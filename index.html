@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games for My Kids</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bradley Hand', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3em;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.3em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .game-card.active:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        .game-card.coming-soon {
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .game-card.coming-soon::before {
+            background: linear-gradient(90deg, #a8a8a8 0%, #6b6b6b 100%);
+        }
+
+        .game-card.coming-soon:hover {
+            transform: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .game-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .game-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .game-tag.coming {
+            background: linear-gradient(135deg, #bbb 0%, #888 100%);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            font-size: 1.1em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease 0.4s backwards;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Games for My Kids 🎮</h1>
+            <p>Fun learning adventures!</p>
+        </div>
+
+        <div class="games-grid">
+            <!-- Keyboard Quest Game -->
+            <a href="keyboard-quest/" class="game-card active">
+                <span class="game-icon">⌨️🦄🤖</span>
+                <div class="game-title">Keyboard Quest</div>
+                <div class="game-description">
+                    Join Sparkle the unicorn and Bolt the robot on an epic adventure! Learn essential macOS keyboard shortcuts while saving the Digital Kingdom from the Chaos Bug.
+                </div>
+                <span class="game-tag">✨ Play Now!</span>
+            </a>
+
+            <!-- Placeholder for future games -->
+            <div class="game-card coming-soon">
+                <span class="game-icon">🔢✨</span>
+                <div class="game-title">Math Adventure</div>
+                <div class="game-description">
+                    Solve exciting math puzzles and help the Math Wizard restore balance to the Number Kingdom!
+                </div>
+                <span class="game-tag coming">🔜 Coming Soon</span>
+            </div>
+
+            <div class="game-card coming-soon">
+                <span class="game-icon">📚🐉</span>
+                <div class="game-title">Spelling Quest</div>
+                <div class="game-description">
+                    Master spelling and vocabulary by helping the Word Dragon collect magical letters and defeat the Grammar Goblins!
+                </div>
+                <span class="game-tag coming">🔜 Coming Soon</span>
+            </div>
+
+            <div class="game-card coming-soon">
+                <span class="game-icon">🧪🚀</span>
+                <div class="game-title">Science Explorer</div>
+                <div class="game-description">
+                    Conduct awesome experiments and discover the wonders of science with Professor Astro the space cat!
+                </div>
+                <span class="game-tag coming">🔜 Coming Soon</span>
+            </div>
+
+            <div class="game-card coming-soon">
+                <span class="game-icon">🗺️🏴‍☠️</span>
+                <div class="game-title">Geography Pirates</div>
+                <div class="game-description">
+                    Sail the seven seas, learn about countries and cultures, and find hidden treasures with Captain Geography!
+                </div>
+                <span class="game-tag coming">🔜 Coming Soon</span>
+            </div>
+
+            <div class="game-card coming-soon">
+                <span class="game-icon">💻🎨</span>
+                <div class="game-title">Code Creator</div>
+                <div class="game-description">
+                    Learn the basics of coding by building your own games and animations with friendly coding creatures!
+                </div>
+                <span class="game-tag coming">🔜 Coming Soon</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Made with ❤️ for learning and fun!</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">More games coming soon! 🌟</p>
+        </div>
+    </div>
+</body>
+</html>
