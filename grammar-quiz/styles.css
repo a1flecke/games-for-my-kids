@@ -1,0 +1,551 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Screen Management */
+.screen {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.screen.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+    max-width: 900px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Typography */
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+}
+
+h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+h3 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Glitch Effect for Title */
+.glitch {
+    position: relative;
+    color: #fff;
+    font-size: 3rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    animation: glitch 1s infinite;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00de;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim 3s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+    left: -2px;
+    text-shadow: -2px 0 #00fff9;
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+
+@keyframes glitch-anim {
+    0% { clip: rect(31px, 9999px, 94px, 0); }
+    25% { clip: rect(70px, 9999px, 71px, 0); }
+    50% { clip: rect(55px, 9999px, 8px, 0); }
+    75% { clip: rect(89px, 9999px, 35px, 0); }
+    100% { clip: rect(45px, 9999px, 46px, 0); }
+}
+
+/* Buttons */
+.btn {
+    padding: 15px 40px;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 10px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* Story Box */
+.story-box {
+    background: rgba(0,0,0,0.3);
+    padding: 30px;
+    border-radius: 20px;
+    margin: 30px 0;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.story-box p {
+    font-size: 1.3rem;
+    margin: 15px 0;
+    line-height: 1.6;
+}
+
+.virus-name {
+    color: #ff00de;
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff00de;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 30px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    transition: width 0.5s ease;
+    border-radius: 15px;
+}
+
+.progress-text {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+/* Level Grid */
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.level-card {
+    background: rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    backdrop-filter: blur(10px);
+}
+
+.level-card:hover:not(.locked) {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-5px);
+    border-color: rgba(255,255,255,0.3);
+}
+
+.level-card.completed {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.level-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.level-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.level-name {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.level-stars {
+    font-size: 1.5rem;
+}
+
+/* Game Header */
+.game-header {
+    display: flex;
+    justify-content: space-around;
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    backdrop-filter: blur(10px);
+}
+
+.stat {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 5px 10px;
+}
+
+.label {
+    color: #ffd700;
+    margin-right: 5px;
+}
+
+/* Game Container */
+.game-container {
+    background: rgba(0,0,0,0.3);
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+/* Lesson Intro */
+.lesson-intro {
+    text-align: center;
+}
+
+.explanation-box {
+    background: rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    text-align: left;
+}
+
+.explanation-box strong {
+    color: #ffd700;
+    font-size: 1.3rem;
+}
+
+.explanation-box .example {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 10px;
+    border-left: 4px solid #4facfe;
+}
+
+.explanation-box .correct {
+    color: #38ef7d;
+}
+
+.explanation-box .incorrect {
+    color: #ff6b6b;
+    text-decoration: line-through;
+}
+
+/* Virus Character */
+.virus-avatar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.virus-character {
+    font-size: 5rem;
+    animation: float 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px #ff00de);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.virus-health-bar {
+    width: 300px;
+    max-width: 100%;
+    height: 25px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 15px;
+    margin: 10px auto;
+    overflow: hidden;
+    border: 2px solid #ff00de;
+}
+
+.virus-health-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #ff00de 0%, #ff6b6b 100%);
+    transition: width 0.5s ease;
+    border-radius: 15px;
+}
+
+/* Question Area */
+.question-box {
+    background: rgba(255,255,255,0.15);
+    padding: 30px;
+    border-radius: 15px;
+    margin: 20px 0;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#questionText {
+    font-size: 1.5rem;
+    line-height: 1.8;
+    font-weight: 500;
+}
+
+/* Answer Area */
+.answer-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.answer-btn {
+    background: rgba(255,255,255,0.2);
+    padding: 25px;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+.answer-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.answer-btn:active {
+    transform: scale(0.97);
+}
+
+.answer-btn.correct {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    border-color: #38ef7d;
+    animation: pulse 0.5s;
+}
+
+.answer-btn.incorrect {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    border-color: #ff6b6b;
+    animation: shake 0.5s;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Feedback */
+.feedback {
+    min-height: 60px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.feedback.show {
+    animation: bounceIn 0.5s;
+}
+
+.feedback.correct {
+    background: rgba(56, 239, 125, 0.3);
+    color: #38ef7d;
+}
+
+.feedback.incorrect {
+    background: rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Results */
+.results-box {
+    background: rgba(0,0,0,0.3);
+    padding: 40px;
+    border-radius: 20px;
+    margin: 30px 0;
+}
+
+.big-text {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.5rem;
+    margin: 15px 0;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.star-display {
+    font-size: 4rem;
+    margin: 30px 0;
+}
+
+.victory-title {
+    color: #ffd700;
+    animation: rainbow 3s infinite;
+}
+
+@keyframes rainbow {
+    0% { color: #ffd700; }
+    25% { color: #ff6b6b; }
+    50% { color: #4facfe; }
+    75% { color: #38ef7d; }
+    100% { color: #ffd700; }
+}
+
+.gameover-title {
+    color: #ff6b6b;
+}
+
+.badge-earned {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-size: 1.3rem;
+}
+
+/* Responsive Design for iPad */
+@media (max-width: 1024px) {
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; }
+    h3 { font-size: 1.7rem; }
+    
+    .btn { 
+        font-size: 1.1rem;
+        padding: 12px 30px;
+    }
+    
+    .virus-character { font-size: 4rem; }
+    
+    #questionText { font-size: 1.3rem; }
+    
+    .answer-btn { font-size: 1.1rem; }
+}
+
+@media (max-width: 768px) {
+    .level-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .answer-area {
+        grid-template-columns: 1fr;
+    }
+    
+    h1 { font-size: 2rem; }
+}
+
+/* Accessibility */
+.answer-btn:focus,
+.btn:focus {
+    outline: 3px solid #ffd700;
+    outline-offset: 3px;
+}
+
+/* Loading Animation */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading {
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
