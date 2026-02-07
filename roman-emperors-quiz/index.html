@@ -1,0 +1,800 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet the Roman Emperors!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8e44ad 0%, #c0392b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #faf8f3;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #d4af37 0%, #c0392b 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .emperor-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 25px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .intro-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .intro-screen h2 {
+            color: #8e44ad;
+            font-size: 1.9em;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .intro-chunk {
+            background: white;
+            padding: 20px;
+            margin: 18px 0;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+            font-size: 1.25em;
+            line-height: 2;
+            color: #2c3e50;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #c0392b 0%, #8e44ad 100%);
+            color: white;
+            border: none;
+            padding: 22px 55px;
+            font-size: 1.5em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 25px;
+            transition: transform 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .start-btn:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 3px;
+        }
+
+        .emperor-card {
+            background: #faf8f3;
+            border: 5px solid #d4af37;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .emperor-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .emperor-icon {
+            font-size: 6em;
+            background: white;
+            border-radius: 50%;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid #d4af37;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin: 0 auto 20px auto;
+        }
+
+        .emperor-name {
+            color: #c0392b;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .emperor-nickname {
+            color: #27ae60;
+            font-style: italic;
+            font-size: 1.3em;
+            margin: 8px 0;
+        }
+
+        .emperor-reign {
+            color: #8e44ad;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .emperor-number {
+            background: #3498db;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 1.15em;
+            font-weight: bold;
+        }
+
+        /* Chunked story text */
+        .story-chunk {
+            background: white;
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid #e74c3c;
+            line-height: 2;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .story-chunk strong {
+            color: #c0392b;
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .achievements-section {
+            background: white;
+            border: 4px solid #27ae60;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 25px 0;
+        }
+
+        .achievements-section h3 {
+            color: #27ae60;
+            margin-bottom: 18px;
+            font-size: 1.5em;
+            letter-spacing: 0.5px;
+        }
+
+        .achievement-item {
+            padding: 14px;
+            margin: 12px 0;
+            background: #e8f8f5;
+            border-left: 6px solid #27ae60;
+            border-radius: 8px;
+            font-size: 1.15em;
+            line-height: 1.8;
+        }
+
+        .fun-fact-box {
+            background: linear-gradient(135deg, #ffb3ba 0%, #ffdfba 100%);
+            border: 4px solid #e74c3c;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 25px 0;
+            line-height: 2;
+        }
+
+        .fun-fact-box h4 {
+            color: #c0392b;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .fun-fact-box p {
+            font-size: 1.15em;
+            line-height: 2;
+        }
+
+        .quiz-section {
+            background: linear-gradient(135deg, #bae1ff 0%, #baffc9 100%);
+            border: 5px solid #3498db;
+            border-radius: 15px;
+            padding: 28px;
+            margin: 30px 0;
+        }
+
+        .quiz-question {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: bold;
+            line-height: 1.8;
+        }
+
+        .quiz-btn {
+            background: white;
+            border: 4px solid #3498db;
+            padding: 20px 25px;
+            margin: 15px 0;
+            border-radius: 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: block;
+            width: 100%;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+
+        .quiz-btn:hover {
+            background: #3498db;
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .quiz-btn:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 2px;
+        }
+
+        .quiz-btn.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+            animation: success-pulse 0.5s ease;
+        }
+
+        .quiz-btn.wrong {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        @keyframes success-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .quiz-feedback {
+            background: #d4edda;
+            border: 4px solid #28a745;
+            color: #155724;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 1.3em;
+            display: none;
+            line-height: 1.8;
+            font-weight: 600;
+        }
+
+        .quiz-feedback.wrong {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .next-emperor-btn {
+            background: linear-gradient(135deg, #8e44ad 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 20px 45px;
+            font-size: 1.4em;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 25px auto;
+            display: none;
+            transition: transform 0.2s;
+        }
+
+        .next-emperor-btn:hover {
+            transform: scale(1.08);
+        }
+
+        .next-emperor-btn:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 3px;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .completion-screen h2 {
+            color: #c0392b;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .crown {
+            font-size: 5em;
+            margin: 20px 0;
+            animation: spin-celebrate 2s ease;
+        }
+
+        @keyframes spin-celebrate {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .emperor-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 18px;
+            margin: 30px 0;
+        }
+
+        .gallery-item {
+            background: white;
+            border: 4px solid #d4af37;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .gallery-item .icon {
+            font-size: 3em;
+            margin-bottom: 12px;
+        }
+
+        .gallery-item .name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .summary-section {
+            background: white;
+            border: 4px solid #d4af37;
+            border-radius: 15px;
+            padding: 28px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .summary-section h3 {
+            color: #c0392b;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+        }
+
+        .summary-item {
+            padding: 15px;
+            margin: 12px 0;
+            background: #faf8f3;
+            border-left: 6px solid #3498db;
+            border-radius: 8px;
+            font-size: 1.15em;
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #16a085 100%);
+            color: white;
+            border: none;
+            padding: 20px 45px;
+            font-size: 1.4em;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 15px;
+        }
+
+        .restart-btn:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .emperor-name {
+                font-size: 1.8em;
+            }
+
+            .story-chunk {
+                font-size: 1.1em;
+            }
+
+            .quiz-btn {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>👑 Meet the Roman Emperors! 👑</h1>
+            <div style="font-size: 1.2em; margin-top: 8px;">Famous Leaders of Rome</div>
+            <div class="emperor-count" id="emperor-count">Ready to Start!</div>
+        </div>
+
+        <div class="content" id="game-content">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        const emperors = [
+            {
+                name: "Augustus",
+                nickname: "The First Emperor",
+                reign: "27 BC - 14 AD (41 years!)",
+                icon: "🦅",
+                chunks: [
+                    "Meet Augustus, the very FIRST Roman Emperor!",
+                    "Before Augustus, Rome was a Republic.",
+                    "After Julius Caesar died, Augustus became the most powerful person.",
+                    "Augustus was Caesar's adopted son.",
+                    "Augustus was super smart.",
+                    "He didn't call himself 'king' because Romans hated kings.",
+                    "Instead, he called himself 'First Citizen.'",
+                    "But really, HE was in charge of everything!",
+                    "In 27 BC, the Republic ended.",
+                    "The <strong>Roman Empire</strong> began!",
+                    "Rome had PEACE for the first time in years!",
+                    "No more civil wars!"
+                ],
+                achievements: [
+                    "🏛️ Built beautiful temples and buildings all over Rome",
+                    "📚 Created Rome's first police force and fire department",
+                    "🗺️ Expanded the empire and made it strong",
+                    "💰 Fixed the money system and made Rome rich",
+                    "📖 Supported writers and artists"
+                ],
+                funFact: "The month of AUGUST is named after Augustus! He ruled for 41 years - longer than most emperors. He said: 'I found Rome a city of brick and left it a city of marble!'",
+                question: "What was special about Augustus?",
+                answers: [
+                    { text: "He was the first Roman Emperor", correct: true },
+                    { text: "He was the last Roman Emperor", correct: false },
+                    { text: "He was the youngest emperor", correct: false }
+                ],
+                correctFeedback: "🎉 Perfect! Augustus was the FIRST Emperor!",
+                wrongFeedback: "Not quite! Augustus was special because he was the FIRST Emperor!"
+            },
+            {
+                name: "Trajan",
+                nickname: "The Best Emperor",
+                reign: "98 - 117 AD (19 years)",
+                icon: "🏆",
+                chunks: [
+                    "Trajan is known as one of the BEST emperors!",
+                    "The Senate gave him the title 'Optimus Princeps.'",
+                    "That means 'The Best First Citizen!'",
+                    "Trajan loved his people.",
+                    "And they loved him back!",
+                    "He wasn't born in Rome.",
+                    "He came from Spain!",
+                    "But he became one of Rome's greatest leaders.",
+                    "Under Trajan, the empire reached its BIGGEST size!",
+                    "It stretched from Britain to the Middle East.",
+                    "That's HUGE!"
+                ],
+                achievements: [
+                    "🗺️ Conquered Dacia and made the empire bigger than ever",
+                    "🏗️ Built Trajan's Column - you can still see it today!",
+                    "🏛️ Built Trajan's Forum - a huge marketplace in Rome",
+                    "💝 Created programs to help poor children and families",
+                    "⚖️ Was known for being fair and just to all people"
+                ],
+                funFact: "For over 300 years after Trajan died, the Senate would say to new emperors: 'May you be luckier than Augustus and better than Trajan!' That's how awesome he was!",
+                question: "Why was Trajan called 'The Best Emperor'?",
+                answers: [
+                    { text: "He was fair, helped the poor, and expanded the empire", correct: true },
+                    { text: "He was the tallest emperor", correct: false },
+                    { text: "He had the most pets", correct: false }
+                ],
+                correctFeedback: "🌟 Excellent! Trajan was beloved because he was fair!",
+                wrongFeedback: "Try again! Think about what makes a leader truly great!"
+            },
+            {
+                name: "Hadrian",
+                nickname: "The Builder Emperor",
+                reign: "117 - 138 AD (21 years)",
+                icon: "🏰",
+                chunks: [
+                    "Hadrian LOVED to build things!",
+                    "He traveled all over the empire.",
+                    "He visited almost every province!",
+                    "He built amazing structures wherever he went.",
+                    "Unlike most emperors, Hadrian didn't want to conquer more land.",
+                    "He thought it was better to protect what Rome already had.",
+                    "So he built walls and forts!",
+                    "These defended the empire's borders.",
+                    "Hadrian loved Greek culture.",
+                    "He loved Greek art and buildings.",
+                    "He even grew a beard like Greek philosophers!"
+                ],
+                achievements: [
+                    "🏰 Built Hadrian's Wall in Britain - 73 miles long!",
+                    "🏛️ Built the Pantheon in Rome - still standing today!",
+                    "📚 Loved learning and supported schools",
+                    "🗺️ Traveled more than any other emperor",
+                    "🛡️ Strengthened the empire's borders"
+                ],
+                funFact: "Hadrian's Wall was so big that it needed 15,000 soldiers to guard it! The wall had small forts every Roman mile. Some parts are over 15 feet tall and you can still visit them today!",
+                question: "What is Hadrian most famous for building?",
+                answers: [
+                    { text: "Hadrian's Wall in Britain and the Pantheon in Rome", correct: true },
+                    { text: "The Colosseum", correct: false },
+                    { text: "A giant statue", correct: false }
+                ],
+                correctFeedback: "🏗️ Great job! Both the wall AND the Pantheon still exist!",
+                wrongFeedback: "Not quite! Hadrian built a famous wall and a temple!"
+            },
+            {
+                name: "Marcus Aurelius",
+                nickname: "The Philosopher Emperor",
+                reign: "161 - 180 AD (19 years)",
+                icon: "📚",
+                chunks: [
+                    "Marcus Aurelius was super unusual.",
+                    "He didn't really WANT to be emperor!",
+                    "He loved reading and thinking more than ruling.",
+                    "He loved writing philosophy!",
+                    "Even though he had to fight many wars, he tried to be wise.",
+                    "He tried to be kind and fair.",
+                    "He had to deal with plagues (terrible diseases).",
+                    "But he always stayed calm.",
+                    "He wrote his thoughts in a book called <strong>'Meditations'</strong>.",
+                    "People still read it today - 2,000 years later!",
+                    "He believed in being calm and doing your duty."
+                ],
+                achievements: [
+                    "📖 Wrote 'Meditations' - still read 2,000 years later!",
+                    "⚔️ Defended Rome from invading tribes",
+                    "⚖️ Made laws fairer for everyone",
+                    "🎓 Supported education throughout the empire",
+                    "💭 Showed leaders can be both strong AND thoughtful"
+                ],
+                funFact: "There's a famous statue of Marcus Aurelius on horseback in Rome. It survived because people thought it was a statue of a Christian emperor, so they didn't destroy it!",
+                question: "What made Marcus Aurelius different?",
+                answers: [
+                    { text: "He was a philosopher who wrote books", correct: true },
+                    { text: "He was the youngest emperor ever", correct: false },
+                    { text: "He never went to war", correct: false }
+                ],
+                correctFeedback: "📚 Perfect! Marcus loved philosophy and wrote a famous book!",
+                wrongFeedback: "Try again! Marcus was famous for his thinking!"
+            },
+            {
+                name: "Constantine",
+                nickname: "Constantine the Great",
+                reign: "306 - 337 AD (31 years)",
+                icon: "✝️",
+                chunks: [
+                    "Constantine changed history FOREVER!",
+                    "Before him, Christians were often punished.",
+                    "But Constantine made Christianity LEGAL!",
+                    "He even became a Christian himself!",
+                    "Legend says he saw a cross in the sky before a big battle.",
+                    "It had words that meant 'In this sign, you will conquer!'",
+                    "He won the battle!",
+                    "He believed God helped him.",
+                    "Constantine also moved the capital!",
+                    "He moved it from Rome to a new city.",
+                    "The city was called <strong>Constantinople</strong>.",
+                    "Today it's called Istanbul, Turkey!"
+                ],
+                achievements: [
+                    "✝️ Made Christianity legal in 313 AD",
+                    "🏛️ Built Constantinople - a magnificent new capital",
+                    "⛪ Built the first Christian churches",
+                    "💰 Created a new gold coin used for centuries",
+                    "🛡️ Reunited the empire after years of civil war"
+                ],
+                funFact: "Constantinople had walls so strong that the city survived for over 1,000 years! The Eastern Roman Empire lasted until 1453 - almost 1,000 years after the Western Empire fell!",
+                question: "What major change did Constantine make?",
+                answers: [
+                    { text: "He made Christianity legal and built a new capital", correct: true },
+                    { text: "He banned all religions", correct: false },
+                    { text: "He gave up being emperor", correct: false }
+                ],
+                correctFeedback: "⭐ Amazing! Constantine made Christianity legal!",
+                wrongFeedback: "Not quite! Constantine did something important for Christianity!"
+            }
+        ];
+
+        let currentEmperor = 0;
+
+        function showIntro() {
+            const content = `
+                <div class="intro-screen">
+                    <h2>Welcome, Young Historian! 🏛️</h2>
+                    <div class="intro-chunk">
+                        You're about to meet some AMAZING emperors!
+                    </div>
+                    <div class="intro-chunk">
+                        These powerful leaders ruled the Roman Empire.
+                    </div>
+                    <div class="intro-chunk">
+                        They shaped history and changed the world!
+                    </div>
+                    <div class="intro-chunk">
+                        Some were great warriors.
+                    </div>
+                    <div class="intro-chunk">
+                        Others were brilliant builders.
+                    </div>
+                    <div class="intro-chunk">
+                        And some were wise philosophers!
+                    </div>
+                    <p style="font-size: 1.5em; color: #c0392b; margin-top: 35px;">
+                        <strong>You'll meet 5 famous emperors!</strong>
+                    </p>
+                    <button class="start-btn" onclick="loadEmperor(0)">Start the Journey! →</button>
+                </div>
+            `;
+            document.getElementById('game-content').innerHTML = content;
+        }
+
+        function loadEmperor(index) {
+            const emperor = emperors[index];
+            currentEmperor = index;
+
+            document.getElementById('emperor-count').textContent = `Emperor ${index + 1} of ${emperors.length}`;
+
+            const chunkedStory = emperor.chunks.map(chunk =>
+                `<div class="story-chunk">${chunk}</div>`
+            ).join('');
+
+            const achievementsList = emperor.achievements.map(achievement =>
+                `<div class="achievement-item">${achievement}</div>`
+            ).join('');
+
+            const content = `
+                <div class="emperor-card">
+                    <div class="emperor-header">
+                        <div class="emperor-number">Emperor ${index + 1} of 5</div>
+                        <div class="emperor-icon">${emperor.icon}</div>
+                        <div class="emperor-name">${emperor.name}</div>
+                        <div class="emperor-nickname">${emperor.nickname}</div>
+                        <div class="emperor-reign">${emperor.reign}</div>
+                    </div>
+
+                    ${chunkedStory}
+
+                    <div class="achievements-section">
+                        <h3>🌟 Amazing Achievements:</h3>
+                        ${achievementsList}
+                    </div>
+
+                    <div class="fun-fact-box">
+                        <h4>🎯 Super Cool Fact!</h4>
+                        <p>${emperor.funFact}</p>
+                    </div>
+
+                    <div class="quiz-section">
+                        <div class="quiz-question">🤔 ${emperor.question}</div>
+                        <div id="quiz-answers">
+                            ${emperor.answers.map((answer, i) =>
+                                `<button class="quiz-btn" onclick="checkAnswer(${i}, ${answer.correct})">${answer.text}</button>`
+                            ).join('')}
+                        </div>
+                        <div class="quiz-feedback" id="quiz-feedback"></div>
+                        <button class="next-emperor-btn" id="next-btn" onclick="nextEmperor()">
+                            ${index < emperors.length - 1 ? 'Meet Next Emperor →' : 'Complete Journey →'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('game-content').innerHTML = content;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkAnswer(answerIndex, isCorrect) {
+            const emperor = emperors[currentEmperor];
+            const buttons = document.querySelectorAll('.quiz-btn');
+            const feedback = document.getElementById('quiz-feedback');
+            const nextBtn = document.getElementById('next-btn');
+
+            buttons.forEach(btn => btn.disabled = true);
+            buttons[answerIndex].classList.add(isCorrect ? 'correct' : 'wrong');
+
+            feedback.className = 'quiz-feedback ' + (isCorrect ? '' : 'wrong');
+            feedback.textContent = isCorrect ? emperor.correctFeedback : emperor.wrongFeedback;
+            feedback.style.display = 'block';
+
+            nextBtn.style.display = 'block';
+        }
+
+        function nextEmperor() {
+            if (currentEmperor < emperors.length - 1) {
+                loadEmperor(currentEmperor + 1);
+            } else {
+                showCompletion();
+            }
+        }
+
+        function showCompletion() {
+            const content = `
+                <div class="completion-screen" style="display: block;">
+                    <div class="crown">👑🏆👑</div>
+                    <h2>Congratulations!</h2>
+                    <p style="font-size: 1.3em; margin: 20px 0; line-height: 1.8;">You've met the most famous emperors!</p>
+
+                    <div class="emperor-gallery">
+                        ${emperors.map(emp => `
+                            <div class="gallery-item">
+                                <div class="icon">${emp.icon}</div>
+                                <div class="name">${emp.name}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="summary-section">
+                        <h3>📜 What You Learned:</h3>
+                        <div class="summary-item">
+                            🦅 <strong>Augustus:</strong> First Emperor - brought peace
+                        </div>
+                        <div class="summary-item">
+                            🏆 <strong>Trajan:</strong> The Best - fair and kind
+                        </div>
+                        <div class="summary-item">
+                            🏰 <strong>Hadrian:</strong> Built the Wall and Pantheon
+                        </div>
+                        <div class="summary-item">
+                            📚 <strong>Marcus Aurelius:</strong> Wrote philosophy books
+                        </div>
+                        <div class="summary-item">
+                            ✝️ <strong>Constantine:</strong> Made Christianity legal
+                        </div>
+                    </div>
+
+                    <div class="fun-fact-box">
+                        <h4>🌟 Remember!</h4>
+                        <p>These emperors ruled Rome during its greatest times! They built amazing buildings. Many still exist over 2,000 years later!</p>
+                    </div>
+
+                    <button class="restart-btn" onclick="restart()">🔄 Meet Emperors Again!</button>
+                </div>
+            `;
+
+            document.getElementById('game-content').innerHTML = content;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function restart() {
+            showIntro();
+        }
+
+        showIntro();
+    </script>
+</body>
+</html>
