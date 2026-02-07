@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Punctuation Defender - Save the Grammar!</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen active">
+        <div class="container">
+            <h1 class="glitch" data-text="PUNCTUATION DEFENDER">PUNCTUATION DEFENDER</h1>
+            <div class="story-box">
+                <p>⚠️ ALERT! A dangerous computer virus is attacking the internet!</p>
+                <p>The <span class="virus-name">GRAMMAR GLITCH</span> is trying to DELETE all punctuation marks!</p>
+                <p>You're the only one who can stop it by proving you know how to use punctuation correctly!</p>
+            </div>
+            <button class="btn btn-primary" onclick="game.showLevelSelect()">START MISSION</button>
+            <button class="btn btn-secondary" onclick="game.resetProgress()">Reset Progress</button>
+        </div>
+    </div>
+
+    <!-- Level Select Screen -->
+    <div id="levelSelect" class="screen">
+        <div class="container">
+            <h2>Select Your Mission</h2>
+            <div class="progress-bar">
+                <div id="overallProgress" class="progress-fill"></div>
+            </div>
+            <p class="progress-text">Overall Progress: <span id="progressPercent">0</span>%</p>
+            
+            <div id="levelGrid" class="level-grid">
+                <!-- Levels will be generated here -->
+            </div>
+            
+            <button class="btn btn-secondary" onclick="game.showStart()">Back</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <div class="stat">
+                <span class="label">Level:</span>
+                <span id="currentLevel">1</span>
+            </div>
+            <div class="stat">
+                <span class="label">Score:</span>
+                <span id="score">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">Lives:</span>
+                <span id="lives">❤️❤️❤️</span>
+            </div>
+            <div class="stat">
+                <span class="label">Streak:</span>
+                <span id="streak">0</span>🔥
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div id="lessonIntro" class="lesson-intro">
+                <h3 id="lessonTitle"></h3>
+                <div id="lessonExplanation" class="explanation-box"></div>
+                <button class="btn btn-primary" onclick="game.startQuestions()">Got it! Let's Fight! 💪</button>
+            </div>
+
+            <div id="questionArea" class="question-area" style="display: none;">
+                <div class="virus-avatar">
+                    <div class="virus-character">👾</div>
+                    <div class="virus-health-bar">
+                        <div id="virusHealth" class="virus-health-fill"></div>
+                    </div>
+                </div>
+
+                <div id="questionBox" class="question-box">
+                    <p id="questionText"></p>
+                </div>
+
+                <div id="answerArea" class="answer-area">
+                    <!-- Answers will be generated here -->
+                </div>
+
+                <div id="feedback" class="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victoryScreen" class="screen">
+        <div class="container">
+            <h1 class="victory-title">🎉 LEVEL COMPLETE! 🎉</h1>
+            <div class="results-box">
+                <p class="big-text">You defeated the virus!</p>
+                <div class="stat-row">
+                    <span>Score:</span>
+                    <span id="finalScore">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>Accuracy:</span>
+                    <span id="accuracy">0</span>%
+                </div>
+                <div class="star-display" id="starDisplay"></div>
+                <div id="badgeEarned"></div>
+            </div>
+            <button class="btn btn-primary" onclick="game.nextLevel()">Next Mission</button>
+            <button class="btn btn-secondary" onclick="game.showLevelSelect()">Level Select</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen">
+        <div class="container">
+            <h1 class="gameover-title">💔 MISSION FAILED 💔</h1>
+            <div class="results-box">
+                <p>The virus was too strong this time!</p>
+                <p>But don't give up - you can try again!</p>
+                <div class="stat-row">
+                    <span>Score:</span>
+                    <span id="gameOverScore">0</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="game.retryLevel()">Try Again</button>
+            <button class="btn btn-secondary" onclick="game.showLevelSelect()">Level Select</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
