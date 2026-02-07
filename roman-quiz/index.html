@@ -1,0 +1,705 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Travel Rome: The Rise and Fall Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* DYSLEXIA-FRIENDLY FONT - OpenDyslexic alternative using system fonts */
+        body {
+            font-family: Arial, Verdana, sans-serif; /* Clear, sans-serif fonts better for dyslexia */
+            background: linear-gradient(135deg, #d4a574 0%, #8b4513 100%);
+            min-height: 100vh;
+            padding: 20px;
+            /* Slightly off-white background reduces eye strain */
+        }
+
+        .game-container {
+            max-width: 800px; /* Narrower for better readability */
+            margin: 0 auto;
+            background: #faf8f3; /* Cream background - easier on eyes than pure white */
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #c0392b 0%, #8e44ad 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 5px solid #d4af37;
+        }
+
+        .header h1 {
+            font-size: 2em; /* Slightly smaller */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            letter-spacing: 0.5px; /* Better letter spacing for dyslexia */
+        }
+
+        .timeline-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 35px; /* Taller for easier visibility */
+            border-radius: 15px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .timeline-progress {
+            background: linear-gradient(90deg, #f39c12 0%, #d4af37 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px; /* Larger text */
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .story-section {
+            background: #faf8f3;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 4px solid #d4af37;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .story-section h2 {
+            color: #c0392b;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        /* CHUNKED TEXT - Break into smaller, manageable pieces */
+        .story-chunk {
+            background: white;
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+            line-height: 2; /* INCREASED line spacing - critical for dyslexia */
+            font-size: 1.2em; /* Larger text */
+            color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Key terms highlighted */
+        .story-chunk strong {
+            color: #c0392b;
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .fact-box {
+            background: #e8f8f5;
+            border: 3px solid #16a085;
+            padding: 18px;
+            margin: 20px 0;
+            border-radius: 10px;
+            line-height: 2;
+            font-size: 1.15em;
+        }
+
+        .fact-box strong {
+            color: #16a085;
+            font-size: 1.2em;
+        }
+
+        .question-section {
+            background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 4px solid #27ae60;
+        }
+
+        .question-title {
+            font-size: 1.6em;
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* LARGER BUTTONS with more spacing */
+        .answer-btn {
+            background: white;
+            border: 4px solid #27ae60; /* Thicker border */
+            padding: 20px 25px; /* More padding */
+            margin: 15px 0; /* More space between buttons */
+            border-radius: 12px;
+            font-size: 1.2em; /* Larger text */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: block;
+            width: 100%;
+            text-align: left;
+            line-height: 1.6;
+            font-weight: 600; /* Bolder */
+        }
+
+        .answer-btn:hover {
+            background: #27ae60;
+            color: white;
+            transform: scale(1.02); /* Slight grow instead of slide */
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .answer-btn:focus {
+            outline: 4px solid #f39c12; /* Clear focus indicator */
+            outline-offset: 2px;
+        }
+
+        .answer-btn.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+            animation: success-pulse 0.5s ease;
+        }
+
+        .answer-btn.wrong {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        @keyframes success-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .feedback {
+            background: #d4edda;
+            border: 4px solid #28a745;
+            color: #155724;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            font-size: 1.3em;
+            display: none;
+            line-height: 1.8;
+            font-weight: 600;
+        }
+
+        .feedback.wrong {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #c0392b 0%, #8e44ad 100%);
+            color: white;
+            border: none;
+            padding: 20px 45px;
+            font-size: 1.4em;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 25px auto;
+            display: none;
+            transition: transform 0.2s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.08);
+        }
+
+        .next-btn:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 3px;
+        }
+
+        .emoji {
+            font-size: 1.8em;
+            margin: 0 5px;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .completion-screen h2 {
+            color: #c0392b;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .laurel {
+            font-size: 5em;
+            margin: 20px 0;
+            animation: spin-celebrate 2s ease;
+        }
+
+        @keyframes spin-celebrate {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .summary-box {
+            background: white;
+            border: 4px solid #d4af37;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .summary-box h3 {
+            color: #c0392b;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .summary-box li {
+            padding: 15px;
+            margin: 12px 0;
+            background: #faf8f3;
+            border-left: 6px solid #3498db;
+            border-radius: 5px;
+            font-size: 1.15em;
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #16a085 100%);
+            color: white;
+            border: none;
+            padding: 20px 45px;
+            font-size: 1.4em;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 20px 10px;
+        }
+
+        .restart-btn:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 3px;
+        }
+
+        .image-placeholder {
+            background: white;
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 4em;
+        }
+
+        /* Progress indicator */
+        .chapter-number {
+            background: #3498db;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.6em;
+            }
+            
+            .story-chunk {
+                font-size: 1.1em;
+            }
+
+            .answer-btn {
+                font-size: 1.1em;
+                padding: 18px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>⏳ Time Travel Rome ⏳</h1>
+            <div style="font-size: 1.2em; margin-top: 10px;">The Rise and Fall Adventure</div>
+            <div class="timeline-bar">
+                <div class="timeline-progress" id="timeline-progress" style="width: 0%">
+                    <span id="era-label">Starting Journey...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="game-content">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        const chapters = [
+            {
+                era: "The Roman Republic (509 BC)",
+                title: "🏛️ The Birth of the Republic",
+                chunks: [
+                    "Welcome, young time traveler! You've just arrived in ancient Rome around 509 BC!",
+                    "Long ago, Rome was ruled by <strong>kings</strong> who had all the power.",
+                    "The Roman people got tired of having mean kings. So they kicked out the last king!",
+                    "They created something new: a <strong>REPUBLIC</strong>!",
+                    "In a republic, the people get to choose their leaders. Kind of like how we vote today!",
+                    "Citizens could vote for leaders called <strong>senators</strong>.",
+                    "Two special leaders called <strong>consuls</strong> ran the government together.",
+                    "The motto of Rome was <strong>SPQR</strong> - 'The Senate and People of Rome.'"
+                ],
+                factBox: "A republic means the people get to choose their leaders! The two consuls had to agree on big decisions, so no one person could become too powerful.",
+                image: "🏛️",
+                question: "Why did the Romans create a Republic?",
+                answers: [
+                    { text: "They wanted to eat more pizza", correct: false },
+                    { text: "They were tired of kings having all the power", correct: true },
+                    { text: "They wanted to build more roads", correct: false }
+                ],
+                correctFeedback: "🎉 Excellent! The Romans wanted citizens to have a say in government!",
+                wrongFeedback: "Not quite! Think about why people might not want one person to have all the power.",
+                progress: 12.5,
+                chapterNum: 1
+            },
+            {
+                era: "The Roman Republic",
+                title: "⚔️ Rome Grows Powerful",
+                chunks: [
+                    "As you travel forward in time, you see Rome getting bigger and bigger!",
+                    "The Romans had an amazing <strong>army</strong>.",
+                    "Their soldiers were called <strong>legionaries</strong>. They were super disciplined!",
+                    "Roman soldiers marched in perfect formation. They worked together like a team!",
+                    "Rome conquered many lands around the Mediterranean Sea.",
+                    "They took over Italy, Greece, Spain, and even parts of Africa!",
+                    "The Romans built cities and roads wherever they went.",
+                    "When Romans conquered people, they often let them become Roman citizens."
+                ],
+                factBox: "Roman soldiers built roads wherever they went! Some of these roads still exist today - over 2,000 years later!",
+                image: "⚔️🛡️",
+                question: "What made the Roman army so successful?",
+                answers: [
+                    { text: "They had magic swords", correct: false },
+                    { text: "They were disciplined and worked together as a team", correct: true },
+                    { text: "They only fought at night", correct: false }
+                ],
+                correctFeedback: "💪 Perfect! Teamwork and discipline made the Roman army nearly unstoppable!",
+                wrongFeedback: "Try again! Think about what makes any team strong - working together!",
+                progress: 25,
+                chapterNum: 2
+            },
+            {
+                era: "End of the Republic",
+                title: "👑 Julius Caesar",
+                chunks: [
+                    "Fast forward to 49 BC... Meet <strong>Julius Caesar</strong>!",
+                    "Caesar was a brilliant general who won many battles.",
+                    "He became super popular with the Roman people.",
+                    "But the Senate was worried he was getting TOO powerful.",
+                    "Caesar crossed a river called the Rubicon with his army.",
+                    "This was against the law! It started a civil war.",
+                    "Caesar won the war and became <strong>dictator</strong> - the most powerful person in Rome.",
+                    "He created a new calendar. We still use a version of it today!",
+                    "But some senators thought he wanted to be king.",
+                    "On March 15th, senators attacked and killed Caesar."
+                ],
+                factBox: "We still say 'crossing the Rubicon' today when someone makes a big decision they can't take back!",
+                image: "👑⚔️",
+                question: "What happened to Julius Caesar?",
+                answers: [
+                    { text: "He became king and lived happily", correct: false },
+                    { text: "Senators killed him because they feared his power", correct: true },
+                    { text: "He retired and became a farmer", correct: false }
+                ],
+                correctFeedback: "📚 Correct! The senators killed Caesar because they feared he had too much power!",
+                wrongFeedback: "Not quite! Remember, some people were afraid Caesar wanted to be king.",
+                progress: 37.5,
+                chapterNum: 3
+            },
+            {
+                era: "The Roman Empire Begins (27 BC)",
+                title: "🦅 Augustus - First Emperor",
+                chunks: [
+                    "After Caesar died, there was chaos!",
+                    "Then came Caesar's adopted son: <strong>Augustus</strong>!",
+                    "Augustus was very clever.",
+                    "He didn't call himself 'king' because Romans hated that word.",
+                    "Instead, he called himself 'First Citizen.'",
+                    "But really, HE was in charge of everything!",
+                    "In 27 BC, the Republic ended and the <strong>Roman Empire</strong> began!",
+                    "Augustus became the first <strong>Emperor</strong>.",
+                    "Rome had peace for the first time in years!",
+                    "He built roads, buildings, and made Rome rich and powerful."
+                ],
+                factBox: "The month of AUGUST is named after Augustus! July is named after Julius Caesar! This peaceful time was called 'Pax Romana' - Roman Peace.",
+                image: "🦅👑",
+                question: "What did Augustus create?",
+                answers: [
+                    { text: "The Roman Empire with himself as first Emperor", correct: true },
+                    { text: "A new type of pizza", correct: false },
+                    { text: "The first school", correct: false }
+                ],
+                correctFeedback: "🎊 Amazing! Augustus transformed Rome from a Republic into an Empire!",
+                wrongFeedback: "Not quite! Think about what changed from the Republic.",
+                progress: 50,
+                chapterNum: 4
+            },
+            {
+                era: "Height of the Empire",
+                title: "🏟️ Rome at Its Greatest",
+                chunks: [
+                    "Zoom forward to around 117 AD - Rome is HUGE!",
+                    "The empire stretches from Britain to Egypt!",
+                    "From Spain to the Middle East!",
+                    "It's the biggest empire the world has ever seen!",
+                    "Romans built amazing things:",
+                    "🏟️ The <strong>Colosseum</strong> - where 50,000 people watched gladiator fights!",
+                    "🚿 <strong>Aqueducts</strong> - bridges that carried water to cities",
+                    "🛣️ <strong>Roads</strong> - straight, well-built roads everywhere",
+                    "🏛️ <strong>Baths</strong> - public pools where people relaxed",
+                    "Romans spoke Latin. It became Spanish, French, and Italian!"
+                ],
+                factBox: "At its biggest, the Roman Empire had about 70 million people - that's like everyone in California, Texas, and Florida combined!",
+                image: "🏟️🏛️",
+                question: "What amazing things did Romans build?",
+                answers: [
+                    { text: "The Colosseum, aqueducts, roads, and baths", correct: true },
+                    { text: "Just temples", correct: false },
+                    { text: "Shopping malls", correct: false }
+                ],
+                correctFeedback: "🏗️ Fantastic! Romans were amazing builders and engineers!",
+                wrongFeedback: "Try again! Romans built many incredible structures!",
+                progress: 62.5,
+                chapterNum: 5
+            },
+            {
+                era: "Challenges Begin (200s AD)",
+                title: "⚠️ Problems Start",
+                chunks: [
+                    "As you travel to 200 AD, you notice Rome is having problems...",
+                    "The empire is getting TOO BIG to control!",
+                    "It's hard for emperors to know what's happening far away.",
+                    "In just 50 years, Rome had over 20 different emperors!",
+                    "Many were killed by their own soldiers!",
+                    "💰 <strong>Money problems:</strong> Spending too much on the army",
+                    "👥 <strong>Weak emperors:</strong> They didn't last long",
+                    "🤺 <strong>Army problems:</strong> Soldiers were loyal to generals, not Rome",
+                    "🦠 <strong>Disease:</strong> Plagues killed millions of people"
+                ],
+                factBox: "Between 235-284 AD, Rome had over 20 emperors in just 50 years! The empire was getting weaker.",
+                image: "⚠️😰",
+                question: "What was one big problem Rome faced?",
+                answers: [
+                    { text: "The empire was too big to control easily", correct: true },
+                    { text: "They ran out of marble", correct: false },
+                    { text: "Everyone moved away", correct: false }
+                ],
+                correctFeedback: "✅ Yes! The empire grew so large it became very difficult to manage!",
+                wrongFeedback: "Not quite! Think about what happens when something gets really big.",
+                progress: 75,
+                chapterNum: 6
+            },
+            {
+                era: "The Empire Splits (285 AD)",
+                title: "✂️ Rome Splits in Two",
+                chunks: [
+                    "In 285 AD, Emperor Diocletian had an idea.",
+                    "'Rome is too big for one person to rule! Let's split it in TWO!'",
+                    "He divided the empire:",
+                    "🌅 <strong>Western Roman Empire</strong> - capital: Rome",
+                    "🌄 <strong>Eastern Roman Empire</strong> - capital: Constantinople",
+                    "Later, Emperor Constantine made Christianity legal!",
+                    "Before this, Christians had been punished.",
+                    "Now, Christianity spread throughout the empire.",
+                    "But splitting the empire didn't solve all problems.",
+                    "Barbarian tribes were pushing into Roman territory!"
+                ],
+                factBox: "The Eastern Empire lasted almost 1,000 years longer than the Western Empire! It became known as the Byzantine Empire.",
+                image: "✂️🗺️",
+                question: "Why did Rome split into two empires?",
+                answers: [
+                    { text: "It was too big for one emperor to rule", correct: true },
+                    { text: "They wanted to have a race", correct: false },
+                    { text: "Half of it sank into the ocean", correct: false }
+                ],
+                correctFeedback: "🎯 Perfect! The empire was so huge that one emperor couldn't manage it!",
+                wrongFeedback: "Try again! Think about managing something really big.",
+                progress: 87.5,
+                chapterNum: 7
+            },
+            {
+                era: "The Fall (476 AD)",
+                title: "🍂 The Fall of Rome",
+                chunks: [
+                    "Your time machine arrives in 476 AD... Rome is falling!",
+                    "Barbarian tribes kept attacking the Western Empire.",
+                    "In 410 AD, the Visigoths captured and looted Rome!",
+                    "This shocked everyone - Rome hadn't been conquered in 800 years!",
+                    "In 476 AD, the last Western Emperor was removed from power.",
+                    "He was a young boy named Romulus Augustulus.",
+                    "The Western Roman Empire was OVER!",
+                    "Why did Rome fall? Many reasons:",
+                    "📉 The economy was weak",
+                    "🤺 The army wasn't as strong",
+                    "👑 Weak emperors",
+                    "🏃 Barbarian invasions",
+                    "But the EASTERN Roman Empire kept going for 1,000 more years!",
+                    "Roman ideas, language, and laws influenced the whole world forever!"
+                ],
+                factBox: "Even though Rome fell, we still use Roman numerals, months named after Romans, and study their amazing history!",
+                image: "🍂🏛️",
+                question: "When did the Western Roman Empire fall?",
+                answers: [
+                    { text: "476 AD", correct: true },
+                    { text: "1000 AD", correct: false },
+                    { text: "It never fell", correct: false }
+                ],
+                correctFeedback: "🎓 Excellent! In 476 AD, the last Western Emperor was removed!",
+                wrongFeedback: "Not quite! The Western Empire fell in 476 AD.",
+                progress: 100,
+                chapterNum: 8
+            }
+        ];
+
+        let currentChapter = 0;
+
+        function loadChapter(index) {
+            const chapter = chapters[index];
+            currentChapter = index;
+
+            // Update progress bar
+            document.getElementById('timeline-progress').style.width = chapter.progress + '%';
+            document.getElementById('era-label').textContent = chapter.era;
+
+            // Build chunked story
+            const chunkedStory = chapter.chunks.map(chunk => 
+                `<div class="story-chunk">${chunk}</div>`
+            ).join('');
+
+            const content = `
+                <div class="story-section">
+                    <div class="chapter-number">Chapter ${chapter.chapterNum} of 8</div>
+                    <h2>${chapter.title}</h2>
+                    <div class="image-placeholder">${chapter.image}</div>
+                    ${chunkedStory}
+                    <div class="fact-box">
+                        <strong>💡 Cool Fact:</strong> ${chapter.factBox}
+                    </div>
+                </div>
+
+                <div class="question-section">
+                    <div class="question-title">🤔 Test Your Knowledge!</div>
+                    <p style="font-size: 1.3em; margin-bottom: 25px; line-height: 1.8;"><strong>${chapter.question}</strong></p>
+                    <div id="answers">
+                        ${chapter.answers.map((answer, i) => 
+                            `<button class="answer-btn" onclick="checkAnswer(${i}, ${answer.correct})">${answer.text}</button>`
+                        ).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                    <button class="next-btn" id="next-btn" onclick="nextChapter()">Continue Journey →</button>
+                </div>
+            `;
+
+            document.getElementById('game-content').innerHTML = content;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkAnswer(answerIndex, isCorrect) {
+            const chapter = chapters[currentChapter];
+            const buttons = document.querySelectorAll('.answer-btn');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('next-btn');
+
+            // Disable all buttons
+            buttons.forEach(btn => btn.disabled = true);
+
+            // Highlight correct/wrong
+            buttons[answerIndex].classList.add(isCorrect ? 'correct' : 'wrong');
+
+            // Show feedback
+            feedback.className = 'feedback ' + (isCorrect ? '' : 'wrong');
+            feedback.textContent = isCorrect ? chapter.correctFeedback : chapter.wrongFeedback;
+            feedback.style.display = 'block';
+
+            // Show next button
+            nextBtn.style.display = 'block';
+        }
+
+        function nextChapter() {
+            if (currentChapter < chapters.length - 1) {
+                loadChapter(currentChapter + 1);
+            } else {
+                showCompletion();
+            }
+        }
+
+        function showCompletion() {
+            const content = `
+                <div class="completion-screen" style="display: block;">
+                    <div class="laurel">🏆</div>
+                    <h2>Congratulations, Time Traveler!</h2>
+                    <p style="font-size: 1.3em; margin: 20px 0; line-height: 1.8;">You've journeyed through 1,000 years of Roman history!</p>
+                    
+                    <div class="summary-box">
+                        <h3>📜 What You Learned:</h3>
+                        <ul>
+                            <li>🏛️ <strong>509 BC:</strong> Rome became a Republic</li>
+                            <li>⚔️ Rome's strong army conquered many lands</li>
+                            <li>👑 <strong>49 BC:</strong> Julius Caesar became powerful</li>
+                            <li>🦅 <strong>27 BC:</strong> Augustus - first Emperor!</li>
+                            <li>🏟️ <strong>117 AD:</strong> Rome at its biggest</li>
+                            <li>⚠️ <strong>200s AD:</strong> Problems started</li>
+                            <li>✂️ <strong>285 AD:</strong> Empire split into East and West</li>
+                            <li>🍂 <strong>476 AD:</strong> Western Empire fell</li>
+                        </ul>
+                    </div>
+
+                    <div class="fact-box" style="margin: 20px 0; font-size: 1.2em;">
+                        <strong>Remember:</strong> Even though Rome fell, Roman ideas influenced the whole world! We still use Roman numerals and months named after Romans!
+                    </div>
+
+                    <button class="restart-btn" onclick="restart()">🔄 Journey Again!</button>
+                </div>
+            `;
+
+            document.getElementById('game-content').innerHTML = content;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function restart() {
+            loadChapter(0);
+        }
+
+        // Start the game!
+        loadChapter(0);
+    </script>
+</body>
+</html>
