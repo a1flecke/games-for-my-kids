@@ -1,0 +1,743 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Quest: The Unicorn & Robot Alliance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bradley Hand', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.3);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .story-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 3px solid #ff6b6b;
+            line-height: 1.6;
+        }
+
+        .story-box p {
+            margin-bottom: 10px;
+        }
+
+        .challenge-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 3px solid #4ecdc4;
+        }
+
+        .challenge-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .keyboard-display {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            letter-spacing: 3px;
+        }
+
+        .instruction {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+        }
+
+        .try-box {
+            background: white;
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            min-height: 100px;
+            position: relative;
+        }
+
+        .try-box textarea {
+            width: 100%;
+            height: 80px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            resize: none;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            display: none;
+        }
+
+        .hint {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .emoji {
+            font-size: 2em;
+            margin: 0 5px;
+        }
+
+        .level-complete {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .level-complete h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+
+        .keyboard-key {
+            display: inline-block;
+            background: #f8f9fa;
+            border: 2px solid #495057;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin: 0 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-weight: bold;
+            box-shadow: 0 3px 0 #495057;
+        }
+
+        .feedback {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>⚡ Keyboard Quest ⚡</h1>
+            <div style="font-size: 1.1em; margin: 10px 0;">The Unicorn & Robot Alliance</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%">Level <span id="current-level">1</span> of 10</div>
+            </div>
+        </div>
+
+        <div class="content" id="game-content">
+            <!-- Game content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            {
+                number: 1,
+                title: "The Beginning: Copy & Paste Power",
+                story: `<p><span class="emoji">🦄</span> Meet Sparkle, a brave unicorn with a magical horn that glows with rainbow light! She lives in the Digital Kingdom, where everything is made of code and commands.</p>
+                <p><span class="emoji">🤖</span> Her best friend is Bolt, a robot with lightning-fast processors and kind heart circuits. Together, they protect the kingdom from the Chaos Bugs!</p>
+                <p><span class="emoji">⚠️</span> But today, a terrible thing happened! The evil Chaos Bug has scrambled all the magical spell scrolls. Sparkle needs to COPY the correct spell and PASTE it into her spell book to restore order!</p>`,
+                challenge: "Help Sparkle copy the magical spell and paste it into her spell book!",
+                instruction: "First, select the text below. Then use <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>C</span> to copy it. Finally, click in the empty box and use <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>V</span> to paste it!",
+                shortcut: "⌘C (Copy) and ⌘V (Paste)",
+                textToCopy: "✨ SPARKLE RAINBOW SHIELD ✨",
+                type: "copy-paste",
+                hint: "Remember: Hold down the Command key (⌘) and press C to copy, then Command + V to paste!"
+            },
+            {
+                number: 2,
+                title: "Cut the Tangled Wires",
+                story: `<p><span class="emoji">🤖</span> "Great work!" says Bolt. "But now I have a problem. My circuit wires are all tangled up in the wrong place!"</p>
+                <p><span class="emoji">⚡</span> "I need to CUT this wire from here and move it to the correct socket. If we just copy it, the tangled wire will still be here causing problems!"</p>
+                <p><span class="emoji">🦄</span> Sparkle remembers: "Cut is like copy, but it REMOVES the original. Perfect for moving things!"</p>`,
+                challenge: "Help Bolt cut the wire code and paste it in the new location!",
+                instruction: "Select the code below, then use <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>X</span> to CUT it (this removes it). Then paste it with <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>V</span> in the box below!",
+                shortcut: "⌘X (Cut) and ⌘V (Paste)",
+                textToCopy: "🔌 POWER-WIRE-BLUE-42 🔌",
+                type: "cut-paste",
+                hint: "Cut (⌘X) is different from Copy (⌘C) - it removes the original text!"
+            },
+            {
+                number: 3,
+                title: "Save the Day!",
+                story: `<p><span class="emoji">💾</span> Suddenly, the ground shakes! "The Chaos Bug is trying to delete all our progress!" shouts Bolt.</p>
+                <p><span class="emoji">🦄</span> "Quick! We need to SAVE our work before it's lost forever!" cries Sparkle.</p>
+                <p><span class="emoji">⚡</span> In the Digital Kingdom, saving your work is the most important skill. It protects everything you've created!</p>`,
+                challenge: "Learn the most important shortcut: SAVE!",
+                instruction: "Practice the save command by typing anything in the text box, then press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>S</span> to save it!",
+                shortcut: "⌘S (Save)",
+                type: "save",
+                hint: "Always remember: ⌘S saves your work! Use it often to never lose your creations!"
+            },
+            {
+                number: 4,
+                title: "Undo the Mistake Spell",
+                story: `<p><span class="emoji">😱</span> "Oh no!" gasps Sparkle. "I accidentally turned Bolt into a toaster!"</p>
+                <p><span class="emoji">🤖</span> "Zkzzzt... I can still talk, but I'm very shiny now... and I can toast bread?" beeps Bolt.</p>
+                <p><span class="emoji">🦄</span> "Don't worry! The UNDO spell can reverse any mistake. Watch this!"</p>`,
+                challenge: "Master the Undo command to fix mistakes!",
+                instruction: "Type something in the box below, then press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>Z</span> to UNDO it. Watch your text disappear! You can press it multiple times to undo multiple actions!",
+                shortcut: "⌘Z (Undo)",
+                type: "undo",
+                hint: "Made a mistake? ⌘Z is your best friend! It undoes your last action."
+            },
+            {
+                number: 5,
+                title: "Redo the Good Magic",
+                story: `<p><span class="emoji">🤖</span> "Wait! I undid too much!" exclaims Bolt. "I accidentally undid my super-speed upgrade!"</p>
+                <p><span class="emoji">🦄</span> "No problem! There's a REDO command that brings back what you undid! It's like Undo's opposite twin!"</p>
+                <p><span class="emoji">⚡</span> "Together, Undo and Redo give you complete control over your actions!"</p>`,
+                challenge: "Learn to Redo what you've undone!",
+                instruction: "First type something, then undo it with <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>Z</span>. Now bring it back with <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>Shift</span> + <span class='keyboard-key'>Z</span> (REDO)!",
+                shortcut: "⌘⇧Z (Redo)",
+                type: "redo",
+                hint: "Redo brings back what you undid! Hold Command + Shift, then press Z."
+            },
+            {
+                number: 6,
+                title: "Select All the Power Crystals",
+                story: `<p><span class="emoji">💎</span> Sparkle and Bolt find a chamber filled with thousands of glowing power crystals!</p>
+                <p><span class="emoji">🤖</span> "We need to collect them all to power up the Shield Generator, but clicking each one would take forever!"</p>
+                <p><span class="emoji">🦄</span> "I know a spell! SELECT ALL will grab everything at once! It's super efficient!"</p>`,
+                challenge: "Use Select All to grab everything at once!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>A</span> while your cursor is in the text box below. It will select ALL the text instantly!",
+                shortcut: "⌘A (Select All)",
+                type: "select-all",
+                preFilledText: "💎 Crystal-1 💎 Crystal-2 💎 Crystal-3 💎 Crystal-4 💎 Crystal-5 💎 Crystal-6 💎 Crystal-7 💎 Crystal-8 💎 Crystal-9 💎 Crystal-10",
+                hint: "⌘A selects everything in the current window or text field!"
+            },
+            {
+                number: 7,
+                title: "Find the Hidden Code",
+                story: `<p><span class="emoji">🔍</span> "Look at this ancient scroll!" says Bolt. "It has thousands of lines of code, but we need to find one specific line!"</p>
+                <p><span class="emoji">🦄</span> "Scrolling through it all would take hours! There must be a faster way!"</p>
+                <p><span class="emoji">🤖</span> "The FIND command! It searches through everything instantly and highlights what you're looking for!"</p>`,
+                challenge: "Master the Find command!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>F</span> to open the Find function. Then search for the word 'TREASURE' in the text below!",
+                shortcut: "⌘F (Find)",
+                type: "find",
+                preFilledText: "In the deep dark code forest, beneath the binary trees, past the variable valleys, lies the word TREASURE hidden among a thousand other words and symbols and numbers and letters...",
+                hint: "⌘F opens the Find dialog. Type what you're looking for and it will highlight all matches!"
+            },
+            {
+                number: 8,
+                title: "Open New Dimensions",
+                story: `<p><span class="emoji">🌟</span> "We're getting close to the Chaos Bug's lair!" announces Sparkle.</p>
+                <p><span class="emoji">🤖</span> "But we need to open multiple portals at once to surround it! Each portal is a new window!"</p>
+                <p><span class="emoji">🦄</span> "The NEW command will help us open as many windows as we need!"</p>`,
+                challenge: "Learn to open new windows and tabs!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>N</span> to practice opening new windows! (In this game, we'll just confirm you know the command.)",
+                shortcut: "⌘N (New Window)",
+                type: "knowledge-check",
+                question: "What does ⌘N do?",
+                options: ["Opens a new window", "Closes a window", "Saves your work"],
+                correctAnswer: 0,
+                hint: "⌘N creates a new window in most applications!"
+            },
+            {
+                number: 9,
+                title: "Close the Chaos Portals",
+                story: `<p><span class="emoji">😈</span> "The Chaos Bug is opening portals everywhere!" shouts Bolt. "We need to close them fast!"</p>
+                <p><span class="emoji">🦄</span> "Each portal is like a window. We can close them one by one with the CLOSE command!"</p>
+                <p><span class="emoji">⚡</span> "But be careful - closing a window doesn't quit the whole application! That's a different command!"</p>`,
+                challenge: "Learn to close windows efficiently!",
+                instruction: "What keyboard shortcut closes the current window?",
+                shortcut: "⌘W (Close Window)",
+                type: "knowledge-check",
+                question: "Which shortcut closes the current window?",
+                options: ["⌘W", "⌘Q", "⌘C"],
+                correctAnswer: 0,
+                hint: "⌘W closes the current window, while ⌘Q quits the entire application!"
+            },
+            {
+                number: 10,
+                title: "The Final Battle: Command Master!",
+                story: `<p><span class="emoji">😈</span> "Face me, heroes!" roars the Chaos Bug. "I'm scrambling all your commands!"</p>
+                <p><span class="emoji">🦄</span> "Bolt, we need to use everything we've learned!"</p>
+                <p><span class="emoji">🤖</span> "Let's show this bug the power of keyboard mastery!"</p>
+                <p><span class="emoji">⚔️</span> This is it - the final challenge! Can you remember all the commands?</p>`,
+                challenge: "Answer all questions correctly to defeat the Chaos Bug!",
+                shortcut: "All Commands Review",
+                type: "final-boss",
+                questions: [
+                    { q: "Which shortcut copies selected text?", options: ["⌘C", "⌘X", "⌘V"], correct: 0 },
+                    { q: "Which shortcut pastes?", options: ["⌘P", "⌘V", "⌘C"], correct: 1 },
+                    { q: "Which shortcut saves your work?", options: ["⌘S", "⌘W", "⌘A"], correct: 0 },
+                    { q: "Which shortcut undoes your last action?", options: ["⌘U", "⌘Z", "⌘Y"], correct: 1 },
+                    { q: "Which shortcut selects all?", options: ["⌘A", "⌘S", "⌘E"], correct: 0 }
+                ],
+                hint: "Think about each command you've learned. You've got this!"
+            }
+        ];
+
+        let currentLevel = 0;
+        let finalBossAnswers = 0;
+
+        function loadLevel(levelIndex) {
+            const level = levels[levelIndex];
+            currentLevel = levelIndex;
+            
+            // Update progress bar
+            const progress = ((levelIndex) / levels.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('current-level').textContent = level.number;
+            
+            // Build level content
+            let content = `
+                <div class="story-box">
+                    <h2 style="color: #e74c3c; margin-bottom: 15px;">📖 Level ${level.number}: ${level.title}</h2>
+                    ${level.story}
+                </div>
+                
+                <div class="challenge-box">
+                    <div class="challenge-title">⚔️ Challenge: ${level.challenge}</div>
+                    <div class="keyboard-display">${level.shortcut}</div>
+                    <div class="instruction">${level.instruction}</div>
+            `;
+
+            // Add type-specific content
+            if (level.type === 'copy-paste') {
+                content += `
+                    <div style="background: #fff; padding: 15px; border: 2px solid #3498db; border-radius: 10px; margin: 15px 0;">
+                        <strong>📜 Magical Spell (select this text):</strong><br>
+                        <div id="source-text" style="margin-top: 10px; font-size: 1.3em; color: #9b59b6; user-select: all;">${level.textToCopy}</div>
+                    </div>
+                    <div class="try-box">
+                        <strong>📚 Spell Book (paste here):</strong>
+                        <textarea id="target-text" placeholder="Use ⌘V to paste the spell here..."></textarea>
+                    </div>
+                    <button class="button" onclick="checkCopyPaste()">Check Answer ✓</button>
+                `;
+            } else if (level.type === 'cut-paste') {
+                content += `
+                    <div style="background: #fff; padding: 15px; border: 2px solid #e74c3c; border-radius: 10px; margin: 15px 0;">
+                        <strong>⚡ Tangled Wire (select and CUT this):</strong><br>
+                        <textarea id="source-text" style="width: 100%; height: 60px; margin-top: 10px; font-size: 1.2em;">${level.textToCopy}</textarea>
+                    </div>
+                    <div class="try-box">
+                        <strong>🔌 Correct Socket (paste here):</strong>
+                        <textarea id="target-text" placeholder="Use ⌘V to paste the wire here..."></textarea>
+                    </div>
+                    <button class="button" onclick="checkCutPaste()">Check Answer ✓</button>
+                `;
+            } else if (level.type === 'save') {
+                content += `
+                    <div class="try-box">
+                        <textarea id="save-text" placeholder="Type anything here, then press ⌘S to save..."></textarea>
+                    </div>
+                    <div id="save-feedback" style="text-align: center; margin: 15px 0; color: #27ae60; font-weight: bold;"></div>
+                    <button class="button" onclick="skipToNext()">I've Practiced ⌘S - Continue!</button>
+                `;
+                
+                // Add save listener
+                setTimeout(() => {
+                    document.getElementById('save-text').addEventListener('keydown', function(e) {
+                        if (e.metaKey && e.key === 's') {
+                            e.preventDefault();
+                            document.getElementById('save-feedback').innerHTML = '💾 SAVED! Great job! In real apps, this would save your work!';
+                        }
+                    });
+                }, 100);
+            } else if (level.type === 'undo') {
+                content += `
+                    <div class="try-box">
+                        <textarea id="undo-text" placeholder="Type something here, then press ⌘Z to watch it disappear!"></textarea>
+                    </div>
+                    <div id="undo-feedback" style="text-align: center; margin: 15px 0; color: #e74c3c; font-weight: bold;"></div>
+                    <button class="button" onclick="skipToNext()">I've Practiced ⌘Z - Continue!</button>
+                `;
+                
+                setTimeout(() => {
+                    let undoDetected = false;
+                    document.getElementById('undo-text').addEventListener('keydown', function(e) {
+                        if (e.metaKey && e.key === 'z' && !e.shiftKey) {
+                            if (!undoDetected) {
+                                undoDetected = true;
+                                document.getElementById('undo-feedback').innerHTML = '↩️ UNDO ACTIVATED! You reversed your action! Try typing again and undoing multiple times!';
+                            }
+                        }
+                    });
+                }, 100);
+            } else if (level.type === 'redo') {
+                content += `
+                    <div class="try-box">
+                        <textarea id="redo-text" placeholder="Type something, undo it (⌘Z), then redo it (⌘⇧Z)!"></textarea>
+                    </div>
+                    <div id="redo-feedback" style="text-align: center; margin: 15px 0; color: #3498db; font-weight: bold;"></div>
+                    <button class="button" onclick="skipToNext()">I've Practiced ⌘⇧Z - Continue!</button>
+                `;
+                
+                setTimeout(() => {
+                    let redoDetected = false;
+                    document.getElementById('redo-text').addEventListener('keydown', function(e) {
+                        if (e.metaKey && e.shiftKey && e.key === 'z') {
+                            e.preventDefault();
+                            if (!redoDetected) {
+                                redoDetected = true;
+                                document.getElementById('redo-feedback').innerHTML = '↪️ REDO ACTIVATED! You brought it back! Undo and Redo give you total control!';
+                            }
+                        }
+                    });
+                }, 100);
+            } else if (level.type === 'select-all') {
+                content += `
+                    <div class="try-box">
+                        <textarea id="select-all-text">${level.preFilledText}</textarea>
+                    </div>
+                    <div id="select-feedback" style="text-align: center; margin: 15px 0; color: #f39c12; font-weight: bold;"></div>
+                    <button class="button" onclick="skipToNext()">I've Practiced ⌘A - Continue!</button>
+                `;
+                
+                setTimeout(() => {
+                    let selectDetected = false;
+                    document.getElementById('select-all-text').addEventListener('keydown', function(e) {
+                        if (e.metaKey && e.key === 'a') {
+                            if (!selectDetected) {
+                                selectDetected = true;
+                                setTimeout(() => {
+                                    document.getElementById('select-feedback').innerHTML = '💎 ALL CRYSTALS SELECTED! Perfect! Now you could copy or cut them all at once!';
+                                }, 100);
+                            }
+                        }
+                    });
+                }, 100);
+            } else if (level.type === 'find') {
+                content += `
+                    <div class="try-box">
+                        <textarea id="find-text" readonly>${level.preFilledText}</textarea>
+                    </div>
+                    <div id="find-feedback" style="text-align: center; margin: 15px 0; color: #9b59b6; font-weight: bold;"></div>
+                    <button class="button" onclick="skipToNext()">I've Practiced ⌘F - Continue!</button>
+                `;
+                
+                setTimeout(() => {
+                    let findDetected = false;
+                    document.getElementById('find-text').addEventListener('keydown', function(e) {
+                        if (e.metaKey && e.key === 'f') {
+                            e.preventDefault();
+                            if (!findDetected) {
+                                findDetected = true;
+                                document.getElementById('find-feedback').innerHTML = '🔍 FIND ACTIVATED! In a real app, a search box would appear. The word TREASURE is in the text!';
+                            }
+                        }
+                    });
+                }, 100);
+            } else if (level.type === 'knowledge-check') {
+                content += `
+                    <div style="margin: 20px 0;">
+                        <strong style="font-size: 1.2em;">${level.question}</strong>
+                        <div style="margin-top: 15px;">
+                `;
+                level.options.forEach((option, index) => {
+                    content += `
+                        <button class="button" onclick="checkKnowledge(${index})" style="display: block; width: 100%; margin: 10px 0;">
+                            ${option}
+                        </button>
+                    `;
+                });
+                content += `</div></div>`;
+            } else if (level.type === 'final-boss') {
+                content += `<div id="boss-questions"></div>`;
+            }
+
+            content += `
+                    <div class="hint">💡 ${level.hint}</div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            `;
+
+            document.getElementById('game-content').innerHTML = content;
+
+            if (level.type === 'final-boss') {
+                loadBossQuestion(0);
+            }
+        }
+
+        function checkCopyPaste() {
+            const source = document.getElementById('source-text').textContent.trim();
+            const target = document.getElementById('target-text').value.trim();
+            const feedback = document.getElementById('feedback');
+            
+            if (target === source) {
+                feedback.className = 'feedback correct';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '⭐ PERFECT! You copied and pasted the magical spell! Sparkle\'s shield is restored!';
+                setTimeout(() => nextLevel(), 2000);
+            } else if (target === '') {
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '❌ The spell book is empty! Try selecting the spell text, pressing ⌘C, clicking in the box, then ⌘V!';
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '❌ The spell doesn\'t match! Make sure you copied the exact text!';
+            }
+        }
+
+        function checkCutPaste() {
+            const source = document.getElementById('source-text').value.trim();
+            const target = document.getElementById('target-text').value.trim();
+            const feedback = document.getElementById('feedback');
+            const originalText = levels[currentLevel].textToCopy;
+            
+            if (target === originalText && source === '') {
+                feedback.className = 'feedback correct';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '⭐ EXCELLENT! You CUT the wire and moved it! Notice how the original is gone - that\'s the power of CUT!';
+                setTimeout(() => nextLevel(), 2000);
+            } else if (target === originalText && source !== '') {
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '❌ You copied instead of cutting! The wire is still tangled above. Use ⌘X (not ⌘C) to CUT!';
+            } else if (source === '') {
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '❌ Close! You cut it, but you need to paste it in the socket below!';
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '❌ Try again! Select the wire, press ⌘X to CUT, then ⌘V to paste!';
+            }
+        }
+
+        function checkKnowledge(answer) {
+            const level = levels[currentLevel];
+            const feedback = document.getElementById('feedback');
+            
+            if (answer === level.correctAnswer) {
+                feedback.className = 'feedback correct';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '⭐ CORRECT! You\'re mastering these commands!';
+                setTimeout(() => nextLevel(), 2000);
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '❌ Not quite! Check the hint and try again!';
+            }
+        }
+
+        let currentBossQuestion = 0;
+
+        function loadBossQuestion(qIndex) {
+            const level = levels[currentLevel];
+            const question = level.questions[qIndex];
+            let content = `
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 1.3em; color: #e74c3c; margin-bottom: 10px;">
+                        Battle ${qIndex + 1} of ${level.questions.length}
+                    </div>
+                    <div style="font-size: 1.5em; font-weight: bold; margin: 20px 0;">
+                        ${question.q}
+                    </div>
+                    <div style="margin-top: 20px;">
+            `;
+            
+            question.options.forEach((option, index) => {
+                content += `
+                    <button class="button" onclick="checkBossAnswer(${index})" style="display: block; width: 100%; margin: 10px auto; max-width: 400px;">
+                        ${option}
+                    </button>
+                `;
+            });
+            
+            content += `</div></div>`;
+            document.getElementById('boss-questions').innerHTML = content;
+        }
+
+        function checkBossAnswer(answer) {
+            const level = levels[currentLevel];
+            const question = level.questions[currentBossQuestion];
+            const feedback = document.getElementById('feedback');
+            
+            if (answer === question.correct) {
+                feedback.className = 'feedback correct';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '⚔️ CRITICAL HIT! The Chaos Bug staggers!';
+                
+                setTimeout(() => {
+                    currentBossQuestion++;
+                    if (currentBossQuestion < level.questions.length) {
+                        feedback.style.display = 'none';
+                        loadBossQuestion(currentBossQuestion);
+                    } else {
+                        showVictory();
+                    }
+                }, 1500);
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                feedback.innerHTML = '❌ The Chaos Bug blocked your attack! Try again!';
+            }
+        }
+
+        function showVictory() {
+            document.getElementById('game-content').innerHTML = `
+                <div class="level-complete">
+                    <h2>🎉 VICTORY! 🎉</h2>
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <div class="story-box">
+                        <p style="font-size: 1.3em;"><span class="emoji">🦄</span> "We did it!" cheers Sparkle, her horn glowing brighter than ever!</p>
+                        <p style="font-size: 1.3em;"><span class="emoji">🤖</span> "The Chaos Bug is defeated! The Digital Kingdom is safe!" celebrates Bolt!</p>
+                        <p style="font-size: 1.3em;"><span class="emoji">👑</span> The King appears: "You have mastered the Ancient Keyboard Commands! You are now a Keyboard Commander!"</p>
+                        <p style="font-size: 1.5em; color: #e74c3c; margin-top: 20px;"><strong>🏆 YOU ARE A KEYBOARD MASTER! 🏆</strong></p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin: 20px 0;">
+                        <h3 style="margin-bottom: 15px;">📚 Commands You've Mastered:</h3>
+                        <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+                            <p>⌘C - Copy</p>
+                            <p>⌘V - Paste</p>
+                            <p>⌘X - Cut</p>
+                            <p>⌘S - Save</p>
+                            <p>⌘Z - Undo</p>
+                            <p>⌘⇧Z - Redo</p>
+                            <p>⌘A - Select All</p>
+                            <p>⌘F - Find</p>
+                            <p>⌘N - New Window</p>
+                            <p>⌘W - Close Window</p>
+                        </div>
+                    </div>
+                    <button class="button" onclick="restartGame()">Play Again! 🔄</button>
+                </div>
+            `;
+        }
+
+        function nextLevel() {
+            if (currentLevel < levels.length - 1) {
+                loadLevel(currentLevel + 1);
+            }
+        }
+
+        function skipToNext() {
+            nextLevel();
+        }
+
+        function restartGame() {
+            currentBossQuestion = 0;
+            loadLevel(0);
+        }
+
+        // Start the game!
+        loadLevel(0);
+    </script>
+</body>
+</html>
