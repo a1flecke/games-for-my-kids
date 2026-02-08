@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Quest Round 3: The Pro Commander</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px; color: #2c3e50;
+        }
+        .game-container {
+            background: #faf8f3; border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px; width: 100%; overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white; padding: 25px; text-align: center;
+        }
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2); height: 25px;
+            border-radius: 15px; margin-top: 15px; overflow: hidden;
+        }
+        #progressFill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%; width: 0%; transition: width 0.5s;
+            display: flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+        .content { padding: 30px; }
+        .story-chunk {
+            background: #fff3cd; padding: 20px; border-radius: 10px;
+            border-left: 5px solid #e74c3c; line-height: 2; font-size: 1.3em; margin-bottom: 20px;
+        }
+        .keyboard-display {
+            background: #2c3e50; color: #00f2fe; padding: 30px;
+            border-radius: 12px; text-align: center; font-size: 2.5em;
+            font-family: monospace; border: 4px solid #3498db; margin: 20px 0;
+        }
+        .success-pop {
+            display: none; background: #38ef7d; color: white;
+            padding: 15px; border-radius: 10px; text-align: center; font-weight: bold;
+        }
+        #completionScreen { display: none; text-align: center; padding: 40px; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>Keyboard Quest: Round 3</h1>
+        <div id="levelTitle" style="font-weight:bold; margin-top:10px;">Level 1 of 15</div>
+        <div class="progress-bar"><div id="progressFill">0%</div></div>
+    </div>
+
+    <div class="content" id="gameArea">
+        <div id="storyBox" class="story-chunk">
+            Sparkle needs a <b>New Tab</b> in Safari! <br>
+            On your keyboard, the <b>Windows key</b> acts like <b>Command (⌘)</b>.
+        </div>
+        
+        <div class="keyboard-display" id="keyPrompt">Win + T</div>
+        
+        <div id="successMsg" class="success-pop">🌟 AMAZING! 🌟</div>
+    </div>
+
+    <div id="completionScreen">
+        <h2>🏆 PRO COMMANDER STATUS REACHED!</h2>
+        <p style="font-size: 1.2em; margin: 20px 0;">You mastered 15 iPad shortcuts on your Bluetooth keyboard!</p>
+        <button onclick="location.reload()" style="padding: 15px 30px; cursor: pointer;">Play Again</button>
+    </div>
+</div>
+
+<script>
+    // 15 Commands adjusted for iPad/Safari + Windows-style Bluetooth Keyboards
+    const levels = [
+        { desc: "Open a <b>New Tab</b> in Safari.", keys: { meta: true, key: "t" }, display: "Win + T" },
+        { desc: "<b>Close</b> the current tab.", keys: { meta: true, key: "w" }, display: "Win + W" },
+        { desc: "<b>Reload</b> the page to see updates.", keys: { meta: true, key: "r" }, display: "Win + R" },
+        { desc: "Jump to the <b>Address Bar</b> to type a website.", keys: { meta: true, key: "l" }, display: "Win + L" },
+        { desc: "Add this page to your <b>Bookmarks</b>.", keys: { meta: true, key: "d" }, display: "Win + D" },
+        { desc: "Go <b>Back</b> to the last page.", keys: { meta: true, key: "[" }, display: "Win + [" },
+        { desc: "Go <b>Forward</b> to the next page.", keys: { meta: true, key: "]" }, display: "Win + ]" },
+        { desc: "Make your text <i>Italic</i>.", keys: { meta: true, key: "i" }, display: "Win + I" },
+        { desc: "Make your text <u>Underlined</u>.", keys: { meta: true, key: "u" }, display: "Win + U" },
+        { desc: "<b>Zoom In</b> to see things bigger!", keys: { meta: true, key: "=" }, display: "Win + Plus" },
+        { desc: "<b>Zoom Out</b> to see more of the page.", keys: { meta: true, key: "-" }, display: "Win + Minus" },
+        { desc: "Reset <b>Zoom to 100%</b>.", keys: { meta: true, key: "0" }, display: "Win + 0" },
+        { desc: "Open Safari <b>Settings</b>.", keys: { meta: true, key: "," }, display: "Win + Comma" },
+        { desc: "<b>Escape</b> or Cancel a popup.", keys: { meta: false, key: "Escape" }, display: "Esc" },
+        { desc: "<b>Secret Trick:</b> In any app, hold <b>Win (⌘)</b> to see all shortcuts!", keys: { meta: true, key: "m" }, display: "Hold Win" }
+    ];
+
+    let currentLevel = 0;
+
+    window.addEventListener('keydown', function(e) {
+        if (currentLevel >= levels.length) return;
+
+        const target = levels[currentLevel].keys;
+        // Check if Windows/Command key is pressed AND the correct letter
+        if ((e.metaKey === target.meta) && (e.key.toLowerCase() === target.key.toLowerCase())) {
+            e.preventDefault();
+            nextLevel();
+        }
+    });
+
+    function nextLevel() {
+        document.getElementById('successMsg').style.display = 'block';
+        
+        setTimeout(() => {
+            currentLevel++;
+            document.getElementById('successMsg').style.display = 'none';
+            
+            if (currentLevel < levels.length) {
+                updateUI();
+            } else {
+                showEnd();
+            }
+        }, 800);
+    }
+
+    function updateUI() {
+        const lvl = levels[currentLevel];
+        document.getElementById('storyBox').innerHTML = lvl.desc;
+        document.getElementById('keyPrompt').innerText = lvl.display;
+        document.getElementById('levelTitle').innerText = `Level ${currentLevel + 1} of 15`;
+        
+        let progress = ((currentLevel) / levels.length) * 100;
+        document.getElementById('progressFill').style.width = progress + "%";
+        document.getElementById('progressFill').innerText = Math.round(progress) + "%";
+    }
+
+    function showEnd() {
+        document.getElementById('gameArea').style.display = 'none';
+        document.getElementById('completionScreen').style.display = 'block';
+        document.getElementById('progressFill').style.width = "100%";
+        document.getElementById('progressFill').innerText = "100%";
+    }
+</script>
+</body>
+</html>
