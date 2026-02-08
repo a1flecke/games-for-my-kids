@@ -1,49 +1,62 @@
-name: Update Game Index
+name: Update and Deploy Game Site
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
     paths-ignore:
       - 'index.html'
       - '.github/workflows/**'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
-  update-index:
+  update-and-build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
+          fetch-depth: 0
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       - name: Generate updated index.html
-        run: |
-          node .github/scripts/update-index.js
-      
-      - name: Check for changes
-        id: check_changes
-        run: |
-          if git diff --quiet index.html; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-      
+        run: node .github/scripts/update-index.js
+
       - name: Commit and push if changed
-        if: steps.check_changes.outputs.changed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add index.html
-          git commit -m "chore: auto-update game index [skip ci]"
-          git push
+          if ! git diff --quiet index.html; then
+            git add index.html
+            git commit -m "chore: auto-update game index [skip ci]"
+            git push
+          else
+            echo "No changes to index.html"
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  deploy:
+    needs: update-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
