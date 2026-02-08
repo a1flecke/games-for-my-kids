@@ -1,0 +1,777 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Quest Round 2: The Digital Dimension</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* DYSLEXIA-FRIENDLY DESIGN */
+        body {
+            font-family: Arial, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #faf8f3; /* Cream background reduces eye strain */
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .level-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* CHUNKED TEXT for ADHD */
+        .story-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 4px solid #ff6b6b;
+        }
+
+        .story-chunk {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 10px;
+            border-left: 5px solid #e74c3c;
+            line-height: 2; /* CRITICAL for dyslexia */
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .story-chunk strong {
+            color: #c0392b;
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .challenge-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 4px solid #4ecdc4;
+        }
+
+        .challenge-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* LARGE, CLEAR KEYBOARD DISPLAY */
+        .keyboard-display {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.6em;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            letter-spacing: 3px;
+            font-weight: bold;
+            border: 3px solid #3498db;
+        }
+
+        .instruction {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            border-radius: 10px;
+            padding: 18px;
+            margin: 15px 0;
+            color: #856404;
+            line-height: 2;
+            font-size: 1.15em;
+        }
+
+        /* PRACTICE AREA */
+        .practice-box {
+            background: white;
+            border: 4px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 80px;
+        }
+
+        .practice-box textarea {
+            width: 100%;
+            height: 100px;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 18px;
+            resize: none;
+            line-height: 1.8;
+            font-family: Arial, sans-serif;
+        }
+
+        .practice-box textarea:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 2px;
+        }
+
+        /* LARGE BUTTONS */
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            font-size: 1.3em;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px 5px;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 3px;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        /* SUCCESS FEEDBACK */
+        .success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.3em;
+            display: none;
+            font-weight: bold;
+            line-height: 1.8;
+            animation: success-appear 0.5s ease;
+        }
+
+        @keyframes success-appear {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .hint {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .emoji {
+            font-size: 2em;
+            margin: 0 8px;
+        }
+
+        /* COMPLETION SCREEN */
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .completion-screen h2 {
+            color: #667eea;
+            font-size: 2.3em;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .stars {
+            font-size: 4em;
+            margin: 25px 0;
+            animation: spin-celebrate 2s ease;
+        }
+
+        @keyframes spin-celebrate {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .skills-list {
+            background: white;
+            border: 4px solid #d4af37;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .skills-list h3 {
+            color: #c0392b;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+        }
+
+        .skill-item {
+            padding: 15px;
+            margin: 12px 0;
+            background: #faf8f3;
+            border-left: 6px solid #3498db;
+            border-radius: 8px;
+            font-size: 1.15em;
+            line-height: 1.8;
+        }
+
+        .keyboard-key {
+            display: inline-block;
+            background: #f8f9fa;
+            border: 2px solid #495057;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin: 0 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-weight: bold;
+            box-shadow: 0 3px 0 #495057;
+        }
+
+        /* LEVEL INTRO */
+        .level-intro {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border: 4px solid #d4af37;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .level-intro h2 {
+            color: #c0392b;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.6em;
+            }
+            
+            .story-chunk {
+                font-size: 1.1em;
+            }
+
+            .keyboard-display {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>⚡ Keyboard Quest: Round 2 ⚡</h1>
+            <div style="font-size: 1.2em; margin: 8px 0;">The Digital Dimension</div>
+            <div class="level-badge" id="level-badge">iPad Edition</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%">
+                    Level <span id="current-level">1</span> of 10
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="game-content">
+            <!-- Game content will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            {
+                number: 1,
+                title: "Welcome Back, Commander!",
+                story: [
+                    "🦄 'Commander! You're back!' cheers Sparkle the unicorn!",
+                    "🤖 'We need your help again!' beeps Bolt the robot.",
+                    "The Digital Dimension is in trouble!",
+                    "New Chaos Bugs have invaded with tricky iPad powers!",
+                    "But YOU have a new weapon...",
+                    "A magical <strong>Bluetooth keyboard</strong> for your iPad!",
+                    "Let's learn the <strong>Globe Key</strong> first!",
+                    "On most keyboards, the Globe key is the <strong>fn key</strong>!",
+                    "It unlocks special iPad superpowers!"
+                ],
+                challenge: "Find the Globe (fn) key on your keyboard!",
+                instruction: "The <span class='keyboard-key'>🌐 Globe</span> key is usually labeled 'fn' at the bottom of your keyboard. Press it with <span class='keyboard-key'>H</span> to go Home!",
+                shortcut: "🌐 H (Go Home)",
+                type: "knowledge-check",
+                question: "What does Globe + H do on iPad?",
+                options: ["Takes you to the Home Screen", "Makes everything bigger", "Turns off your iPad"],
+                correctAnswer: 0,
+                hint: "Globe is like a magic key that gives other keys special iPad powers! Globe + H takes you HOME!",
+                setupText: "Try pressing Globe (fn) + H on your iPad right now! (Don't worry, you can come back to the game!)"
+            },
+            {
+                number: 2,
+                title: "The Search Quest",
+                story: [
+                    "🔍 'The Chaos Bugs are hiding everywhere!' says Sparkle.",
+                    "🤖 'We need to SEARCH for them!' beeps Bolt.",
+                    "On iPad, you can search for ANYTHING!",
+                    "Apps, games, messages, photos - everything!",
+                    "The <strong>Search</strong> command opens a magic search box!",
+                    "Just press <strong>Command + Space</strong>!",
+                    "This is the MOST powerful command on iPad!"
+                ],
+                challenge: "Master the Search command!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>Space</span> to open Search! You can then type to find any app or thing on your iPad!",
+                shortcut: "⌘ Space (Open Search)",
+                type: "knowledge-check",
+                question: "What does Command + Space do?",
+                options: ["Opens Search to find anything", "Takes a photo", "Deletes everything"],
+                correctAnswer: 0,
+                hint: "Command + Space opens the magic Search box! It's like having a superpower to find anything instantly!",
+                setupText: "Try it now! Press ⌘ Space, then type 'photos' or any app name!"
+            },
+            {
+                number: 3,
+                title: "App Switcher Power!",
+                story: [
+                    "⚡ 'The Chaos Bugs are jumping between apps!' shouts Sparkle.",
+                    "🤖 'We need to switch apps super fast!' says Bolt.",
+                    "The <strong>App Switcher</strong> shows all your open apps!",
+                    "Press <strong>Command + Tab</strong> to see them all!",
+                    "Keep holding Command and press Tab again to move!",
+                    "Let go on the app you want!"
+                ],
+                challenge: "Learn to switch between apps like a pro!",
+                instruction: "Hold <span class='keyboard-key'>⌘</span> and press <span class='keyboard-key'>Tab</span> to see all your open apps. Keep holding ⌘ and press Tab again to move between them!",
+                shortcut: "⌘ Tab (Switch Apps)",
+                type: "knowledge-check",
+                question: "How do you switch between open apps?",
+                options: ["Hold Command and press Tab", "Shake your iPad", "Press Space 10 times"],
+                correctAnswer: 0,
+                hint: "Command + Tab is like a magic window showing all your apps! Hold Command and keep pressing Tab to move!",
+                setupText: "Try it! Open a few apps, then hold ⌘ and press Tab to switch between them!"
+            },
+            {
+                number: 4,
+                title: "The Screenshot Spell",
+                story: [
+                    "📸 'We found a Chaos Bug hideout!' exclaims Sparkle.",
+                    "🤖 'Quick! Take a picture for evidence!' beeps Bolt.",
+                    "On iPad, you can take <strong>screenshots</strong> with your keyboard!",
+                    "Press <strong>Command + Shift + 3</strong>!",
+                    "This captures what's on your screen!",
+                    "The picture saves to your Photos app!"
+                ],
+                challenge: "Learn the screenshot command!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>⇧</span> + <span class='keyboard-key'>3</span> together to take a screenshot! (Shift is the ⇧ arrow key)",
+                shortcut: "⌘ ⇧ 3 (Screenshot)",
+                type: "knowledge-check",
+                question: "How do you take a screenshot?",
+                options: ["Command + Shift + 3", "Just press S", "Tap the screen 5 times"],
+                correctAnswer: 0,
+                hint: "Command + Shift + 3 takes a picture of your screen! Check your Photos app to see it!",
+                setupText: "Try taking a screenshot of this game! Press ⌘ + ⇧ + 3!"
+            },
+            {
+                number: 5,
+                title: "Bold Text Battle!",
+                story: [
+                    "✏️ 'We need to send a message to headquarters!' says Sparkle.",
+                    "🤖 'But it needs to be BOLD and strong!' adds Bolt.",
+                    "When typing, you can make text <strong>BOLD</strong>!",
+                    "Just select the text first.",
+                    "Then press <strong>Command + B</strong>!",
+                    "The B stands for BOLD!"
+                ],
+                challenge: "Make text BOLD like a commander!",
+                instruction: "Type some words below. Select them (drag your finger or use Shift + arrows). Then press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>B</span> to make them BOLD!",
+                shortcut: "⌘ B (Bold)",
+                type: "practice",
+                hint: "Select text first, then Command + B makes it BOLD and strong!",
+                setupText: "In Notes or any app, type 'I am a Keyboard Commander!' Then select it and press ⌘ + B!"
+            },
+            {
+                number: 6,
+                title: "The Emoji Portal!",
+                story: [
+                    "😊 'The team needs to celebrate!' says Sparkle happily.",
+                    "🤖 'Let's send them emojis!' beeps Bolt with joy.",
+                    "Emojis make messages fun!",
+                    "On iPad, the <strong>Globe key</strong> opens the emoji keyboard!",
+                    "Just press <strong>Globe + E</strong>!",
+                    "Or you can press <strong>Globe</strong> by itself!"
+                ],
+                challenge: "Open the emoji keyboard!",
+                instruction: "Press <span class='keyboard-key'>🌐 Globe</span> + <span class='keyboard-key'>E</span> (or just Globe alone) to open the emoji keyboard! Pick your favorite emoji!",
+                shortcut: "🌐 E (Emoji Keyboard)",
+                type: "knowledge-check",
+                question: "How do you open the emoji keyboard?",
+                options: ["Press Globe + E (or just Globe)", "Type 'emoji'", "Shake your iPad"],
+                correctAnswer: 0,
+                hint: "Globe + E opens a world of emojis! Or just press Globe by itself! 😊🦄🤖",
+                setupText: "Try it in Notes! Press Globe (fn) or Globe + E to see all the emojis!"
+            },
+            {
+                number: 7,
+                title: "Spotlight Search Superpower!",
+                story: [
+                    "🔦 'That regular search is good...' says Sparkle.",
+                    "🤖 'But did you know there's MORE?' asks Bolt mysteriously.",
+                    "You already learned <strong>Command + Space</strong> for search!",
+                    "That's called <strong>Spotlight Search</strong>!",
+                    "It can find apps, do math, search the web!",
+                    "It's your iPad's supercomputer brain!"
+                ],
+                challenge: "Use Spotlight like a pro!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>Space</span> again, but this time try typing '5+5' or 'weather' or any app name!",
+                shortcut: "⌘ Space (Spotlight)",
+                type: "knowledge-check",
+                question: "What cool things can Spotlight Search do?",
+                options: ["Find apps, do math, search the web!", "Only open Settings", "Turn off your iPad"],
+                correctAnswer: 0,
+                hint: "Spotlight is like a super-brain! It finds apps, does math (try 5+5!), and even searches the internet!",
+                setupText: "Press ⌘ + Space and type '10 + 10' - Spotlight will solve it!"
+            },
+            {
+                number: 8,
+                title: "The Dock Dimension!",
+                story: [
+                    "📱 'At the bottom of your iPad is the Dock!' explains Sparkle.",
+                    "🤖 'It holds your favorite apps!' adds Bolt.",
+                    "You can show and hide the Dock with a command!",
+                    "Press <strong>Globe + A</strong>!",
+                    "This makes the Dock appear or disappear!",
+                    "It's like magic!"
+                ],
+                challenge: "Control the Dock!",
+                instruction: "Press <span class='keyboard-key'>🌐 Globe</span> + <span class='keyboard-key'>A</span> to show or hide the Dock at the bottom of your screen!",
+                shortcut: "🌐 A (Show/Hide Dock)",
+                type: "knowledge-check",
+                question: "What does Globe + A do?",
+                options: ["Shows or hides the Dock", "Opens the App Store", "Makes everything red"],
+                correctAnswer: 0,
+                hint: "Globe + A is like a magic switch for the Dock! Press it to make the Dock appear or disappear!",
+                setupText: "Try it! Press Globe (fn) + A to see the Dock appear or disappear!"
+            },
+            {
+                number: 9,
+                title: "Select All Mastery!",
+                story: [
+                    "✨ 'Remember Command + A from Round 1?' asks Sparkle.",
+                    "🤖 'It works on iPad too!' confirms Bolt.",
+                    "When you're typing, <strong>Command + A</strong> selects EVERYTHING!",
+                    "Then you can copy it, delete it, or make it bold!",
+                    "It's super useful for big tasks!"
+                ],
+                challenge: "Select all text like a master!",
+                instruction: "In any app with text, press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>A</span> to select everything! Then try ⌘ + C to copy it all!",
+                shortcut: "⌘ A (Select All)",
+                type: "knowledge-check",
+                question: "What does Command + A do?",
+                options: ["Selects all the text or items", "Opens the App Store", "Takes a photo"],
+                correctAnswer: 0,
+                hint: "Command + A is like a lasso that catches EVERYTHING in one go! Super fast!",
+                setupText: "Open Notes, type a few sentences, then press ⌘ + A to select them all!"
+            },
+            {
+                number: 10,
+                title: "The Ultimate Challenge: Full Screen!",
+                story: [
+                    "🎮 'This is it, Commander!' says Sparkle excitedly.",
+                    "🤖 'The final boss needs full screen mode!' explains Bolt.",
+                    "Sometimes you want an app to use your WHOLE screen!",
+                    "Press <strong>Globe + F</strong>!",
+                    "This makes apps go full screen or exit full screen!",
+                    "F stands for FULL SCREEN!",
+                    "You've learned 10 amazing iPad commands!",
+                    "You're now a TRUE Keyboard Master!"
+                ],
+                challenge: "Master full screen mode!",
+                instruction: "Press <span class='keyboard-key'>🌐 Globe</span> + <span class='keyboard-key'>F</span> to make apps go full screen! Press it again to exit full screen!",
+                shortcut: "🌐 F (Full Screen)",
+                type: "final-boss",
+                questions: [
+                    { q: "What takes you to the Home Screen?", options: ["Globe + H", "Globe + B", "Globe + S"], correct: 0 },
+                    { q: "How do you open Search?", options: ["⌘ Space", "⌘ H", "⌘ F"], correct: 0 },
+                    { q: "How do you switch between apps?", options: ["⌘ Tab", "⌘ A", "Globe + Tab"], correct: 0 },
+                    { q: "How do you make text BOLD?", options: ["⌘ B", "⌘ H", "Globe + B"], correct: 0 },
+                    { q: "How do you open emojis?", options: ["Globe + E (or just Globe)", "⌘ E", "⌘ Space"], correct: 0 }
+                ],
+                hint: "Remember everything you learned! You've got this, Commander!"
+            }
+        ];
+
+        let currentLevel = 0;
+        let finalBossQuestion = 0;
+
+        function loadLevel(levelIndex) {
+            const level = levels[levelIndex];
+            currentLevel = levelIndex;
+            
+            const progress = ((levelIndex) / levels.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('current-level').textContent = level.number;
+            
+            const storyChunks = level.story.map(chunk => 
+                `<div class="story-chunk">${chunk}</div>`
+            ).join('');
+
+            let content = `
+                <div class="level-intro">
+                    <h2>Level ${level.number}: ${level.title}</h2>
+                    <div class="emoji">🦄🤖</div>
+                </div>
+                
+                <div class="story-box">
+                    ${storyChunks}
+                </div>
+                
+                <div class="challenge-box">
+                    <div class="challenge-title">⚔️ Mission: ${level.challenge}</div>
+                    <div class="keyboard-display">${level.shortcut}</div>
+                    <div class="instruction">${level.instruction}</div>
+                    ${level.setupText ? `<div class="hint">💡 ${level.setupText}</div>` : ''}
+            `;
+
+            if (level.type === 'knowledge-check') {
+                content += `
+                    <div style="margin: 25px 0;">
+                        <strong style="font-size: 1.3em; display: block; margin-bottom: 20px;">${level.question}</strong>
+                        ${level.options.map((option, index) => `
+                            <button class="button" onclick="checkAnswer(${index})" style="display: block; width: 100%; margin: 12px 0; text-align: left;">
+                                ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (level.type === 'practice') {
+                content += `
+                    <div class="practice-box">
+                        <textarea id="practice-area" placeholder="Type here and try the command!"></textarea>
+                    </div>
+                    <button class="button" onclick="skipToNext()">I Practiced It! Continue →</button>
+                `;
+            } else if (level.type === 'final-boss') {
+                content += `<div id="boss-questions"></div>`;
+            }
+
+            content += `
+                    <div class="hint">💡 ${level.hint}</div>
+                    <div class="success" id="success-feedback"></div>
+                </div>
+            `;
+
+            document.getElementById('game-content').innerHTML = content;
+
+            if (level.type === 'final-boss') {
+                loadBossQuestion(0);
+            }
+        }
+
+        function checkAnswer(answerIndex) {
+            const level = levels[currentLevel];
+            const success = document.getElementById('success-feedback');
+            
+            if (answerIndex === level.correctAnswer) {
+                success.innerHTML = `🎉 PERFECT! You've mastered ${level.shortcut}!<br><br>Get ready for the next level!`;
+                success.style.display = 'block';
+                setTimeout(() => nextLevel(), 2500);
+            } else {
+                success.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                success.innerHTML = `Not quite! ${level.hint}<br><br>Try again!`;
+                success.style.display = 'block';
+                setTimeout(() => {
+                    success.style.display = 'none';
+                    success.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                }, 2000);
+            }
+        }
+
+        function loadBossQuestion(qIndex) {
+            const level = levels[currentLevel];
+            const question = level.questions[qIndex];
+            
+            let content = `
+                <div style="text-align: center; margin: 25px 0;">
+                    <div style="font-size: 1.4em; color: #e74c3c; margin-bottom: 15px; font-weight: bold;">
+                        Final Challenge ${qIndex + 1} of ${level.questions.length}
+                    </div>
+                    <div style="font-size: 1.4em; margin: 20px 0; line-height: 2;">
+                        ${question.q}
+                    </div>
+                    <div style="margin-top: 25px;">
+            `;
+            
+            question.options.forEach((option, index) => {
+                content += `
+                    <button class="button" onclick="checkBossAnswer(${index})" style="display: block; width: 100%; margin: 15px 0; font-size: 1.2em;">
+                        ${option}
+                    </button>
+                `;
+            });
+            
+            content += `</div></div>`;
+            document.getElementById('boss-questions').innerHTML = content;
+        }
+
+        function checkBossAnswer(answer) {
+            const level = levels[currentLevel];
+            const question = level.questions[finalBossQuestion];
+            const success = document.getElementById('success-feedback');
+            
+            if (answer === question.correct) {
+                success.innerHTML = '⚔️ CRITICAL HIT! The Chaos Bug is weakening!';
+                success.style.display = 'block';
+                
+                setTimeout(() => {
+                    finalBossQuestion++;
+                    if (finalBossQuestion < level.questions.length) {
+                        success.style.display = 'none';
+                        loadBossQuestion(finalBossQuestion);
+                    } else {
+                        showVictory();
+                    }
+                }, 1800);
+            } else {
+                success.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                success.innerHTML = '❌ The Chaos Bug blocked your attack! Try again!';
+                success.style.display = 'block';
+                setTimeout(() => {
+                    success.style.display = 'none';
+                    success.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                }, 1500);
+            }
+        }
+
+        function showVictory() {
+            document.getElementById('game-content').innerHTML = `
+                <div class="completion-screen" style="display: block;">
+                    <div class="stars">⭐🏆⭐</div>
+                    <h2>🎉 VICTORY! 🎉</h2>
+                    <div class="story-box" style="font-size: 1.2em; line-height: 2;">
+                        <div class="story-chunk">
+                            🦄 "You did it!" cheers Sparkle! "The Digital Dimension is saved!"
+                        </div>
+                        <div class="story-chunk">
+                            🤖 "You're now a TRUE iPad Keyboard Master!" beeps Bolt proudly!
+                        </div>
+                        <div class="story-chunk" style="font-size: 1.3em; color: #e74c3c;">
+                            <strong>👑 YOU ARE A KEYBOARD COMMANDER! 👑</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="skills-list">
+                        <h3>🎓 iPad Commands You've Mastered:</h3>
+                        <div class="skill-item">🌐 H - Go to Home Screen</div>
+                        <div class="skill-item">⌘ Space - Open Search (Spotlight)</div>
+                        <div class="skill-item">⌘ Tab - Switch Between Apps</div>
+                        <div class="skill-item">⌘ ⇧ 3 - Take Screenshot</div>
+                        <div class="skill-item">⌘ B - Make Text Bold</div>
+                        <div class="skill-item">🌐 E - Open Emoji Keyboard</div>
+                        <div class="skill-item">🌐 A - Show/Hide Dock</div>
+                        <div class="skill-item">⌘ A - Select All</div>
+                        <div class="skill-item">🌐 F - Full Screen Mode</div>
+                        <div class="skill-item">Plus: ⌘C, ⌘V, ⌘X, ⌘S, ⌘Z from Round 1!</div>
+                    </div>
+
+                    <div class="hint" style="font-size: 1.2em; margin: 25px 0;">
+                        💡 <strong>Pro Tip:</strong> Hold down ⌘ (Command) in any app to see ALL the shortcuts that app supports!
+                    </div>
+
+                    <button class="button" onclick="restartGame()" style="font-size: 1.4em; padding: 20px 45px;">
+                        🔄 Play Again!
+                    </button>
+                </div>
+            `;
+        }
+
+        function nextLevel() {
+            if (currentLevel < levels.length - 1) {
+                loadLevel(currentLevel + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function skipToNext() {
+            nextLevel();
+        }
+
+        function restartGame() {
+            finalBossQuestion = 0;
+            loadLevel(0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Start the game!
+        loadLevel(0);
+    </script>
+</body>
+</html>
