@@ -1,0 +1,1185 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odyssey of the Ages: Ancient Greece</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --terracotta: #E07041;
+            --deep-black: #1A1A1A;
+            --pottery-orange: #D4722E;
+            --olive-green: #4A5D3F;
+            --marble-white: #F5F3ED;
+            --bronze: #CD7F32;
+            --aegean-blue: #2C4A6E;
+        }
+
+        body {
+            font-family: 'Philosopher', sans-serif;
+            background: linear-gradient(135deg, var(--deep-black) 0%, #2D1810 100%);
+            color: var(--marble-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .title-screen {
+            text-align: center;
+            padding: 60px 20px;
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--terracotta);
+            text-shadow: 3px 3px 0 var(--deep-black), 6px 6px 0 rgba(224, 112, 65, 0.3);
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--bronze);
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+
+        .start-button {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            padding: 20px 60px;
+            background: linear-gradient(135deg, var(--terracotta) 0%, var(--pottery-orange) 100%);
+            color: var(--marble-white);
+            border: 4px solid var(--bronze);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(224, 112, 65, 0.6);
+            border-color: var(--marble-white);
+        }
+
+        .game-screen {
+            display: none;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(74, 93, 63, 0.3) 0%, rgba(44, 74, 110, 0.3) 100%);
+            border: 3px solid var(--bronze);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .stat {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: var(--bronze);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--marble-white);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--terracotta) 0%, var(--pottery-orange) 100%);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--terracotta);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .story-panel {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(45, 24, 16, 0.9) 100%);
+            padding: 35px;
+            border: 4px solid var(--pottery-orange);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, transparent, var(--terracotta), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .chapter-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--terracotta);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .era-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--aegean-blue);
+            color: var(--marble-white);
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            border: 2px solid var(--bronze);
+        }
+
+        .story-text {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--marble-white);
+            margin-bottom: 25px;
+        }
+
+        .info-panel {
+            background: rgba(44, 74, 110, 0.3);
+            padding: 25px;
+            border: 3px solid var(--aegean-blue);
+            border-radius: 20px;
+            height: fit-content;
+        }
+
+        .info-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--bronze);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.4);
+            border-left: 4px solid var(--terracotta);
+            border-radius: 5px;
+        }
+
+        .info-item strong {
+            color: var(--bronze);
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .choice-button {
+            font-family: 'Philosopher', sans-serif;
+            font-size: 1.1rem;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(74, 93, 63, 0.6) 0%, rgba(74, 93, 63, 0.8) 100%);
+            color: var(--marble-white);
+            border: 3px solid var(--olive-green);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-button::before {
+            content: '⚔️';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .choice-button:hover {
+            transform: translateX(5px);
+            border-color: var(--terracotta);
+            background: linear-gradient(135deg, rgba(224, 112, 65, 0.6) 0%, rgba(212, 114, 46, 0.8) 100%);
+            box-shadow: 0 5px 20px rgba(224, 112, 65, 0.4);
+        }
+
+        .choice-button:hover::before {
+            opacity: 1;
+            right: 15px;
+        }
+
+        .battle-screen {
+            background: linear-gradient(135deg, rgba(45, 24, 16, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
+            padding: 40px;
+            border: 5px solid var(--terracotta);
+            border-radius: 25px;
+            margin-top: 30px;
+            box-shadow: 0 15px 50px rgba(224, 112, 65, 0.5);
+        }
+
+        .battle-header {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            text-align: center;
+            color: var(--terracotta);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .combatants {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .combatant {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            border: 3px solid var(--bronze);
+        }
+
+        .combatant-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--terracotta);
+            margin-bottom: 15px;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid var(--bronze);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 15px #4CAF50;
+        }
+
+        .attack-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .attack-button {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, var(--terracotta) 0%, var(--pottery-orange) 100%);
+            color: var(--marble-white);
+            border: 3px solid var(--bronze);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .attack-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(224, 112, 65, 0.6);
+        }
+
+        .battle-log {
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border: 2px solid var(--bronze);
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Philosopher', sans-serif;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-left: 3px solid var(--terracotta);
+            animation: logFadeIn 0.5s ease;
+        }
+
+        @keyframes logFadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .question-panel {
+            background: linear-gradient(135deg, rgba(44, 74, 110, 0.4) 0%, rgba(74, 93, 63, 0.4) 100%);
+            padding: 30px;
+            border: 4px solid var(--aegean-blue);
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            color: var(--marble-white);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .answer-button {
+            font-family: 'Philosopher', sans-serif;
+            font-size: 1.1rem;
+            padding: 18px;
+            background: rgba(0,0,0,0.5);
+            color: var(--marble-white);
+            border: 2px solid var(--bronze);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+
+        .answer-button:hover {
+            background: rgba(74, 93, 63, 0.7);
+            border-color: var(--terracotta);
+            transform: translateX(10px);
+        }
+
+        .correct {
+            background: rgba(76, 175, 80, 0.5) !important;
+            border-color: #4CAF50 !important;
+        }
+
+        .incorrect {
+            background: rgba(244, 67, 54, 0.5) !important;
+            border-color: #F44336 !important;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 24, 16, 0.95) 100%);
+            border: 5px solid var(--terracotta);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(224, 112, 65, 0.6);
+        }
+
+        .completion-title {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            color: var(--terracotta);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .completion-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .completion-stat {
+            padding: 25px;
+            background: rgba(0,0,0,0.5);
+            border: 3px solid var(--bronze);
+            border-radius: 15px;
+        }
+
+        .completion-stat-value {
+            font-size: 2.5rem;
+            color: var(--terracotta);
+            font-weight: 700;
+        }
+
+        .completion-stat-label {
+            font-size: 1.1rem;
+            color: var(--bronze);
+            margin-top: 10px;
+        }
+
+        .pottery-decoration {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 4rem;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .combatants {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Keyboard accessibility highlight */
+        button:focus, .choice-button:focus, .answer-button:focus {
+            outline: 3px solid var(--terracotta);
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Title Screen -->
+        <div id="title-screen" class="title-screen">
+            <h1>ODYSSEY OF THE AGES</h1>
+            <div class="subtitle">Journey Through Ancient Greece</div>
+            <button class="start-button" onclick="startGame()">Begin Your Quest</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="game-screen">
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-label">Hero Level</div>
+                    <div class="stat-value" id="level">1</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Knowledge</div>
+                    <div class="stat-value" id="knowledge">0</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="knowledge-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Glory</div>
+                    <div class="stat-value" id="glory">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Wisdom</div>
+                    <div class="stat-value" id="wisdom">0</div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="story-panel">
+                    <div class="chapter-title" id="chapter-title">Chapter 1: The Bronze Age</div>
+                    <div class="era-badge" id="era-badge">Minoan Civilization - 2000 BCE</div>
+                    <div class="story-text" id="story-text"></div>
+                    <div id="choices" class="choices"></div>
+                    <div id="battle-area"></div>
+                    <div id="question-area"></div>
+                </div>
+
+                <div class="info-panel">
+                    <div class="info-title">Historical Context</div>
+                    <div id="info-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div id="completion-screen" class="completion-screen hidden">
+            <div class="completion-title">Quest Complete!</div>
+            <div class="subtitle">You've mastered the history of Ancient Greece</div>
+            <div class="completion-stats">
+                <div class="completion-stat">
+                    <div class="completion-stat-value" id="final-knowledge">0</div>
+                    <div class="completion-stat-label">Knowledge Points</div>
+                </div>
+                <div class="completion-stat">
+                    <div class="completion-stat-value" id="final-glory">0</div>
+                    <div class="completion-stat-label">Glory Earned</div>
+                </div>
+                <div class="completion-stat">
+                    <div class="completion-stat-value" id="final-wisdom">0</div>
+                    <div class="completion-stat-label">Wisdom Gained</div>
+                </div>
+                <div class="completion-stat">
+                    <div class="completion-stat-value" id="final-level">1</div>
+                    <div class="completion-stat-label">Final Level</div>
+                </div>
+            </div>
+            <button class="start-button" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <div class="pottery-decoration">🏛️</div>
+
+    <script>
+        // Game State
+        let gameState = {
+            level: 1,
+            knowledge: 0,
+            glory: 0,
+            wisdom: 0,
+            currentChapter: 0,
+            health: 100,
+            enemyHealth: 100,
+            battlesWon: 0,
+            questionsAnswered: 0
+        };
+
+        // Game Chapters - Historical Journey
+        const chapters = [
+            {
+                title: "Chapter 1: The Bronze Age",
+                era: "Minoan Civilization - 2000 BCE",
+                story: `You find yourself on the island of Crete, home to the mysterious Minoan civilization. The great palace of Knossos rises before you, a labyrinth of over 1,000 rooms. The Minoans have created the first great civilization in Greece, with advanced plumbing, vibrant frescoes, and thriving trade across the Mediterranean Sea. The palace walls show images of bull-leaping ceremonies, a dangerous sport where athletes vault over charging bulls. You are a young merchant seeking to understand the power and wisdom of this ancient culture. A priest approaches you at the palace gates.`,
+                info: [
+                    { label: "Period", value: "2000-1450 BCE" },
+                    { label: "Key Achievement", value: "First European civilization, advanced architecture" },
+                    { label: "Cultural Impact", value: "Influenced Greek mythology (Minotaur legend)" }
+                ],
+                choices: [
+                    {
+                        text: "Ask the priest about Minoan trade networks and their wealth",
+                        nextAction: "question",
+                        knowledge: 10,
+                        question: {
+                            text: "Why were the Minoans so wealthy and powerful?",
+                            answers: [
+                                { text: "They conquered many lands with a powerful army", correct: false },
+                                { text: "They controlled sea trade routes across the Mediterranean", correct: true },
+                                { text: "They discovered gold mines on Crete", correct: false },
+                                { text: "They taxed all Greek city-states", correct: false }
+                            ],
+                            explanation: "The Minoans became wealthy through maritime trade! Their ships carried goods like olive oil, wine, and beautiful pottery across the Mediterranean. They didn't rely on military conquest but on trading relationships. This peaceful approach to power influenced later Greek city-states."
+                        }
+                    },
+                    {
+                        text: "Explore the palace and learn about Minoan architecture",
+                        nextAction: "info",
+                        knowledge: 15,
+                        wisdom: 5,
+                        reveal: "The palace has indoor plumbing with clay pipes, multiple stories connected by grand staircases, and colorful frescoes depicting nature and religious ceremonies. The Minoans built without defensive walls, suggesting they felt safe from invasion. Their architectural innovations like columns and drainage systems influenced later Greek building. The open, light-filled design shows they valued beauty and comfort."
+                    }
+                ]
+            },
+            {
+                title: "Chapter 2: The Mycenaean Warriors",
+                era: "Mycenaean Greece - 1600-1100 BCE",
+                story: `Time passes, and you travel to mainland Greece where the warrior culture of the Mycenaeans dominates. Unlike the peaceful Minoans, the Mycenaeans are fierce fighters who build massive fortified citadels with walls so large that later Greeks believed giants must have built them. You stand before the Lion Gate of Mycenae, where the legendary King Agamemnon once ruled. The Mycenaeans have conquered the Minoans and adopted much of their culture, but added their own warrior spirit. They write in an early Greek script called Linear B, keeping detailed records of weapons, chariots, and military supplies. A warlord challenges you.`,
+                info: [
+                    { label: "Period", value: "1600-1100 BCE" },
+                    { label: "Key Achievement", value: "Warrior culture, massive fortifications" },
+                    { label: "Cultural Impact", value: "Inspired Homer's epics, Trojan War legends" }
+                ],
+                choices: [
+                    {
+                        text: "Challenge the warlord to ritual combat to prove your worth",
+                        nextAction: "battle",
+                        enemy: { name: "Mycenaean Warlord", health: 80 },
+                        glory: 20
+                    },
+                    {
+                        text: "Ask about the relationship between Mycenaeans and Minoans",
+                        nextAction: "question",
+                        knowledge: 10,
+                        wisdom: 5,
+                        question: {
+                            text: "How did the Mycenaeans interact with Minoan civilization?",
+                            answers: [
+                                { text: "They lived peacefully side by side and never interacted", correct: false },
+                                { text: "They conquered the Minoans but adopted their culture and art", correct: true },
+                                { text: "They were enemies who never traded or communicated", correct: false },
+                                { text: "The Minoans conquered the Mycenaeans", correct: false }
+                            ],
+                            explanation: "The Mycenaeans conquered the Minoans around 1450 BCE, but they didn't destroy Minoan culture - they embraced it! They adopted Minoan art styles, religious practices, and luxury goods. This shows how conquerors often absorb the culture of those they defeat. The Mycenaeans even took over the Minoan trading networks, spreading this mixed culture throughout Greece."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 3: The Dark Age and Homer",
+                era: "Greek Dark Ages - 1100-800 BCE",
+                story: `Disaster strikes Greece. The Bronze Age civilizations collapse mysteriously. The great palaces are abandoned, writing is forgotten, and trade networks crumble. You wander through ruined cities, seeking wisdom in this dark time. Yet from darkness comes light - during these centuries, wandering poets keep alive the stories of the old heroes. An elderly poet named Homer shares tales of the Trojan War and Odysseus's long journey home. These oral poems, memorized and passed down, preserve Greek values: honor, hospitality, respect for the gods, and the pursuit of glory. Though times are hard, these stories will shape Greek identity forever.`,
+                info: [
+                    { label: "Period", value: "1100-800 BCE" },
+                    { label: "Key Loss", value: "Writing, palace systems, trade" },
+                    { label: "Cultural Impact", value: "Oral poetry preserved heroic values and Greek identity" }
+                ],
+                choices: [
+                    {
+                        text: "Listen to Homer recite the Iliad and learn its lessons",
+                        nextAction: "question",
+                        knowledge: 15,
+                        wisdom: 10,
+                        question: {
+                            text: "Why were Homer's epic poems important even though Greece had lost writing?",
+                            answers: [
+                                { text: "They were just entertainment with no real value", correct: false },
+                                { text: "They preserved cultural values, history, and Greek identity through oral tradition", correct: true },
+                                { text: "They helped people learn mathematics and science", correct: false },
+                                { text: "They were written down and sold for profit", correct: false }
+                            ],
+                            explanation: "Homer's epics were crucial! Even without writing, these poems preserved Greek values like honor, bravery, and respect for the gods. They taught moral lessons and kept alive memories of the heroic age. When writing returned, the Iliad and Odyssey became the foundation of Greek education. This shows how stories and culture can survive even when civilizations fall."
+                        }
+                    },
+                    {
+                        text: "Help rebuild a small community and learn about survival",
+                        nextAction: "info",
+                        knowledge: 10,
+                        glory: 10,
+                        reveal: "During the Dark Age, Greeks lived in small villages without central governments. They developed strong local traditions and tribal loyalties. This decentralization eventually led to the creation of independent city-states (poleis). Though trade declined, Greeks never completely lost contact with each other or with other Mediterranean peoples. They slowly adopted the Phoenician alphabet, which they modified into the Greek alphabet we know today. From collapse came the seeds of rebirth."
+                    }
+                ]
+            },
+            {
+                title: "Chapter 4: Birth of the Polis",
+                era: "Archaic Period - 800-500 BCE",
+                story: `Greece awakens! Small villages grow into city-states, each fiercely independent. You arrive in Athens, one of many poleis emerging across Greece. The city buzzes with innovation. Citizens gather in the agora (marketplace) to debate, trade, and share ideas. In Sparta, warriors train from childhood in brutal discipline. In Corinth, merchants grow wealthy. Each polis develops its own government, culture, and identity, but all share the Greek language, gods, and love of competition. The Olympic Games unite Greeks from all cities in peaceful athletic contests. A crisis emerges in Athens as tyrants seize power, but reformers like Solon work to create fairer laws.`,
+                info: [
+                    { label: "Period", value: "800-500 BCE" },
+                    { label: "Key Development", value: "Independent city-states with unique governments" },
+                    { label: "Cultural Impact", value: "Experimentation with different political systems" }
+                ],
+                choices: [
+                    {
+                        text: "Compete in the Olympic Games for glory",
+                        nextAction: "battle",
+                        enemy: { name: "Champion Wrestler", health: 90 },
+                        glory: 25,
+                        wisdom: 5
+                    },
+                    {
+                        text: "Study the different city-states and their governments",
+                        nextAction: "question",
+                        knowledge: 15,
+                        wisdom: 10,
+                        question: {
+                            text: "Why did Greece develop many independent city-states instead of one united empire?",
+                            answers: [
+                                { text: "Greeks hated each other and refused to unite", correct: false },
+                                { text: "Mountains divided the land, creating isolated communities with fierce independence", correct: true },
+                                { text: "Foreign invaders prevented unification", correct: false },
+                                { text: "Greek gods commanded them to stay separate", correct: false }
+                            ],
+                            explanation: "Geography shaped Greek politics! The mountainous terrain divided Greece into isolated valleys and islands, making it hard for one power to control everything. This led to hundreds of independent poleis, each experimenting with different governments - from Sparta's dual kings to Athens's democracy. This diversity of political systems became a laboratory for ideas that still influence modern governments."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 5: The Persian Threat",
+                era: "Persian Wars - 490-479 BCE",
+                story: `The massive Persian Empire, stretching from India to Egypt, turns its eyes toward Greece. The Persian King Darius, then his son Xerxes, demand that the free Greek cities submit and pay tribute. Athens and Sparta, ancient rivals, must unite or be conquered. You stand with the 300 Spartans at Thermopylae, a narrow mountain pass where a small force holds back the Persian army for three days, buying time for Greece to prepare. Though the Spartans fall, their sacrifice inspires all Greeks. At Marathon, Athenian citizen-soldiers defeat a larger Persian force. At Salamis, the Athenian navy traps and destroys the Persian fleet. The Greeks prove that free citizens fighting for their homes can defeat a vast empire.`,
+                info: [
+                    { label: "Period", value: "490-479 BCE" },
+                    { label: "Key Battles", value: "Marathon, Thermopylae, Salamis, Plataea" },
+                    { label: "Cultural Impact", value: "Proved value of citizen defenders and inspired Greek unity" }
+                ],
+                choices: [
+                    {
+                        text: "Fight alongside the Spartans at Thermopylae",
+                        nextAction: "battle",
+                        enemy: { name: "Persian Immortal", health: 100 },
+                        glory: 30,
+                        knowledge: 10
+                    },
+                    {
+                        text: "Analyze why the Greeks defeated the Persian Empire",
+                        nextAction: "question",
+                        knowledge: 20,
+                        wisdom: 15,
+                        question: {
+                            text: "How did the smaller Greek forces manage to defeat the mighty Persian Empire?",
+                            answers: [
+                                { text: "Greek soldiers were genetically superior warriors", correct: false },
+                                { text: "Free citizens fighting for their homes fought harder than hired soldiers fighting for a king", correct: true },
+                                { text: "Greeks had better weapons and more soldiers", correct: false },
+                                { text: "The Persians were too weak to fight properly", correct: false }
+                            ],
+                            explanation: "The Greeks won because of motivation and tactics! Free citizens defending their homes and way of life fought with intense dedication, while Persian troops were often conscripts fighting for a distant king. Greeks also used superior tactics - heavy infantry phalanxes at Marathon, naval maneuvers at Salamis, and defensive terrain at Thermopylae. This victory showed the West that democracy and freedom could defeat tyranny, a theme that echoes through Western civilization."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 6: The Golden Age of Athens",
+                era: "Age of Pericles - 461-429 BCE",
+                story: `Victory over Persia brings confidence and wealth to Athens. Under the leadership of Pericles, Athens enters its golden age. The Parthenon rises on the Acropolis, a temple to Athena and a symbol of Athenian glory. Democracy flourishes as all male citizens can vote in the Assembly and serve on juries. Philosophers like Socrates question everything, asking "What is justice? What is virtue?" in the agora. Playwrights like Sophocles perform tragedies that explore human nature and fate. The historian Herodotus records the Persian Wars. Artists perfect the human form in marble. Athens becomes the cultural and intellectual center of Greece, attracting talent from across the Mediterranean. Yet power breeds arrogance, and Athens begins to dominate its allies too harshly.`,
+                info: [
+                    { label: "Period", value: "461-429 BCE" },
+                    { label: "Key Achievements", value: "Democracy, philosophy, drama, architecture, art" },
+                    { label: "Cultural Impact", value: "Foundation of Western philosophy, politics, and arts" }
+                ],
+                choices: [
+                    {
+                        text: "Debate with Socrates about justice and virtue",
+                        nextAction: "question",
+                        knowledge: 25,
+                        wisdom: 20,
+                        question: {
+                            text: "How did Athenian democracy and philosophy influence modern Western civilization?",
+                            answers: [
+                                { text: "They had no real influence on modern times", correct: false },
+                                { text: "They created foundations for democratic government, critical thinking, and questioning authority", correct: true },
+                                { text: "They only influenced ancient times, not modern society", correct: false },
+                                { text: "They proved democracy doesn't work", correct: false }
+                            ],
+                            explanation: "Athenian achievements transformed history! Their democracy introduced the idea that citizens should participate in government, not just obey rulers - a concept that inspired modern democracies worldwide. Socrates's method of questioning assumptions founded Western philosophy and critical thinking. Greek drama explored human psychology. Their art celebrated human potential. Even today, Western governments, schools, and courts use Greek ideas about citizenship, reason, and debate."
+                        }
+                    },
+                    {
+                        text: "Help design the Parthenon's sculptures",
+                        nextAction: "info",
+                        knowledge: 15,
+                        glory: 15,
+                        wisdom: 10,
+                        reveal: "The Parthenon represents Greek ideals of balance, proportion, and human excellence. Its sculptures show gods and heroes in perfect human form, reflecting the Greek belief that humanity could achieve greatness. The mathematical precision of its columns (which actually curve slightly to look straight) shows the Greek love of reason and geometry. This building wasn't just a temple - it was a statement that Athens stood for civilization, wisdom, and beauty. Renaissance artists 2,000 years later would use these same principles!"
+                    }
+                ]
+            },
+            {
+                title: "Chapter 7: The Peloponnesian War",
+                era: "Athens vs Sparta - 431-404 BCE",
+                story: `Pride leads to disaster. Athens's power threatens Sparta and its allies. The Peloponnesian War erupts, pitting Athens's naval empire against Sparta's land army. For 27 years, Greece tears itself apart. A plague strikes Athens, killing Pericles and thousands more. The brilliant but reckless Alcibiades leads Athens to disaster in Sicily. Sparta, funded by Persia (the old enemy!), builds a fleet and defeats Athens. Democracy falls as Sparta installs a brutal oligarchy called the Thirty Tyrants. The philosopher Socrates is executed for questioning authority. Greece's golden age ends in exhaustion, distrust, and decline. The war shows the destructive power of hubris (excessive pride) and the fragility of democratic societies.`,
+                info: [
+                    { label: "Period", value: "431-404 BCE" },
+                    { label: "Key Lesson", value: "Internal conflict weakened Greece" },
+                    { label: "Cultural Impact", value: "Showed dangers of hubris and division among free peoples" }
+                ],
+                choices: [
+                    {
+                        text: "Fight in the final naval battle at Aegospotami",
+                        nextAction: "battle",
+                        enemy: { name: "Spartan Navarch", health: 110 },
+                        glory: 20
+                    },
+                    {
+                        text: "Reflect on why the war was a tragedy for all Greeks",
+                        nextAction: "question",
+                        knowledge: 20,
+                        wisdom: 25,
+                        question: {
+                            text: "What lesson does the Peloponnesian War teach about power and conflict?",
+                            answers: [
+                                { text: "War always makes nations stronger", correct: false },
+                                { text: "Internal conflict among free peoples can destroy them, benefiting their common enemies", correct: true },
+                                { text: "Sparta was right to attack Athens", correct: false },
+                                { text: "Democracy always fails during wartime", correct: false }
+                            ],
+                            explanation: "The Peloponnesian War was a catastrophic civil war! Athens and Sparta, who had united to defeat Persia, destroyed each other in a pointless struggle for dominance. Both sides were weakened so much that Persia regained influence, and eventually Philip of Macedon conquered all of Greece. This teaches that divided democracies can fall to internal conflict, a lesson the Founding Fathers remembered when creating the United States. Unity and compromise matter more than total victory."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 8: Alexander the Great",
+                era: "Macedonian Empire - 336-323 BCE",
+                story: `From the north comes a young king named Alexander, son of Philip of Macedon. Though Greeks consider Macedonians barbarians, Alexander has been tutored by the philosopher Aristotle and loves Greek culture. At only 20 years old, he becomes king and decides to fulfill his father's dream: punish Persia for invading Greece 150 years earlier. Alexander never loses a battle. He conquers the entire Persian Empire, Egypt (where he's crowned pharaoh), and pushes to India. More than a conqueror, Alexander spreads Greek culture, language, and ideas across three continents. He founds cities (many named Alexandria) where Greek and local cultures blend. This fusion, called Hellenistic culture, will dominate the ancient world for centuries. When Alexander dies at 33, his empire fragments but his cultural legacy endures.`,
+                info: [
+                    { label: "Period", value: "336-323 BCE" },
+                    { label: "Key Achievement", value: "Created largest empire of ancient world" },
+                    { label: "Cultural Impact", value: "Spread Greek culture globally, creating Hellenistic civilization" }
+                ],
+                choices: [
+                    {
+                        text: "Lead cavalry with Alexander at the Battle of Gaugamela",
+                        nextAction: "battle",
+                        enemy: { name: "Persian Scythed Chariot", health: 120 },
+                        glory: 35,
+                        knowledge: 15
+                    },
+                    {
+                        text: "Study how Greek culture spread to create the Hellenistic world",
+                        nextAction: "question",
+                        knowledge: 25,
+                        wisdom: 20,
+                        question: {
+                            text: "How did Alexander's conquests change world history beyond military victories?",
+                            answers: [
+                                { text: "They didn't - he only conquered lands temporarily", correct: false },
+                                { text: "He spread Greek language, ideas, and culture across Asia and Africa, blending civilizations", correct: true },
+                                { text: "He destroyed all non-Greek cultures he encountered", correct: false },
+                                { text: "He only affected Greece, not other regions", correct: false }
+                            ],
+                            explanation: "Alexander created cultural globalization! His conquests spread Greek language (which became the common language of learning), Greek cities, Greek art, and Greek philosophy across the known world. But he also encouraged blending - Greeks married locals, Greek gods merged with Egyptian and Persian deities, and Greek science combined with Babylonian astronomy. This Hellenistic culture influenced the Roman Empire, Christianity, and Islam. Greek ideas reached India, affecting Buddhism. Today's Western civilization traces back to this cultural diffusion."
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Chapter 9: Legacy of Ancient Greece",
+                era: "Hellenistic Period and Beyond - 323 BCE onward",
+                story: `Your journey through Greek history ends, but the story continues. After Alexander, Greek kingdoms rule Egypt (the Ptolemies), Syria (the Seleucids), and Macedon. Greek remains the language of learning. The Library of Alexandria becomes the world's greatest repository of knowledge. Scientists like Archimedes and Euclid make discoveries in mathematics and physics still taught today. Greek culture influences Rome, which will conquer the Mediterranean but adopt Greek art, literature, and philosophy. When Rome falls, Byzantine Greeks preserve classical knowledge. Arab scholars translate Greek texts. Renaissance Europeans rediscover them. The Founding Fathers of America study Greek democracy. Today, we still use Greek ideas: democracy, philosophy, scientific method, theater, Olympics, architecture. Greek words fill English: democracy, philosophy, academy, museum, theater, politics. Ancient Greece lives on in every courtroom, classroom, and capitol building in the Western world.`,
+                info: [
+                    { label: "Period", value: "323 BCE - Present" },
+                    { label: "Key Achievement", value: "Foundations of Western civilization" },
+                    { label: "Cultural Impact", value: "Democracy, science, philosophy, art - all modern Western culture" }
+                ],
+                choices: [
+                    {
+                        text: "Reflect on Greece's eternal influence on Western civilization",
+                        nextAction: "question",
+                        knowledge: 30,
+                        wisdom: 30,
+                        question: {
+                            text: "Which Greek contribution has most influenced modern Western society?",
+                            answers: [
+                                { text: "Military tactics from Sparta", correct: false },
+                                { text: "The idea that citizens should participate in government and use reason to understand the world", correct: true },
+                                { text: "Greek food and clothing styles", correct: false },
+                                { text: "The Olympic Games only", correct: false }
+                            ],
+                            explanation: "The Greek legacy is citizenship and reason! The revolutionary idea that ordinary people should govern themselves (democracy), question authority (Socratic method), use logic and evidence (scientific method), and celebrate human achievement (humanism) formed the foundation of Western civilization. When America's Founders created the Constitution, they studied Athenian democracy. When scientists develop theories, they use Greek logic. When we debate in court or vote in elections, we're using Greek ideas. Ancient Greece showed that humans could use reason and freedom to build great societies - the core belief of the modern West."
+                        }
+                    },
+                    {
+                        text: "Complete your odyssey and return home victorious",
+                        nextAction: "complete"
+                    }
+                ]
+            }
+        ];
+
+        function startGame() {
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            loadChapter(0);
+        }
+
+        function loadChapter(chapterIndex) {
+            if (chapterIndex >= chapters.length) {
+                completeGame();
+                return;
+            }
+
+            gameState.currentChapter = chapterIndex;
+            const chapter = chapters[chapterIndex];
+
+            document.getElementById('chapter-title').textContent = chapter.title;
+            document.getElementById('era-badge').textContent = chapter.era;
+            document.getElementById('story-text').textContent = chapter.story;
+
+            // Load info panel
+            const infoContent = document.getElementById('info-content');
+            infoContent.innerHTML = chapter.info.map(item => 
+                `<div class="info-item"><strong>${item.label}:</strong> ${item.value}</div>`
+            ).join('');
+
+            // Load choices
+            const choicesDiv = document.getElementById('choices');
+            choicesDiv.innerHTML = chapter.choices.map((choice, index) => 
+                `<button class="choice-button" onclick="handleChoice(${index})">${choice.text}</button>`
+            ).join('');
+
+            // Clear previous battle/question areas
+            document.getElementById('battle-area').innerHTML = '';
+            document.getElementById('question-area').innerHTML = '';
+
+            updateStats();
+        }
+
+        function handleChoice(choiceIndex) {
+            const choice = chapters[gameState.currentChapter].choices[choiceIndex];
+
+            // Award immediate rewards
+            if (choice.knowledge) {
+                gameState.knowledge += choice.knowledge;
+            }
+            if (choice.glory) {
+                gameState.glory += choice.glory;
+            }
+            if (choice.wisdom) {
+                gameState.wisdom += choice.wisdom;
+            }
+
+            // Check for level up
+            if (gameState.knowledge >= gameState.level * 50) {
+                gameState.level++;
+            }
+
+            updateStats();
+
+            // Handle different action types
+            if (choice.nextAction === 'battle') {
+                startBattle(choice);
+            } else if (choice.nextAction === 'question') {
+                showQuestion(choice);
+            } else if (choice.nextAction === 'info') {
+                showInfoReveal(choice);
+            } else if (choice.nextAction === 'complete') {
+                completeGame();
+            }
+        }
+
+        function startBattle(choice) {
+            document.getElementById('choices').innerHTML = '';
+            gameState.health = 100;
+            gameState.enemyHealth = choice.enemy.health;
+
+            const battleHTML = `
+                <div class="battle-screen">
+                    <div class="battle-header">⚔️ COMBAT ⚔️</div>
+                    <div class="combatants">
+                        <div class="combatant">
+                            <div class="combatant-name">You</div>
+                            <div class="health-bar">
+                                <div class="health-fill" id="player-health" style="width: 100%"></div>
+                            </div>
+                            <div>HP: <span id="player-hp">100</span></div>
+                        </div>
+                        <div class="combatant">
+                            <div class="combatant-name">${choice.enemy.name}</div>
+                            <div class="health-bar">
+                                <div class="health-fill" id="enemy-health" style="width: 100%"></div>
+                            </div>
+                            <div>HP: <span id="enemy-hp">${choice.enemy.health}</span></div>
+                        </div>
+                    </div>
+                    <div class="attack-buttons">
+                        <button class="attack-button" onclick="attack('quick')">Quick Strike (15-25 dmg)</button>
+                        <button class="attack-button" onclick="attack('power')">Power Attack (25-40 dmg)</button>
+                        <button class="attack-button" onclick="attack('defend')">Defend & Counter (10-20 dmg, -50% incoming)</button>
+                    </div>
+                    <div class="battle-log" id="battle-log"></div>
+                </div>
+            `;
+
+            document.getElementById('battle-area').innerHTML = battleHTML;
+        }
+
+        function attack(type) {
+            let playerDamage = 0;
+            let enemyDamage = Math.floor(Math.random() * 20) + 15;
+
+            if (type === 'quick') {
+                playerDamage = Math.floor(Math.random() * 11) + 15;
+            } else if (type === 'power') {
+                playerDamage = Math.floor(Math.random() * 16) + 25;
+            } else if (type === 'defend') {
+                playerDamage = Math.floor(Math.random() * 11) + 10;
+                enemyDamage = Math.floor(enemyDamage / 2);
+            }
+
+            // Apply damage
+            gameState.enemyHealth -= playerDamage;
+            gameState.health -= enemyDamage;
+
+            // Update display
+            document.getElementById('enemy-hp').textContent = Math.max(0, gameState.enemyHealth);
+            document.getElementById('player-hp').textContent = Math.max(0, gameState.health);
+            document.getElementById('enemy-health').style.width = Math.max(0, (gameState.enemyHealth / chapters[gameState.currentChapter].choices.find(c => c.nextAction === 'battle').enemy.health) * 100) + '%';
+            document.getElementById('player-health').style.width = Math.max(0, gameState.health) + '%';
+
+            // Battle log
+            const log = document.getElementById('battle-log');
+            log.innerHTML = `<div class="log-entry">You dealt ${playerDamage} damage!</div>` + 
+                           `<div class="log-entry">Enemy dealt ${enemyDamage} damage!</div>` + log.innerHTML;
+
+            // Check for battle end
+            if (gameState.enemyHealth <= 0) {
+                gameState.battlesWon++;
+                gameState.glory += 20;
+                log.innerHTML = `<div class="log-entry" style="color: #4CAF50; font-weight: bold;">🏆 VICTORY! You defeated your foe!</div>` + log.innerHTML;
+                setTimeout(() => {
+                    loadChapter(gameState.currentChapter + 1);
+                }, 2000);
+            } else if (gameState.health <= 0) {
+                log.innerHTML = `<div class="log-entry" style="color: #F44336; font-weight: bold;">💀 You were defeated but learned from the experience...</div>` + log.innerHTML;
+                setTimeout(() => {
+                    loadChapter(gameState.currentChapter + 1);
+                }, 2000);
+            }
+        }
+
+        function showQuestion(choice) {
+            document.getElementById('choices').innerHTML = '';
+            
+            const questionHTML = `
+                <div class="question-panel">
+                    <div class="question-text">${choice.question.text}</div>
+                    ${choice.question.answers.map((answer, index) => 
+                        `<button class="answer-button" onclick="checkAnswer(${index}, ${answer.correct}, '${choice.question.explanation.replace(/'/g, "\\'")}')">${answer.text}</button>`
+                    ).join('')}
+                </div>
+            `;
+
+            document.getElementById('question-area').innerHTML = questionHTML;
+        }
+
+        function checkAnswer(answerIndex, correct, explanation) {
+            const buttons = document.querySelectorAll('.answer-button');
+            buttons[answerIndex].classList.add(correct ? 'correct' : 'incorrect');
+            
+            // Disable all buttons
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (correct) {
+                gameState.knowledge += 20;
+                gameState.wisdom += 10;
+                gameState.questionsAnswered++;
+            }
+
+            updateStats();
+
+            // Show explanation
+            setTimeout(() => {
+                document.getElementById('question-area').innerHTML += 
+                    `<div class="story-text" style="margin-top: 20px; padding: 20px; background: rgba(76, 175, 80, 0.2); border-left: 4px solid #4CAF50;">
+                        ${explanation}
+                    </div>`;
+                
+                setTimeout(() => {
+                    loadChapter(gameState.currentChapter + 1);
+                }, 4000);
+            }, 1000);
+        }
+
+        function showInfoReveal(choice) {
+            document.getElementById('choices').innerHTML = '';
+            
+            const revealHTML = `
+                <div class="story-text" style="padding: 25px; background: rgba(74, 93, 63, 0.3); border-left: 4px solid var(--olive-green); margin-top: 20px;">
+                    ${choice.reveal}
+                </div>
+                <button class="choice-button" style="margin-top: 20px;" onclick="loadChapter(${gameState.currentChapter + 1})">Continue Your Journey →</button>
+            `;
+
+            document.getElementById('question-area').innerHTML = revealHTML;
+        }
+
+        function updateStats() {
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('knowledge').textContent = gameState.knowledge;
+            document.getElementById('glory').textContent = gameState.glory;
+            document.getElementById('wisdom').textContent = gameState.wisdom;
+            
+            const knowledgePercent = Math.min((gameState.knowledge % 50) * 2, 100);
+            document.getElementById('knowledge-bar').style.width = knowledgePercent + '%';
+        }
+
+        function completeGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('completion-screen').classList.remove('hidden');
+            
+            document.getElementById('final-knowledge').textContent = gameState.knowledge;
+            document.getElementById('final-glory').textContent = gameState.glory;
+            document.getElementById('final-wisdom').textContent = gameState.wisdom;
+            document.getElementById('final-level').textContent = gameState.level;
+        }
+
+        function restartGame() {
+            gameState = {
+                level: 1,
+                knowledge: 0,
+                glory: 0,
+                wisdom: 0,
+                currentChapter: 0,
+                health: 100,
+                enemyHealth: 100,
+                battlesWon: 0,
+                questionsAnswered: 0
+            };
+            
+            document.getElementById('completion-screen').classList.add('hidden');
+            startGame();
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.querySelector('.start-button:not([disabled])')) {
+                document.querySelector('.start-button').click();
+            }
+        });
+    </script>
+</body>
+</html>
