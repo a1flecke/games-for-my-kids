@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,140 +6,830 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keyboard Quest Round 3: The Pro Commander</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Verdana, sans-serif;
+            font-family: Arial, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 20px; color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
+
         .game-container {
-            background: #faf8f3; border-radius: 20px;
+            background: #faf8f3;
+            border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 800px; width: 100%; overflow: hidden;
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
         }
+
         .header {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white; padding: 25px; text-align: center;
+            color: white;
+            padding: 25px;
+            text-align: center;
         }
+
+        .header h1 {
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .level-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
         .progress-bar {
-            background: rgba(255, 255, 255, 0.2); height: 25px;
-            border-radius: 15px; margin-top: 15px; overflow: hidden;
+            background: rgba(255, 255, 255, 0.2);
+            height: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
         }
-        #progressFill {
+
+        .progress-fill {
             background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-            height: 100%; width: 0%; transition: width 0.5s;
-            display: flex; align-items: center; justify-content: center; font-size: 14px;
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
         }
-        .content { padding: 30px; }
+
+        .content {
+            padding: 30px;
+        }
+
+        .story-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 4px solid #ff6b6b;
+        }
+
         .story-chunk {
-            background: #fff3cd; padding: 20px; border-radius: 10px;
-            border-left: 5px solid #e74c3c; line-height: 2; font-size: 1.3em; margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 10px;
+            border-left: 5px solid #e74c3c;
+            line-height: 2;
+            font-size: 1.2em;
+            color: #2c3e50;
         }
+
+        .story-chunk strong {
+            color: #c0392b;
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .challenge-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 4px solid #4ecdc4;
+        }
+
+        .challenge-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
         .keyboard-display {
-            background: #2c3e50; color: #00f2fe; padding: 30px;
-            border-radius: 12px; text-align: center; font-size: 2.5em;
-            font-family: monospace; border: 4px solid #3498db; margin: 20px 0;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.6em;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            letter-spacing: 3px;
+            font-weight: bold;
+            border: 3px solid #3498db;
         }
-        .success-pop {
-            display: none; background: #38ef7d; color: white;
-            padding: 15px; border-radius: 10px; text-align: center; font-weight: bold;
+
+        .instruction {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            border-radius: 10px;
+            padding: 18px;
+            margin: 15px 0;
+            color: #856404;
+            line-height: 2;
+            font-size: 1.15em;
         }
-        #completionScreen { display: none; text-align: center; padding: 40px; }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            font-size: 1.3em;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px 5px;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:focus {
+            outline: 4px solid #f39c12;
+            outline-offset: 3px;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.3em;
+            display: none;
+            font-weight: bold;
+            line-height: 1.8;
+            animation: success-appear 0.5s ease;
+        }
+
+        @keyframes success-appear {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .hint {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .completion-screen h2 {
+            color: #667eea;
+            font-size: 2.3em;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .stars {
+            font-size: 4em;
+            margin: 25px 0;
+            animation: spin-celebrate 2s ease;
+        }
+
+        @keyframes spin-celebrate {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .skills-list {
+            background: white;
+            border: 4px solid #d4af37;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .skills-list h3 {
+            color: #c0392b;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+        }
+
+        .skill-item {
+            padding: 15px;
+            margin: 12px 0;
+            background: #faf8f3;
+            border-left: 6px solid #3498db;
+            border-radius: 8px;
+            font-size: 1.15em;
+            line-height: 1.8;
+        }
+
+        .level-intro {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border: 4px solid #d4af37;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .level-intro h2 {
+            color: #c0392b;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .keyboard-key {
+            display: inline-block;
+            background: #f8f9fa;
+            border: 2px solid #495057;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin: 0 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-weight: bold;
+            box-shadow: 0 3px 0 #495057;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.6em;
+            }
+            
+            .story-chunk {
+                font-size: 1.1em;
+            }
+        }
     </style>
 </head>
 <body>
-
-<div class="game-container">
-    <div class="header">
-        <h1>Keyboard Quest: Round 3</h1>
-        <div id="levelTitle" style="font-weight:bold; margin-top:10px;">Level 1 of 15</div>
-        <div class="progress-bar"><div id="progressFill">0%</div></div>
-    </div>
-
-    <div class="content" id="gameArea">
-        <div id="storyBox" class="story-chunk">
-            Sparkle needs a <b>New Tab</b> in Safari! <br>
-            On your keyboard, the <b>Windows key</b> acts like <b>Command (⌘)</b>.
+    <div class="game-container">
+        <div class="header">
+            <h1>⚡ Keyboard Quest: Round 3 ⚡</h1>
+            <div style="font-size: 1.2em; margin: 8px 0;">The Pro Commander</div>
+            <div class="level-badge" id="level-badge">Dell Keyboard Edition</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%">
+                    Level <span id="current-level">1</span> of 15
+                </div>
+            </div>
         </div>
-        
-        <div class="keyboard-display" id="keyPrompt">Win + T</div>
-        
-        <div id="successMsg" class="success-pop">🌟 AMAZING! 🌟</div>
+
+        <div class="content" id="game-content">
+            <!-- Game content will be inserted here -->
+        </div>
     </div>
 
-    <div id="completionScreen">
-        <h2>🏆 PRO COMMANDER STATUS REACHED!</h2>
-        <p style="font-size: 1.2em; margin: 20px 0;">You mastered 15 iPad shortcuts on your Bluetooth keyboard!</p>
-        <button onclick="location.reload()" style="padding: 15px 30px; cursor: pointer;">Play Again</button>
-    </div>
-</div>
-
-<script>
-    // 15 Commands adjusted for iPad/Safari + Windows-style Bluetooth Keyboards
-    const levels = [
-        { desc: "Open a <b>New Tab</b> in Safari.", keys: { meta: true, key: "t" }, display: "Win + T" },
-        { desc: "<b>Close</b> the current tab.", keys: { meta: true, key: "w" }, display: "Win + W" },
-        { desc: "<b>Reload</b> the page to see updates.", keys: { meta: true, key: "r" }, display: "Win + R" },
-        { desc: "Jump to the <b>Address Bar</b> to type a website.", keys: { meta: true, key: "l" }, display: "Win + L" },
-        { desc: "Add this page to your <b>Bookmarks</b>.", keys: { meta: true, key: "d" }, display: "Win + D" },
-        { desc: "Go <b>Back</b> to the last page.", keys: { meta: true, key: "[" }, display: "Win + [" },
-        { desc: "Go <b>Forward</b> to the next page.", keys: { meta: true, key: "]" }, display: "Win + ]" },
-        { desc: "Make your text <i>Italic</i>.", keys: { meta: true, key: "i" }, display: "Win + I" },
-        { desc: "Make your text <u>Underlined</u>.", keys: { meta: true, key: "u" }, display: "Win + U" },
-        { desc: "<b>Zoom In</b> to see things bigger!", keys: { meta: true, key: "=" }, display: "Win + Plus" },
-        { desc: "<b>Zoom Out</b> to see more of the page.", keys: { meta: true, key: "-" }, display: "Win + Minus" },
-        { desc: "Reset <b>Zoom to 100%</b>.", keys: { meta: true, key: "0" }, display: "Win + 0" },
-        { desc: "Open Safari <b>Settings</b>.", keys: { meta: true, key: "," }, display: "Win + Comma" },
-        { desc: "<b>Escape</b> or Cancel a popup.", keys: { meta: false, key: "Escape" }, display: "Esc" },
-        { desc: "<b>Secret Trick:</b> In any app, hold <b>Win (⌘)</b> to see all shortcuts!", keys: { meta: true, key: "m" }, display: "Hold Win" }
-    ];
-
-    let currentLevel = 0;
-
-    window.addEventListener('keydown', function(e) {
-        if (currentLevel >= levels.length) return;
-
-        const target = levels[currentLevel].keys;
-        // Check if Windows/Command key is pressed AND the correct letter
-        if ((e.metaKey === target.meta) && (e.key.toLowerCase() === target.key.toLowerCase())) {
-            e.preventDefault();
-            nextLevel();
-        }
-    });
-
-    function nextLevel() {
-        document.getElementById('successMsg').style.display = 'block';
-        
-        setTimeout(() => {
-            currentLevel++;
-            document.getElementById('successMsg').style.display = 'none';
-            
-            if (currentLevel < levels.length) {
-                updateUI();
-            } else {
-                showEnd();
+    <script>
+        const levels = [
+            {
+                number: 1,
+                title: "Welcome to Pro Training!",
+                story: [
+                    "🦄 'You're back, Commander!' Sparkle jumps with joy!",
+                    "🤖 'Ready for PRO level training?' asks Bolt excitedly.",
+                    "You've mastered the basics!",
+                    "Now it's time to learn the ADVANCED commands!",
+                    "These will make you a SUPER fast web surfer!",
+                    "Let's start with making NEW TABS in Safari!",
+                    "Tabs let you have many websites open at once!"
+                ],
+                challenge: "Learn to open new tabs instantly!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>T</span> to open a brand new tab in Safari! The T stands for TAB!",
+                shortcut: "⌘ T (New Tab)",
+                type: "knowledge-check",
+                question: "What does Command + T do?",
+                options: ["Opens a new tab", "Closes Safari", "Takes a photo"],
+                correctAnswer: 0,
+                hint: "Command + T opens a new blank tab so you can visit another website! T = TAB!",
+                progress: 6.67
+            },
+            {
+                number: 2,
+                title: "Closing Tabs Like a Pro!",
+                story: [
+                    "📱 'Now you know how to OPEN tabs!' says Sparkle.",
+                    "🤖 'But how do you CLOSE them?' wonders Bolt.",
+                    "Too many tabs can make Safari slow!",
+                    "The <strong>Close Tab</strong> command helps you clean up!",
+                    "Press <strong>Command + W</strong>!",
+                    "W stands for 'Window' - it closes the current tab!",
+                    "Try it after opening a new tab!"
+                ],
+                challenge: "Master closing tabs!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>W</span> to close the current tab! W = Window/cloWse!",
+                shortcut: "⌘ W (Close Tab)",
+                type: "knowledge-check",
+                question: "How do you close a tab?",
+                options: ["Command + W", "Command + Q", "Command + X"],
+                correctAnswer: 0,
+                hint: "Command + W closes the tab you're looking at right now! Perfect for cleanup!",
+                progress: 13.33
+            },
+            {
+                number: 3,
+                title: "The Reload Power!",
+                story: [
+                    "🔄 'Sometimes websites don't load right,' explains Sparkle.",
+                    "🤖 'Or you want to see if there's new info!' adds Bolt.",
+                    "The <strong>Reload</strong> command refreshes the page!",
+                    "It's like asking the website to start over!",
+                    "Press <strong>Command + R</strong>!",
+                    "R stands for RELOAD or REFRESH!"
+                ],
+                challenge: "Learn to reload pages!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>R</span> to reload the current page! It refreshes everything!",
+                shortcut: "⌘ R (Reload)",
+                type: "knowledge-check",
+                question: "What does Command + R do?",
+                options: ["Reloads/refreshes the page", "Removes the page", "Renames the page"],
+                correctAnswer: 0,
+                hint: "Command + R makes the page load again from the start! Great if something isn't working!",
+                progress: 20
+            },
+            {
+                number: 4,
+                title: "Jump to the Address Bar!",
+                story: [
+                    "🎯 'The address bar is where you type website addresses!' says Sparkle.",
+                    "🤖 'But clicking it is slow!' beeps Bolt.",
+                    "There's a FASTER way!",
+                    "Press <strong>Command + L</strong>!",
+                    "This jumps your cursor right to the address bar!",
+                    "L stands for LOCATION!",
+                    "Now you can type a new website super fast!"
+                ],
+                challenge: "Master the address bar jump!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>L</span> and your cursor jumps to the address bar! Then you can type any website!",
+                shortcut: "⌘ L (Address Bar)",
+                type: "knowledge-check",
+                question: "How do you jump to the address bar?",
+                options: ["Command + L", "Command + A", "Command + B"],
+                correctAnswer: 0,
+                hint: "Command + L puts your cursor in the Location bar instantly! L = LOCATION!",
+                progress: 26.67
+            },
+            {
+                number: 5,
+                title: "Bookmark Your Favorites!",
+                story: [
+                    "⭐ 'Found a great website?' asks Sparkle.",
+                    "🤖 'Save it as a BOOKMARK!' suggests Bolt.",
+                    "Bookmarks remember your favorite sites!",
+                    "Press <strong>Command + D</strong>!",
+                    "D stands for... well, it just sounds good!",
+                    "Now that website is saved forever!"
+                ],
+                challenge: "Learn to bookmark pages!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>D</span> to save the current page as a bookmark!",
+                shortcut: "⌘ D (Bookmark)",
+                type: "knowledge-check",
+                question: "How do you bookmark a page?",
+                options: ["Command + D", "Command + B", "Command + S"],
+                correctAnswer: 0,
+                hint: "Command + D adds the page to your bookmarks! You can visit it anytime!",
+                progress: 33.33
+            },
+            {
+                number: 6,
+                title: "Go Back in Time!",
+                story: [
+                    "⏪ 'Oops! I clicked the wrong link!' says Sparkle.",
+                    "🤖 'Use the BACK button!' beeps Bolt helpfully.",
+                    "The <strong>Back</strong> command takes you to the previous page!",
+                    "Press <strong>Command + [</strong>!",
+                    "The [ bracket points backwards - just like going BACK!",
+                    "It's like a time machine for websites!"
+                ],
+                challenge: "Master going back!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>[</span> to go back to the previous page! The bracket points backward!",
+                shortcut: "⌘ [ (Back)",
+                type: "knowledge-check",
+                question: "How do you go back to the previous page?",
+                options: ["Command + [", "Command + B", "Command + <"],
+                correctAnswer: 0,
+                hint: "Command + [ goes BACK to the page you were just on! [ points backward!",
+                progress: 40
+            },
+            {
+                number: 7,
+                title: "Go Forward in Time!",
+                story: [
+                    "⏩ 'Wait, I want to go back to the future!' laughs Sparkle.",
+                    "🤖 'Use FORWARD!' says Bolt.",
+                    "After going back, you can go FORWARD again!",
+                    "Press <strong>Command + ]</strong>!",
+                    "The ] bracket points forward!",
+                    "It's the opposite of the back command!"
+                ],
+                challenge: "Learn to go forward!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>]</span> to go forward to the next page! The bracket points forward!",
+                shortcut: "⌘ ] (Forward)",
+                type: "knowledge-check",
+                question: "How do you go forward?",
+                options: ["Command + ]", "Command + F", "Command + >"],
+                correctAnswer: 0,
+                hint: "Command + ] goes FORWARD! ] points the way forward!",
+                progress: 46.67
+            },
+            {
+                number: 8,
+                title: "Italic Text Magic!",
+                story: [
+                    "✍️ 'Sometimes you need to make text fancy!' says Sparkle.",
+                    "🤖 'ITALIC text slants to the side!' explains Bolt.",
+                    "When you're writing emails or notes...",
+                    "You can make text <em>italic</em>!",
+                    "First, select the text.",
+                    "Then press <strong>Command + I</strong>!",
+                    "I stands for ITALIC!"
+                ],
+                challenge: "Master italic text!",
+                instruction: "In Notes or Mail, select some text, then press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>I</span> to make it italic!",
+                shortcut: "⌘ I (Italic)",
+                type: "knowledge-check",
+                question: "How do you make text italic?",
+                options: ["Command + I", "Command + T", "Command + S"],
+                correctAnswer: 0,
+                hint: "Select text first, then Command + I makes it slant sideways (italic)! I = ITALIC!",
+                progress: 53.33
+            },
+            {
+                number: 9,
+                title: "Underline Power!",
+                story: [
+                    "📝 'You already know BOLD from Round 1!' remembers Sparkle.",
+                    "🤖 'Now learn UNDERLINE!' adds Bolt.",
+                    "Underline puts a line under your words!",
+                    "Like <u>this</u>!",
+                    "Select text, then press <strong>Command + U</strong>!",
+                    "U stands for UNDERLINE!"
+                ],
+                challenge: "Learn to underline!",
+                instruction: "Select text, then press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>U</span> to put a line under it!",
+                shortcut: "⌘ U (Underline)",
+                type: "knowledge-check",
+                question: "How do you underline text?",
+                options: ["Command + U", "Command + L", "Command + D"],
+                correctAnswer: 0,
+                hint: "Command + U puts a line UNDER your words! U = UNDERLINE!",
+                progress: 60
+            },
+            {
+                number: 10,
+                title: "Zoom In - See It Bigger!",
+                story: [
+                    "🔍 'This text is too small!' squints Sparkle.",
+                    "🤖 'ZOOM IN!' suggests Bolt.",
+                    "The <strong>Zoom In</strong> command makes everything bigger!",
+                    "Press <strong>Command + Plus (+)</strong>!",
+                    "Plus means MORE and BIGGER!",
+                    "Perfect for when things are hard to read!"
+                ],
+                challenge: "Master zooming in!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>+</span> (plus) to make everything on the page BIGGER!",
+                shortcut: "⌘ + (Zoom In)",
+                type: "knowledge-check",
+                question: "How do you make a page bigger?",
+                options: ["Command + Plus (+)", "Command + B", "Command + Up"],
+                correctAnswer: 0,
+                hint: "Command + Plus makes everything BIGGER! Great for reading small text!",
+                progress: 66.67
+            },
+            {
+                number: 11,
+                title: "Zoom Out - See More!",
+                story: [
+                    "🔍 'Now everything is TOO big!' giggles Sparkle.",
+                    "🤖 'ZOOM OUT!' beeps Bolt.",
+                    "The <strong>Zoom Out</strong> command makes things smaller!",
+                    "Press <strong>Command + Minus (-)</strong>!",
+                    "Minus means LESS and SMALLER!",
+                    "It's the opposite of Zoom In!"
+                ],
+                challenge: "Learn to zoom out!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>-</span> (minus) to make everything on the page SMALLER!",
+                shortcut: "⌘ - (Zoom Out)",
+                type: "knowledge-check",
+                question: "How do you make a page smaller?",
+                options: ["Command + Minus (-)", "Command + S", "Command + Down"],
+                correctAnswer: 0,
+                hint: "Command + Minus makes everything SMALLER! Perfect if you zoomed in too much!",
+                progress: 73.33
+            },
+            {
+                number: 12,
+                title: "Reset Zoom - Back to Normal!",
+                story: [
+                    "↩️ 'Help! I zoomed in and out too many times!' worries Sparkle.",
+                    "🤖 'RESET ZOOM to normal!' suggests Bolt wisely.",
+                    "The <strong>Reset Zoom</strong> command puts everything back to normal size!",
+                    "Press <strong>Command + Zero (0)</strong>!",
+                    "Zero resets it to 0 extra zoom - just normal!",
+                    "It's like a magic reset button!"
+                ],
+                challenge: "Master zoom reset!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>0</span> (zero) to reset zoom back to normal size!",
+                shortcut: "⌘ 0 (Reset Zoom)",
+                type: "knowledge-check",
+                question: "How do you reset zoom to normal?",
+                options: ["Command + Zero (0)", "Command + R", "Command + N"],
+                correctAnswer: 0,
+                hint: "Command + 0 resets zoom to normal! Zero = no extra zoom!",
+                progress: 80
+            },
+            {
+                number: 13,
+                title: "Settings Shortcut!",
+                story: [
+                    "⚙️ 'Sometimes you need to change app settings!' says Sparkle.",
+                    "🤖 'There's a fast way!' reveals Bolt.",
+                    "Many apps have a <strong>Settings</strong> or <strong>Preferences</strong> menu!",
+                    "Press <strong>Command + Comma (,)</strong>!",
+                    "This usually opens the app's settings!",
+                    "It works in Safari, Notes, and many apps!"
+                ],
+                challenge: "Learn the settings command!",
+                instruction: "Press <span class='keyboard-key'>⌘</span> + <span class='keyboard-key'>,</span> (comma) to open app settings!",
+                shortcut: "⌘ , (Settings)",
+                type: "knowledge-check",
+                question: "How do you open app settings quickly?",
+                options: ["Command + Comma (,)", "Command + S", "Command + G"],
+                correctAnswer: 0,
+                hint: "Command + Comma opens Settings in most apps! Try it in Safari!",
+                progress: 86.67
+            },
+            {
+                number: 14,
+                title: "The Escape Button!",
+                story: [
+                    "❌ 'Pop-ups and menus can be annoying!' says Sparkle.",
+                    "🤖 'ESCAPE closes them!' announces Bolt.",
+                    "The <strong>Escape</strong> key (Esc) is special!",
+                    "It closes menus, pop-ups, and cancels things!",
+                    "Just press the <strong>Esc</strong> key at the top left of your keyboard!",
+                    "It's like a 'never mind' button!"
+                ],
+                challenge: "Master the Escape key!",
+                instruction: "Press the <span class='keyboard-key'>Esc</span> key (top left corner) to close pop-ups and cancel actions!",
+                shortcut: "Esc (Escape/Cancel)",
+                type: "knowledge-check",
+                question: "What does the Escape key do?",
+                options: ["Closes pop-ups and cancels actions", "Deletes everything", "Opens a new tab"],
+                correctAnswer: 0,
+                hint: "Esc is your 'never mind' button! It closes things and cancels actions!",
+                progress: 93.33
+            },
+            {
+                number: 15,
+                title: "The Ultimate Secret: Discover Mode!",
+                story: [
+                    "🎓 'You've learned SO many commands!' cheers Sparkle proudly.",
+                    "🤖 'But there's ONE more secret!' whispers Bolt mysteriously.",
+                    "Here's the ULTIMATE PRO TIP:",
+                    "Hold down the <strong>Command (⌘)</strong> key in ANY app!",
+                    "A menu will pop up showing ALL the shortcuts for that app!",
+                    "It's like having a magic cheat sheet!",
+                    "Now you can discover NEW commands in every app!",
+                    "You're a TRUE Keyboard Master!"
+                ],
+                challenge: "The Final Boss Challenge!",
+                instruction: "Try it right now! Hold <span class='keyboard-key'>⌘</span> in Safari or any app to see ALL its shortcuts!",
+                shortcut: "Hold ⌘ (Discover All Shortcuts)",
+                type: "final-boss",
+                questions: [
+                    { q: "How do you open a new tab?", options: ["⌘ T", "⌘ N", "⌘ O"], correct: 0 },
+                    { q: "How do you close a tab?", options: ["⌘ W", "⌘ Q", "⌘ X"], correct: 0 },
+                    { q: "How do you reload a page?", options: ["⌘ R", "⌘ L", "⌘ F"], correct: 0 },
+                    { q: "How do you zoom in?", options: ["⌘ +", "⌘ -", "⌘ Z"], correct: 0 },
+                    { q: "How do you cancel/close things?", options: ["Esc", "⌘ C", "⌘ Q"], correct: 0 }
+                ],
+                hint: "Remember all the commands you learned! You've got this!",
+                progress: 100
             }
-        }, 800);
-    }
+        ];
 
-    function updateUI() {
-        const lvl = levels[currentLevel];
-        document.getElementById('storyBox').innerHTML = lvl.desc;
-        document.getElementById('keyPrompt').innerText = lvl.display;
-        document.getElementById('levelTitle').innerText = `Level ${currentLevel + 1} of 15`;
-        
-        let progress = ((currentLevel) / levels.length) * 100;
-        document.getElementById('progressFill').style.width = progress + "%";
-        document.getElementById('progressFill').innerText = Math.round(progress) + "%";
-    }
+        let currentLevel = 0;
+        let finalBossQuestion = 0;
 
-    function showEnd() {
-        document.getElementById('gameArea').style.display = 'none';
-        document.getElementById('completionScreen').style.display = 'block';
-        document.getElementById('progressFill').style.width = "100%";
-        document.getElementById('progressFill').innerText = "100%";
-    }
-</script>
+        function loadLevel(levelIndex) {
+            const level = levels[levelIndex];
+            currentLevel = levelIndex;
+            
+            const progress = level.progress;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('current-level').textContent = level.number;
+            
+            const storyChunks = level.story.map(chunk => 
+                `<div class="story-chunk">${chunk}</div>`
+            ).join('');
+
+            let content = `
+                <div class="level-intro">
+                    <h2>Level ${level.number}: ${level.title}</h2>
+                    <div style="font-size: 2em; margin-top: 10px;">🦄🤖</div>
+                </div>
+                
+                <div class="story-box">
+                    ${storyChunks}
+                </div>
+                
+                <div class="challenge-box">
+                    <div class="challenge-title">⚔️ Mission: ${level.challenge}</div>
+                    <div class="keyboard-display">${level.shortcut}</div>
+                    <div class="instruction">${level.instruction}</div>
+            `;
+
+            if (level.type === 'knowledge-check') {
+                content += `
+                    <div style="margin: 25px 0;">
+                        <strong style="font-size: 1.3em; display: block; margin-bottom: 20px; line-height: 2;">${level.question}</strong>
+                        ${level.options.map((option, index) => `
+                            <button class="button" onclick="checkAnswer(${index})" style="display: block; width: 100%; margin: 12px 0; text-align: left;">
+                                ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (level.type === 'final-boss') {
+                content += `<div id="boss-questions"></div>`;
+            }
+
+            content += `
+                    <div class="hint">💡 ${level.hint}</div>
+                    <div class="success" id="success-feedback"></div>
+                </div>
+            `;
+
+            document.getElementById('game-content').innerHTML = content;
+
+            if (level.type === 'final-boss') {
+                loadBossQuestion(0);
+            }
+        }
+
+        function checkAnswer(answerIndex) {
+            const level = levels[currentLevel];
+            const success = document.getElementById('success-feedback');
+            
+            if (answerIndex === level.correctAnswer) {
+                success.innerHTML = `🎉 PERFECT! You've mastered ${level.shortcut}!<br><br>Get ready for the next level!`;
+                success.style.display = 'block';
+                setTimeout(() => nextLevel(), 2500);
+            } else {
+                success.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                success.innerHTML = `Not quite! ${level.hint}<br><br>Try again!`;
+                success.style.display = 'block';
+                setTimeout(() => {
+                    success.style.display = 'none';
+                    success.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                }, 2000);
+            }
+        }
+
+        function loadBossQuestion(qIndex) {
+            const level = levels[currentLevel];
+            const question = level.questions[qIndex];
+            
+            let content = `
+                <div style="text-align: center; margin: 25px 0;">
+                    <div style="font-size: 1.4em; color: #e74c3c; margin-bottom: 15px; font-weight: bold;">
+                        Final Challenge ${qIndex + 1} of ${level.questions.length}
+                    </div>
+                    <div style="font-size: 1.4em; margin: 20px 0; line-height: 2;">
+                        ${question.q}
+                    </div>
+                    <div style="margin-top: 25px;">
+            `;
+            
+            question.options.forEach((option, index) => {
+                content += `
+                    <button class="button" onclick="checkBossAnswer(${index})" style="display: block; width: 100%; margin: 15px 0; font-size: 1.2em;">
+                        ${option}
+                    </button>
+                `;
+            });
+            
+            content += `</div></div>`;
+            document.getElementById('boss-questions').innerHTML = content;
+        }
+
+        function checkBossAnswer(answer) {
+            const level = levels[currentLevel];
+            const question = level.questions[finalBossQuestion];
+            const success = document.getElementById('success-feedback');
+            
+            if (answer === question.correct) {
+                success.innerHTML = '⚔️ CRITICAL HIT! The Chaos Bug is weakening!';
+                success.style.display = 'block';
+                
+                setTimeout(() => {
+                    finalBossQuestion++;
+                    if (finalBossQuestion < level.questions.length) {
+                        success.style.display = 'none';
+                        loadBossQuestion(finalBossQuestion);
+                    } else {
+                        showVictory();
+                    }
+                }, 1800);
+            } else {
+                success.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                success.innerHTML = '❌ The Chaos Bug blocked your attack! Try again!';
+                success.style.display = 'block';
+                setTimeout(() => {
+                    success.style.display = 'none';
+                    success.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                }, 1500);
+            }
+        }
+
+        function showVictory() {
+            document.getElementById('game-content').innerHTML = `
+                <div class="completion-screen" style="display: block;">
+                    <div class="stars">⭐🏆⭐</div>
+                    <h2>🎉 ULTIMATE VICTORY! 🎉</h2>
+                    <div class="story-box" style="font-size: 1.2em; line-height: 2;">
+                        <div class="story-chunk">
+                            🦄 "You did it, Commander!" cheers Sparkle! "You're a PRO now!"
+                        </div>
+                        <div class="story-chunk">
+                            🤖 "You've mastered ALL the commands!" beeps Bolt proudly!
+                        </div>
+                        <div class="story-chunk" style="font-size: 1.3em; color: #e74c3c;">
+                            <strong>👑 YOU ARE THE ULTIMATE KEYBOARD MASTER! 👑</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="skills-list">
+                        <h3>🎓 Round 3 - Pro Commands You've Mastered:</h3>
+                        <div class="skill-item">⌘ T - New Tab</div>
+                        <div class="skill-item">⌘ W - Close Tab</div>
+                        <div class="skill-item">⌘ R - Reload Page</div>
+                        <div class="skill-item">⌘ L - Jump to Address Bar</div>
+                        <div class="skill-item">⌘ D - Bookmark Page</div>
+                        <div class="skill-item">⌘ [ - Go Back</div>
+                        <div class="skill-item">⌘ ] - Go Forward</div>
+                        <div class="skill-item">⌘ I - Italic Text</div>
+                        <div class="skill-item">⌘ U - Underline Text</div>
+                        <div class="skill-item">⌘ + - Zoom In</div>
+                        <div class="skill-item">⌘ - - Zoom Out</div>
+                        <div class="skill-item">⌘ 0 - Reset Zoom</div>
+                        <div class="skill-item">⌘ , - Open Settings</div>
+                        <div class="skill-item">Esc - Cancel/Close</div>
+                        <div class="skill-item">Hold ⌘ - See All Shortcuts!</div>
+                    </div>
+
+                    <div class="hint" style="font-size: 1.2em; margin: 25px 0; background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); border: 3px solid #d4af37; border-left: 5px solid #d4af37;">
+                        <strong>🌟 YOU NOW KNOW 35+ KEYBOARD COMMANDS! 🌟</strong><br><br>
+                        Round 1: 10 commands | Round 2: 10 commands | Round 3: 15 commands<br><br>
+                        You're officially a Keyboard Commander!
+                    </div>
+
+                    <button class="button" onclick="restartGame()" style="font-size: 1.4em; padding: 20px 45px;">
+                        🔄 Play Round 3 Again!
+                    </button>
+                </div>
+            `;
+        }
+
+        function nextLevel() {
+            if (currentLevel < levels.length - 1) {
+                loadLevel(currentLevel + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function restartGame() {
+            finalBossQuestion = 0;
+            loadLevel(0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Start the game!
+        loadLevel(0);
+    </script>
 </body>
 </html>
