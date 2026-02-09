@@ -1,11 +1,9 @@
-name: Update and Deploy Game Site
+name: Quest Deploy
 
 on:
   push:
-    branches: ["main"]
-    paths-ignore:
-      - 'index.html'
-      - '.github/workflows/**'
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -14,7 +12,7 @@ permissions:
   id-token: write
 
 jobs:
-  update-and-build:
+  update-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -30,33 +28,21 @@ jobs:
       - name: Generate updated index.html
         run: node .github/scripts/update-index.js
 
-      - name: Commit and push if changed
+      - name: Commit index.html if changed
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          if ! git diff --quiet index.html; then
-            git add index.html
-            git commit -m "chore: auto-update game index [skip ci]"
-            git push
-          else
-            echo "No changes to index.html"
-          fi
+          git add index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update index [skip ci]" && git push)
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Upload artifact
+      - name: Upload for Deployment
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
-  deploy:
-    needs: update-and-build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
