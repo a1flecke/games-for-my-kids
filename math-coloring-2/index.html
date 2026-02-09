@@ -1,0 +1,1059 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>✨ Magical Math Coloring ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Baloo 2', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            touch-action: pan-y;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .sparkle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: twinkle 2s infinite;
+            z-index: 1;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 3em;
+            color: white;
+            text-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                0 0 0 8px rgba(255, 255, 255, 0.2);
+            animation: popIn 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .level-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            padding: 15px 30px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            touch-action: manipulation;
+        }
+
+        .level-btn.puppies {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #d63031;
+        }
+
+        .level-btn.kitties {
+            background: linear-gradient(135deg, #ff9ff3, #feca57);
+            color: #ee5a6f;
+        }
+
+        .level-btn.unicorns {
+            background: linear-gradient(135deg, #a29bfe, #fd79a8);
+            color: white;
+        }
+
+        .level-btn:active {
+            transform: scale(0.95);
+        }
+
+        .level-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .lesson-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            border-radius: 15px;
+        }
+
+        .lesson-info h3 {
+            font-family: 'Fredoka', sans-serif;
+            color: #2d3436;
+            font-size: 1.4em;
+            margin-bottom: 5px;
+        }
+
+        .lesson-info p {
+            color: #636e72;
+            font-size: 1em;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            border-radius: 20px;
+        }
+
+        .color-option {
+            text-align: center;
+            animation: bounceIn 0.5s ease-out both;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .color-option:nth-child(1) { animation-delay: 0.1s; }
+        .color-option:nth-child(2) { animation-delay: 0.15s; }
+        .color-option:nth-child(3) { animation-delay: 0.2s; }
+        .color-option:nth-child(4) { animation-delay: 0.25s; }
+        .color-option:nth-child(5) { animation-delay: 0.3s; }
+        .color-option:nth-child(6) { animation-delay: 0.35s; }
+        .color-option:nth-child(7) { animation-delay: 0.4s; }
+        .color-option:nth-child(8) { animation-delay: 0.45s; }
+
+        .math-problem {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 8px;
+            min-height: 35px;
+        }
+
+        .color-btn {
+            width: 60px;
+            height: 60px;
+            border: 4px solid white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            touch-action: manipulation;
+        }
+
+        .color-btn:active {
+            transform: scale(0.9);
+        }
+
+        .color-btn.selected {
+            border-color: #ffd700;
+            border-width: 5px;
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .canvas-container {
+            position: relative;
+            margin: 25px auto;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #coloringCanvas {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            touch-action: manipulation;
+        }
+
+        .control-btn.reset {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .control-btn.new {
+            background: linear-gradient(135deg, #48dbfb, #0abde3);
+            color: white;
+        }
+
+        .control-btn.next {
+            background: linear-gradient(135deg, #5f27cd, #341f97);
+            color: white;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .celebration.show {
+            animation: celebrate 0.6s ease-out forwards;
+        }
+
+        @keyframes celebrate {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .celebration h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 3em;
+            color: #a29bfe;
+            margin-bottom: 20px;
+        }
+
+        .celebration p {
+            font-size: 1.5em;
+            color: #636e72;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .game-container {
+                padding: 20px;
+            }
+
+            .color-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            .math-problem {
+                font-size: 1em;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a29bfe, #fd79a8);
+            transition: width 0.5s ease;
+            border-radius: 15px;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sparkles -->
+    <script>
+        for (let i = 0; i < 30; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = Math.random() * 100 + '%';
+            sparkle.style.top = Math.random() * 100 + '%';
+            sparkle.style.animationDelay = Math.random() * 2 + 's';
+            document.body.appendChild(sparkle);
+        }
+    </script>
+
+    <div class="container">
+        <header>
+            <h1>✨ Magical Math Coloring ✨</h1>
+            <p class="subtitle">Master 2nd Grade Math Skills!</p>
+        </header>
+
+        <div class="game-container">
+            <div class="lesson-info">
+                <h3 id="lessonTitle">Lesson 1: Addition Fluency</h3>
+                <p id="lessonDescription">Practice adding numbers within 20</p>
+            </div>
+
+            <div class="level-selector">
+                <button class="level-btn puppies active" onclick="selectLevel('puppies')">
+                    🐶 Puppies
+                </button>
+                <button class="level-btn kitties" onclick="selectLevel('kitties')">
+                    🐱 Kitties
+                </button>
+                <button class="level-btn unicorns" onclick="selectLevel('unicorns')">
+                    🦄 Unicorns
+                </button>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+
+            <div class="color-palette" id="colorPalette"></div>
+
+            <div class="canvas-container">
+                <canvas id="coloringCanvas" width="600" height="600"></canvas>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn reset" onclick="resetCanvas()">
+                    🔄 Start Over
+                </button>
+                <button class="control-btn new" onclick="newPicture()">
+                    ✨ New Picture
+                </button>
+                <button class="control-btn next" onclick="nextLesson()">
+                    ➡️ Next Lesson
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration">
+        <h2>🎉 Amazing Work! 🎉</h2>
+        <p>You're a math superstar!</p>
+    </div>
+
+    <script>
+        let currentLevel = 'puppies';
+        let selectedColor = null;
+        let coloredSections = new Set();
+        let currentLesson = 0;
+        
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 20+ Lessons covering 2nd grade curriculum
+        const lessons = [
+            {
+                title: "Lesson 1: Addition Fluency",
+                description: "Practice adding numbers within 20",
+                problems: {
+                    6: ['3 + 3', '4 + 2', '9 - 3', '2 + 4'],
+                    7: ['4 + 3', '5 + 2', '10 - 3', '3 + 4'],
+                    8: ['4 + 4', '5 + 3', '11 - 3', '6 + 2'],
+                    9: ['5 + 4', '6 + 3', '12 - 3', '7 + 2'],
+                    10: ['6 + 4', '5 + 5', '13 - 3', '7 + 3'],
+                    12: ['6 + 6', '7 + 5', '15 - 3', '8 + 4'],
+                    14: ['7 + 7', '8 + 6', '17 - 3', '9 + 5'],
+                    15: ['8 + 7', '9 + 6', '18 - 3', '10 + 5']
+                }
+            },
+            {
+                title: "Lesson 2: Missing Addends",
+                description: "Find the unknown number (algebraic thinking!)",
+                problems: {
+                    3: ['5 + ? = 8', '9 - 6 = ?', '? + 1 = 4', '10 - 7 = ?'],
+                    4: ['6 + ? = 10', '11 - 7 = ?', '? + 2 = 6', '12 - 8 = ?'],
+                    5: ['7 + ? = 12', '13 - 8 = ?', '? + 3 = 8', '14 - 9 = ?'],
+                    6: ['8 + ? = 14', '15 - 9 = ?', '? + 4 = 10', '13 - 7 = ?'],
+                    7: ['9 + ? = 16', '16 - 9 = ?', '? + 5 = 12', '14 - 7 = ?'],
+                    8: ['10 + ? = 18', '17 - 9 = ?', '? + 6 = 14', '15 - 7 = ?'],
+                    9: ['11 + ? = 20', '18 - 9 = ?', '? + 7 = 16', '16 - 7 = ?'],
+                    10: ['5 + ? = 15', '20 - 10 = ?', '? + 8 = 18', '17 - 7 = ?']
+                }
+            },
+            {
+                title: "Lesson 3: Subtraction Fluency",
+                description: "Practice subtracting within 20",
+                problems: {
+                    2: ['5 - 3', '8 - 6', '11 - 9', '10 - 8'],
+                    3: ['7 - 4', '9 - 6', '12 - 9', '11 - 8'],
+                    4: ['9 - 5', '10 - 6', '13 - 9', '12 - 8'],
+                    5: ['11 - 6', '12 - 7', '14 - 9', '13 - 8'],
+                    6: ['13 - 7', '14 - 8', '15 - 9', '16 - 10'],
+                    7: ['15 - 8', '16 - 9', '17 - 10', '14 - 7'],
+                    8: ['17 - 9', '18 - 10', '16 - 8', '15 - 7'],
+                    9: ['18 - 9', '19 - 10', '17 - 8', '16 - 7']
+                }
+            },
+            {
+                title: "Lesson 4: Introduction to Multiplication",
+                description: "Equal groups (2s, 5s, 10s)",
+                problems: {
+                    4: ['2 × 2', '2 + 2', '4 groups of 1'],
+                    6: ['2 × 3', '3 + 3', '2 groups of 3'],
+                    8: ['2 × 4', '4 + 4', '2 groups of 4'],
+                    10: ['2 × 5', '5 + 5', '2 groups of 5'],
+                    12: ['2 × 6', '6 + 6', '2 groups of 6'],
+                    14: ['2 × 7', '7 + 7', '2 groups of 7'],
+                    15: ['3 × 5', '5 + 5 + 5', '3 groups of 5'],
+                    20: ['2 × 10', '10 + 10', '4 × 5']
+                }
+            },
+            {
+                title: "Lesson 5: Skip Counting by 5s",
+                description: "Count by 5s to build multiplication",
+                problems: {
+                    5: ['5 × 1', 'Count: 5', '10 - 5'],
+                    10: ['5 × 2', 'Count: 5, 10', '15 - 5'],
+                    15: ['5 × 3', 'Count: 5, 10, 15', '20 - 5'],
+                    20: ['5 × 4', 'Count: 5, 10, 15, 20', '25 - 5'],
+                    25: ['5 × 5', '30 - 5', '20 + 5'],
+                    30: ['5 × 6', '35 - 5', '25 + 5'],
+                    35: ['5 × 7', '40 - 5', '30 + 5'],
+                    40: ['5 × 8', '45 - 5', '35 + 5']
+                }
+            },
+            {
+                title: "Lesson 6: Even and Odd Numbers",
+                description: "Identify even numbers (pairs)",
+                problems: {
+                    2: ['1 + 1', 'Even!', '4 - 2'],
+                    4: ['2 + 2', 'Even!', '6 - 2'],
+                    6: ['3 + 3', 'Even!', '8 - 2'],
+                    8: ['4 + 4', 'Even!', '10 - 2'],
+                    10: ['5 + 5', 'Even!', '12 - 2'],
+                    12: ['6 + 6', 'Even!', '14 - 2'],
+                    14: ['7 + 7', 'Even!', '16 - 2'],
+                    16: ['8 + 8', 'Even!', '18 - 2']
+                }
+            },
+            {
+                title: "Lesson 7: Addition within 100",
+                description: "Two-digit addition",
+                problems: {
+                    12: ['10 + 2', '6 + 6', '15 - 3'],
+                    15: ['10 + 5', '8 + 7', '20 - 5'],
+                    18: ['10 + 8', '9 + 9', '20 - 2'],
+                    20: ['10 + 10', '15 + 5', '25 - 5'],
+                    24: ['20 + 4', '12 + 12', '30 - 6'],
+                    25: ['20 + 5', '15 + 10', '30 - 5'],
+                    30: ['20 + 10', '15 + 15', '35 - 5'],
+                    35: ['30 + 5', '20 + 15', '40 - 5']
+                }
+            },
+            {
+                title: "Lesson 8: Subtraction within 100",
+                description: "Two-digit subtraction",
+                problems: {
+                    5: ['15 - 10', '20 - 15', '10 - 5'],
+                    10: ['20 - 10', '25 - 15', '15 - 5'],
+                    15: ['25 - 10', '30 - 15', '20 - 5'],
+                    20: ['30 - 10', '35 - 15', '25 - 5'],
+                    25: ['35 - 10', '40 - 15', '30 - 5'],
+                    30: ['40 - 10', '45 - 15', '35 - 5'],
+                    35: ['45 - 10', '50 - 15', '40 - 5'],
+                    40: ['50 - 10', '55 - 15', '45 - 5']
+                }
+            },
+            {
+                title: "Lesson 9: Arrays (Multiplication Foundation)",
+                description: "Count objects in rows and columns",
+                problems: {
+                    6: ['2 rows × 3', '3 + 3', '2 × 3'],
+                    8: ['2 rows × 4', '4 + 4', '2 × 4'],
+                    10: ['2 rows × 5', '5 + 5', '2 × 5'],
+                    12: ['3 rows × 4', '4 + 4 + 4', '3 × 4'],
+                    15: ['3 rows × 5', '5 + 5 + 5', '3 × 5'],
+                    16: ['4 rows × 4', '4 + 4 + 4 + 4', '4 × 4'],
+                    20: ['4 rows × 5', '5 + 5 + 5 + 5', '4 × 5'],
+                    25: ['5 rows × 5', '5 + 5 + 5 + 5 + 5', '5 × 5']
+                }
+            },
+            {
+                title: "Lesson 10: Place Value Tens and Ones",
+                description: "Understand tens and ones",
+                problems: {
+                    12: ['1 ten + 2 ones', '10 + 2', '6 + 6'],
+                    15: ['1 ten + 5 ones', '10 + 5', '7 + 8'],
+                    20: ['2 tens + 0 ones', '10 + 10', '15 + 5'],
+                    24: ['2 tens + 4 ones', '20 + 4', '12 + 12'],
+                    30: ['3 tens + 0 ones', '20 + 10', '25 + 5'],
+                    35: ['3 tens + 5 ones', '30 + 5', '20 + 15'],
+                    40: ['4 tens + 0 ones', '30 + 10', '35 + 5'],
+                    45: ['4 tens + 5 ones', '40 + 5', '40 + 5']
+                }
+            },
+            {
+                title: "Lesson 11: Unknown Addend (Challenge)",
+                description: "Solve for the mystery number!",
+                problems: {
+                    6: ['? + 8 = 14', '12 - ? = 6', '? + 4 = 10'],
+                    7: ['? + 9 = 16', '14 - ? = 7', '? + 5 = 12'],
+                    8: ['? + 7 = 15', '16 - ? = 8', '? + 6 = 14'],
+                    9: ['? + 8 = 17', '18 - ? = 9', '? + 7 = 16'],
+                    10: ['? + 10 = 20', '20 - ? = 10', '? + 5 = 15'],
+                    12: ['? + 8 = 20', '24 - ? = 12', '? + 13 = 25'],
+                    15: ['? + 15 = 30', '30 - ? = 15', '? + 10 = 25'],
+                    20: ['? + 20 = 40', '40 - ? = 20', '? + 15 = 35']
+                }
+            },
+            {
+                title: "Lesson 12: Adding Three Numbers",
+                description: "Add three addends",
+                problems: {
+                    6: ['2 + 2 + 2', '1 + 2 + 3', '3 + 1 + 2'],
+                    9: ['3 + 3 + 3', '2 + 3 + 4', '4 + 2 + 3'],
+                    12: ['4 + 4 + 4', '3 + 4 + 5', '5 + 3 + 4'],
+                    15: ['5 + 5 + 5', '4 + 5 + 6', '6 + 4 + 5'],
+                    18: ['6 + 6 + 6', '5 + 6 + 7', '7 + 5 + 6'],
+                    21: ['7 + 7 + 7', '6 + 7 + 8', '8 + 6 + 7'],
+                    24: ['8 + 8 + 8', '7 + 8 + 9', '9 + 7 + 8'],
+                    27: ['9 + 9 + 9', '8 + 9 + 10', '10 + 8 + 9']
+                }
+            },
+            {
+                title: "Lesson 13: Comparing Numbers",
+                description: "Greater than, less than, equal to",
+                problems: {
+                    5: ['3 < ?', '? > 2', '2 + 3'],
+                    10: ['8 < ?', '? > 5', '5 + 5'],
+                    15: ['12 < ?', '? > 10', '10 + 5'],
+                    20: ['18 < ?', '? > 15', '10 + 10'],
+                    25: ['23 < ?', '? > 20', '20 + 5'],
+                    30: ['28 < ?', '? > 25', '25 + 5'],
+                    35: ['33 < ?', '? > 30', '30 + 5'],
+                    40: ['38 < ?', '? > 35', '35 + 5']
+                }
+            },
+            {
+                title: "Lesson 14: Skip Counting by 10s",
+                description: "Count by tens",
+                problems: {
+                    10: ['10 × 1', 'Count: 10', '20 - 10'],
+                    20: ['10 × 2', 'Count: 10, 20', '30 - 10'],
+                    30: ['10 × 3', 'Count: 10, 20, 30', '40 - 10'],
+                    40: ['10 × 4', '50 - 10', '30 + 10'],
+                    50: ['10 × 5', '60 - 10', '40 + 10'],
+                    60: ['10 × 6', '70 - 10', '50 + 10'],
+                    70: ['10 × 7', '80 - 10', '60 + 10'],
+                    80: ['10 × 8', '90 - 10', '70 + 10']
+                }
+            },
+            {
+                title: "Lesson 15: Doubles and Near Doubles",
+                description: "Use doubles to add quickly",
+                problems: {
+                    6: ['3 + 3', 'Double 3', '4 - 1 + 3'],
+                    8: ['4 + 4', 'Double 4', '5 - 1 + 4'],
+                    10: ['5 + 5', 'Double 5', '6 - 1 + 5'],
+                    12: ['6 + 6', 'Double 6', '7 - 1 + 6'],
+                    14: ['7 + 7', 'Double 7', '8 - 1 + 7'],
+                    16: ['8 + 8', 'Double 8', '9 - 1 + 8'],
+                    18: ['9 + 9', 'Double 9', '10 - 1 + 9'],
+                    20: ['10 + 10', 'Double 10', '11 - 1 + 10']
+                }
+            },
+            {
+                title: "Lesson 16: Making 10 Strategy",
+                description: "Make 10 to add easier",
+                problems: {
+                    11: ['9 + 2', 'Make 10: 9 + 1 + 1', '10 + 1'],
+                    12: ['9 + 3', 'Make 10: 9 + 1 + 2', '10 + 2'],
+                    13: ['8 + 5', 'Make 10: 8 + 2 + 3', '10 + 3'],
+                    14: ['8 + 6', 'Make 10: 8 + 2 + 4', '10 + 4'],
+                    15: ['7 + 8', 'Make 10: 7 + 3 + 5', '10 + 5'],
+                    16: ['7 + 9', 'Make 10: 7 + 3 + 6', '10 + 6'],
+                    17: ['9 + 8', 'Make 10: 9 + 1 + 7', '10 + 7'],
+                    18: ['9 + 9', 'Make 10: 9 + 1 + 8', '10 + 8']
+                }
+            },
+            {
+                title: "Lesson 17: Two-Step Word Problems",
+                description: "Solve problems with 2 operations",
+                problems: {
+                    8: ['5 + 7 - 4', '10 - 2', '3 + 5'],
+                    10: ['6 + 8 - 4', '12 - 2', '4 + 6'],
+                    12: ['7 + 9 - 4', '14 - 2', '5 + 7'],
+                    14: ['8 + 10 - 4', '16 - 2', '6 + 8'],
+                    16: ['9 + 11 - 4', '18 - 2', '7 + 9'],
+                    18: ['10 + 12 - 4', '20 - 2', '8 + 10'],
+                    20: ['15 + 9 - 4', '22 - 2', '10 + 10'],
+                    22: ['16 + 10 - 4', '24 - 2', '11 + 11']
+                }
+            },
+            {
+                title: "Lesson 18: Measurement & Addition",
+                description: "Add lengths together",
+                problems: {
+                    12: ['5 cm + 7 cm', '6 in + 6 in', '8 + 4'],
+                    15: ['8 cm + 7 cm', '10 in + 5 in', '9 + 6'],
+                    18: ['10 cm + 8 cm', '12 in + 6 in', '9 + 9'],
+                    20: ['12 cm + 8 cm', '15 in + 5 in', '10 + 10'],
+                    24: ['14 cm + 10 cm', '18 in + 6 in', '12 + 12'],
+                    25: ['15 cm + 10 cm', '20 in + 5 in', '20 + 5'],
+                    30: ['20 cm + 10 cm', '25 in + 5 in', '25 + 5'],
+                    35: ['25 cm + 10 cm', '30 in + 5 in', '30 + 5']
+                }
+            },
+            {
+                title: "Lesson 19: Number Patterns",
+                description: "Find the pattern rule",
+                problems: {
+                    5: ['Pattern: +5', '0, 5, ?', '10 - 5'],
+                    10: ['Pattern: +5', '5, 10, ?', '15 - 5'],
+                    15: ['Pattern: +5', '10, 15, ?', '20 - 5'],
+                    20: ['Pattern: +10', '10, 20, ?', '30 - 10'],
+                    25: ['Pattern: +5', '20, 25, ?', '30 - 5'],
+                    30: ['Pattern: +10', '20, 30, ?', '40 - 10'],
+                    35: ['Pattern: +5', '30, 35, ?', '40 - 5'],
+                    40: ['Pattern: +10', '30, 40, ?', '50 - 10']
+                }
+            },
+            {
+                title: "Lesson 20: Mental Math Strategies",
+                description: "Add and subtract in your head!",
+                problems: {
+                    7: ['10 - 3', '4 + 3', '14 - 7'],
+                    9: ['10 - 1', '4 + 5', '18 - 9'],
+                    11: ['10 + 1', '5 + 6', '22 - 11'],
+                    13: ['10 + 3', '6 + 7', '26 - 13'],
+                    15: ['20 - 5', '8 + 7', '30 - 15'],
+                    17: ['20 - 3', '9 + 8', '34 - 17'],
+                    19: ['20 - 1', '10 + 9', '38 - 19'],
+                    21: ['30 - 9', '11 + 10', '42 - 21']
+                }
+            },
+            {
+                title: "Lesson 21: Master Challenge!",
+                description: "Mix of all skills learned",
+                problems: {
+                    8: ['? + 6 = 14', '2 × 4', '16 - 8'],
+                    10: ['5 × 2', '? + 5 = 15', '20 - 10'],
+                    12: ['3 × 4', '? + 7 = 19', '24 - 12'],
+                    15: ['3 × 5', '? + 10 = 25', '30 - 15'],
+                    18: ['2 × 9', '? + 8 = 26', '36 - 18'],
+                    20: ['4 × 5', '? + 15 = 35', '40 - 20'],
+                    24: ['6 × 4', '? + 12 = 36', '48 - 24'],
+                    25: ['5 × 5', '? + 20 = 45', '50 - 25']
+                }
+            }
+        ];
+
+        const colors = {
+            2: '#FF6B9D', 3: '#4ECDC4', 4: '#FFE66D', 5: '#A8E6CF',
+            6: '#C7CEEA', 7: '#FFA07A', 8: '#DDA0DD', 9: '#87CEEB',
+            10: '#FFB6C1', 11: '#98FB98', 12: '#98D8C8', 13: '#F0E68C',
+            14: '#DDA0DD', 15: '#F7DC6F', 16: '#BB8FCE', 17: '#85C1E2',
+            18: '#85C1E2', 19: '#F8B88B', 20: '#F8B88B', 21: '#FFD700',
+            22: '#FF69B4', 24: '#87CEEB', 25: '#98FB98', 27: '#DDA0DD',
+            30: '#F7DC6F', 35: '#FFA07A', 40: '#C7CEEA', 45: '#FF6B9D',
+            50: '#A8E6CF', 60: '#4ECDC4', 70: '#FFE66D', 80: '#87CEEB'
+        };
+
+        const themes = {
+            puppies: [
+                { x: 150, y: 100, r: 80, answer: 6, type: 'circle' },
+                { x: 450, y: 100, r: 80, answer: 6, type: 'circle' },
+                { x: 300, y: 200, r: 120, answer: 8, type: 'circle' },
+                { x: 250, y: 200, r: 25, answer: 4, type: 'circle' },
+                { x: 350, y: 200, r: 25, answer: 4, type: 'circle' },
+                { x: 300, y: 250, r: 30, answer: 2, type: 'circle' },
+                { x: 300, y: 380, r: 100, answer: 10, type: 'circle' },
+                { x: 220, y: 520, r: 40, answer: 5, type: 'circle' },
+                { x: 380, y: 520, r: 40, answer: 5, type: 'circle' },
+                { x: 480, y: 350, r: 35, answer: 3, type: 'circle' }
+            ],
+            kitties: [
+                { x: 200, y: 80, points: [[200,80], [180,140], [220,140]], answer: 7, type: 'triangle' },
+                { x: 400, y: 80, points: [[400,80], [380,140], [420,140]], answer: 7, type: 'triangle' },
+                { x: 300, y: 200, r: 120, answer: 9, type: 'circle' },
+                { x: 250, y: 190, r: 25, answer: 4, type: 'circle' },
+                { x: 350, y: 190, r: 25, answer: 4, type: 'circle' },
+                { x: 300, y: 240, r: 20, answer: 2, type: 'circle' },
+                { x: 300, y: 380, r: 90, answer: 12, type: 'circle' },
+                { x: 230, y: 520, r: 35, answer: 6, type: 'circle' },
+                { x: 370, y: 520, r: 35, answer: 6, type: 'circle' },
+                { x: 450, y: 420, points: [[450,420], [480,380], [500,440], [470,480]], answer: 5, type: 'polygon' }
+            ],
+            unicorns: [
+                { x: 300, y: 80, points: [[300,60], [280,120], [320,120]], answer: 15, type: 'triangle' },
+                { x: 150, y: 120, r: 70, answer: 8, type: 'circle' },
+                { x: 450, y: 120, r: 70, answer: 8, type: 'circle' },
+                { x: 300, y: 220, r: 130, answer: 18, type: 'circle' },
+                { x: 250, y: 210, r: 30, answer: 6, type: 'circle' },
+                { x: 350, y: 210, r: 30, answer: 6, type: 'circle' },
+                { x: 300, y: 280, r: 25, answer: 3, type: 'circle' },
+                { x: 300, y: 420, r: 110, answer: 20, type: 'circle' },
+                { x: 230, y: 560, r: 40, answer: 10, type: 'circle' },
+                { x: 370, y: 560, r: 40, answer: 10, type: 'circle' },
+                { x: 480, y: 380, points: [[480,380], [520,340], [540,400], [510,440], [480,420]], answer: 12, type: 'polygon' }
+            ]
+        };
+
+        function updateLessonInfo() {
+            const lesson = lessons[currentLesson];
+            document.getElementById('lessonTitle').textContent = lesson.title;
+            document.getElementById('lessonDescription').textContent = lesson.description;
+        }
+
+        function getRandomProblem(answer) {
+            const lesson = lessons[currentLesson];
+            const problems = lesson.problems[answer];
+            if (!problems) return answer + '';
+            return problems[Math.floor(Math.random() * problems.length)];
+        }
+
+        function renderColorPalette() {
+            const palette = document.getElementById('colorPalette');
+            palette.innerHTML = '';
+            
+            const answers = [...new Set(themes[currentLevel].map(s => s.answer))].sort((a, b) => a - b);
+            
+            answers.forEach((answer, index) => {
+                const option = document.createElement('div');
+                option.className = 'color-option';
+                
+                const problem = document.createElement('div');
+                problem.className = 'math-problem';
+                problem.textContent = getRandomProblem(answer);
+                
+                const btn = document.createElement('div');
+                btn.className = 'color-btn';
+                btn.style.backgroundColor = colors[answer] || '#FFB6C1';
+                btn.dataset.answer = answer;
+                btn.onclick = () => selectColor(answer, btn);
+                
+                option.appendChild(problem);
+                option.appendChild(btn);
+                palette.appendChild(option);
+            });
+        }
+
+        function selectColor(answer, btn) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedColor = answer;
+        }
+
+        function drawSection(section, filled = false) {
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#2d3436';
+            
+            if (filled && coloredSections.has(section)) {
+                ctx.fillStyle = colors[section.answer] || '#FFB6C1';
+            } else {
+                ctx.fillStyle = 'white';
+            }
+            
+            if (section.type === 'circle') {
+                ctx.beginPath();
+                ctx.arc(section.x, section.y, section.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            } else if (section.type === 'triangle' || section.type === 'polygon') {
+                ctx.beginPath();
+                ctx.moveTo(section.points[0][0], section.points[0][1]);
+                for (let i = 1; i < section.points.length; i++) {
+                    ctx.lineTo(section.points[i][0], section.points[i][1]);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            if (!coloredSections.has(section)) {
+                ctx.fillStyle = '#95a5a6';
+                ctx.font = 'bold 24px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(section.answer, section.x, section.y);
+            }
+        }
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            themes[currentLevel].forEach(section => drawSection(section, true));
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const total = themes[currentLevel].length;
+            const colored = coloredSections.size;
+            const percent = (colored / total) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function isPointInSection(x, y, section) {
+            if (section.type === 'circle') {
+                const dx = x - section.x;
+                const dy = y - section.y;
+                return dx * dx + dy * dy <= section.r * section.r;
+            } else if (section.type === 'triangle' || section.type === 'polygon') {
+                let inside = false;
+                const points = section.points;
+                for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                    const xi = points[i][0], yi = points[i][1];
+                    const xj = points[j][0], yj = points[j][1];
+                    const intersect = ((yi > y) !== (yj > y))
+                        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                    if (intersect) inside = !inside;
+                }
+                return inside;
+            }
+            return false;
+        }
+
+        function handleCanvasClick(event) {
+            if (!selectedColor) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            for (const section of themes[currentLevel]) {
+                if (isPointInSection(x, y, section)) {
+                    if (section.answer === selectedColor) {
+                        coloredSections.add(section);
+                        drawCanvas();
+                        if (coloredSections.size === themes[currentLevel].length) {
+                            setTimeout(celebrate, 500);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        function handleTouch(event) {
+            event.preventDefault();
+            const touch = event.touches[0];
+            const mouseEvent = new MouseEvent('click', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function celebrate() {
+            const celebration = document.getElementById('celebration');
+            celebration.classList.add('show');
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => createConfetti(), i * 30);
+            }
+            setTimeout(() => {
+                celebration.classList.remove('show');
+            }, 3000);
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.top = '-10px';
+            confetti.style.backgroundColor = ['#FF6B9D', '#4ECDC4', '#FFE66D', '#A8E6CF', '#C7CEEA'][Math.floor(Math.random() * 5)];
+            confetti.style.animation = `fall ${2 + Math.random() * 2}s linear`;
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 4000);
+        }
+
+        function selectLevel(level) {
+            currentLevel = level;
+            coloredSections.clear();
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderColorPalette();
+            drawCanvas();
+        }
+
+        function resetCanvas() {
+            coloredSections.clear();
+            drawCanvas();
+        }
+
+        function newPicture() {
+            const levels = ['puppies', 'kitties', 'unicorns'];
+            let newLevel;
+            do {
+                newLevel = levels[Math.floor(Math.random() * levels.length)];
+            } while (newLevel === currentLevel && levels.length > 1);
+            currentLevel = newLevel;
+            coloredSections.clear();
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((newLevel === 'puppies' && btn.textContent.includes('🐶')) ||
+                    (newLevel === 'kitties' && btn.textContent.includes('🐱')) ||
+                    (newLevel === 'unicorns' && btn.textContent.includes('🦄'))) {
+                    btn.classList.add('active');
+                }
+            });
+            renderColorPalette();
+            drawCanvas();
+        }
+
+        function nextLesson() {
+            currentLesson = (currentLesson + 1) % lessons.length;
+            coloredSections.clear();
+            updateLessonInfo();
+            renderColorPalette();
+            drawCanvas();
+        }
+
+        canvas.addEventListener('click', handleCanvasClick);
+        canvas.addEventListener('touchstart', handleTouch);
+
+        updateLessonInfo();
+        renderColorPalette();
+        drawCanvas();
+    </script>
+</body>
+</html>
