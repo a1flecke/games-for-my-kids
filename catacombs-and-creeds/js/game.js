@@ -1,5 +1,5 @@
 /**
- * Game - Main game engine with player movement, collision detection, and game loop
+ * Game - Main game engine with state machine, input routing, and game loop
  */
 
 /**
@@ -94,144 +94,6 @@ class TileMap {
 }
 
 /**
- * Player - Player character with movement and collision
- */
-class Player {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = CONFIG.PLAYER_SIZE;
-        this.speed = CONFIG.PLAYER_SPEED;
-        this.direction = 'down';
-
-        // Movement state
-        this.moving = {
-            up: false,
-            down: false,
-            left: false,
-            right: false
-        };
-    }
-
-    // Update player position based on input
-    update(map) {
-        let dx = 0;
-        let dy = 0;
-
-        // Calculate movement direction
-        if (this.moving.up) {
-            dy -= this.speed;
-            this.direction = 'up';
-        }
-        if (this.moving.down) {
-            dy += this.speed;
-            this.direction = 'down';
-        }
-        if (this.moving.left) {
-            dx -= this.speed;
-            this.direction = 'left';
-        }
-        if (this.moving.right) {
-            dx += this.speed;
-            this.direction = 'right';
-        }
-
-        // Normalize diagonal movement
-        if (dx !== 0 && dy !== 0) {
-            dx *= 0.707; // 1/sqrt(2)
-            dy *= 0.707;
-        }
-
-        // Apply movement with collision detection
-        this.moveWithCollision(map, dx, dy);
-    }
-
-    // Move player with collision detection
-    moveWithCollision(map, dx, dy) {
-        // Try X movement
-        if (dx !== 0) {
-            const newX = this.x + dx;
-            const halfSize = this.size / 2;
-
-            if (map.isAreaWalkable(
-                newX - halfSize,
-                this.y - halfSize,
-                this.size,
-                this.size
-            )) {
-                this.x = newX;
-            }
-        }
-
-        // Try Y movement
-        if (dy !== 0) {
-            const newY = this.y + dy;
-            const halfSize = this.size / 2;
-
-            if (map.isAreaWalkable(
-                this.x - halfSize,
-                newY - halfSize,
-                this.size,
-                this.size
-            )) {
-                this.y = newY;
-            }
-        }
-    }
-
-    // Get tile position
-    getTilePosition() {
-        return {
-            x: worldToGrid(this.x, CONFIG.TILE_SIZE),
-            y: worldToGrid(this.y, CONFIG.TILE_SIZE)
-        };
-    }
-}
-
-/**
- * InputHandler - Keyboard input management
- */
-class InputHandler {
-    constructor(player) {
-        this.player = player;
-        this.keys = {};
-
-        // Bind keyboard events
-        window.addEventListener('keydown', (e) => this.onKeyDown(e));
-        window.addEventListener('keyup', (e) => this.onKeyUp(e));
-
-        // Prevent arrow key scrolling
-        window.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.key)) {
-                e.preventDefault();
-            }
-        });
-    }
-
-    onKeyDown(e) {
-        this.keys[e.key] = true;
-        this.updatePlayerMovement();
-    }
-
-    onKeyUp(e) {
-        this.keys[e.key] = false;
-        this.updatePlayerMovement();
-    }
-
-    updatePlayerMovement() {
-        // WASD and Arrow keys
-        this.player.moving.up = this.keys['w'] || this.keys['W'] || this.keys['ArrowUp'];
-        this.player.moving.down = this.keys['s'] || this.keys['S'] || this.keys['ArrowDown'];
-        this.player.moving.left = this.keys['a'] || this.keys['A'] || this.keys['ArrowLeft'];
-        this.player.moving.right = this.keys['d'] || this.keys['D'] || this.keys['ArrowRight'];
-    }
-
-    isKeyPressed(key) {
-        return this.keys[key] === true;
-    }
-}
-
-/**
  * Game - Main game controller with state machine
  */
 class Game {
@@ -239,19 +101,17 @@ class Game {
         this.canvas = canvas;
         this.tileSize = CONFIG.TILE_SIZE;
 
-        // State machine
-        this.state = GameState.PLAYING;
+        // State machine — start at title screen
+        this.state = GameState.TITLE;
 
-        // Game objects
-        this.map = new TileMap(20, 15);
-        this.player = new Player(
-            this.tileSize * 2.5, // Start position X (in pixels)
-            this.tileSize * 2.5  // Start position Y (in pixels)
-        );
+        // Game objects (created on startNewGame)
+        this.map = null;
+        this.player = null;
 
         // Systems
         this.renderer = new Renderer(canvas);
-        this.input = new InputHandler(this.player);
+        this.input = new InputHandler();
+        this.screens = new ScreenManager();
 
         // Game loop
         this.lastTime = 0;
@@ -269,7 +129,6 @@ class Game {
 
     init() {
         console.log('Game initialized');
-        this.loadGame();
         this.start();
     }
 
@@ -287,6 +146,18 @@ class Game {
     changeState(newState) {
         console.log(`State: ${this.state} -> ${newState}`);
         this.state = newState;
+    }
+
+    /** Create map and player, transition to PLAYING */
+    startNewGame() {
+        this.map = new TileMap(20, 15);
+        this.player = new Player(
+            this.tileSize * 2.5,
+            this.tileSize * 2.5
+        );
+        this.loadGame();
+        this.lastSaveTime = performance.now();
+        this.changeState(GameState.PLAYING);
     }
 
     // Main game loop (60fps target)
@@ -313,12 +184,18 @@ class Game {
         // Render
         this.render();
 
+        // Clear justPressed AFTER update+render so wasPressed works for one full frame
+        this.input.update();
+
         // Continue loop
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
     update(deltaTime, currentTime) {
         switch (this.state) {
+            case GameState.TITLE:
+                this.updateTitle();
+                break;
             case GameState.PLAYING:
                 this.updatePlaying(deltaTime, currentTime);
                 break;
@@ -332,18 +209,52 @@ class Game {
                 this.updateInventory(deltaTime);
                 break;
             case GameState.PAUSED:
+                this.updatePaused();
                 break;
         }
     }
 
+    updateTitle() {
+        const action = this.screens.update(this.input, 'title');
+        if (action === 'new_game') {
+            this.startNewGame();
+        }
+    }
+
     updatePlaying(deltaTime, currentTime) {
+        // Read input and apply to player movement
+        this.player.moving.up = this.input.isDown('w') || this.input.isDown('W') || this.input.isDown('ArrowUp');
+        this.player.moving.down = this.input.isDown('s') || this.input.isDown('S') || this.input.isDown('ArrowDown');
+        this.player.moving.left = this.input.isDown('a') || this.input.isDown('A') || this.input.isDown('ArrowLeft');
+        this.player.moving.right = this.input.isDown('d') || this.input.isDown('D') || this.input.isDown('ArrowRight');
+
         // Update player
         this.player.update(this.map);
+
+        // Check Escape → pause
+        if (this.input.wasPressed('Escape')) {
+            this.screens.resetSelection();
+            this.changeState(GameState.PAUSED);
+            return;
+        }
 
         // Auto-save periodically
         if (currentTime - this.lastSaveTime >= CONFIG.AUTO_SAVE_INTERVAL) {
             this.saveGame();
             this.lastSaveTime = currentTime;
+        }
+    }
+
+    updatePaused() {
+        const action = this.screens.update(this.input, 'pause');
+        if (action === 'resume') {
+            this.changeState(GameState.PLAYING);
+        } else if (action === 'exit_title') {
+            this.saveGame();
+            this.player = null;
+            this.map = null;
+            this.screens.resetSelection();
+            this.changeState(GameState.TITLE);
         }
     }
 
@@ -361,6 +272,9 @@ class Game {
 
     render() {
         switch (this.state) {
+            case GameState.TITLE:
+                this.screens.renderTitle(this.renderer.ctx, this.canvas);
+                break;
             case GameState.PLAYING:
                 this.renderPlaying();
                 break;
@@ -377,7 +291,7 @@ class Game {
                 break;
             case GameState.PAUSED:
                 this.renderPlaying();
-                this.renderPaused();
+                this.screens.renderPause(this.renderer.ctx, this.canvas);
                 break;
         }
     }
@@ -401,10 +315,6 @@ class Game {
         // Stub — implemented in Session 6
     }
 
-    renderPaused() {
-        // Stub — implemented in Session 3
-    }
-
     updateUI() {
         // Update FPS display
         const fpsElement = document.getElementById('fps');
@@ -412,22 +322,33 @@ class Game {
             fpsElement.textContent = this.fps;
         }
 
-        // Update position display
-        const tilePos = this.player.getTilePosition();
-        const posXElement = document.getElementById('posX');
-        const posYElement = document.getElementById('posY');
-        if (posXElement && posYElement) {
-            posXElement.textContent = tilePos.x;
-            posYElement.textContent = tilePos.y;
+        // Update position display (guard against null player on title screen)
+        if (this.player) {
+            const tilePos = this.player.getTilePosition();
+            const posXElement = document.getElementById('posX');
+            const posYElement = document.getElementById('posY');
+            if (posXElement && posYElement) {
+                posXElement.textContent = tilePos.x;
+                posYElement.textContent = tilePos.y;
+            }
         }
     }
 
     // Save game to localStorage
     saveGame() {
+        if (!this.player) return;
+
         const saveData = {
             playerX: this.player.x,
             playerY: this.player.y,
             playerDirection: this.player.direction,
+            hp: this.player.hp,
+            maxHp: this.player.maxHp,
+            attack: this.player.attack,
+            defense: this.player.defense,
+            xp: this.player.xp,
+            level: this.player.level,
+            xpThreshold: this.player.xpThreshold,
             timestamp: Date.now()
         };
 
@@ -441,6 +362,8 @@ class Game {
 
     // Load game from localStorage
     loadGame() {
+        if (!this.player) return;
+
         try {
             const saveData = localStorage.getItem(this.saveKey);
             if (saveData) {
@@ -448,6 +371,16 @@ class Game {
                 this.player.x = data.playerX;
                 this.player.y = data.playerY;
                 this.player.direction = data.playerDirection || 'down';
+                // Restore stats if present in save
+                if (data.hp !== undefined) {
+                    this.player.hp = data.hp;
+                    this.player.maxHp = data.maxHp;
+                    this.player.attack = data.attack;
+                    this.player.defense = data.defense;
+                    this.player.xp = data.xp;
+                    this.player.level = data.level;
+                    this.player.xpThreshold = data.xpThreshold;
+                }
                 console.log('Game loaded from save');
             }
         } catch (e) {
@@ -458,9 +391,11 @@ class Game {
     // Reset save
     resetSave() {
         localStorage.removeItem(this.saveKey);
-        this.player.x = this.tileSize * 2.5;
-        this.player.y = this.tileSize * 2.5;
-        this.player.direction = 'down';
+        if (this.player) {
+            this.player.x = this.tileSize * 2.5;
+            this.player.y = this.tileSize * 2.5;
+            this.player.direction = 'down';
+        }
         console.log('Save reset');
     }
 }
