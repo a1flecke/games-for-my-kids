@@ -2,24 +2,13 @@
  * Renderer - Handles all tile-based drawing with retro pixel art aesthetic
  */
 class Renderer {
-    constructor(canvas, tileSize = 32) {
+    constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d', { alpha: false });
-        this.tileSize = tileSize;
-        
-        // Retro color palette (NES/SNES inspired)
-        this.colors = {
-            floor: '#2d2d2d',
-            wall: '#4a4a4a',
-            wallTop: '#6b6b6b',
-            wallShadow: '#1a1a1a',
-            player: '#ffcc00',
-            playerOutline: '#cc9900',
-            background: '#0f0f1e',
-            highlight: '#ff6b6b',
-            accent1: '#4ecdc4',
-            accent2: '#95e1d3'
-        };
+        this.tileSize = CONFIG.TILE_SIZE;
+
+        // Use color palette from config
+        this.colors = CONFIG.COLORS;
 
         // Camera position (in pixels)
         this.camera = {
@@ -29,7 +18,7 @@ class Renderer {
 
         // Disable image smoothing for crisp pixels
         this.ctx.imageSmoothingEnabled = false;
-        
+
         this.setupCanvas();
     }
 
@@ -37,13 +26,13 @@ class Renderer {
         // Set canvas size for iPad landscape (responsive)
         const maxWidth = window.innerWidth - 40;
         const maxHeight = window.innerHeight - 40;
-        
-        // Target 800x600 base resolution, scaled to fit
-        const baseWidth = 800;
-        const baseHeight = 600;
-        
+
+        // Target base resolution, scaled to fit
+        const baseWidth = CONFIG.CANVAS_WIDTH;
+        const baseHeight = CONFIG.CANVAS_HEIGHT;
+
         const scale = Math.min(maxWidth / baseWidth, maxHeight / baseHeight);
-        
+
         this.canvas.width = baseWidth;
         this.canvas.height = baseHeight;
         this.canvas.style.width = `${baseWidth * scale}px`;
@@ -53,23 +42,18 @@ class Renderer {
         this.viewportTilesY = Math.ceil(this.canvas.height / this.tileSize);
     }
 
-    // Update camera to follow player smoothly
+    // Update camera to follow player instantly
     updateCamera(player, mapWidth, mapHeight) {
-        // Center camera on player
-        const targetX = player.x - this.canvas.width / 2;
-        const targetY = player.y - this.canvas.height / 2;
-
-        // Smooth camera movement (lerp)
-        const smoothing = 0.1;
-        this.camera.x += (targetX - this.camera.x) * smoothing;
-        this.camera.y += (targetY - this.camera.y) * smoothing;
+        // Center camera on player — instant, no lerp
+        this.camera.x = player.x - this.canvas.width / 2;
+        this.camera.y = player.y - this.canvas.height / 2;
 
         // Clamp camera to map bounds
         const maxCameraX = mapWidth * this.tileSize - this.canvas.width;
         const maxCameraY = mapHeight * this.tileSize - this.canvas.height;
 
-        this.camera.x = Math.max(0, Math.min(this.camera.x, maxCameraX));
-        this.camera.y = Math.max(0, Math.min(this.camera.y, maxCameraY));
+        this.camera.x = clamp(this.camera.x, 0, maxCameraX);
+        this.camera.y = clamp(this.camera.y, 0, maxCameraY);
     }
 
     // Clear the canvas

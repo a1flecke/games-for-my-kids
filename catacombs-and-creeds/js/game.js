@@ -3,9 +3,9 @@
  */
 
 /**
- * Map - Tile-based map with collision detection
+ * TileMap - Tile-based map with collision detection
  */
-class Map {
+class TileMap {
     constructor(width, height) {
         this.width = width;
         this.height = height;
@@ -17,7 +17,7 @@ class Map {
         // Create a 20x15 test dungeon
         this.width = 20;
         this.height = 15;
-        
+
         // Initialize with floor tiles
         for (let y = 0; y < this.height; y++) {
             this.tiles[y] = [];
@@ -76,7 +76,7 @@ class Map {
 
     // Check if a rectangular area is walkable
     isAreaWalkable(x, y, width, height) {
-        const tileSize = 32;
+        const tileSize = CONFIG.TILE_SIZE;
         const left = Math.floor(x / tileSize);
         const right = Math.floor((x + width - 1) / tileSize);
         const top = Math.floor(y / tileSize);
@@ -100,10 +100,10 @@ class Player {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.size = 24; // Player sprite size
-        this.speed = 3; // Pixels per frame
+        this.size = CONFIG.PLAYER_SIZE;
+        this.speed = CONFIG.PLAYER_SPEED;
         this.direction = 'down';
-        
+
         // Movement state
         this.moving = {
             up: false,
@@ -114,7 +114,7 @@ class Player {
     }
 
     // Update player position based on input
-    update(map, tileSize) {
+    update(map) {
         let dx = 0;
         let dy = 0;
 
@@ -143,16 +143,16 @@ class Player {
         }
 
         // Apply movement with collision detection
-        this.moveWithCollision(map, dx, dy, tileSize);
+        this.moveWithCollision(map, dx, dy);
     }
 
     // Move player with collision detection
-    moveWithCollision(map, dx, dy, tileSize) {
+    moveWithCollision(map, dx, dy) {
         // Try X movement
         if (dx !== 0) {
             const newX = this.x + dx;
             const halfSize = this.size / 2;
-            
+
             if (map.isAreaWalkable(
                 newX - halfSize,
                 this.y - halfSize,
@@ -167,7 +167,7 @@ class Player {
         if (dy !== 0) {
             const newY = this.y + dy;
             const halfSize = this.size / 2;
-            
+
             if (map.isAreaWalkable(
                 this.x - halfSize,
                 newY - halfSize,
@@ -180,10 +180,10 @@ class Player {
     }
 
     // Get tile position
-    getTilePosition(tileSize) {
+    getTilePosition() {
         return {
-            x: Math.floor(this.x / tileSize),
-            y: Math.floor(this.y / tileSize)
+            x: worldToGrid(this.x, CONFIG.TILE_SIZE),
+            y: worldToGrid(this.y, CONFIG.TILE_SIZE)
         };
     }
 }
@@ -195,7 +195,7 @@ class InputHandler {
     constructor(player) {
         this.player = player;
         this.keys = {};
-        
+
         // Bind keyboard events
         window.addEventListener('keydown', (e) => this.onKeyDown(e));
         window.addEventListener('keyup', (e) => this.onKeyUp(e));
@@ -232,30 +232,36 @@ class InputHandler {
 }
 
 /**
- * Game - Main game controller
+ * Game - Main game controller with state machine
  */
 class Game {
     constructor(canvas) {
         this.canvas = canvas;
-        this.tileSize = 32;
-        
-        // Game state
-        this.map = new Map(20, 15);
+        this.tileSize = CONFIG.TILE_SIZE;
+
+        // State machine
+        this.state = GameState.PLAYING;
+
+        // Game objects
+        this.map = new TileMap(20, 15);
         this.player = new Player(
             this.tileSize * 2.5, // Start position X (in pixels)
             this.tileSize * 2.5  // Start position Y (in pixels)
         );
-        
+
         // Systems
-        this.renderer = new Renderer(canvas, this.tileSize);
+        this.renderer = new Renderer(canvas);
         this.input = new InputHandler(this.player);
-        
+
         // Game loop
         this.lastTime = 0;
         this.fps = 60;
         this.fpsCounter = 0;
         this.fpsTime = 0;
         this.isRunning = false;
+
+        // Auto-save timer
+        this.lastSaveTime = 0;
 
         // Save system foundation
         this.saveKey = 'earlyChurchDungeonSave';
@@ -270,11 +276,17 @@ class Game {
     start() {
         this.isRunning = true;
         this.lastTime = performance.now();
+        this.lastSaveTime = this.lastTime;
         this.gameLoop(this.lastTime);
     }
 
     stop() {
         this.isRunning = false;
+    }
+
+    changeState(newState) {
+        console.log(`State: ${this.state} -> ${newState}`);
+        this.state = newState;
     }
 
     // Main game loop (60fps target)
@@ -296,7 +308,7 @@ class Game {
         }
 
         // Update game state
-        this.update(deltaTime);
+        this.update(deltaTime, currentTime);
 
         // Render
         this.render();
@@ -305,21 +317,92 @@ class Game {
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 
-    update(deltaTime) {
-        // Update player
-        this.player.update(this.map, this.tileSize);
-        
-        // Auto-save periodically (every 5 seconds)
-        if (Math.floor(this.lastTime / 5000) !== Math.floor((this.lastTime - deltaTime) / 5000)) {
-            this.saveGame();
+    update(deltaTime, currentTime) {
+        switch (this.state) {
+            case GameState.PLAYING:
+                this.updatePlaying(deltaTime, currentTime);
+                break;
+            case GameState.DIALOGUE:
+                this.updateDialogue(deltaTime);
+                break;
+            case GameState.COMBAT:
+                this.updateCombat(deltaTime);
+                break;
+            case GameState.INVENTORY:
+                this.updateInventory(deltaTime);
+                break;
+            case GameState.PAUSED:
+                break;
         }
     }
 
+    updatePlaying(deltaTime, currentTime) {
+        // Update player
+        this.player.update(this.map);
+
+        // Auto-save periodically
+        if (currentTime - this.lastSaveTime >= CONFIG.AUTO_SAVE_INTERVAL) {
+            this.saveGame();
+            this.lastSaveTime = currentTime;
+        }
+    }
+
+    updateDialogue(deltaTime) {
+        // Stub — implemented in Session 4
+    }
+
+    updateCombat(deltaTime) {
+        // Stub — implemented in Session 5
+    }
+
+    updateInventory(deltaTime) {
+        // Stub — implemented in Session 6
+    }
+
     render() {
+        switch (this.state) {
+            case GameState.PLAYING:
+                this.renderPlaying();
+                break;
+            case GameState.DIALOGUE:
+                this.renderPlaying();
+                this.renderDialogue();
+                break;
+            case GameState.COMBAT:
+                this.renderCombat();
+                break;
+            case GameState.INVENTORY:
+                this.renderPlaying();
+                this.renderInventory();
+                break;
+            case GameState.PAUSED:
+                this.renderPlaying();
+                this.renderPaused();
+                break;
+        }
+    }
+
+    renderPlaying() {
         this.renderer.render({
             player: this.player,
             map: this.map
         });
+    }
+
+    renderDialogue() {
+        // Stub — implemented in Session 4
+    }
+
+    renderCombat() {
+        // Stub — implemented in Session 5
+    }
+
+    renderInventory() {
+        // Stub — implemented in Session 6
+    }
+
+    renderPaused() {
+        // Stub — implemented in Session 3
     }
 
     updateUI() {
@@ -330,7 +413,7 @@ class Game {
         }
 
         // Update position display
-        const tilePos = this.player.getTilePosition(this.tileSize);
+        const tilePos = this.player.getTilePosition();
         const posXElement = document.getElementById('posX');
         const posYElement = document.getElementById('posY');
         if (posXElement && posYElement) {
