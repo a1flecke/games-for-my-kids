@@ -2,6 +2,7 @@
  * Game - Main game engine with state machine, input routing, and game loop
  *
  * Session 3: Level loading from JSON, NPC support, interaction system.
+ * Session 4: Dialogue system integration, quest flags, TTS.
  * TileMap class extracted to tilemap.js, Camera to camera.js.
  */
 
@@ -28,6 +29,7 @@ class Game {
         this.renderer = new Renderer(canvas);
         this.input = new InputHandler();
         this.screens = new ScreenManager();
+        this.dialogue = new DialogueSystem();
 
         // Game loop
         this.lastTime = 0;
@@ -120,7 +122,12 @@ class Game {
         const success = await this.loadLevel(1);
 
         if (success) {
-            // Try to load saved game data (position, stats)
+            // Register level dialogue content
+            if (window.LEVEL1_DIALOGUES) {
+                this.dialogue.registerDialogues(window.LEVEL1_DIALOGUES);
+            }
+
+            // Try to load saved game data (position, stats, quest flags)
             this.loadGame();
             this.lastSaveTime = performance.now();
             this.changeState(GameState.PLAYING);
@@ -342,11 +349,18 @@ class Game {
     handleInteract() {
         if (!this.nearInteractable) return;
 
-        // NPC interaction
+        // NPC interaction — start dialogue
         if (this.nearNPC) {
             const result = this.nearNPC.interact();
             console.log('NPC interaction:', result);
-            // Dialogue system will be wired up in Session 4
+
+            if (result.dialogueId) {
+                this.dialogue.startDialogue(result.dialogueId, () => {
+                    // Dialogue ended — return to playing
+                    this.changeState(GameState.PLAYING);
+                });
+                this.changeState(GameState.DIALOGUE);
+            }
             return;
         }
 
@@ -390,7 +404,12 @@ class Game {
     }
 
     updateDialogue(deltaTime) {
-        // Stub — implemented in Session 4
+        this.dialogue.update(this.input);
+
+        // If the dialogue system closed itself (e.g. via Escape), return to PLAYING
+        if (!this.dialogue.isActive()) {
+            this.changeState(GameState.PLAYING);
+        }
     }
 
     updateCombat(deltaTime) {
@@ -458,7 +477,7 @@ class Game {
     }
 
     renderDialogue() {
-        // Stub — implemented in Session 4
+        this.dialogue.render(this.renderer.ctx, this.canvas);
     }
 
     renderCombat() {
@@ -528,6 +547,11 @@ class Game {
             }
         }
 
+        // Save quest flags from dialogue system
+        if (this.dialogue) {
+            saveData.questFlags = { ...this.dialogue.questFlags };
+        }
+
         try {
             localStorage.setItem(this.saveKey, JSON.stringify(saveData));
             console.log('Game saved');
@@ -578,6 +602,12 @@ class Game {
                                 npc.hasBeenTalkedTo = data.npcState[npc.id].hasBeenTalkedTo;
                             }
                         }
+                    }
+
+                    // Restore quest flags
+                    if (data.questFlags && this.dialogue) {
+                        this.dialogue.questFlags = { ...data.questFlags };
+                        console.log('Quest flags restored:', Object.keys(data.questFlags));
                     }
 
                     console.log('Game loaded from save');

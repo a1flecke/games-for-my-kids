@@ -130,6 +130,16 @@ Replaced hardcoded test map with data-driven level system. Added interactive til
 - Refactored `js/render.js` (8 tile types with animations, NPC drawing, interaction prompt)
 - Refactored `js/game.js` (async loadLevel, LOADING state, interaction system, save/load tile & NPC state)
 
+### Session 4: Dialogue System (New) ✅
+
+Replaced 5 old dialogue files with one unified DialogueSystem. Fully integrated with game loop.
+
+- Deleted `js/dialogue.js` (old), `js/dialogueSystem.js`, `js/textRenderer.js`, `js/sampleDialogue.js`, `js/gameDialogueData.js`
+- Created `js/dialogue.js` (unified DialogueSystem: typewriter, auto-split at 15 words, branching choices, quest flags, TTS, portrait placeholders)
+- Created `content/level1_dialogue.js` (18 dialogue sequences: tutorial, 3 apostles with quiz branches, Roman Guard branching, boss prefight, victory)
+- Refactored `js/game.js` (DIALOGUE state integration, quest flag save/load)
+- Updated `js/input.js` (added T, 1-4 to game keys)
+
 ---
 
 ## Remaining Sessions
@@ -138,7 +148,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 4 | [session-04.md](sessions/session-04.md) | Opus | Dialogue System (New) |
 | 5 | [session-05.md](sessions/session-05.md) | Opus | Combat System |
 | 6 | [session-06.md](sessions/session-06.md) | Sonnet | Inventory & Items |
 | 7 | [session-07.md](sessions/session-07.md) | Sonnet | Save System & HUD |

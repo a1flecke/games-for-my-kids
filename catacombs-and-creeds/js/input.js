@@ -15,7 +15,8 @@ class InputHandler {
         this.gameKeys = new Set([
             'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
             'w', 'W', 's', 'S', 'a', 'A', 'd', 'D',
-            ' ', 'Escape', 'i', 'I', 'Enter', 'e', 'E'
+            ' ', 'Escape', 'i', 'I', 'Enter', 'e', 'E',
+            't', 'T', '1', '2', '3', '4'
         ]);
 
         window.addEventListener('keydown', (e) => this.onKeyDown(e));
