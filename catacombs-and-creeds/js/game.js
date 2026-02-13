@@ -28,6 +28,9 @@ class Game {
         // Track defeated enemies (by ID) so they don't respawn on reload
         this.defeatedEnemies = new Set();
 
+        // Floor items in the world (spawned from level data)
+        this.worldItems = [];
+
         // Checkpoint position (for respawn on defeat)
         this.checkpointX = 0;
         this.checkpointY = 0;
@@ -44,9 +47,13 @@ class Game {
         this.dialogue = new DialogueSystem();
         this.combat = new CombatSystem();
         this.questions = new QuestionSystem();
+        this.inventory = new InventorySystem();
 
         // Wire question system into combat
         this.combat.questionSystem = this.questions;
+
+        // Wire inventory into combat
+        this.combat.inventory = this.inventory;
 
         // Game loop
         this.lastTime = 0;
@@ -146,6 +153,22 @@ class Game {
                 }
             }
 
+            // Spawn floor items from level data
+            this.worldItems = [];
+            if (levelData.items) {
+                for (const itemSpawn of levelData.items) {
+                    const def = this.inventory.getDef(itemSpawn.type);
+                    this.worldItems.push({
+                        id: itemSpawn.id,
+                        type: itemSpawn.type,
+                        x: gridToWorld(itemSpawn.x, this.tileSize),
+                        y: gridToWorld(itemSpawn.y, this.tileSize),
+                        pickedUp: false,
+                        def: def // Cache definition for rendering
+                    });
+                }
+            }
+
             // Set player position from level data
             if (levelData.playerStart && this.player) {
                 this.player.x = gridToWorld(levelData.playerStart.x, this.tileSize);
@@ -174,10 +197,11 @@ class Game {
             this.tileSize * 2.5
         );
 
-        // Load enemy definitions and questions in parallel
+        // Load enemy definitions, questions, and item definitions in parallel
         await Promise.all([
             this.loadEnemyDefs(),
-            this.questions.load()
+            this.questions.load(),
+            this.inventory.load()
         ]);
 
         // Load level 1
@@ -296,12 +320,25 @@ class Game {
         // Check player-enemy collision (triggers combat)
         this.checkEnemyCollision();
 
+        // Check floor item pickup
+        this.checkItemPickup();
+
+        // Update item notifications
+        this.inventory.updateNotifications(deltaTime);
+
         // Check proximity to interactables
         this.checkNearInteractable();
 
         // Handle SPACE interaction
         if (this.input.wasPressed(' ') || this.input.wasPressed('e') || this.input.wasPressed('E')) {
             this.handleInteract();
+        }
+
+        // Check I key -> inventory
+        if (this.input.wasPressed('i') || this.input.wasPressed('I')) {
+            this.inventory.open();
+            this.changeState(GameState.INVENTORY);
+            return;
         }
 
         // Check Escape -> pause
@@ -465,10 +502,29 @@ class Game {
                         console.log('Stairs interaction — level transition not yet implemented');
                         break;
                     case 'door_locked':
-                        // Could show a message in the future
+                        // Check if player has a key
+                        if (this.inventory.hasItem('catacomb_key')) {
+                            this.inventory.removeItem('catacomb_key');
+                            this.map.unlockDoor(this.nearTile.x, this.nearTile.y);
+                            // Open the door immediately after unlocking
+                            this.map.interact(this.nearTile.x, this.nearTile.y);
+                            this.inventory.showNotification('Used Catacomb Key!');
+                        } else {
+                            this.inventory.showNotification('This door is locked.');
+                        }
                         break;
                     case 'chest_opened':
-                        // Could add item to inventory in the future
+                        // Add chest contents to inventory
+                        if (result.contents) {
+                            const added = this.inventory.addItem(result.contents);
+                            if (added) {
+                                const def = this.inventory.getDef(result.contents);
+                                const itemName = def ? def.name : result.contents;
+                                this.inventory.showNotification(`Obtained ${itemName}!`);
+                            } else {
+                                this.inventory.showNotification('Inventory full!');
+                            }
+                        }
                         break;
                 }
             }
@@ -485,6 +541,7 @@ class Game {
             this.map = null;
             this.npcs = [];
             this.enemies = [];
+            this.worldItems = [];
             this.screens.resetSelection();
             this.changeState(GameState.TITLE);
         }
@@ -512,6 +569,18 @@ class Game {
                 this.defeatedEnemies.add(result.enemyId);
                 console.log(`Enemy "${result.enemyId}" removed from map. XP gained: ${result.xpGained}`);
 
+                // Add item drops to inventory
+                if (result.itemsGained && result.itemsGained.length > 0) {
+                    for (const itemId of result.itemsGained) {
+                        const added = this.inventory.addItem(itemId);
+                        if (added) {
+                            const def = this.inventory.getDef(itemId);
+                            const itemName = def ? def.name : itemId;
+                            this.inventory.showNotification(`Obtained ${itemName}!`);
+                        }
+                    }
+                }
+
                 // Save after combat victory
                 this.saveGame();
             } else {
@@ -526,7 +595,11 @@ class Game {
     }
 
     updateInventory(deltaTime) {
-        // Stub — implemented in Session 6
+        this.inventory.updateNotifications(deltaTime);
+        const result = this.inventory.update(this.input, this.player);
+        if (result === 'close') {
+            this.changeState(GameState.PLAYING);
+        }
     }
 
     render() {
@@ -582,8 +655,11 @@ class Game {
             map: this.map,
             npcs: this.npcs,
             enemies: this.enemies,
+            worldItems: this.worldItems,
             nearInteractable: this.nearInteractable
         });
+        // Draw item notifications on top of the game world
+        this.inventory.renderNotifications(this.renderer.ctx, this.canvas);
     }
 
     renderDialogue() {
@@ -595,7 +671,8 @@ class Game {
     }
 
     renderInventory() {
-        // Stub — implemented in Session 6
+        this.inventory.render(this.renderer.ctx, this.canvas);
+        this.inventory.renderNotifications(this.renderer.ctx, this.canvas);
     }
 
     // ── Enemy systems ──────────────────────────────────────────────
@@ -660,6 +737,39 @@ class Game {
             if (aabbCollision(playerBox, enemyBox)) {
                 this.startCombatWithEnemy(enemy);
                 return;
+            }
+        }
+    }
+
+    /**
+     * Check if player overlaps a floor item and auto-pickup.
+     */
+    checkItemPickup() {
+        if (!this.player || this.worldItems.length === 0) return;
+
+        const pickupRange = this.tileSize * 0.6;
+
+        for (const item of this.worldItems) {
+            if (item.pickedUp) continue;
+
+            const dx = this.player.x - item.x;
+            const dy = this.player.y - item.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist <= pickupRange) {
+                const added = this.inventory.addItem(item.type);
+                if (added) {
+                    item.pickedUp = true;
+                    const def = this.inventory.getDef(item.type);
+                    const itemName = def ? def.name : item.type;
+                    this.inventory.showNotification(`Obtained ${itemName}!`);
+                } else {
+                    // Only show full message once per item
+                    if (!item.fullWarningShown) {
+                        this.inventory.showNotification('Inventory full!');
+                        item.fullWarningShown = true;
+                    }
+                }
             }
         }
     }
@@ -758,6 +868,23 @@ class Game {
         // Save defeated enemies
         saveData.defeatedEnemies = [...this.defeatedEnemies];
 
+        // Save inventory
+        if (this.inventory) {
+            saveData.inventory = this.inventory.toSaveData();
+        }
+
+        // Save equipment bonus
+        if (this.player.equipmentBonus) {
+            saveData.equipmentBonus = { ...this.player.equipmentBonus };
+        }
+
+        // Save picked-up state of world items
+        if (this.worldItems.length > 0) {
+            saveData.pickedUpItems = this.worldItems
+                .filter(i => i.pickedUp)
+                .map(i => i.id);
+        }
+
         // Save checkpoint
         saveData.checkpointX = this.checkpointX;
         saveData.checkpointY = this.checkpointY;
@@ -832,6 +959,25 @@ class Game {
                     if (data.checkpointX !== undefined) {
                         this.checkpointX = data.checkpointX;
                         this.checkpointY = data.checkpointY;
+                    }
+
+                    // Restore inventory
+                    if (data.inventory && this.inventory) {
+                        // Reset equipment bonus before restoring (fromSaveData re-applies)
+                        this.player.equipmentBonus = { defense: 0, attack: 0, wisdom: 0 };
+                        this.inventory.fromSaveData(data.inventory, this.player);
+                        console.log(`Inventory restored: ${this.inventory.items.length} items`);
+                    }
+
+                    // Restore picked-up world items
+                    if (data.pickedUpItems && this.worldItems.length > 0) {
+                        const pickedSet = new Set(data.pickedUpItems);
+                        for (const item of this.worldItems) {
+                            if (pickedSet.has(item.id)) {
+                                item.pickedUp = true;
+                            }
+                        }
+                        console.log(`Picked-up items restored: ${data.pickedUpItems.length}`);
                     }
 
                     console.log('Game loaded from save');

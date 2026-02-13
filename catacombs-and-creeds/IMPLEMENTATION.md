@@ -151,6 +151,19 @@ Turn-based combat with educational questions. Enemy patrol, collision, victory/d
 - Refactored `js/render.js` (enemy drawing on overworld with boss crown indicators)
 - Refactored `js/game.js` (enemy spawning/patrol/collision, combat state wiring, defeated enemies persistence, checkpoint system)
 
+### Session 6: Inventory & Items ✅
+
+Full inventory system with item management, equipment, combat integration, and save/load.
+
+- Created `data/items.json` (9 item definitions: consumables, equipment, quest items, collectibles)
+- Created `js/inventory.js` (InventorySystem: 20-slot grid, equipment slots, consumable usage in/out of combat, sub-menu actions, notification popups, serialization)
+- Refactored `js/player.js` (equipmentBonus property, getEffectiveAttack/getEffectiveDefense methods)
+- Refactored `js/combat.js` (ITEM_SELECT sub-state, item menu UI, effective stats in damage formulas, item name display on victory)
+- Refactored `js/game.js` (floor item spawning, auto-pickup, chest→inventory, catacomb key→unlock doors, combat drops, inventory state, save/load for inventory and picked-up items)
+- Refactored `js/render.js` (floor item drawing with bobbing/glow/sparkle animations)
+- Updated `data/levels/level1.json` (4 floor items, chest contents mapped to item IDs)
+- Updated `data/enemies.json` (Roman Scout drops bread, Centurion drops scripture_scroll)
+
 ---
 
 ## Remaining Sessions
@@ -159,7 +172,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 6 | [session-06.md](sessions/session-06.md) | Sonnet | Inventory & Items |
 | 7 | [session-07.md](sessions/session-07.md) | Sonnet | Save System & HUD |
 | 8 | [session-08.md](sessions/session-08.md) | Opus | Level 1 Complete & Tutorial |
 | 9 | [session-09.md](sessions/session-09.md) | Opus | Level 2 - Persecutions & Stealth |

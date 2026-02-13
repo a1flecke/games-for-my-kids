@@ -726,6 +726,45 @@ class Renderer {
         }
     }
 
+    // Draw a floor item (colored square with sparkle effect)
+    drawFloorItem(item, itemDef) {
+        const screenPos = this.camera.worldToScreen(item.x, item.y);
+        const screenX = screenPos.x;
+        const screenY = screenPos.y;
+        const size = 16;
+
+        const ctx = this.ctx;
+
+        // Cull off-screen
+        if (screenX + size < 0 || screenX - size > this.canvas.width ||
+            screenY + size < 0 || screenY - size > this.canvas.height) {
+            return;
+        }
+
+        // Bobbing animation
+        const bob = Math.sin(this.animTime * 3 + item.x * 0.1 + item.y * 0.1) * 2;
+
+        // Glow effect
+        const pulse = Math.sin(this.animTime * 4 + item.x * 0.2) * 0.15 + 0.35;
+        ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY + bob, size * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Item square
+        ctx.fillStyle = (itemDef && itemDef.color) || '#ffd700';
+        ctx.fillRect(screenX - size / 2, screenY - size / 2 + bob, size, size);
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(screenX - size / 2, screenY - size / 2 + bob, size, size);
+
+        // Sparkle particles
+        const sparkle = Math.sin(this.animTime * 6 + item.x) * 0.5 + 0.5;
+        ctx.fillStyle = `rgba(255, 255, 200, ${sparkle})`;
+        ctx.fillRect(screenX + 5, screenY - 6 + bob, 2, 2);
+        ctx.fillRect(screenX - 7, screenY + 4 + bob, 2, 2);
+    }
+
     // Main render method
     render(gameState) {
         // Advance animation time
@@ -743,6 +782,15 @@ class Renderer {
 
         // Draw map
         this.drawMap(gameState.map);
+
+        // Draw floor items (after map, before entities)
+        if (gameState.worldItems) {
+            for (const item of gameState.worldItems) {
+                if (!item.pickedUp) {
+                    this.drawFloorItem(item, item.def);
+                }
+            }
+        }
 
         // Draw enemies
         if (gameState.enemies) {

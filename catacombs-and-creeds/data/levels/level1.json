@@ -38,10 +38,10 @@
     { "x": 4, "y": 16, "locked": false },
     { "x": 14, "y": 16, "locked": true },
     { "x": 24, "y": 16, "locked": false },
-    { "x": 3, "y": 3, "contents": "Scroll of Peter" },
-    { "x": 26, "y": 3, "contents": "Scroll of John" },
-    { "x": 10, "y": 15, "contents": "Health Potion" },
-    { "x": 18, "y": 14, "contents": "Catacomb Key" }
+    { "x": 3, "y": 3, "contents": "scroll_of_peter" },
+    { "x": 26, "y": 3, "contents": "scroll_of_john" },
+    { "x": 10, "y": 15, "contents": "bread" },
+    { "x": 18, "y": 14, "contents": "catacomb_key" }
   ],
   "npcs": [
     {
@@ -93,7 +93,9 @@
     { "id": "centurion", "type": "roman_centurion", "x": 14, "y": 13 }
   ],
   "items": [
-    { "id": "torch_1", "type": "torch", "x": 5, "y": 17 },
-    { "id": "bread_1", "type": "bread", "x": 25, "y": 19 }
+    { "id": "bread_1", "type": "bread", "x": 25, "y": 19 },
+    { "id": "bread_2", "type": "bread", "x": 5, "y": 17 },
+    { "id": "prayer_beads_1", "type": "prayer_beads", "x": 18, "y": 17 },
+    { "id": "scripture_scroll_1", "type": "scripture_scroll", "x": 1, "y": 10 }
   ]
 }

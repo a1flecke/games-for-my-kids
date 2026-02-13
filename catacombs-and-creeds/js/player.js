@@ -25,6 +25,9 @@ class Player {
         this.xp = 0;
         this.level = 1;
         this.xpThreshold = 100;
+
+        // Equipment stat bonuses (modified by InventorySystem equip/unequip)
+        this.equipmentBonus = { defense: 0, attack: 0, wisdom: 0 };
     }
 
     /** Update player position based on movement flags */
@@ -105,6 +108,16 @@ class Player {
         this.hp = this.maxHp;
         this.xpThreshold = Math.ceil(this.xpThreshold * 1.1);
         console.log(`Level up! Now level ${this.level}`);
+    }
+
+    /** Get effective attack (base + equipment bonus) */
+    getEffectiveAttack() {
+        return this.attack + this.equipmentBonus.attack;
+    }
+
+    /** Get effective defense (base + equipment bonus) */
+    getEffectiveDefense() {
+        return this.defense + this.equipmentBonus.defense;
     }
 
     /** Reduce HP by amount (min 0) */

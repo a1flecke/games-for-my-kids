@@ -11,14 +11,15 @@
 
 /** Combat sub-states */
 const CombatState = Object.freeze({
-    FADE_IN:     'FADE_IN',
-    PLAYER_TURN: 'PLAYER_TURN',
-    ANIMATING:   'ANIMATING',
-    ENEMY_TURN:  'ENEMY_TURN',
-    QUESTION:    'QUESTION',
-    VICTORY:     'VICTORY',
-    DEFEAT:      'DEFEAT',
-    FADE_OUT:    'FADE_OUT'
+    FADE_IN:      'FADE_IN',
+    PLAYER_TURN:  'PLAYER_TURN',
+    ANIMATING:    'ANIMATING',
+    ENEMY_TURN:   'ENEMY_TURN',
+    QUESTION:     'QUESTION',
+    ITEM_SELECT:  'ITEM_SELECT',
+    VICTORY:      'VICTORY',
+    DEFEAT:       'DEFEAT',
+    FADE_OUT:     'FADE_OUT'
 });
 
 class CombatSystem {
@@ -86,6 +87,13 @@ class CombatSystem {
 
         // Question system reference (set by Game)
         this.questionSystem = null;
+
+        // Inventory reference (set by Game)
+        this.inventory = null;
+
+        // Item select sub-state
+        this.itemSelectList = [];    // Array of { id, name, quantity, def }
+        this.selectedItemIndex = 0;
 
         // Current game level (for question filtering)
         this.gameLevel = 1;
@@ -270,7 +278,7 @@ class CombatSystem {
             return { damage: 0, isCrit: false, isMiss: true };
         }
 
-        let baseDamage = this.player.attack - (this.enemy.defense / 2);
+        let baseDamage = this.player.getEffectiveAttack() - (this.enemy.defense / 2);
         baseDamage += randomInt(-2, 2);
         baseDamage = Math.max(1, Math.round(baseDamage)); // Minimum 1 damage
 
@@ -295,7 +303,7 @@ class CombatSystem {
      * @param {boolean} isSpecial - Whether this is a boss special attack
      */
     calculateEnemyDamage(isSpecial) {
-        let baseDamage = this.enemy.attack - (this.player.defense / 2);
+        let baseDamage = this.enemy.attack - (this.player.getEffectiveDefense() / 2);
         baseDamage += randomInt(-2, 2);
         baseDamage = Math.max(1, Math.round(baseDamage));
 
@@ -385,6 +393,10 @@ class CombatSystem {
 
             case CombatState.QUESTION:
                 this.updateQuestion(input, deltaTime);
+                break;
+
+            case CombatState.ITEM_SELECT:
+                this.updateItemSelect(input);
                 break;
 
             case CombatState.VICTORY:
@@ -514,9 +526,69 @@ class CombatSystem {
     }
 
     playerUseItem() {
-        // Stub: no inventory system yet, show message
-        this.setTurnMessage('No items to use yet!');
-        // Don't consume the turn - player can pick another action
+        if (!this.inventory) {
+            this.setTurnMessage('No items to use yet!');
+            return;
+        }
+
+        this.itemSelectList = this.inventory.getUsableItems();
+        if (this.itemSelectList.length === 0) {
+            this.setTurnMessage('No usable items!');
+            return;
+        }
+
+        this.selectedItemIndex = 0;
+        this.state = CombatState.ITEM_SELECT;
+    }
+
+    updateItemSelect(input) {
+        // Navigate item list
+        if (input.wasPressed('ArrowUp') || input.wasPressed('w') || input.wasPressed('W')) {
+            this.selectedItemIndex = (this.selectedItemIndex - 1 + this.itemSelectList.length) % this.itemSelectList.length;
+        }
+        if (input.wasPressed('ArrowDown') || input.wasPressed('s') || input.wasPressed('S')) {
+            this.selectedItemIndex = (this.selectedItemIndex + 1) % this.itemSelectList.length;
+        }
+
+        // Number keys for quick select
+        for (let i = 0; i < Math.min(this.itemSelectList.length, 4); i++) {
+            if (input.wasPressed(String(i + 1))) {
+                this.selectedItemIndex = i;
+                this.executeItemUse();
+                return;
+            }
+        }
+
+        // Confirm selection
+        if (input.wasPressed('Enter') || input.wasPressed(' ')) {
+            this.executeItemUse();
+            return;
+        }
+
+        // Cancel back to action menu
+        if (input.wasPressed('Escape')) {
+            this.state = CombatState.PLAYER_TURN;
+        }
+    }
+
+    executeItemUse() {
+        const item = this.itemSelectList[this.selectedItemIndex];
+        if (!item || !this.inventory) return;
+
+        const result = this.inventory.useItemInCombat(item.id, this);
+        if (result) {
+            this.setTurnMessage(result.message);
+            if (result.healed > 0) {
+                this.addFloatingNumber(`+${result.healed} HP`, 200, 420, CONFIG.COLORS.success);
+            }
+            // Using an item consumes the turn
+            this.startAnimation('heal', 400, () => {
+                this.startEnemyTurn();
+            });
+        } else {
+            this.setTurnMessage('Could not use item!');
+            this.state = CombatState.PLAYER_TURN;
+        }
     }
 
     // ── Enemy turn ──────────────────────────────────────────────────
@@ -759,6 +831,11 @@ class CombatSystem {
             // Question screen
             if (this.state === CombatState.QUESTION) {
                 this.drawQuestion(ctx, w, h, a);
+            }
+
+            // Item select screen
+            if (this.state === CombatState.ITEM_SELECT) {
+                this.drawItemMenu(ctx, w, h, a);
             }
 
             // Floating damage numbers
@@ -1212,8 +1289,10 @@ class CombatSystem {
         if (this.itemsGained.length > 0) {
             ctx.fillStyle = a.textColor;
             ctx.font = `16px ${a.fontFamily}`;
-            for (const item of this.itemsGained) {
-                ctx.fillText(`Found: ${item}`, w / 2, nextY);
+            for (const itemId of this.itemsGained) {
+                const def = this.inventory ? this.inventory.getDef(itemId) : null;
+                const displayName = def ? def.name : itemId;
+                ctx.fillText(`Found: ${displayName}`, w / 2, nextY);
                 nextY += 24;
             }
         }
@@ -1267,6 +1346,73 @@ class CombatSystem {
             ctx.textAlign = 'center';
             ctx.fillText('Press Enter to continue', w / 2, boxY + boxH - 20);
         }
+    }
+
+    drawItemMenu(ctx, w, h, a) {
+        const menuX = w - 240;
+        const menuY = h - 260;
+        const menuW = 220;
+        const itemCount = this.itemSelectList.length;
+        const menuH = 40 + itemCount * (this.BUTTON_SIZE + 4);
+
+        // Menu background
+        ctx.fillStyle = 'rgba(30, 30, 50, 0.95)';
+        ctx.fillRect(menuX, menuY, menuW, menuH);
+        ctx.strokeStyle = CONFIG.COLORS.warning;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(menuX, menuY, menuW, menuH);
+
+        // Title
+        ctx.fillStyle = '#ffd700';
+        ctx.font = `bold 16px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Use Item', menuX + menuW / 2, menuY + 8);
+
+        // Item buttons
+        const buttonStartY = menuY + 34;
+        const buttonH = this.BUTTON_SIZE;
+
+        for (let i = 0; i < itemCount; i++) {
+            const item = this.itemSelectList[i];
+            const btnY = buttonStartY + i * (buttonH + 4);
+            const isSelected = i === this.selectedItemIndex;
+
+            // Button background
+            ctx.fillStyle = isSelected ? CONFIG.COLORS.info : 'rgba(60, 60, 80, 0.8)';
+            ctx.fillRect(menuX + 10, btnY, menuW - 20, buttonH - 4);
+
+            // Button border
+            ctx.strokeStyle = isSelected ? '#ffffff' : '#555555';
+            ctx.lineWidth = isSelected ? 2 : 1;
+            ctx.strokeRect(menuX + 10, btnY, menuW - 20, buttonH - 4);
+
+            // Item color swatch
+            if (item.def) {
+                ctx.fillStyle = item.def.color || '#888888';
+                ctx.fillRect(menuX + 16, btnY + 6, 14, 14);
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(menuX + 16, btnY + 6, 14, 14);
+            }
+
+            // Item text
+            ctx.fillStyle = isSelected ? '#ffffff' : '#cccccc';
+            ctx.font = `${isSelected ? 'bold ' : ''}${a.fontSize}px ${a.fontFamily}`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+
+            const prefix = `${i + 1}. `;
+            const qtyText = item.quantity > 1 ? ` x${item.quantity}` : '';
+            ctx.fillText(prefix + item.name + qtyText, menuX + 36, btnY + (buttonH - 4) / 2);
+        }
+
+        // Hint
+        ctx.fillStyle = '#888888';
+        ctx.font = `11px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Esc to cancel', menuX + menuW / 2, buttonStartY + itemCount * (buttonH + 4) + 2);
     }
 
     /**

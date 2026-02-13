@@ -1,0 +1,84 @@
+{
+  "bread": {
+    "id": "bread",
+    "name": "Bread",
+    "description": "Simple bread. Heals 20 HP.",
+    "category": "consumable",
+    "stackable": true,
+    "maxStack": 99,
+    "effect": { "type": "heal", "amount": 20 },
+    "color": "#d4a44a"
+  },
+  "water": {
+    "id": "water",
+    "name": "Water",
+    "description": "Fresh water. Heals 10 HP.",
+    "category": "consumable",
+    "stackable": true,
+    "maxStack": 99,
+    "effect": { "type": "heal", "amount": 10 },
+    "color": "#6ca0dc"
+  },
+  "scripture_scroll": {
+    "id": "scripture_scroll",
+    "name": "Scripture Scroll",
+    "description": "A holy scripture. Fully heals HP.",
+    "category": "consumable",
+    "stackable": true,
+    "maxStack": 99,
+    "effect": { "type": "fullHeal" },
+    "color": "#f0e6c8"
+  },
+  "faith_shield": {
+    "id": "faith_shield",
+    "name": "Faith Shield",
+    "description": "A shield blessed by faith. +5 Defense.",
+    "category": "equipment",
+    "slot": "shield",
+    "stackable": false,
+    "statBonus": { "defense": 5 },
+    "color": "#b8860b"
+  },
+  "prayer_beads": {
+    "id": "prayer_beads",
+    "name": "Prayer Beads",
+    "description": "Wooden beads for prayer. +1 Defense, +3 Wisdom.",
+    "category": "equipment",
+    "slot": "accessory",
+    "stackable": false,
+    "statBonus": { "defense": 1, "wisdom": 3 },
+    "color": "#8b6914"
+  },
+  "apostle_coin": {
+    "id": "apostle_coin",
+    "name": "Apostle Coin",
+    "description": "A coin given by an apostle. A quest item.",
+    "category": "quest",
+    "stackable": false,
+    "color": "#ffd700"
+  },
+  "catacomb_key": {
+    "id": "catacomb_key",
+    "name": "Catacomb Key",
+    "description": "An old iron key. Opens locked doors.",
+    "category": "quest",
+    "stackable": false,
+    "color": "#a0a0a0"
+  },
+  "scroll_of_peter": {
+    "id": "scroll_of_peter",
+    "name": "Scroll of Peter",
+    "description": "A scroll with the teachings of Peter.",
+    "category": "collectible",
+    "stackable": false,
+    "color": "#d4c4a0"
+  },
+  "scroll_of_john": {
+    "id": "scroll_of_john",
+    "name": "Scroll of John",
+    "description": "A scroll with the writings of John.",
+    "category": "collectible",
+    "stackable": false,
+    "color": "#c4d4a0"
+  }
+}
