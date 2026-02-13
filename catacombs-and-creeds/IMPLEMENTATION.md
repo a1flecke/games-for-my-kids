@@ -140,6 +140,17 @@ Replaced 5 old dialogue files with one unified DialogueSystem. Fully integrated 
 - Refactored `js/game.js` (DIALOGUE state integration, quest flag save/load)
 - Updated `js/input.js` (added T, 1-4 to game keys)
 
+### Session 5: Combat System ✅
+
+Turn-based combat with educational questions. Enemy patrol, collision, victory/defeat flows.
+
+- Created `js/combat.js` (CombatSystem: 8 sub-states, attack/defend/question/item actions, enemy AI, boss patterns, fade transitions, floating damage numbers, full combat UI)
+- Created `js/questions.js` (QuestionSystem: loads from JSON, tracks asked questions, filters by level)
+- Created `data/enemies.json` (3 enemy types: Doubtful Villager, Roman Scout, Roman Centurion boss)
+- Created `data/questions.json` (8 Level 1 educational questions with explanations)
+- Refactored `js/render.js` (enemy drawing on overworld with boss crown indicators)
+- Refactored `js/game.js` (enemy spawning/patrol/collision, combat state wiring, defeated enemies persistence, checkpoint system)
+
 ---
 
 ## Remaining Sessions
@@ -148,7 +159,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 5 | [session-05.md](sessions/session-05.md) | Opus | Combat System |
 | 6 | [session-06.md](sessions/session-06.md) | Sonnet | Inventory & Items |
 | 7 | [session-07.md](sessions/session-07.md) | Sonnet | Save System & HUD |
 | 8 | [session-08.md](sessions/session-08.md) | Opus | Level 1 Complete & Tutorial |

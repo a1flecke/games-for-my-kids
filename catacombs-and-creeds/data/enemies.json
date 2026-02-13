@@ -1,0 +1,40 @@
+{
+  "doubtful_villager": {
+    "name": "Doubtful Villager",
+    "hp": 30,
+    "attack": 5,
+    "defense": 2,
+    "xpReward": 20,
+    "itemDrops": [],
+    "color": "#8b6b4a",
+    "isBoss": false,
+    "patrolRange": 2,
+    "patrolSpeed": 0.5
+  },
+  "roman_guard": {
+    "name": "Roman Scout",
+    "hp": 50,
+    "attack": 8,
+    "defense": 4,
+    "xpReward": 35,
+    "itemDrops": [],
+    "color": "#8b4444",
+    "isBoss": false,
+    "patrolRange": 2,
+    "patrolSpeed": 0.5
+  },
+  "roman_centurion": {
+    "name": "Roman Centurion",
+    "hp": 80,
+    "attack": 12,
+    "defense": 6,
+    "xpReward": 75,
+    "itemDrops": ["Catacomb Key"],
+    "color": "#aa3333",
+    "isBoss": true,
+    "patrolRange": 1,
+    "patrolSpeed": 0.3,
+    "specialAttackName": "Shield Bash",
+    "specialAttackMultiplier": 1.5
+  }
+}

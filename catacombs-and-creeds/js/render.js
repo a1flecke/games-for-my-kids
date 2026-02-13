@@ -627,6 +627,85 @@ class Renderer {
         }
     }
 
+    // Draw an enemy entity on the overworld map
+    drawEnemy(enemy) {
+        const screenPos = this.camera.worldToScreen(enemy.x, enemy.y);
+        const screenX = screenPos.x;
+        const screenY = screenPos.y;
+        const size = CONFIG.TILE_SIZE;
+        const halfSize = size / 2;
+
+        const ctx = this.ctx;
+
+        // Cull off-screen enemies
+        if (screenX + halfSize < 0 || screenX - halfSize > this.canvas.width ||
+            screenY + halfSize < 0 || screenY - halfSize > this.canvas.height) {
+            return;
+        }
+
+        // Enemy shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.ellipse(screenX, screenY + halfSize - 4, halfSize * 0.5, halfSize * 0.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Enemy body
+        const enemyColor = enemy.color || this.colors.enemy;
+        ctx.fillStyle = enemyColor;
+        ctx.fillRect(screenX - halfSize + 2, screenY - halfSize + 2, size - 4, size - 4);
+
+        // Enemy outline (red-tinted to distinguish from NPCs)
+        ctx.strokeStyle = this.colors.danger;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(screenX - halfSize + 2, screenY - halfSize + 2, size - 4, size - 4);
+
+        // Angry eyes (to distinguish from friendly NPCs)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(screenX - 8, screenY - 4, 6, 6);
+        ctx.fillRect(screenX + 2, screenY - 4, 6, 6);
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(screenX - 6, screenY - 2, 3, 3);
+        ctx.fillRect(screenX + 4, screenY - 2, 3, 3);
+
+        // Eyebrow slants (angry look)
+        ctx.strokeStyle = enemyColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(screenX - 10, screenY - 8);
+        ctx.lineTo(screenX - 2, screenY - 5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(screenX + 10, screenY - 8);
+        ctx.lineTo(screenX + 2, screenY - 5);
+        ctx.stroke();
+
+        // Boss indicator (small crown)
+        if (enemy.isBoss) {
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.moveTo(screenX - 8, screenY - halfSize + 2);
+            ctx.lineTo(screenX - 10, screenY - halfSize - 6);
+            ctx.lineTo(screenX - 4, screenY - halfSize - 2);
+            ctx.lineTo(screenX, screenY - halfSize - 8);
+            ctx.lineTo(screenX + 4, screenY - halfSize - 2);
+            ctx.lineTo(screenX + 10, screenY - halfSize - 6);
+            ctx.lineTo(screenX + 8, screenY - halfSize + 2);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Name label above enemy
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.font = `bold 11px ${CONFIG.ACCESSIBILITY.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        const labelY = enemy.isBoss ? screenY - halfSize - 10 : screenY - halfSize - 2;
+        ctx.strokeText(enemy.name, screenX, labelY);
+        ctx.fillText(enemy.name, screenX, labelY);
+    }
+
     // Draw a rounded rectangle path (fallback for older browsers without roundRect)
     drawRoundRect(ctx, x, y, w, h, r) {
         ctx.beginPath();
@@ -665,6 +744,13 @@ class Renderer {
         // Draw map
         this.drawMap(gameState.map);
 
+        // Draw enemies
+        if (gameState.enemies) {
+            for (const enemy of gameState.enemies) {
+                this.drawEnemy(enemy);
+            }
+        }
+
         // Draw NPCs
         if (gameState.npcs) {
             for (const npc of gameState.npcs) {
@@ -672,7 +758,7 @@ class Renderer {
             }
         }
 
-        // Draw player (on top of NPCs)
+        // Draw player (on top of NPCs and enemies)
         this.drawPlayer(gameState.player);
 
         // Draw interaction prompt if near something interactable

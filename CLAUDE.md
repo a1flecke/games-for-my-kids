@@ -14,6 +14,13 @@ Collection of educational browser games for 3rd-6th grade students (ages 8-12), 
 - **LocalStorage** for save data
 - Games run directly in-browser with no build step
 
+## Environment
+
+Use `mise` to manage `node` and `yarn` versions. Activate mise shell before running node/yarn:
+```bash
+eval "$(mise activate bash)"
+```
+
 ## Development Workflow
 
 There is no build, lint, or test step. Edit files directly and commit.

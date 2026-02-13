@@ -3,6 +3,7 @@
  *
  * Session 3: Level loading from JSON, NPC support, interaction system.
  * Session 4: Dialogue system integration, quest flags, TTS.
+ * Session 5: Combat system, enemies, questions.
  * TileMap class extracted to tilemap.js, Camera to camera.js.
  */
 
@@ -18,7 +19,18 @@ class Game {
         this.map = null;
         this.player = null;
         this.npcs = [];
+        this.enemies = [];
         this.currentLevel = 0;
+
+        // Enemy definitions loaded from enemies.json
+        this.enemyDefs = {};
+
+        // Track defeated enemies (by ID) so they don't respawn on reload
+        this.defeatedEnemies = new Set();
+
+        // Checkpoint position (for respawn on defeat)
+        this.checkpointX = 0;
+        this.checkpointY = 0;
 
         // Interaction tracking
         this.nearInteractable = false;
@@ -30,6 +42,11 @@ class Game {
         this.input = new InputHandler();
         this.screens = new ScreenManager();
         this.dialogue = new DialogueSystem();
+        this.combat = new CombatSystem();
+        this.questions = new QuestionSystem();
+
+        // Wire question system into combat
+        this.combat.questionSystem = this.questions;
 
         // Game loop
         this.lastTime = 0;
@@ -93,13 +110,52 @@ class Game {
                 }
             }
 
+            // Spawn enemies from level data + enemy definitions
+            this.enemies = [];
+            if (levelData.enemies) {
+                for (const enemySpawn of levelData.enemies) {
+                    // Skip already-defeated enemies
+                    if (this.defeatedEnemies.has(enemySpawn.id)) {
+                        continue;
+                    }
+
+                    const def = this.enemyDefs[enemySpawn.type];
+                    if (!def) {
+                        console.warn(`Unknown enemy type: "${enemySpawn.type}" for enemy "${enemySpawn.id}"`);
+                        continue;
+                    }
+
+                    this.enemies.push({
+                        id: enemySpawn.id,
+                        type: enemySpawn.type,
+                        name: def.name,
+                        color: def.color,
+                        isBoss: def.isBoss || false,
+                        // World position (center of tile)
+                        x: gridToWorld(enemySpawn.x, this.tileSize),
+                        y: gridToWorld(enemySpawn.y, this.tileSize),
+                        // Patrol state
+                        originX: gridToWorld(enemySpawn.x, this.tileSize),
+                        originY: gridToWorld(enemySpawn.y, this.tileSize),
+                        patrolRange: (def.patrolRange || 2) * this.tileSize,
+                        patrolSpeed: def.patrolSpeed || 0.5,
+                        patrolDirection: 1, // 1 = right/down, -1 = left/up
+                        patrolAxis: 'x',    // 'x' or 'y' - patrol horizontally
+                        size: CONFIG.TILE_SIZE
+                    });
+                }
+            }
+
             // Set player position from level data
             if (levelData.playerStart && this.player) {
                 this.player.x = gridToWorld(levelData.playerStart.x, this.tileSize);
                 this.player.y = gridToWorld(levelData.playerStart.y, this.tileSize);
+                // Set initial checkpoint to player start
+                this.checkpointX = this.player.x;
+                this.checkpointY = this.player.y;
             }
 
-            console.log(`Level ${levelNumber} loaded: "${levelData.name}" (${levelData.width}x${levelData.height}), ${this.npcs.length} NPCs`);
+            console.log(`Level ${levelNumber} loaded: "${levelData.name}" (${levelData.width}x${levelData.height}), ${this.npcs.length} NPCs, ${this.enemies.length} enemies`);
             return true;
         } catch (err) {
             console.error('Level load failed:', err);
@@ -118,6 +174,12 @@ class Game {
             this.tileSize * 2.5
         );
 
+        // Load enemy definitions and questions in parallel
+        await Promise.all([
+            this.loadEnemyDefs(),
+            this.questions.load()
+        ]);
+
         // Load level 1
         const success = await this.loadLevel(1);
 
@@ -134,6 +196,23 @@ class Game {
         } else {
             console.error('Failed to load level, returning to title');
             this.changeState(GameState.TITLE);
+        }
+    }
+
+    /**
+     * Load enemy type definitions from JSON.
+     */
+    async loadEnemyDefs() {
+        try {
+            const response = await fetch('data/enemies.json');
+            if (!response.ok) {
+                throw new Error(`Failed to load enemies.json: ${response.status}`);
+            }
+            this.enemyDefs = await response.json();
+            console.log(`Loaded ${Object.keys(this.enemyDefs).length} enemy type(s)`);
+        } catch (err) {
+            console.error('Failed to load enemy definitions:', err);
+            this.enemyDefs = {};
         }
     }
 
@@ -210,6 +289,12 @@ class Game {
 
         // Update player with NPC collision
         this.updatePlayerMovement();
+
+        // Update enemy patrol movement
+        this.updateEnemies(deltaTime);
+
+        // Check player-enemy collision (triggers combat)
+        this.checkEnemyCollision();
 
         // Check proximity to interactables
         this.checkNearInteractable();
@@ -373,6 +458,7 @@ class Game {
                 // Handle specific results
                 switch (result.type) {
                     case 'altar_save':
+                        this.updateCheckpoint();
                         this.saveGame();
                         break;
                     case 'stairs':
@@ -398,6 +484,7 @@ class Game {
             this.player = null;
             this.map = null;
             this.npcs = [];
+            this.enemies = [];
             this.screens.resetSelection();
             this.changeState(GameState.TITLE);
         }
@@ -413,7 +500,29 @@ class Game {
     }
 
     updateCombat(deltaTime) {
-        // Stub — implemented in Session 5
+        this.combat.update(deltaTime, this.input);
+
+        // Check if combat has finished (fade-out complete)
+        if (this.combat.isFinished()) {
+            const result = this.combat.endCombat();
+
+            if (result.outcome === 'victory') {
+                // Remove defeated enemy from the map
+                this.enemies = this.enemies.filter(e => e.id !== result.enemyId);
+                this.defeatedEnemies.add(result.enemyId);
+                console.log(`Enemy "${result.enemyId}" removed from map. XP gained: ${result.xpGained}`);
+
+                // Save after combat victory
+                this.saveGame();
+            } else {
+                // Defeat: respawn player at checkpoint with 50% HP
+                this.player.x = this.checkpointX;
+                this.player.y = this.checkpointY;
+                console.log('Player respawned at checkpoint');
+            }
+
+            this.changeState(GameState.PLAYING);
+        }
     }
 
     updateInventory(deltaTime) {
@@ -472,6 +581,7 @@ class Game {
             player: this.player,
             map: this.map,
             npcs: this.npcs,
+            enemies: this.enemies,
             nearInteractable: this.nearInteractable
         });
     }
@@ -481,11 +591,104 @@ class Game {
     }
 
     renderCombat() {
-        // Stub — implemented in Session 5
+        this.combat.render(this.renderer.ctx, this.canvas);
     }
 
     renderInventory() {
         // Stub — implemented in Session 6
+    }
+
+    // ── Enemy systems ──────────────────────────────────────────────
+
+    /**
+     * Update enemy patrol movement.
+     * Enemies walk back and forth horizontally within their patrol range.
+     */
+    updateEnemies(deltaTime) {
+        for (const enemy of this.enemies) {
+            // Simple horizontal patrol
+            enemy.x += enemy.patrolSpeed * enemy.patrolDirection;
+
+            // Reverse direction at patrol bounds
+            const distFromOrigin = enemy.x - enemy.originX;
+            if (Math.abs(distFromOrigin) >= enemy.patrolRange) {
+                enemy.patrolDirection *= -1;
+                // Clamp to patrol bounds
+                enemy.x = enemy.originX + enemy.patrolRange * Math.sign(distFromOrigin);
+            }
+
+            // Also check tile collision — reverse if hitting a wall
+            const halfSize = enemy.size / 2;
+            const checkX = enemy.patrolDirection > 0
+                ? enemy.x + halfSize
+                : enemy.x - halfSize;
+            const tileX = worldToGrid(checkX, this.tileSize);
+            const tileY = worldToGrid(enemy.y, this.tileSize);
+
+            if (this.map && this.map.isSolid(tileX, tileY)) {
+                enemy.patrolDirection *= -1;
+                // Step back
+                enemy.x -= enemy.patrolSpeed * enemy.patrolDirection;
+            }
+        }
+    }
+
+    /**
+     * Check if the player collides with any enemy.
+     * If so, start combat.
+     */
+    checkEnemyCollision() {
+        if (!this.player || this.enemies.length === 0) return;
+
+        const playerHalf = this.player.size / 2;
+        const playerBox = {
+            x: this.player.x - playerHalf,
+            y: this.player.y - playerHalf,
+            width: this.player.size,
+            height: this.player.size
+        };
+
+        for (const enemy of this.enemies) {
+            const enemyHalf = enemy.size / 2;
+            const enemyBox = {
+                x: enemy.x - enemyHalf,
+                y: enemy.y - enemyHalf,
+                width: enemy.size,
+                height: enemy.size
+            };
+
+            if (aabbCollision(playerBox, enemyBox)) {
+                this.startCombatWithEnemy(enemy);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Initiate combat with a specific enemy.
+     * @param {Object} enemy - Enemy map entity
+     */
+    startCombatWithEnemy(enemy) {
+        const def = this.enemyDefs[enemy.type];
+        if (!def) {
+            console.error(`Cannot start combat: no definition for enemy type "${enemy.type}"`);
+            return;
+        }
+
+        console.log(`Starting combat with ${enemy.name} (${enemy.id})`);
+        this.combat.startCombat(this.player, def, enemy.id, this.currentLevel);
+        this.changeState(GameState.COMBAT);
+    }
+
+    /**
+     * Update the checkpoint position (called when player interacts with an altar).
+     */
+    updateCheckpoint() {
+        if (this.player) {
+            this.checkpointX = this.player.x;
+            this.checkpointY = this.player.y;
+            console.log(`Checkpoint updated: ${worldToGrid(this.checkpointX, this.tileSize)}, ${worldToGrid(this.checkpointY, this.tileSize)}`);
+        }
     }
 
     updateUI() {
@@ -552,6 +755,13 @@ class Game {
             saveData.questFlags = { ...this.dialogue.questFlags };
         }
 
+        // Save defeated enemies
+        saveData.defeatedEnemies = [...this.defeatedEnemies];
+
+        // Save checkpoint
+        saveData.checkpointX = this.checkpointX;
+        saveData.checkpointY = this.checkpointY;
+
         try {
             localStorage.setItem(this.saveKey, JSON.stringify(saveData));
             console.log('Game saved');
@@ -608,6 +818,20 @@ class Game {
                     if (data.questFlags && this.dialogue) {
                         this.dialogue.questFlags = { ...data.questFlags };
                         console.log('Quest flags restored:', Object.keys(data.questFlags));
+                    }
+
+                    // Restore defeated enemies
+                    if (data.defeatedEnemies) {
+                        this.defeatedEnemies = new Set(data.defeatedEnemies);
+                        // Remove defeated enemies from current enemy list
+                        this.enemies = this.enemies.filter(e => !this.defeatedEnemies.has(e.id));
+                        console.log(`Defeated enemies restored: ${this.defeatedEnemies.size}`);
+                    }
+
+                    // Restore checkpoint
+                    if (data.checkpointX !== undefined) {
+                        this.checkpointX = data.checkpointX;
+                        this.checkpointY = data.checkpointY;
                     }
 
                     console.log('Game loaded from save');

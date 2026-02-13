@@ -1,0 +1,186 @@
+[
+  {
+    "id": "q1_persecution",
+    "question": "Why did early Christians meet in secret catacombs?",
+    "choices": [
+      {
+        "text": "They were hiding from Roman persecution",
+        "correct": true,
+        "explanation": "Early Christians met in underground tunnels called catacombs because the Roman Empire persecuted them for their faith."
+      },
+      {
+        "text": "They liked dark places",
+        "correct": false,
+        "explanation": "Early Christians met in catacombs because the Roman Empire persecuted them. They needed safe, hidden places to worship."
+      },
+      {
+        "text": "There were no churches yet",
+        "correct": false,
+        "explanation": "While there were no church buildings yet, the main reason was that Romans persecuted Christians, so they met in secret underground tunnels."
+      }
+    ],
+    "level": 1,
+    "topic": "early_church"
+  },
+  {
+    "id": "q1_apostles_count",
+    "question": "How many apostles did Jesus choose?",
+    "choices": [
+      {
+        "text": "12 apostles",
+        "correct": true,
+        "explanation": "Jesus chose 12 apostles to be his closest followers and to spread his message."
+      },
+      {
+        "text": "7 apostles",
+        "correct": false,
+        "explanation": "Jesus chose 12 apostles, not 7. The number 12 matched the 12 tribes of Israel."
+      },
+      {
+        "text": "3 apostles",
+        "correct": false,
+        "explanation": "Jesus chose 12 apostles. While Peter, James, and John were especially close to Jesus, there were 12 in total."
+      }
+    ],
+    "level": 1,
+    "topic": "apostles"
+  },
+  {
+    "id": "q1_peter_job",
+    "question": "What was the Apostle Peter's job before following Jesus?",
+    "choices": [
+      {
+        "text": "A fisherman",
+        "correct": true,
+        "explanation": "Peter was a fisherman on the Sea of Galilee. Jesus told him he would become a fisher of men!"
+      },
+      {
+        "text": "A carpenter",
+        "correct": false,
+        "explanation": "Peter was actually a fisherman, not a carpenter. Jesus himself was a carpenter before his ministry."
+      },
+      {
+        "text": "A soldier",
+        "correct": false,
+        "explanation": "Peter was a fisherman on the Sea of Galilee. He left his fishing nets behind when Jesus called him."
+      }
+    ],
+    "level": 1,
+    "topic": "apostles"
+  },
+  {
+    "id": "q1_greatest_commandment",
+    "question": "What did Jesus say was the greatest commandment?",
+    "choices": [
+      {
+        "text": "Love God and love each other",
+        "correct": true,
+        "explanation": "Jesus taught that the greatest commandments are to love God with all your heart and to love your neighbor as yourself."
+      },
+      {
+        "text": "Be the strongest warrior",
+        "correct": false,
+        "explanation": "Jesus taught peace and love, not fighting. The greatest commandment is to love God and love each other."
+      },
+      {
+        "text": "Collect as much gold as possible",
+        "correct": false,
+        "explanation": "Jesus taught that love is more important than wealth. The greatest commandment is to love God and love each other."
+      }
+    ],
+    "level": 1,
+    "topic": "teachings"
+  },
+  {
+    "id": "q1_year",
+    "question": "Around what year does this adventure take place?",
+    "choices": [
+      {
+        "text": "64 AD, during the Roman Empire",
+        "correct": true,
+        "explanation": "This adventure takes place around 64 AD, when Emperor Nero ruled Rome and persecuted Christians."
+      },
+      {
+        "text": "1776 AD, during the American Revolution",
+        "correct": false,
+        "explanation": "This story is set in 64 AD, during the time of the Roman Empire under Emperor Nero, over 1700 years before America!"
+      },
+      {
+        "text": "1000 BC, before Jesus was born",
+        "correct": false,
+        "explanation": "This story takes place in 64 AD, about 30 years after Jesus lived. The early Christians were spreading his teachings."
+      }
+    ],
+    "level": 1,
+    "topic": "history"
+  },
+  {
+    "id": "q1_nero",
+    "question": "Who was the Roman Emperor who persecuted Christians?",
+    "choices": [
+      {
+        "text": "Emperor Nero",
+        "correct": true,
+        "explanation": "Emperor Nero blamed Christians for the Great Fire of Rome in 64 AD and began persecuting them."
+      },
+      {
+        "text": "Emperor Augustus",
+        "correct": false,
+        "explanation": "Augustus ruled earlier. It was Emperor Nero who blamed Christians for the Great Fire of Rome and persecuted them."
+      },
+      {
+        "text": "King David",
+        "correct": false,
+        "explanation": "King David lived long before Rome. Emperor Nero was the ruler who persecuted Christians in 64 AD."
+      }
+    ],
+    "level": 1,
+    "topic": "history"
+  },
+  {
+    "id": "q1_faith_action",
+    "question": "What did Apostle James teach about faith?",
+    "choices": [
+      {
+        "text": "Faith means doing good things, not just talking",
+        "correct": true,
+        "explanation": "James taught that faith without actions is not complete. Showing kindness and helping others demonstrates real faith."
+      },
+      {
+        "text": "Faith means staying quiet about what you believe",
+        "correct": false,
+        "explanation": "James taught the opposite! He said faith means putting your beliefs into action by helping others and showing kindness."
+      },
+      {
+        "text": "Faith only matters on special days",
+        "correct": false,
+        "explanation": "James taught that faith is an everyday choice. It means showing love and kindness through your actions every day."
+      }
+    ],
+    "level": 1,
+    "topic": "teachings"
+  },
+  {
+    "id": "q1_rock",
+    "question": "Jesus called Peter 'the rock.' What did he mean?",
+    "choices": [
+      {
+        "text": "Peter would be a strong foundation for the church",
+        "correct": true,
+        "explanation": "Jesus meant that Peter would be strong and dependable, like a rock that others could build upon."
+      },
+      {
+        "text": "Peter was very heavy",
+        "correct": false,
+        "explanation": "It was not about weight! Jesus meant Peter would be a strong, reliable foundation for the church."
+      },
+      {
+        "text": "Peter liked to collect rocks",
+        "correct": false,
+        "explanation": "It was a metaphor! Jesus meant Peter would be strong and dependable, a solid foundation for the church."
+      }
+    ],
+    "level": 1,
+    "topic": "apostles"
+  }
+]
