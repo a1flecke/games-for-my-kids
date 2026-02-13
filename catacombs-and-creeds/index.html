@@ -8,6 +8,9 @@
     <script src="js/config.js" defer></script>
     <script src="js/utils.js" defer></script>
     <script src="js/input.js" defer></script>
+    <script src="js/camera.js" defer></script>
+    <script src="js/tilemap.js" defer></script>
+    <script src="js/npc.js" defer></script>
     <script src="js/player.js" defer></script>
     <script src="js/render.js" defer></script>
     <script src="js/screens.js" defer></script>
@@ -29,14 +32,15 @@
         <canvas id="gameCanvas"></canvas>
 
         <div id="ui">
-            <div class="stat">Level 1: The Catacombs</div>
+            <div class="stat" id="levelName">Level 1: The Catacombs</div>
             <div class="stat">Position: <span id="posX">0</span>, <span id="posY">0</span></div>
             <div class="stat">FPS: <span id="fps">60</span></div>
         </div>
 
         <div id="controls">
             <div>WASD or Arrow Keys to Move</div>
-            <div>Explore the dungeon!</div>
+            <div>SPACE or E to Interact</div>
+            <div>ESC to Pause</div>
         </div>
 
         <div id="loading">

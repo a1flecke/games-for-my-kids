@@ -119,6 +119,17 @@ Decoupled input from player, extracted Player with RPG stats, added title screen
 - Created `js/screens.js` (title screen, pause overlay, menu navigation)
 - Refactored `game.js` (starts in TITLE state, startNewGame(), state-based input routing)
 
+### Session 3: Tile Map System & Level Data ✅
+
+Replaced hardcoded test map with data-driven level system. Added interactive tiles, NPCs, and Camera extraction.
+
+- Created `js/camera.js` (extracted from renderer, instant follow, worldToScreen/screenToWorld)
+- Created `js/tilemap.js` (TileType enum, JSON loading, per-tile state, isSolid/interact, NPC collision)
+- Created `js/npc.js` (grid-to-pixel positioning, interaction range, talked-to tracking)
+- Created `data/levels/level1.json` (30x22 dungeon with 3 apostle paths, doors, chests, altar, NPCs)
+- Refactored `js/render.js` (8 tile types with animations, NPC drawing, interaction prompt)
+- Refactored `js/game.js` (async loadLevel, LOADING state, interaction system, save/load tile & NPC state)
+
 ---
 
 ## Remaining Sessions
@@ -127,7 +138,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 3 | [session-03.md](sessions/session-03.md) | Opus | Tile Map System & Level Data |
 | 4 | [session-04.md](sessions/session-04.md) | Opus | Dialogue System (New) |
 | 5 | [session-05.md](sessions/session-05.md) | Opus | Combat System |
 | 6 | [session-06.md](sessions/session-06.md) | Sonnet | Inventory & Items |
