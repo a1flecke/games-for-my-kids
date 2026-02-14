@@ -481,5 +481,189 @@
     ],
     "level": 3,
     "topic": "creeds"
+  },
+  {
+    "id": "q4_augustine_confessions",
+    "question": "What is Augustine's book 'Confessions' about?",
+    "choices": [
+      {
+        "text": "His journey from a sinful life to following Christ",
+        "correct": true,
+        "explanation": "Augustine's Confessions tells how he lived a wild youth but eventually found God through honest searching and prayer."
+      },
+      {
+        "text": "A guide to building churches",
+        "correct": false,
+        "explanation": "Confessions is not about buildings. It is Augustine's personal story of turning from sin to faith in God."
+      },
+      {
+        "text": "A list of Roman laws",
+        "correct": false,
+        "explanation": "Confessions is not about laws. It is Augustine's honest story of how he found God after years of searching."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_jerome_vulgate",
+    "question": "What was Jerome's most important work?",
+    "choices": [
+      {
+        "text": "Translating the Bible into Latin, called the Vulgate",
+        "correct": true,
+        "explanation": "Jerome spent about 15 years translating the Bible into Latin so ordinary people could read God's word in their language."
+      },
+      {
+        "text": "Painting pictures of saints",
+        "correct": false,
+        "explanation": "Jerome was a scholar, not a painter. His greatest work was translating the Bible into Latin, known as the Vulgate."
+      },
+      {
+        "text": "Building the first monastery",
+        "correct": false,
+        "explanation": "Jerome did not build the first monastery. He translated the Bible into Latin (the Vulgate) so more people could read it."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_ambrose_emperor",
+    "question": "What did Ambrose do when Emperor Theodosius ordered a massacre?",
+    "choices": [
+      {
+        "text": "He refused the emperor communion until he repented",
+        "correct": true,
+        "explanation": "Ambrose bravely told the emperor that even rulers must answer to God. Theodosius eventually repented publicly."
+      },
+      {
+        "text": "He praised the emperor for being strong",
+        "correct": false,
+        "explanation": "Ambrose did not praise violence. He bravely confronted the emperor and refused him communion until he repented."
+      },
+      {
+        "text": "He ran away and hid",
+        "correct": false,
+        "explanation": "Ambrose showed great courage. He stood up to the most powerful man in the world and demanded he repent."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_church_father_meaning",
+    "question": "What is a 'Church Father'?",
+    "choices": [
+      {
+        "text": "An early Christian teacher whose writings shaped the faith",
+        "correct": true,
+        "explanation": "Church Fathers were influential early Christian leaders and writers. Their teachings helped define what Christians believe."
+      },
+      {
+        "text": "The father of a church building",
+        "correct": false,
+        "explanation": "Church Father does not mean someone who owns a building. It refers to early Christian teachers whose writings shaped the faith."
+      },
+      {
+        "text": "A Roman official who controlled churches",
+        "correct": false,
+        "explanation": "Church Fathers were not Roman officials. They were devoted Christian teachers who helped explain and defend the faith."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_city_of_god",
+    "question": "What did Augustine teach in 'City of God'?",
+    "choices": [
+      {
+        "text": "God's kingdom is greater and more lasting than any earthly empire",
+        "correct": true,
+        "explanation": "Augustine wrote City of God after Rome fell. He taught that God's eternal kingdom matters more than any earthly power."
+      },
+      {
+        "text": "How to build a perfect city on earth",
+        "correct": false,
+        "explanation": "City of God is not an architecture guide. Augustine taught that God's eternal kingdom is greater than any earthly empire."
+      },
+      {
+        "text": "That Rome would last forever",
+        "correct": false,
+        "explanation": "Augustine wrote City of God after Rome fell! He taught that earthly kingdoms fall, but God's kingdom lasts forever."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_latin_importance",
+    "question": "Why was Latin important to the early church?",
+    "choices": [
+      {
+        "text": "It was the common language of the Roman world",
+        "correct": true,
+        "explanation": "Latin was spoken across the Roman Empire. Translating the Bible into Latin meant millions more people could understand it."
+      },
+      {
+        "text": "It was a secret code that only priests knew",
+        "correct": false,
+        "explanation": "Latin was not a secret code. It was the everyday language of the Roman world, which is why Jerome translated the Bible into it."
+      },
+      {
+        "text": "It sounded prettier than other languages",
+        "correct": false,
+        "explanation": "The reason was practical: Latin was the common language of the Roman Empire, so translating the Bible into it reached more people."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_courage_faith",
+    "question": "Why is courage important in the Christian faith?",
+    "choices": [
+      {
+        "text": "Sometimes standing for truth requires bravery against powerful opposition",
+        "correct": true,
+        "explanation": "Like Ambrose confronting an emperor, Christians sometimes need courage to stand for what is right, even when it is difficult."
+      },
+      {
+        "text": "Christians must be the strongest fighters",
+        "correct": false,
+        "explanation": "Christian courage is not about physical fighting. It is about bravely standing for truth and justice, like Ambrose did."
+      },
+      {
+        "text": "Courage is not really needed for faith",
+        "correct": false,
+        "explanation": "Courage is essential! Early Christians faced persecution. Ambrose showed courage by confronting an emperor for wrongdoing."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_monastery_purpose",
+    "question": "What was the purpose of early Christian monasteries?",
+    "choices": [
+      {
+        "text": "Places for prayer, study, and preserving knowledge",
+        "correct": true,
+        "explanation": "Monasteries were communities where monks devoted their lives to prayer, studying Scripture, and copying important books by hand."
+      },
+      {
+        "text": "Forts for fighting wars",
+        "correct": false,
+        "explanation": "Monasteries were not military forts. They were peaceful communities devoted to prayer, study, and preserving knowledge."
+      },
+      {
+        "text": "Marketplaces for selling goods",
+        "correct": false,
+        "explanation": "Monasteries were not markets. Monks lived simple lives focused on prayer, study, and carefully copying books by hand."
+      }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
   }
 ]

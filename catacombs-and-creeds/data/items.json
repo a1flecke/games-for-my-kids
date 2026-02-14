@@ -132,5 +132,39 @@
     "stackable": false,
     "statBonus": { "defense": 8 },
     "color": "#d4af37"
+  },
+  "father_scroll": {
+    "id": "father_scroll",
+    "name": "Church Father Scroll",
+    "description": "A scroll from a Church Father granting an ability.",
+    "category": "quest",
+    "stackable": false,
+    "color": "#d4c4a0"
+  },
+  "augustine_ring": {
+    "id": "augustine_ring",
+    "name": "Augustine's Ring",
+    "description": "A ring worn by Augustine of Hippo.",
+    "category": "collectible",
+    "stackable": false,
+    "color": "#d4a017"
+  },
+  "jerome_pen": {
+    "id": "jerome_pen",
+    "name": "Jerome's Pen",
+    "description": "The pen Jerome used to translate the Vulgate.",
+    "category": "collectible",
+    "stackable": false,
+    "color": "#6ca0dc"
+  },
+  "ambrose_staff": {
+    "id": "ambrose_staff",
+    "name": "Ambrose's Staff",
+    "description": "The staff of Bishop Ambrose. +3 Attack, +2 Wisdom.",
+    "category": "equipment",
+    "slot": "accessory",
+    "stackable": false,
+    "statBonus": { "attack": 3, "wisdom": 2 },
+    "color": "#cc6644"
   }
 }

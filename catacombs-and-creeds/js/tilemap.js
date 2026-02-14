@@ -22,7 +22,10 @@ const TileType = Object.freeze({
     WATER:  6,
     STAIRS: 7,
     HIDING: 8,     // Alcove / hiding spot — walkable, hides player from guard vision cones
-    BOOKSHELF: 9   // Decorative bookshelf — solid, used in library level
+    BOOKSHELF: 9,  // Decorative bookshelf — solid, used in library level
+    HIDDEN_WALL: 10, // Wall that can be revealed by Augustine's Wisdom ability
+    LATIN_TILE: 11,  // Floor tile with Latin inscription, interactable with Jerome's Translation
+    BARRIER: 12      // Destructible barrier, breakable with Ambrose's Courage
 });
 
 class TileMap {
@@ -102,6 +105,8 @@ class TileMap {
             case TileType.TORCH:
             case TileType.WATER:
             case TileType.BOOKSHELF:
+            case TileType.HIDDEN_WALL:
+            case TileType.BARRIER:
                 return true;
             case TileType.DOOR: {
                 // Locked or closed doors are solid
@@ -178,7 +183,10 @@ class TileMap {
         return tileType === TileType.DOOR ||
                tileType === TileType.CHEST ||
                tileType === TileType.ALTAR ||
-               tileType === TileType.STAIRS;
+               tileType === TileType.STAIRS ||
+               tileType === TileType.HIDDEN_WALL ||
+               tileType === TileType.LATIN_TILE ||
+               tileType === TileType.BARRIER;
     }
 
     /**
@@ -209,6 +217,12 @@ class TileMap {
                 return this.interactAltar(x, y, state);
             case TileType.STAIRS:
                 return this.interactStairs(x, y, state);
+            case TileType.HIDDEN_WALL:
+                return { type: 'hidden_wall', x, y };
+            case TileType.LATIN_TILE:
+                return { type: 'latin_tile', x, y };
+            case TileType.BARRIER:
+                return { type: 'barrier', x, y };
             default:
                 return null;
         }
@@ -251,6 +265,30 @@ class TileMap {
         const direction = state.direction || 'down';
         console.log(`Stairs at ${x},${y} going ${direction}`);
         return { type: 'stairs', message: `Stairs leading ${direction}.`, direction: direction };
+    }
+
+    /**
+     * Reveal a hidden wall, turning it into a floor tile.
+     */
+    revealHiddenWall(x, y) {
+        if (this.getTile(x, y) === TileType.HIDDEN_WALL) {
+            this.tiles[y][x] = TileType.FLOOR;
+            console.log(`Hidden wall at ${x},${y} revealed.`);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Break a barrier, turning it into a floor tile.
+     */
+    breakBarrier(x, y) {
+        if (this.getTile(x, y) === TileType.BARRIER) {
+            this.tiles[y][x] = TileType.FLOOR;
+            console.log(`Barrier at ${x},${y} broken.`);
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -1,0 +1,139 @@
+{
+  "name": "The Monastery",
+  "width": 24,
+  "height": 20,
+  "playerStart": { "x": 12, "y": 12 },
+  "tiles": [
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,0,5,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,5,1,
+    1,0,0,0,0,11,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1,
+    1,0,0,0,0,11,0,3,0,1,0,0,0,0,0,0,0,0,10,0,0,3,0,1,
+    1,1,1,1,1,2,1,1,1,1,0,0,0,0,0,0,0,0,1,1,2,1,1,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,1,1,1,1,2,1,1,1,1,0,0,0,0,0,0,1,
+    1,0,5,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,5,0,1,
+    1,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,1,0,0,4,0,0,0,0,1,0,0,0,0,0,0,1,
+    1,0,0,0,0,3,0,0,1,0,0,0,0,0,0,0,1,0,0,12,0,0,0,1,
+    1,1,1,1,1,2,1,1,1,0,0,0,0,0,0,0,1,1,2,1,1,1,1,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,
+    1,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,7,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+  ],
+  "tileMetadata": [
+    { "x": 5, "y": 4, "locked": false },
+    { "x": 20, "y": 4, "locked": false },
+    { "x": 12, "y": 6, "locked": false },
+    { "x": 8, "y": 8, "locked": false },
+    { "x": 16, "y": 8, "locked": false },
+    { "x": 5, "y": 11, "locked": false },
+    { "x": 18, "y": 11, "locked": false },
+    { "x": 11, "y": 14, "locked": true, "lockedByAbilities": true },
+    { "x": 12, "y": 14, "locked": true, "lockedByAbilities": true },
+    { "x": 7, "y": 3, "contents": "jerome_pen" },
+    { "x": 5, "y": 10, "contents": "augustine_ring" },
+    { "x": 21, "y": 3, "contents": "scripture_scroll" },
+    { "x": 19, "y": 16, "contents": "ambrose_staff" },
+    { "x": 11, "y": 9 },
+    { "x": 7, "y": 18, "direction": "down" }
+  ],
+  "npcs": [
+    {
+      "id": "monastery_monk",
+      "name": "Monk Guide",
+      "x": 12,
+      "y": 13,
+      "direction": "up",
+      "color": "#8b7355",
+      "dialogueId": "monastery_monk_intro"
+    },
+    {
+      "id": "augustine",
+      "name": "Augustine",
+      "x": 4,
+      "y": 8,
+      "direction": "right",
+      "color": "#d4a017",
+      "dialogueId": "augustine_intro"
+    },
+    {
+      "id": "jerome",
+      "name": "Jerome",
+      "x": 3,
+      "y": 2,
+      "direction": "down",
+      "color": "#6ca0dc",
+      "dialogueId": "jerome_intro"
+    },
+    {
+      "id": "ambrose",
+      "name": "Ambrose",
+      "x": 20,
+      "y": 8,
+      "direction": "left",
+      "color": "#cc6644",
+      "dialogueId": "ambrose_intro"
+    },
+    {
+      "id": "library_guardian",
+      "name": "Library Guardian",
+      "x": 12,
+      "y": 5,
+      "direction": "down",
+      "color": "#9a8a7a",
+      "dialogueId": "library_guardian_intro"
+    },
+    {
+      "id": "scholar_npc",
+      "name": "Scholar",
+      "x": 14,
+      "y": 12,
+      "direction": "left",
+      "color": "#7a6b5a",
+      "dialogueId": "monastery_scholar"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "book_burner_1",
+      "type": "book_burner",
+      "x": 4,
+      "y": 5
+    },
+    {
+      "id": "book_burner_2",
+      "type": "book_burner",
+      "x": 19,
+      "y": 5
+    },
+    {
+      "id": "imperial_censor_1",
+      "type": "imperial_censor",
+      "x": 4,
+      "y": 13
+    },
+    {
+      "id": "imperial_censor_2",
+      "type": "imperial_censor",
+      "x": 19,
+      "y": 13
+    },
+    {
+      "id": "corrupt_prefect",
+      "type": "corrupt_prefect",
+      "x": 12,
+      "y": 17
+    }
+  ],
+  "items": [
+    { "id": "bread_l4_1", "type": "bread", "x": 2, "y": 5 },
+    { "id": "bread_l4_2", "type": "bread", "x": 21, "y": 5 },
+    { "id": "bread_l4_3", "type": "bread", "x": 2, "y": 12 },
+    { "id": "bread_l4_4", "type": "bread", "x": 21, "y": 12 }
+  ]
+}

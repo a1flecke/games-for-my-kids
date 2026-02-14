@@ -121,5 +121,51 @@
         "behavior": "question_required"
       }
     ]
+  },
+  "book_burner": {
+    "name": "Book Burner",
+    "hp": 50,
+    "attack": 9,
+    "defense": 4,
+    "xpReward": 30,
+    "itemDrops": ["bread"],
+    "color": "#8b4513",
+    "isBoss": false,
+    "patrolRange": 2,
+    "patrolSpeed": 0.5
+  },
+  "imperial_censor": {
+    "name": "Imperial Censor",
+    "hp": 70,
+    "attack": 12,
+    "defense": 6,
+    "xpReward": 50,
+    "itemDrops": ["bread"],
+    "color": "#6b3333",
+    "isBoss": false,
+    "patrolRange": 3,
+    "patrolSpeed": 0.4
+  },
+  "corrupt_prefect": {
+    "name": "Corrupt Prefect",
+    "hp": 140,
+    "attack": 16,
+    "defense": 9,
+    "xpReward": 140,
+    "itemDrops": ["scripture_scroll"],
+    "color": "#882222",
+    "isBoss": true,
+    "patrolRange": 1,
+    "patrolSpeed": 0.2,
+    "specialAttackName": "Book Burning Decree",
+    "specialAttackMultiplier": 1.7,
+    "bossPhases": [
+      {
+        "phase": 2,
+        "hpThreshold": 0.5,
+        "message": "The Corrupt Prefect calls for reinforcements! His attacks grow fiercer!",
+        "behavior": "question_required"
+      }
+    ]
   }
 }

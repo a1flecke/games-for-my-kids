@@ -218,6 +218,24 @@ Complete Level 3 (The Grand Library) with new puzzle mechanic and multi-phase bo
 - Updated `js/hud.js` (+_getLevel3Objective with full progression flow, _countCreedFragments helper, Level 3 progress display showing Fragments: X/5)
 - Updated `index.html` (added puzzle.js and level3_dialogue.js script tags)
 
+### Session 11: Level 4 - Church Fathers & Abilities ✅
+
+Complete Level 4 (The Monastery) with new ability system. Three Church Fathers teach abilities (Wisdom, Translation, Courage) that interact with environment tiles. Players learn from Augustine, Jerome, and Ambrose, then use all 3 abilities to enter the Forbidden Library and defeat the Corrupt Prefect boss.
+
+- Created `js/abilities.js` (AbilitySystem class: 3 abilities toggled with keys 4/5/6, quest flag gating, HUD icons with active glow, serialization)
+- Created `data/levels/level4.json` (24x20 monastery map with 5 areas: Jerome's Scriptorium, Augustine's Study, Courtyard, Ambrose's Chapel, Forbidden Library; hidden wall, Latin tiles, barrier; 6 NPCs, 5 enemies, 4 floor items, 4 chests)
+- Created `content/level4_dialogue.js` (~22 dialogue nodes: 3 Church Father quests with quizzes, Latin inscription decoding, Library Guardian ability check, boss pre-fight/victory, level victory)
+- Updated `js/tilemap.js` (added TileType.HIDDEN_WALL=10, LATIN_TILE=11, BARRIER=12; solidity, interaction handlers, revealHiddenWall/breakBarrier methods)
+- Updated `js/render.js` (+drawHiddenWall with gold shimmer, drawLatinTile with blue glow, drawBarrier with red glow when respective abilities active)
+- Updated `js/combat.js` (+courageBonus: +2 damage when Courage ability is active during combat)
+- Updated `js/game.js` (+ability system initialization, key 4/5/6 handling, Library Guardian special NPC, _handleHiddenWall/_handleLatinTile/_handleBarrier environmental puzzles, Level 3→4 transition, Level 4 stairs/victory, ability save/load, courage bonus in combat)
+- Updated `js/hud.js` (+Level 4 objective tracking with scroll collection, _getLevel4Objective progression flow, _countFatherScrolls helper)
+- Updated `js/input.js` (added keys '5' and '6' to gameKeys)
+- Updated `data/enemies.json` (+3 enemy types: book_burner HP:50, imperial_censor HP:70, corrupt_prefect boss HP:140 with multi-phase)
+- Updated `data/items.json` (+5 items: father_scroll quest, augustine_ring collectible, jerome_pen collectible, ambrose_staff equipment +3 ATK +2 WIS)
+- Updated `data/questions.json` (+8 Level 4 questions on church fathers topics)
+- Updated `index.html` (added abilities.js and level4_dialogue.js script tags)
+
 ---
 
 ## Remaining Sessions
@@ -226,7 +244,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 11 | [session-11.md](sessions/session-11.md) | Sonnet | Level 4 - Church Fathers & Abilities |
 | 12 | [session-12.md](sessions/session-12.md) | Opus | Level 5 - Constantine & Final Challenge |
 | 13 | [session-13.md](sessions/session-13.md) | Sonnet | Audio System |
 | 14 | [session-14.md](sessions/session-14.md) | Sonnet | Polish, Accessibility & Deployment |

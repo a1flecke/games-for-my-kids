@@ -51,12 +51,14 @@ class Game {
         this.saveSystem = new SaveSystem();
         this.hud = new HUD();
         this.puzzle = new PuzzleSystem();
+        this.abilities = new AbilitySystem();
 
         // Wire question system into combat
         this.combat.questionSystem = this.questions;
 
-        // Wire inventory into combat
+        // Wire inventory and abilities into combat
         this.combat.inventory = this.inventory;
+        this.combat.abilities = this.abilities;
 
         // Game loop
         this.lastTime = 0;
@@ -431,6 +433,14 @@ class Game {
             this.handleInteract();
         }
 
+        // Check ability keys (4, 5, 6) when abilities are available
+        if (this.currentLevel >= 4) {
+            const abilityMsg = this.abilities.update(this.input, this.dialogue.questFlags);
+            if (abilityMsg) {
+                this.hud.showNotification(abilityMsg, 'info');
+            }
+        }
+
         // Check I key -> inventory
         if (this.input.wasPressed('i') || this.input.wasPressed('I')) {
             this.inventory.open();
@@ -579,6 +589,12 @@ class Game {
                 return;
             }
 
+            // Special handling for library guardian (ability check)
+            if (this.nearNPC.id === 'library_guardian' && this.currentLevel === 4) {
+                this._handleLibraryGuardian();
+                return;
+            }
+
             if (result.dialogueId) {
                 this.dialogue.startDialogue(result.dialogueId, () => {
                     // Check for coin/token/fragment rewards after dialogue
@@ -638,6 +654,15 @@ class Game {
                                 this.inventory.showNotification('Inventory full!');
                             }
                         }
+                        break;
+                    case 'hidden_wall':
+                        this._handleHiddenWall(result.x, result.y);
+                        break;
+                    case 'latin_tile':
+                        this._handleLatinTile(result.x, result.y);
+                        break;
+                    case 'barrier':
+                        this._handleBarrier(result.x, result.y);
                         break;
                 }
             }
@@ -718,7 +743,7 @@ class Game {
 
                 // Boss post-victory dialogue
                 if (wasBoss) {
-                    const victoryDialogueMap = { 1: 'boss_victory', 2: 'boss_victory_l2', 3: 'boss_victory_l3' };
+                    const victoryDialogueMap = { 1: 'boss_victory', 2: 'boss_victory_l2', 3: 'boss_victory_l3', 4: 'boss_victory_l4' };
                     const victoryDialogue = victoryDialogueMap[this.currentLevel] || 'boss_victory';
                     this.dialogue.startDialogue(victoryDialogue, () => {
                         this.checkDialogueRewards();
@@ -843,6 +868,9 @@ class Game {
     }
 
     renderPlaying() {
+        // Pass active ability to renderer for tile effect rendering
+        this.renderer.abilityActive = this.abilities.activeAbility;
+
         this.renderer.render({
             player: this.player,
             map: this.map,
@@ -872,6 +900,11 @@ class Game {
 
         // Render HUD on top of game world
         this.hud.render(this.renderer.ctx, this.canvas, this);
+
+        // Render ability icons (Level 4+)
+        if (this.currentLevel >= 4) {
+            this.abilities.renderHUD(this.renderer.ctx, this.canvas, this.dialogue.questFlags);
+        }
 
         // Draw item notifications on top of HUD
         this.inventory.renderNotifications(this.renderer.ctx, this.canvas);
@@ -1102,8 +1135,8 @@ class Game {
 
             if (aabbCollision(playerBox, enemyBox)) {
                 // Boss pre-fight dialogue (first encounter only)
-                const prefightFlagMap = { 1: 'boss_prefight_shown', 2: 'boss_prefight_l2_shown', 3: 'boss_prefight_l3_shown' };
-                const prefightDialogueMap = { 1: 'boss_prefight', 2: 'boss_prefight_l2', 3: 'boss_prefight_l3' };
+                const prefightFlagMap = { 1: 'boss_prefight_shown', 2: 'boss_prefight_l2_shown', 3: 'boss_prefight_l3_shown', 4: 'boss_prefight_l4_shown' };
+                const prefightDialogueMap = { 1: 'boss_prefight', 2: 'boss_prefight_l2', 3: 'boss_prefight_l3', 4: 'boss_prefight_l4' };
                 const prefightFlag = prefightFlagMap[this.currentLevel] || 'boss_prefight_shown';
                 const prefightDialogue = prefightDialogueMap[this.currentLevel] || 'boss_prefight';
                 if (enemy.isBoss && !this.dialogue.getFlag(prefightFlag)) {
@@ -1217,6 +1250,12 @@ class Game {
 
         console.log(`Starting combat with ${enemy.name} (${enemy.id})`);
         this.combat.startCombat(this.player, def, enemy.id, this.currentLevel);
+
+        // Apply Ambrose's Courage bonus if unlocked
+        if (this.abilities.isUnlocked('courage', this.dialogue.questFlags)) {
+            this.combat.courageBonus = true;
+        }
+
         this.changeState(GameState.COMBAT);
     }
 
@@ -1270,6 +1309,17 @@ class Game {
                 console.log(`Awarded creed fragment for ${flag}`);
             }
         }
+
+        // Level 4: Church Father Scrolls
+        const scrollFlags = ['scroll_augustine', 'scroll_jerome', 'scroll_ambrose'];
+        for (const flag of scrollFlags) {
+            if (flags[flag] && !flags[`awarded_${flag}`]) {
+                this.inventory.addItem('father_scroll');
+                this.inventory.showNotification('Obtained Church Father Scroll!');
+                this.dialogue.setFlag(`awarded_${flag}`);
+                console.log(`Awarded father scroll for ${flag}`);
+            }
+        }
     }
 
     /**
@@ -1313,6 +1363,97 @@ class Game {
     }
 
     /**
+     * Handle Library Guardian interaction for Level 4.
+     * Checks if player has all 3 abilities, then unlocks forbidden library.
+     */
+    _handleLibraryGuardian() {
+        const flags = this.dialogue.questFlags;
+
+        if (flags.library_unlocked) {
+            this.inventory.showNotification('The Library is already open!');
+            return;
+        }
+
+        if (this.abilities.allUnlocked(flags)) {
+            // Unlock the forbidden library doors
+            if (this.map) {
+                this.map.unlockDoor(11, 14);
+                this.map.interact(11, 14);
+                this.map.unlockDoor(12, 14);
+                this.map.interact(12, 14);
+            }
+            this.dialogue.startDialogue('library_guardian_unlock', () => {
+                this.checkDialogueRewards();
+                this.changeState(GameState.PLAYING);
+            });
+            this.changeState(GameState.DIALOGUE);
+        } else {
+            this.dialogue.startDialogue('library_guardian_intro', () => {
+                this.changeState(GameState.PLAYING);
+            });
+            this.changeState(GameState.DIALOGUE);
+        }
+    }
+
+    /**
+     * Handle hidden wall interaction (requires Augustine's Wisdom).
+     */
+    _handleHiddenWall(x, y) {
+        if (!this.abilities.isActive('wisdom')) {
+            this.inventory.showNotification('This wall looks unusual...');
+            return;
+        }
+
+        if (this.map.revealHiddenWall(x, y)) {
+            this.dialogue.setFlag('hidden_wall_revealed');
+            this.hud.showNotification('Secret passage revealed!', 'success');
+        }
+    }
+
+    /**
+     * Handle Latin tile interaction (requires Jerome's Translation).
+     */
+    _handleLatinTile(x, y) {
+        if (!this.abilities.isActive('translation')) {
+            this.inventory.showNotification('There is Latin text here...');
+            return;
+        }
+
+        const flags = this.dialogue.questFlags;
+        // Determine which inscription based on position
+        if (y === 2 && !flags.decoded_latin_1) {
+            this.dialogue.startDialogue('latin_decoded_1', () => {
+                this.checkDialogueRewards();
+                this.changeState(GameState.PLAYING);
+            });
+            this.changeState(GameState.DIALOGUE);
+        } else if (y === 3 && !flags.decoded_latin_2) {
+            this.dialogue.startDialogue('latin_decoded_2', () => {
+                this.checkDialogueRewards();
+                this.changeState(GameState.PLAYING);
+            });
+            this.changeState(GameState.DIALOGUE);
+        } else {
+            this.inventory.showNotification('You have already decoded this.');
+        }
+    }
+
+    /**
+     * Handle barrier interaction (requires Ambrose's Courage).
+     */
+    _handleBarrier(x, y) {
+        if (!this.abilities.isActive('courage')) {
+            this.inventory.showNotification('A solid barrier blocks the way.');
+            return;
+        }
+
+        if (this.map.breakBarrier(x, y)) {
+            this.dialogue.setFlag('barrier_broken');
+            this.hud.showNotification('Barrier destroyed!', 'success');
+        }
+    }
+
+    /**
      * Count creed fragments collected based on quest flags.
      */
     countCreedFragments() {
@@ -1336,6 +1477,8 @@ class Game {
             this.handleLevel2Stairs();
         } else if (this.currentLevel === 3) {
             this.handleLevel3Stairs();
+        } else if (this.currentLevel === 4) {
+            this.handleLevel4Stairs();
         }
     }
 
@@ -1407,8 +1550,32 @@ class Game {
             return;
         }
 
-        // All conditions met — victory dialogue then victory screen
+        // All conditions met — victory dialogue then transition to Level 4
         this.dialogue.startDialogue('victory_l3', () => {
+            this.checkDialogueRewards();
+            this.transitionToLevel(4);
+        });
+        this.changeState(GameState.DIALOGUE);
+    }
+
+    /**
+     * Level 4 stairs: need all 3 abilities + boss defeated → victory dialogue.
+     */
+    handleLevel4Stairs() {
+        const flags = this.dialogue.questFlags;
+
+        if (!flags.library_unlocked) {
+            this.inventory.showNotification('The Forbidden Library must be opened first!');
+            return;
+        }
+
+        if (!flags.boss_defeated_l4) {
+            this.inventory.showNotification('The Corrupt Prefect still guards the way!');
+            return;
+        }
+
+        // All conditions met — victory dialogue then victory screen (or next level)
+        this.dialogue.startDialogue('victory_l4', () => {
             this.checkDialogueRewards();
             this.enterVictoryState();
         });
@@ -1493,6 +1660,11 @@ class Game {
                     this.dialogue.registerDialogues(window.LEVEL3_DIALOGUES);
                 }
                 break;
+            case 4:
+                if (window.LEVEL4_DIALOGUES) {
+                    this.dialogue.registerDialogues(window.LEVEL4_DIALOGUES);
+                }
+                break;
         }
     }
 
@@ -1509,7 +1681,12 @@ class Game {
 
         // Level-specific collectible count
         let collectiblesLabel, collectiblesCount;
-        if (this.currentLevel === 2) {
+        if (this.currentLevel === 4) {
+            collectiblesLabel = 'scrollsCollected';
+            collectiblesCount = (flags.scroll_augustine ? 1 : 0) +
+                                (flags.scroll_jerome ? 1 : 0) +
+                                (flags.scroll_ambrose ? 1 : 0);
+        } else if (this.currentLevel === 2) {
             collectiblesLabel = 'tokensCollected';
             collectiblesCount = this.countMartyrTokens();
         } else {
@@ -1639,6 +1816,11 @@ class Game {
         // Save checkpoint
         saveData.checkpointX = this.checkpointX;
         saveData.checkpointY = this.checkpointY;
+
+        // Save ability state
+        if (this.abilities) {
+            saveData.abilities = this.abilities.toSaveData();
+        }
 
         try {
             localStorage.setItem(this.saveKey, JSON.stringify(saveData));
@@ -1883,6 +2065,11 @@ class Game {
                 }
             }
             console.log(`Picked-up items restored: ${data.pickedUpItems.length}`);
+        }
+
+        // Restore ability state
+        if (data.abilities && this.abilities) {
+            this.abilities.fromSaveData(data.abilities);
         }
 
         console.log('Game state restored from slot');

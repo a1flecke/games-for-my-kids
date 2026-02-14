@@ -137,7 +137,11 @@ class HUD {
         const currentLevel = gameState.currentLevel || 1;
         let collected, total, progressText;
 
-        if (currentLevel === 3) {
+        if (currentLevel === 4) {
+            collected = this._countFatherScrolls(gameState);
+            total = 3;
+            progressText = `Scrolls: ${collected}/${total}`;
+        } else if (currentLevel === 3) {
             collected = this._countCreedFragments(gameState);
             total = 5;
             progressText = `Fragments: ${collected}/${total}`;
@@ -369,7 +373,9 @@ class HUD {
         const flags = gameState.dialogue.questFlags;
         const currentLevel = gameState.currentLevel || 1;
 
-        if (currentLevel === 3) {
+        if (currentLevel === 4) {
+            return this._getLevel4Objective(flags, gameState);
+        } else if (currentLevel === 3) {
             return this._getLevel3Objective(flags, gameState);
         } else if (currentLevel === 2) {
             return this._getLevel2Objective(flags, gameState);
@@ -409,6 +415,32 @@ class HUD {
         if (fragments >= 5) return 'Assemble the Creed at the Lectern';
         if (flags.met_athanasius) return `Find the Bishops (${fragments}/5 fragments)`;
         return 'Explore the Grand Library';
+    }
+
+    /** @private */
+    _getLevel4Objective(flags, gameState) {
+        const scrolls = this._countFatherScrolls(gameState);
+
+        if (flags.level4_complete) return 'Level 4 Complete!';
+        if (flags.boss_defeated_l4) return 'Find the exit stairs';
+        if (flags.library_unlocked) return 'Defeat the Corrupt Prefect';
+        if (scrolls >= 3) return 'Enter the Forbidden Library';
+        if (flags.met_monastery_monk) return `Learn from the Fathers (${scrolls}/3)`;
+        return 'Explore the monastery';
+    }
+
+    /**
+     * Count Church Father scrolls collected based on quest flags.
+     * @private
+     */
+    _countFatherScrolls(gameState) {
+        if (!gameState.dialogue) return 0;
+        const flags = gameState.dialogue.questFlags;
+        let count = 0;
+        if (flags.scroll_augustine) count++;
+        if (flags.scroll_jerome) count++;
+        if (flags.scroll_ambrose) count++;
+        return count;
     }
 
     /**

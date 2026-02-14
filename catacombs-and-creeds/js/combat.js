@@ -95,6 +95,9 @@ class CombatSystem {
         // Inventory reference (set by Game)
         this.inventory = null;
 
+        // Abilities reference (set by Game)
+        this.abilities = null;
+
         // Item select sub-state
         this.itemSelectList = [];    // Array of { id, name, quantity, def }
         this.selectedItemIndex = 0;
@@ -112,6 +115,9 @@ class CombatSystem {
 
         // Player flash animation
         this.playerFlashTimer = 0;
+
+        // Ambrose's Courage combat bonus (set by Game when starting combat)
+        this.courageBonus = false;
     }
 
     /**
@@ -171,6 +177,7 @@ class CombatSystem {
         this.enemyShakeX = 0;
         this.enemyShakeTimer = 0;
         this.playerFlashTimer = 0;
+        this.courageBonus = false;
 
         // Reset question tracking for this combat
         if (this.questionSystem) {
@@ -288,6 +295,11 @@ class CombatSystem {
         let baseDamage = this.player.getEffectiveAttack() - (this.enemy.defense / 2);
         baseDamage += randomInt(-2, 2);
         baseDamage = Math.max(1, Math.round(baseDamage)); // Minimum 1 damage
+
+        // Apply Ambrose's Courage bonus (+2 damage)
+        if (this.courageBonus) {
+            baseDamage += 2;
+        }
 
         // Apply attack boost from correct question
         if (this.attackBoost) {

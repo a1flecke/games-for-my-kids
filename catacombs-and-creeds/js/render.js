@@ -19,6 +19,9 @@ class Renderer {
         // Animation timers
         this.animTime = 0;
 
+        // Active ability for tile rendering effects (set by Game each frame)
+        this.abilityActive = null;
+
         // Disable image smoothing for crisp pixels
         this.ctx.imageSmoothingEnabled = false;
 
@@ -99,6 +102,15 @@ class Renderer {
                 break;
             case TileType.BOOKSHELF:
                 this.drawBookshelf(screenX, screenY);
+                break;
+            case TileType.HIDDEN_WALL:
+                this.drawHiddenWall(screenX, screenY);
+                break;
+            case TileType.LATIN_TILE:
+                this.drawLatinTile(screenX, screenY);
+                break;
+            case TileType.BARRIER:
+                this.drawBarrier(screenX, screenY);
                 break;
         }
     }
@@ -509,6 +521,84 @@ class Renderer {
         ctx.strokeStyle = '#2a1a0a';
         ctx.lineWidth = 1;
         ctx.strokeRect(x, y, size, size);
+    }
+
+    // Draw a hidden wall tile - looks like normal wall but shimmers when Wisdom ability is active
+    drawHiddenWall(x, y) {
+        // Draw as normal wall
+        this.drawWall(x, y);
+
+        // If wisdom ability is active, add shimmer overlay to hint at the hidden passage
+        if (this.abilityActive === 'wisdom') {
+            const ctx = this.ctx;
+            const size = this.tileSize;
+            const pulse = Math.sin(this.animTime * 3) * 0.15 + 0.25;
+            ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
+            ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+        }
+    }
+
+    // Draw a Latin inscription tile - floor with text markings
+    drawLatinTile(x, y) {
+        const ctx = this.ctx;
+        const size = this.tileSize;
+
+        // Base floor
+        this.drawFloor(x, y);
+
+        // Inscription marks (small scratches)
+        ctx.strokeStyle = '#6b5a4a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + 6, y + 10);
+        ctx.lineTo(x + size - 6, y + 10);
+        ctx.moveTo(x + 8, y + 16);
+        ctx.lineTo(x + size - 8, y + 16);
+        ctx.moveTo(x + 6, y + 22);
+        ctx.lineTo(x + size - 6, y + 22);
+        ctx.stroke();
+
+        // If translation ability is active, glow to show interactability
+        if (this.abilityActive === 'translation') {
+            const pulse = Math.sin(this.animTime * 3) * 0.15 + 0.2;
+            ctx.fillStyle = `rgba(108, 160, 220, ${pulse})`;
+            ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+        }
+    }
+
+    // Draw a barrier tile - solid barrier with cracks
+    drawBarrier(x, y) {
+        const ctx = this.ctx;
+        const size = this.tileSize;
+
+        // Barrier body (stone/wood)
+        ctx.fillStyle = '#5a4a3a';
+        ctx.fillRect(x, y, size, size);
+
+        // Cracks
+        ctx.strokeStyle = '#3a2a1a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + size / 3, y);
+        ctx.lineTo(x + size / 2, y + size / 2);
+        ctx.lineTo(x + size / 3, y + size);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + size * 2 / 3, y + 4);
+        ctx.lineTo(x + size / 2, y + size * 2 / 3);
+        ctx.stroke();
+
+        // Border
+        ctx.strokeStyle = '#2a1a0a';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, size, size);
+
+        // If courage ability is active, glow to show breakability
+        if (this.abilityActive === 'courage') {
+            const pulse = Math.sin(this.animTime * 3) * 0.15 + 0.2;
+            ctx.fillStyle = `rgba(204, 68, 68, ${pulse})`;
+            ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+        }
     }
 
     // Draw a guard's vision cone (semi-transparent triangle)

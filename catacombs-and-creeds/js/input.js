@@ -16,7 +16,7 @@ class InputHandler {
             'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
             'w', 'W', 's', 'S', 'a', 'A', 'd', 'D',
             ' ', 'Escape', 'i', 'I', 'Enter', 'e', 'E',
-            't', 'T', '1', '2', '3', '4'
+            't', 'T', '1', '2', '3', '4', '5', '6'
         ]);
 
         window.addEventListener('keydown', (e) => this.onKeyDown(e));
