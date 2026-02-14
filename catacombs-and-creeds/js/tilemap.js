@@ -20,7 +20,8 @@ const TileType = Object.freeze({
     ALTAR:  4,
     TORCH:  5,
     WATER:  6,
-    STAIRS: 7
+    STAIRS: 7,
+    HIDING: 8  // Alcove / hiding spot — walkable, hides player from guard vision cones
 });
 
 class TileMap {

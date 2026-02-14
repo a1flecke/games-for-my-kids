@@ -36,5 +36,44 @@
     "patrolSpeed": 0.3,
     "specialAttackName": "Shield Bash",
     "specialAttackMultiplier": 1.5
+  },
+  "roman_patrol": {
+    "name": "Roman Patrol",
+    "hp": 45,
+    "attack": 10,
+    "defense": 5,
+    "xpReward": 40,
+    "itemDrops": ["bread"],
+    "color": "#8b3333",
+    "isBoss": false,
+    "patrolRange": 3,
+    "patrolSpeed": 0.4,
+    "stealth": true
+  },
+  "informant": {
+    "name": "Informant",
+    "hp": 35,
+    "attack": 7,
+    "defense": 3,
+    "xpReward": 30,
+    "itemDrops": [],
+    "color": "#6b5b3a",
+    "isBoss": false,
+    "patrolRange": 1,
+    "patrolSpeed": 0.3
+  },
+  "prefect": {
+    "name": "Roman Prefect",
+    "hp": 100,
+    "attack": 15,
+    "defense": 8,
+    "xpReward": 100,
+    "itemDrops": ["scripture_scroll"],
+    "color": "#992222",
+    "isBoss": true,
+    "patrolRange": 1,
+    "patrolSpeed": 0.2,
+    "specialAttackName": "Decree of Persecution",
+    "specialAttackMultiplier": 1.8
   }
 }

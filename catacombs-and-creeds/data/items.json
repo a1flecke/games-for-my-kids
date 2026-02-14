@@ -80,5 +80,31 @@
     "category": "collectible",
     "stackable": false,
     "color": "#c4d4a0"
+  },
+  "martyr_token": {
+    "id": "martyr_token",
+    "name": "Martyr Token",
+    "description": "A token honoring a martyr of the faith.",
+    "category": "quest",
+    "stackable": false,
+    "color": "#cc4444"
+  },
+  "ichthys_pendant": {
+    "id": "ichthys_pendant",
+    "name": "Ichthys Pendant",
+    "description": "A fish-shaped pendant. Reduces guard detection range.",
+    "category": "equipment",
+    "slot": "accessory",
+    "stackable": false,
+    "statBonus": { "defense": 2, "wisdom": 2 },
+    "color": "#5080b0"
+  },
+  "church_father_letter": {
+    "id": "church_father_letter",
+    "name": "Church Father Letter",
+    "description": "A letter written by an early church father.",
+    "category": "collectible",
+    "stackable": false,
+    "color": "#d4c090"
   }
 }

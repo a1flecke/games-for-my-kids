@@ -1,0 +1,135 @@
+{
+  "name": "The Persecutions",
+  "width": 25,
+  "height": 20,
+  "levelNumber": 2,
+  "description": "Deeper catacombs where persecution grows. Guards patrol the tunnels. Stay hidden and find the martyrs.",
+  "playerStart": { "x": 1, "y": 18 },
+  "tiles": [
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,0,0,0,0,5,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,
+    1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,3,0,0,1,0,0,0,0,0,1,
+    1,0,0,5,0,0,2,0,0,5,0,0,2,0,0,0,0,0,2,0,0,5,0,0,1,
+    1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,
+    1,0,0,0,0,0,1,1,1,2,1,1,1,0,0,0,0,0,1,1,1,2,1,1,1,
+    1,8,1,1,1,1,1,0,0,0,0,0,1,1,1,2,1,1,1,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,1,
+    1,1,1,2,1,1,1,0,0,5,0,0,1,1,1,1,1,0,0,5,0,0,1,1,1,
+    1,0,0,0,0,0,1,0,0,0,0,0,1,6,6,6,1,0,0,0,0,0,1,0,1,
+    1,0,0,4,0,0,1,0,0,0,0,0,1,6,6,6,1,0,0,3,0,0,2,0,1,
+    1,0,0,0,0,0,1,0,0,0,0,0,1,6,6,6,1,0,0,0,0,0,1,0,1,
+    1,0,0,0,0,8,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,1,
+    1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,2,1,1,1,0,0,0,0,8,1,
+    1,0,0,0,0,0,1,0,0,5,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,
+    1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,3,0,7,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+  ],
+  "tileMetadata": [
+    { "x": 6, "y": 3, "locked": false },
+    { "x": 12, "y": 3, "locked": false },
+    { "x": 18, "y": 3, "locked": false },
+    { "x": 9, "y": 5, "locked": false },
+    { "x": 21, "y": 5, "locked": false },
+    { "x": 15, "y": 6, "locked": false },
+    { "x": 3, "y": 9, "locked": false },
+    { "x": 9, "y": 13, "locked": true },
+    { "x": 19, "y": 13, "locked": false },
+    { "x": 15, "y": 16, "locked": false },
+    { "x": 22, "y": 11, "locked": false },
+    { "x": 15, "y": 2, "contents": "bread" },
+    { "x": 19, "y": 11, "contents": "church_father_letter" },
+    { "x": 21, "y": 18, "contents": "catacomb_key" },
+    { "x": 3, "y": 11 }
+  ],
+  "npcs": [
+    {
+      "id": "polycarp",
+      "name": "Polycarp",
+      "x": 2,
+      "y": 11,
+      "direction": "right",
+      "dialogueId": "polycarp_intro",
+      "portrait": "polycarp",
+      "color": "#8060a0"
+    },
+    {
+      "id": "martyr_polycarp",
+      "name": "Spirit of Polycarp",
+      "x": 2,
+      "y": 1,
+      "direction": "down",
+      "dialogueId": "martyr_polycarp_story",
+      "portrait": "polycarp",
+      "color": "#cc88cc"
+    },
+    {
+      "id": "martyr_ignatius",
+      "name": "Spirit of Ignatius",
+      "x": 10,
+      "y": 1,
+      "direction": "down",
+      "dialogueId": "martyr_ignatius_story",
+      "portrait": "ignatius",
+      "color": "#cc8888"
+    },
+    {
+      "id": "martyr_perpetua",
+      "name": "Spirit of Perpetua",
+      "x": 15,
+      "y": 4,
+      "direction": "down",
+      "dialogueId": "martyr_perpetua_story",
+      "portrait": "perpetua",
+      "color": "#88cccc"
+    },
+    {
+      "id": "martyr_felicity",
+      "name": "Spirit of Felicity",
+      "x": 22,
+      "y": 1,
+      "direction": "left",
+      "dialogueId": "martyr_felicity_story",
+      "portrait": "felicity",
+      "color": "#88cc88"
+    },
+    {
+      "id": "ichthys_teacher",
+      "name": "Elder Marcus",
+      "x": 10,
+      "y": 7,
+      "direction": "down",
+      "dialogueId": "ichthys_teaching",
+      "portrait": "marcus",
+      "color": "#a09060"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "patrol_1", "type": "roman_patrol", "x": 7, "y": 7,
+      "patrolRoute": [{"x": 7, "y": 7}, {"x": 17, "y": 7}, {"x": 17, "y": 8}, {"x": 7, "y": 8}]
+    },
+    {
+      "id": "patrol_2", "type": "roman_patrol", "x": 3, "y": 14,
+      "patrolRoute": [{"x": 3, "y": 14}, {"x": 11, "y": 14}, {"x": 11, "y": 15}, {"x": 3, "y": 15}]
+    },
+    {
+      "id": "patrol_3", "type": "roman_patrol", "x": 13, "y": 15,
+      "patrolRoute": [{"x": 13, "y": 14}, {"x": 22, "y": 14}, {"x": 22, "y": 15}, {"x": 13, "y": 15}]
+    },
+    { "id": "informant_1", "type": "informant", "x": 20, "y": 4 },
+    { "id": "informant_2", "type": "informant", "x": 8, "y": 11 },
+    {
+      "id": "prefect_boss", "type": "prefect", "x": 16, "y": 18,
+      "patrolRoute": [{"x": 14, "y": 18}, {"x": 18, "y": 18}]
+    }
+  ],
+  "items": [
+    { "id": "bread_l2_1", "type": "bread", "x": 1, "y": 14 },
+    { "id": "bread_l2_2", "type": "bread", "x": 20, "y": 7 },
+    { "id": "bread_l2_3", "type": "bread", "x": 9, "y": 17 },
+    { "id": "ichthys_pendant_1", "type": "ichthys_pendant", "x": 5, "y": 13 }
+  ]
+}

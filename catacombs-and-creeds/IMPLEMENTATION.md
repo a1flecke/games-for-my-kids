@@ -185,6 +185,21 @@ Fully playable Level 1 from start to finish. Tutorial system teaches all mechani
 - Refactored `js/screens.js` (+60 lines: renderVictory screen with playtime, enemies defeated, coins, items found, player level stats, "To be continued" message)
 - Refactored `js/game.js` (+120 lines: tutorial system via quest flags with HUD notifications for movement/interact/save/combat/inventory, checkDialogueRewards for awarding apostle_coin items from coin flags, boss pre-fight dialogue before centurion combat, boss_victory dialogue after centurion defeat, handleStairsInteraction with victory condition checking, enterVictoryState with stats collection, updateVictory state handler, fixed dialogue→combat state transition bug)
 
+### Session 9: Level 2 - Persecutions & Stealth ✅
+
+Complete Level 2 with new stealth mechanic. Guards patrol with vision cones. Hiding spots (alcove tiles). Martyr Token quest system. Level transition from Level 1 to Level 2.
+
+- Created `data/levels/level2.json` (25x20 winding catacomb labyrinth with patrol guards, hiding spots, shrine room, escape tunnel, 6 NPCs, 6 enemies with waypoint patrol routes, 4 floor items)
+- Created `content/level2_dialogue.js` (4 martyr stories with branching choices: Polycarp, Ignatius, Perpetua, Felicity; Ichthys teaching; guard encounters; Polycarp guide NPC; boss pre-fight/victory; victory dialogue; ~35 dialogue nodes)
+- Updated `data/enemies.json` (+3 enemy types: Roman Patrol with stealth flag, Informant, Roman Prefect boss)
+- Updated `data/items.json` (+3 items: Martyr Token quest item, Ichthys Pendant equipment, Church Father Letter collectible)
+- Updated `data/questions.json` (+6 Level 2 questions: persecution, martyrdom, fish symbol, Ichthys meaning, catacombs, Polycarp)
+- Updated `js/tilemap.js` (added TileType.HIDING = 8 for alcove/hiding spot tiles)
+- Refactored `js/render.js` (+120 lines: drawHidingSpot tile, drawVisionCone for semi-transparent triangular guard vision, drawAlertIndicator with "!" and "!!" above guards, vision cones and alert indicators integrated into main render loop)
+- Refactored `js/game.js` (+250 lines: waypoint patrol system with updateWaypointPatrol/updateSimplePatrol, vision cone calculation with updateVisionCone/isPointInVisionCone, detection system with updateDetection/triggerStealthCombat, hiding spot awareness via TileType.HIDING check, stealth bypass bonus XP via checkStealthBypass, Ichthys Pendant reduces detection range, level transition system with transitionToLevel/registerLevelDialogues, multi-level boss dialogue and victory conditions via handleLevel1Stairs/handleLevel2Stairs, countMartyrTokens helper, checkDialogueRewards extended for martyr tokens, "HIDDEN" indicator when player in alcove, stealth tutorial hint)
+- Refactored `js/hud.js` (multi-level objective tracking with _getLevel1Objective/_getLevel2Objective, multi-level progress display with _countMartyrTokens, dynamic coins/tokens label)
+- Updated `index.html` (added level2_dialogue.js script tag)
+
 ---
 
 ## Remaining Sessions
@@ -193,7 +208,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 9 | [session-09.md](sessions/session-09.md) | Opus | Level 2 - Persecutions & Stealth |
 | 10 | [session-10.md](sessions/session-10.md) | Sonnet | Level 3 - Creeds & Puzzles |
 | 11 | [session-11.md](sessions/session-11.md) | Sonnet | Level 4 - Church Fathers & Abilities |
 | 12 | [session-12.md](sessions/session-12.md) | Opus | Level 5 - Constantine & Final Challenge |

@@ -140,7 +140,7 @@ class Game {
                         continue;
                     }
 
-                    this.enemies.push({
+                    const enemyObj = {
                         id: enemySpawn.id,
                         type: enemySpawn.type,
                         name: def.name,
@@ -154,10 +154,29 @@ class Game {
                         originY: gridToWorld(enemySpawn.y, this.tileSize),
                         patrolRange: (def.patrolRange || 2) * this.tileSize,
                         patrolSpeed: def.patrolSpeed || 0.5,
-                        patrolDirection: 1, // 1 = right/down, -1 = left/up
-                        patrolAxis: 'x',    // 'x' or 'y' - patrol horizontally
-                        size: CONFIG.TILE_SIZE
-                    });
+                        patrolDirection: 1,
+                        patrolAxis: 'x',
+                        size: CONFIG.TILE_SIZE,
+                        // Stealth system (for patrol guards with routes)
+                        isStealth: def.stealth || false,
+                        alertLevel: 0,       // 0 = idle, 0-1 = detecting, >= 1 = alerted
+                        visionCone: null,     // Set each frame for stealth enemies
+                        facingDirection: 'right' // Updated during patrol
+                    };
+
+                    // Waypoint patrol route (from level JSON)
+                    if (enemySpawn.patrolRoute && enemySpawn.patrolRoute.length > 1) {
+                        enemyObj.patrolRoute = enemySpawn.patrolRoute.map(wp => ({
+                            x: gridToWorld(wp.x, this.tileSize),
+                            y: gridToWorld(wp.y, this.tileSize)
+                        }));
+                        enemyObj.patrolWaypointIndex = 0;
+                        enemyObj.useWaypoints = true;
+                    } else {
+                        enemyObj.useWaypoints = false;
+                    }
+
+                    this.enemies.push(enemyObj);
                 }
             }
 
@@ -217,9 +236,7 @@ class Game {
 
         if (success) {
             // Register level dialogue content
-            if (window.LEVEL1_DIALOGUES) {
-                this.dialogue.registerDialogues(window.LEVEL1_DIALOGUES);
-            }
+            this.registerLevelDialogues(1);
 
             // Reset session start time for playtime tracking
             this.sessionStartTime = performance.now();
@@ -362,6 +379,9 @@ class Game {
         // Check player-enemy collision (triggers combat)
         this.checkEnemyCollision();
 
+        // Check stealth bypass bonus (sneaking past patrol guards)
+        this.checkStealthBypass();
+
         // Check floor item pickup
         this.checkItemPickup();
 
@@ -375,6 +395,22 @@ class Game {
         if (this.nearNPC && !this.dialogue.getFlag('tutorial_interact')) {
             this.dialogue.setFlag('tutorial_interact');
             this.hud.showNotification('Press SPACE or E to talk!', 'info');
+        }
+
+        // Tutorial: show stealth hint when first near a patrol guard (Level 2+)
+        if (!this.dialogue.getFlag('tutorial_stealth')) {
+            for (const enemy of this.enemies) {
+                if (enemy.isStealth) {
+                    const dx = this.player.x - enemy.x;
+                    const dy = this.player.y - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < this.tileSize * 7) {
+                        this.dialogue.setFlag('tutorial_stealth');
+                        this.hud.showNotification('Hide in dark alcoves to avoid guards!', 'warning');
+                        break;
+                    }
+                }
+            }
         }
 
         // Tutorial: show save hint when first near an altar
@@ -672,7 +708,8 @@ class Game {
 
                 // Boss post-victory dialogue
                 if (wasBoss) {
-                    this.dialogue.startDialogue('boss_victory', () => {
+                    const victoryDialogue = this.currentLevel === 2 ? 'boss_victory_l2' : 'boss_victory';
+                    this.dialogue.startDialogue(victoryDialogue, () => {
                         this.checkDialogueRewards();
                         this.changeState(GameState.PLAYING);
                     });
@@ -782,6 +819,24 @@ class Game {
             nearInteractable: this.nearInteractable
         });
 
+        // Show "Hidden" indicator if player is in a hiding spot
+        if (this.player && this.map) {
+            const pt = this.player.getTilePosition();
+            if (this.map.getTile(pt.x, pt.y) === TileType.HIDING) {
+                const ctx = this.renderer.ctx;
+                const a = CONFIG.ACCESSIBILITY;
+                ctx.font = `bold 14px ${a.fontFamily}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                const screenPos = this.renderer.camera.worldToScreen(this.player.x, this.player.y);
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.strokeText('HIDDEN', screenPos.x, screenPos.y - this.player.size - 4);
+                ctx.fillStyle = '#88cc88';
+                ctx.fillText('HIDDEN', screenPos.x, screenPos.y - this.player.size - 4);
+            }
+        }
+
         // Render HUD on top of game world
         this.hud.render(this.renderer.ctx, this.canvas, this);
 
@@ -806,35 +861,186 @@ class Game {
 
     /**
      * Update enemy patrol movement.
-     * Enemies walk back and forth horizontally within their patrol range.
+     * Supports both simple back-and-forth patrol and waypoint-based routes.
+     * For stealth enemies, also updates vision cones and detection.
      */
     updateEnemies(deltaTime) {
         for (const enemy of this.enemies) {
-            // Simple horizontal patrol
-            enemy.x += enemy.patrolSpeed * enemy.patrolDirection;
-
-            // Reverse direction at patrol bounds
-            const distFromOrigin = enemy.x - enemy.originX;
-            if (Math.abs(distFromOrigin) >= enemy.patrolRange) {
-                enemy.patrolDirection *= -1;
-                // Clamp to patrol bounds
-                enemy.x = enemy.originX + enemy.patrolRange * Math.sign(distFromOrigin);
+            if (enemy.useWaypoints) {
+                this.updateWaypointPatrol(enemy);
+            } else {
+                this.updateSimplePatrol(enemy);
             }
 
-            // Also check tile collision — reverse if hitting a wall
-            const halfSize = enemy.size / 2;
-            const checkX = enemy.patrolDirection > 0
-                ? enemy.x + halfSize
-                : enemy.x - halfSize;
-            const tileX = worldToGrid(checkX, this.tileSize);
-            const tileY = worldToGrid(enemy.y, this.tileSize);
-
-            if (this.map && this.map.isSolid(tileX, tileY)) {
-                enemy.patrolDirection *= -1;
-                // Step back
-                enemy.x -= enemy.patrolSpeed * enemy.patrolDirection;
+            // Update vision cone for stealth enemies
+            if (enemy.isStealth) {
+                this.updateVisionCone(enemy);
+                this.updateDetection(enemy, deltaTime);
             }
         }
+    }
+
+    /**
+     * Simple horizontal back-and-forth patrol (original behavior).
+     */
+    updateSimplePatrol(enemy) {
+        enemy.x += enemy.patrolSpeed * enemy.patrolDirection;
+
+        // Reverse direction at patrol bounds
+        const distFromOrigin = enemy.x - enemy.originX;
+        if (Math.abs(distFromOrigin) >= enemy.patrolRange) {
+            enemy.patrolDirection *= -1;
+            enemy.x = enemy.originX + enemy.patrolRange * Math.sign(distFromOrigin);
+        }
+
+        // Track facing direction
+        enemy.facingDirection = enemy.patrolDirection > 0 ? 'right' : 'left';
+
+        // Check tile collision
+        const halfSize = enemy.size / 2;
+        const checkX = enemy.patrolDirection > 0
+            ? enemy.x + halfSize
+            : enemy.x - halfSize;
+        const tileX = worldToGrid(checkX, this.tileSize);
+        const tileY = worldToGrid(enemy.y, this.tileSize);
+
+        if (this.map && this.map.isSolid(tileX, tileY)) {
+            enemy.patrolDirection *= -1;
+            enemy.x -= enemy.patrolSpeed * enemy.patrolDirection;
+        }
+    }
+
+    /**
+     * Waypoint-based patrol: enemy moves toward next waypoint, advances when reached.
+     */
+    updateWaypointPatrol(enemy) {
+        const route = enemy.patrolRoute;
+        const target = route[enemy.patrolWaypointIndex];
+        const dx = target.x - enemy.x;
+        const dy = target.y - enemy.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < enemy.patrolSpeed * 2) {
+            // Reached waypoint — advance to next
+            enemy.patrolWaypointIndex = (enemy.patrolWaypointIndex + 1) % route.length;
+        } else {
+            // Move toward waypoint
+            const nx = dx / dist;
+            const ny = dy / dist;
+            enemy.x += nx * enemy.patrolSpeed;
+            enemy.y += ny * enemy.patrolSpeed;
+
+            // Update facing direction based on dominant movement axis
+            if (Math.abs(dx) > Math.abs(dy)) {
+                enemy.facingDirection = dx > 0 ? 'right' : 'left';
+            } else {
+                enemy.facingDirection = dy > 0 ? 'down' : 'up';
+            }
+        }
+    }
+
+    /**
+     * Update a stealth enemy's vision cone data (used for rendering and detection).
+     */
+    updateVisionCone(enemy) {
+        const coneLength = this.tileSize * 4; // 4 tiles long
+        const coneHalfWidth = this.tileSize * 2; // 2 tiles wide at the far end
+
+        // Check if player has ichthys_pendant equipped (reduces detection range)
+        let lengthMultiplier = 1.0;
+        if (this.inventory && this.inventory.equipped && this.inventory.equipped.accessory) {
+            const equipped = this.inventory.equipped.accessory;
+            if (equipped === 'ichthys_pendant') {
+                lengthMultiplier = 0.6;
+            }
+        }
+
+        enemy.visionCone = {
+            direction: enemy.facingDirection,
+            length: coneLength * lengthMultiplier,
+            halfWidth: coneHalfWidth * lengthMultiplier
+        };
+    }
+
+    /**
+     * Check if player is in a stealth enemy's vision cone and update detection.
+     */
+    updateDetection(enemy, deltaTime) {
+        if (!this.player) return;
+
+        // Check if player is hiding in an alcove
+        const playerTile = this.player.getTilePosition();
+        const playerTileType = this.map ? this.map.getTile(playerTile.x, playerTile.y) : TileType.FLOOR;
+        const isHiding = playerTileType === TileType.HIDING;
+
+        if (isHiding) {
+            // Player is hidden — reduce alert
+            enemy.alertLevel = Math.max(0, enemy.alertLevel - (deltaTime / 1000));
+            return;
+        }
+
+        // Check if player is inside the vision cone
+        const cone = enemy.visionCone;
+        if (!cone) return;
+
+        const playerInCone = this.isPointInVisionCone(
+            this.player.x, this.player.y,
+            enemy.x, enemy.y,
+            cone.direction, cone.length, cone.halfWidth
+        );
+
+        if (playerInCone) {
+            // Build up detection (0.5 seconds to full alert)
+            enemy.alertLevel += (deltaTime / 500);
+
+            if (enemy.alertLevel >= 1.0) {
+                enemy.alertLevel = 1.0;
+                // Trigger forced combat (harder: enemy gets first strike handled in combat)
+                this.triggerStealthCombat(enemy);
+            }
+        } else {
+            // Slowly reduce alert when player leaves cone
+            enemy.alertLevel = Math.max(0, enemy.alertLevel - (deltaTime / 1500));
+        }
+    }
+
+    /**
+     * Check if a point is inside a vision cone.
+     */
+    isPointInVisionCone(px, py, ex, ey, direction, length, halfWidth) {
+        const dx = px - ex;
+        const dy = py - ey;
+
+        // Project onto the cone's forward axis
+        let forward, lateral;
+        switch (direction) {
+            case 'right':  forward = dx;  lateral = dy; break;
+            case 'left':   forward = -dx; lateral = dy; break;
+            case 'down':   forward = dy;  lateral = dx; break;
+            case 'up':     forward = -dy; lateral = dx; break;
+            default: return false;
+        }
+
+        // Must be in front of the guard and within range
+        if (forward <= 0 || forward > length) return false;
+
+        // The cone widens linearly from 0 at the guard to halfWidth at max range
+        const allowedLateral = (forward / length) * halfWidth;
+        return Math.abs(lateral) <= allowedLateral;
+    }
+
+    /**
+     * Trigger combat from stealth detection (harder combat).
+     */
+    triggerStealthCombat(enemy) {
+        // Reset alert so it doesn't re-trigger
+        enemy.alertLevel = 0;
+
+        // Show detection message
+        this.hud.showNotification('You were spotted!', 'error');
+
+        // Start combat — stealth enemies are tougher when they catch you
+        this.startCombatWithEnemy(enemy);
     }
 
     /**
@@ -863,8 +1069,10 @@ class Game {
 
             if (aabbCollision(playerBox, enemyBox)) {
                 // Boss pre-fight dialogue (first encounter only)
-                if (enemy.isBoss && !this.dialogue.getFlag('boss_prefight_shown')) {
-                    this.dialogue.setFlag('boss_prefight_shown');
+                const prefightFlag = this.currentLevel === 2 ? 'boss_prefight_l2_shown' : 'boss_prefight_shown';
+                const prefightDialogue = this.currentLevel === 2 ? 'boss_prefight_l2' : 'boss_prefight';
+                if (enemy.isBoss && !this.dialogue.getFlag(prefightFlag)) {
+                    this.dialogue.setFlag(prefightFlag);
                     // Push player back to avoid immediate re-trigger
                     const dx = this.player.x - enemy.x;
                     const dy = this.player.y - enemy.y;
@@ -873,7 +1081,7 @@ class Game {
                     this.player.y += (dy / dist) * this.tileSize;
 
                     const enemyRef = enemy;
-                    this.dialogue.startDialogue('boss_prefight', () => {
+                    this.dialogue.startDialogue(prefightDialogue, () => {
                         this.startCombatWithEnemy(enemyRef);
                     });
                     this.changeState(GameState.DIALOGUE);
@@ -932,6 +1140,36 @@ class Game {
     }
 
     /**
+     * Check if the player has successfully sneaked past a stealth enemy.
+     * Awards bonus XP for stealth bypass.
+     */
+    checkStealthBypass() {
+        if (!this.player || this.enemies.length === 0) return;
+
+        for (const enemy of this.enemies) {
+            if (!enemy.isStealth || enemy.stealthBypassed) continue;
+
+            // Check if player is behind the enemy (past its patrol route area)
+            const dx = this.player.x - enemy.x;
+            const dy = this.player.y - enemy.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Player must be far enough away and have been near enough at some point
+            if (dist > this.tileSize * 6) {
+                // Check if player was ever close to this enemy (within 5 tiles)
+                if (!enemy.playerWasNear) continue;
+
+                enemy.stealthBypassed = true;
+                const bonusXP = 15;
+                this.player.gainXP(bonusXP);
+                this.hud.showNotification(`Stealth bonus! +${bonusXP} XP`, 'success');
+            } else if (dist < this.tileSize * 5) {
+                enemy.playerWasNear = true;
+            }
+        }
+    }
+
+    /**
      * Initiate combat with a specific enemy.
      * @param {Object} enemy - Enemy map entity
      */
@@ -959,13 +1197,14 @@ class Game {
     }
 
     /**
-     * Check if dialogue set any coin flags and award Apostle Coins.
-     * Called after dialogue completes.
+     * Check if dialogue set any reward flags and award items.
+     * Called after dialogue completes. Supports Level 1 coins and Level 2 tokens.
      */
     checkDialogueRewards() {
         const flags = this.dialogue.questFlags;
-        const coinFlags = ['coin_peter', 'coin_james', 'coin_john'];
 
+        // Level 1: Apostle Coins
+        const coinFlags = ['coin_peter', 'coin_james', 'coin_john'];
         for (const flag of coinFlags) {
             if (flags[flag] && !flags[`awarded_${flag}`]) {
                 this.inventory.addItem('apostle_coin');
@@ -974,12 +1213,34 @@ class Game {
                 console.log(`Awarded apostle coin for ${flag}`);
             }
         }
+
+        // Level 2: Martyr Tokens
+        const tokenFlags = ['token_polycarp', 'token_ignatius', 'token_perpetua', 'token_felicity'];
+        for (const flag of tokenFlags) {
+            if (flags[flag] && !flags[`awarded_${flag}`]) {
+                this.inventory.addItem('martyr_token');
+                this.inventory.showNotification('Obtained Martyr Token!');
+                this.dialogue.setFlag(`awarded_${flag}`);
+                console.log(`Awarded martyr token for ${flag}`);
+            }
+        }
     }
 
     /**
-     * Handle stairs interaction — check victory conditions.
+     * Handle stairs interaction — check victory conditions for the current level.
      */
     handleStairsInteraction() {
+        if (this.currentLevel === 1) {
+            this.handleLevel1Stairs();
+        } else if (this.currentLevel === 2) {
+            this.handleLevel2Stairs();
+        }
+    }
+
+    /**
+     * Level 1 stairs: need 3 coins + boss defeated → victory dialogue → Level 2.
+     */
+    handleLevel1Stairs() {
         const flags = this.dialogue.questFlags;
         const coins = (flags.coin_peter ? 1 : 0) +
                       (flags.coin_james ? 1 : 0) +
@@ -995,12 +1256,113 @@ class Game {
             return;
         }
 
-        // All conditions met — start victory dialogue then transition to victory screen
+        // All conditions met — start victory dialogue then transition to Level 2
         this.dialogue.startDialogue('victory', () => {
+            this.checkDialogueRewards();
+            this.transitionToLevel(2);
+        });
+        this.changeState(GameState.DIALOGUE);
+    }
+
+    /**
+     * Level 2 stairs: need 4 martyr tokens + boss defeated → victory screen.
+     */
+    handleLevel2Stairs() {
+        const flags = this.dialogue.questFlags;
+        const tokens = this.countMartyrTokens();
+
+        if (tokens < 4) {
+            this.inventory.showNotification(`You need ${4 - tokens} more Martyr Token(s)!`);
+            return;
+        }
+
+        if (!flags.boss_defeated_l2) {
+            this.inventory.showNotification('The Roman Prefect still blocks the escape!');
+            return;
+        }
+
+        // All conditions met — start victory dialogue then show victory screen
+        this.dialogue.startDialogue('victory_l2', () => {
             this.checkDialogueRewards();
             this.enterVictoryState();
         });
         this.changeState(GameState.DIALOGUE);
+    }
+
+    /**
+     * Count martyr tokens collected based on quest flags.
+     */
+    countMartyrTokens() {
+        const flags = this.dialogue.questFlags;
+        let count = 0;
+        if (flags.token_polycarp) count++;
+        if (flags.token_ignatius) count++;
+        if (flags.token_perpetua) count++;
+        if (flags.token_felicity) count++;
+        return count;
+    }
+
+    /**
+     * Transition to a new level. Preserves player stats and inventory.
+     */
+    async transitionToLevel(levelNumber) {
+        this.changeState(GameState.LOADING);
+
+        // Preserve player state across levels
+        const preservedPlayer = {
+            hp: this.player.hp,
+            maxHp: this.player.maxHp,
+            attack: this.player.attack,
+            defense: this.player.defense,
+            xp: this.player.xp,
+            level: this.player.level,
+            xpThreshold: this.player.xpThreshold,
+            equipmentBonus: { ...this.player.equipmentBonus }
+        };
+
+        // Clear level-specific state
+        this.defeatedEnemies.clear();
+
+        // Load new level
+        const success = await this.loadLevel(levelNumber);
+        if (success) {
+            // Restore player stats
+            Object.assign(this.player, preservedPlayer);
+
+            // Register level dialogue content
+            this.registerLevelDialogues(levelNumber);
+
+            // Reset session timer for new level playtime
+            this.sessionStartTime = performance.now();
+            this.lastSaveTime = this.sessionStartTime;
+
+            this.hud.showNotification(`Level ${levelNumber}: ${this.map.name}`, 'info');
+            this.changeState(GameState.PLAYING);
+
+            // Auto-save at level start
+            this.autoSave();
+        } else {
+            console.error(`Failed to load level ${levelNumber}`);
+            this.changeState(GameState.TITLE);
+        }
+    }
+
+    /**
+     * Register dialogue content for a given level number.
+     */
+    registerLevelDialogues(levelNumber) {
+        switch (levelNumber) {
+            case 1:
+                if (window.LEVEL1_DIALOGUES) {
+                    this.dialogue.registerDialogues(window.LEVEL1_DIALOGUES);
+                }
+                break;
+            case 2:
+                if (window.LEVEL2_DIALOGUES) {
+                    this.dialogue.registerDialogues(window.LEVEL2_DIALOGUES);
+                }
+                break;
+        }
     }
 
     /**
@@ -1013,14 +1375,24 @@ class Game {
         const playtime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
         const flags = this.dialogue.questFlags;
-        const coins = (flags.coin_peter ? 1 : 0) +
-                      (flags.coin_james ? 1 : 0) +
-                      (flags.coin_john ? 1 : 0);
+
+        // Level-specific collectible count
+        let collectiblesLabel, collectiblesCount;
+        if (this.currentLevel === 2) {
+            collectiblesLabel = 'tokensCollected';
+            collectiblesCount = this.countMartyrTokens();
+        } else {
+            collectiblesLabel = 'coinsCollected';
+            collectiblesCount = (flags.coin_peter ? 1 : 0) +
+                                (flags.coin_james ? 1 : 0) +
+                                (flags.coin_john ? 1 : 0);
+        }
 
         this.victoryStats = {
+            levelName: this.map ? this.map.name : `Level ${this.currentLevel}`,
             playtime: playtime,
             enemiesDefeated: this.defeatedEnemies.size,
-            coinsCollected: coins,
+            coinsCollected: collectiblesCount,
             itemsFound: this.inventory.items.length +
                          (this.inventory.equipped.shield ? 1 : 0) +
                          (this.inventory.equipped.accessory ? 1 : 0),
@@ -1297,9 +1669,7 @@ class Game {
 
         if (success) {
             // Register level dialogue content
-            if (window.LEVEL1_DIALOGUES) {
-                this.dialogue.registerDialogues(window.LEVEL1_DIALOGUES);
-            }
+            this.registerLevelDialogues(saveData.currentLevel);
 
             // Restore all save data
             this.restoreSaveData(saveData);

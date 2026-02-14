@@ -94,6 +94,9 @@ class Renderer {
             case TileType.STAIRS:
                 this.drawStairs(screenX, screenY);
                 break;
+            case TileType.HIDING:
+                this.drawHidingSpot(screenX, screenY);
+                break;
         }
     }
 
@@ -434,6 +437,124 @@ class Renderer {
         ctx.lineTo(x + size / 2 + 5, y + size - 10);
         ctx.closePath();
         ctx.fill();
+    }
+
+    // Draw hiding spot tile (dark alcove)
+    drawHidingSpot(x, y) {
+        const ctx = this.ctx;
+        const size = this.tileSize;
+
+        // Dark recessed floor
+        ctx.fillStyle = '#1a1510';
+        ctx.fillRect(x, y, size, size);
+
+        // Subtle wall edges to show it's a recessed alcove
+        ctx.fillStyle = '#2a2520';
+        ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+
+        // Shadow lines
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, size, size);
+
+        // Subtle shadow indicator
+        const pulse = Math.sin(this.animTime * 1.5) * 0.05 + 0.1;
+        ctx.fillStyle = `rgba(80, 60, 120, ${pulse})`;
+        ctx.fillRect(x + 4, y + 4, size - 8, size - 8);
+    }
+
+    // Draw a guard's vision cone (semi-transparent triangle)
+    drawVisionCone(enemy) {
+        if (!enemy.visionCone) return;
+
+        const screenPos = this.camera.worldToScreen(enemy.x, enemy.y);
+        const ctx = this.ctx;
+        const cone = enemy.visionCone;
+
+        // Cone color based on alert state
+        let coneColor;
+        if (enemy.alertLevel >= 1.0) {
+            coneColor = 'rgba(255, 50, 50, 0.2)';  // Red when fully alerted
+        } else if (enemy.alertLevel > 0) {
+            coneColor = 'rgba(255, 200, 50, 0.15)'; // Yellow when detecting
+        } else {
+            coneColor = 'rgba(255, 255, 100, 0.08)'; // Dim yellow when idle
+        }
+
+        // Draw cone as a triangle from enemy position
+        const length = cone.length;
+        const halfWidth = cone.halfWidth;
+
+        // Calculate cone points based on facing direction
+        let tipX, tipY, leftX, leftY, rightX, rightY;
+        switch (cone.direction) {
+            case 'right':
+                tipX = screenPos.x;
+                tipY = screenPos.y;
+                leftX = screenPos.x + length;
+                leftY = screenPos.y - halfWidth;
+                rightX = screenPos.x + length;
+                rightY = screenPos.y + halfWidth;
+                break;
+            case 'left':
+                tipX = screenPos.x;
+                tipY = screenPos.y;
+                leftX = screenPos.x - length;
+                leftY = screenPos.y + halfWidth;
+                rightX = screenPos.x - length;
+                rightY = screenPos.y - halfWidth;
+                break;
+            case 'down':
+                tipX = screenPos.x;
+                tipY = screenPos.y;
+                leftX = screenPos.x + halfWidth;
+                leftY = screenPos.y + length;
+                rightX = screenPos.x - halfWidth;
+                rightY = screenPos.y + length;
+                break;
+            case 'up':
+                tipX = screenPos.x;
+                tipY = screenPos.y;
+                leftX = screenPos.x - halfWidth;
+                leftY = screenPos.y - length;
+                rightX = screenPos.x + halfWidth;
+                rightY = screenPos.y - length;
+                break;
+            default:
+                return;
+        }
+
+        ctx.fillStyle = coneColor;
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(leftX, leftY);
+        ctx.lineTo(rightX, rightY);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Draw alert indicator above a guard ("!" or "!!")
+    drawAlertIndicator(enemy) {
+        if (!enemy.alertLevel || enemy.alertLevel <= 0) return;
+
+        const screenPos = this.camera.worldToScreen(enemy.x, enemy.y);
+        const ctx = this.ctx;
+        const size = CONFIG.TILE_SIZE;
+
+        const text = enemy.alertLevel >= 1.0 ? '!!' : '!';
+        const color = enemy.alertLevel >= 1.0 ? '#ff3333' : '#ffcc00';
+
+        // Bouncing animation
+        const bounce = Math.sin(this.animTime * 8) * 3;
+
+        ctx.font = `bold 18px ${CONFIG.ACCESSIBILITY.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+        ctx.strokeText(text, screenPos.x, screenPos.y - size / 2 - 8 + bounce);
+        ctx.fillStyle = color;
+        ctx.fillText(text, screenPos.x, screenPos.y - size / 2 - 8 + bounce);
     }
 
     // Draw the player character
@@ -792,10 +913,22 @@ class Renderer {
             }
         }
 
+        // Draw vision cones (behind enemies, on top of floor items)
+        if (gameState.enemies) {
+            for (const enemy of gameState.enemies) {
+                if (enemy.visionCone) {
+                    this.drawVisionCone(enemy);
+                }
+            }
+        }
+
         // Draw enemies
         if (gameState.enemies) {
             for (const enemy of gameState.enemies) {
                 this.drawEnemy(enemy);
+                if (enemy.alertLevel !== undefined) {
+                    this.drawAlertIndicator(enemy);
+                }
             }
         }
 

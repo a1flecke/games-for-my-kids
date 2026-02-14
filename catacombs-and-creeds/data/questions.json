@@ -182,5 +182,143 @@
     ],
     "level": 1,
     "topic": "apostles"
+  },
+  {
+    "id": "q2_persecution_reason",
+    "question": "Why did the Roman Empire persecute early Christians?",
+    "choices": [
+      {
+        "text": "Christians refused to worship the Roman gods and emperor",
+        "correct": true,
+        "explanation": "Romans saw Christians as a threat because they worshiped only one God and refused to honor the emperor as divine."
+      },
+      {
+        "text": "Christians were too noisy at night",
+        "correct": false,
+        "explanation": "The real reason was that Christians refused to worship Roman gods and the emperor. Rome saw this as disloyal and dangerous."
+      },
+      {
+        "text": "Christians did not pay their taxes",
+        "correct": false,
+        "explanation": "Actually, Jesus taught to pay taxes. Rome persecuted Christians because they refused to worship the emperor and Roman gods."
+      }
+    ],
+    "level": 2,
+    "topic": "persecution"
+  },
+  {
+    "id": "q2_what_is_martyr",
+    "question": "What is a martyr?",
+    "choices": [
+      {
+        "text": "Someone who dies for their faith rather than give it up",
+        "correct": true,
+        "explanation": "A martyr is someone who chooses to suffer or die rather than deny their beliefs. Many early Christians became martyrs."
+      },
+      {
+        "text": "A type of Roman soldier",
+        "correct": false,
+        "explanation": "A martyr is not a soldier. A martyr is someone who dies for their faith rather than deny what they believe."
+      },
+      {
+        "text": "A person who builds churches",
+        "correct": false,
+        "explanation": "A martyr is someone who suffers or dies for their faith. The word comes from Greek and means witness."
+      }
+    ],
+    "level": 2,
+    "topic": "persecution"
+  },
+  {
+    "id": "q2_fish_symbol",
+    "question": "What did the fish symbol mean to early Christians?",
+    "choices": [
+      {
+        "text": "It was a secret sign to identify fellow Christians",
+        "correct": true,
+        "explanation": "Christians drew the fish symbol (Ichthys) to secretly identify each other. One person would draw half, and the other would complete it."
+      },
+      {
+        "text": "They really liked fishing",
+        "correct": false,
+        "explanation": "The fish was a secret code! The Greek word for fish (Ichthys) spelled out Jesus Christ, God's Son, Savior."
+      },
+      {
+        "text": "It was a Roman military symbol",
+        "correct": false,
+        "explanation": "The fish was a Christian symbol, not Roman. The Greek letters in Ichthys stood for Jesus Christ, God's Son, Savior."
+      }
+    ],
+    "level": 2,
+    "topic": "symbols"
+  },
+  {
+    "id": "q2_ichthys_meaning",
+    "question": "What does the Greek word Ichthys mean?",
+    "choices": [
+      {
+        "text": "Fish, and its letters stand for Jesus Christ, God's Son, Savior",
+        "correct": true,
+        "explanation": "Ichthys means fish in Greek. Each letter stands for a word: Iesous Christos Theou Yios Soter — Jesus Christ, God's Son, Savior."
+      },
+      {
+        "text": "It means love in Greek",
+        "correct": false,
+        "explanation": "Ichthys means fish in Greek. The letters are an acronym: I-Ch-Th-Y-S stands for Jesus Christ, God's Son, Savior."
+      },
+      {
+        "text": "It means church in Greek",
+        "correct": false,
+        "explanation": "Ichthys means fish. Early Christians used it as a secret code because the letters stand for Jesus Christ, God's Son, Savior."
+      }
+    ],
+    "level": 2,
+    "topic": "symbols"
+  },
+  {
+    "id": "q2_catacombs_purpose",
+    "question": "Why did early Christians meet in underground catacombs?",
+    "choices": [
+      {
+        "text": "To worship safely, hidden from Roman authorities",
+        "correct": true,
+        "explanation": "Catacombs were underground burial tunnels. Christians met there in secret because gathering to worship was dangerous during persecution."
+      },
+      {
+        "text": "Because they could not afford buildings",
+        "correct": false,
+        "explanation": "The main reason was safety. Catacombs were underground tunnels where Christians could worship without being caught by Roman soldiers."
+      },
+      {
+        "text": "Because catacombs were warmer in winter",
+        "correct": false,
+        "explanation": "Christians met in catacombs to hide from persecution. These underground tunnels kept their gatherings secret from Roman authorities."
+      }
+    ],
+    "level": 2,
+    "topic": "early_church"
+  },
+  {
+    "id": "q2_polycarp",
+    "question": "Who was Polycarp?",
+    "choices": [
+      {
+        "text": "A bishop who was martyred for refusing to deny Christ",
+        "correct": true,
+        "explanation": "Polycarp was the Bishop of Smyrna who was a student of the Apostle John. He was martyred at age 86 for his faith."
+      },
+      {
+        "text": "A Roman emperor who helped Christians",
+        "correct": false,
+        "explanation": "Polycarp was not a Roman emperor. He was a Christian bishop, a student of Apostle John, who was martyred for his faith at age 86."
+      },
+      {
+        "text": "The person who wrote the Bible",
+        "correct": false,
+        "explanation": "Polycarp did not write the Bible. He was the Bishop of Smyrna who learned from Apostle John and was martyred at age 86."
+      }
+    ],
+    "level": 2,
+    "topic": "persecution"
   }
 ]

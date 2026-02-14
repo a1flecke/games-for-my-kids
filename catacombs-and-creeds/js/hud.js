@@ -133,10 +133,19 @@ class HUD {
         const padding = 20;
         const y = 20;
 
-        // Calculate progress based on apostle coins collected
-        const coinsCollected = this._countApostleCoins(gameState);
-        const totalCoins = 3;
-        const progressText = `Coins: ${coinsCollected}/${totalCoins}`;
+        // Calculate progress based on current level
+        const currentLevel = gameState.currentLevel || 1;
+        let collected, total, progressText;
+
+        if (currentLevel === 2) {
+            collected = this._countMartyrTokens(gameState);
+            total = 4;
+            progressText = `Tokens: ${collected}/${total}`;
+        } else {
+            collected = this._countApostleCoins(gameState);
+            total = 3;
+            progressText = `Coins: ${collected}/${total}`;
+        }
 
         // Measure text for background box
         ctx.font = `bold ${a.fontSize}px ${a.fontFamily}`;
@@ -166,7 +175,7 @@ class HUD {
         const progressBarHeight = 6;
         const progressBarX = boxX + 5;
         const progressBarY = y + boxHeight + 5;
-        const progress = coinsCollected / totalCoins;
+        const progress = collected / total;
 
         // Progress bar background
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -354,29 +363,33 @@ class HUD {
         if (!gameState.dialogue) return null;
 
         const flags = gameState.dialogue.questFlags;
+        const currentLevel = gameState.currentLevel || 1;
+
+        if (currentLevel === 2) {
+            return this._getLevel2Objective(flags, gameState);
+        }
+        return this._getLevel1Objective(flags, gameState);
+    }
+
+    /** @private */
+    _getLevel1Objective(flags, gameState) {
         const coinsCollected = this._countApostleCoins(gameState);
 
-        // Level complete
-        if (flags.level1_complete) {
-            return 'Level 1 Complete!';
-        }
+        if (flags.level1_complete) return 'Level 1 Complete!';
+        if (coinsCollected >= 3 && flags.boss_defeated) return 'Find the exit stairs';
+        if (coinsCollected >= 3) return 'Defeat the Roman Centurion';
+        if (flags.met_peter_guide) return `Find the Apostles (${coinsCollected}/3 coins)`;
+        return 'Explore the catacombs';
+    }
 
-        // All coins + boss defeated
-        if (coinsCollected >= 3 && flags.boss_defeated) {
-            return 'Find the exit stairs';
-        }
+    /** @private */
+    _getLevel2Objective(flags, gameState) {
+        const tokensCollected = this._countMartyrTokens(gameState);
 
-        // All coins but boss not defeated
-        if (coinsCollected >= 3) {
-            return 'Defeat the Roman Centurion';
-        }
-
-        // Has talked to Peter guide — working on collecting coins
-        if (flags.met_peter_guide) {
-            return `Find the Apostles (${coinsCollected}/3 coins)`;
-        }
-
-        // Default objective
+        if (flags.level2_complete) return 'Level 2 Complete!';
+        if (tokensCollected >= 4 && flags.boss_defeated_l2) return 'Find the escape tunnel';
+        if (tokensCollected >= 4) return 'Defeat the Roman Prefect';
+        if (flags.met_polycarp) return `Find the Martyrs (${tokensCollected}/4 tokens)`;
         return 'Explore the catacombs';
     }
 
@@ -391,6 +404,21 @@ class HUD {
         if (flags.coin_peter) count++;
         if (flags.coin_james) count++;
         if (flags.coin_john) count++;
+        return count;
+    }
+
+    /**
+     * Count martyr tokens collected based on quest flags.
+     * @private
+     */
+    _countMartyrTokens(gameState) {
+        if (!gameState.dialogue) return 0;
+        const flags = gameState.dialogue.questFlags;
+        let count = 0;
+        if (flags.token_polycarp) count++;
+        if (flags.token_ignatius) count++;
+        if (flags.token_perpetua) count++;
+        if (flags.token_felicity) count++;
         return count;
     }
 }
