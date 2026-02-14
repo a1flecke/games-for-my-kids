@@ -48,6 +48,8 @@ class Game {
         this.combat = new CombatSystem();
         this.questions = new QuestionSystem();
         this.inventory = new InventorySystem();
+        this.saveSystem = new SaveSystem();
+        this.hud = new HUD();
 
         // Wire question system into combat
         this.combat.questionSystem = this.questions;
@@ -65,8 +67,11 @@ class Game {
         // Auto-save timer
         this.lastSaveTime = 0;
 
-        // Save system foundation
-        this.saveKey = 'earlyChurchDungeonSave';
+        // Track session playtime (for save metadata)
+        this.sessionStartTime = 0;
+
+        // Previous state (for returning from settings)
+        this.previousState = null;
     }
 
     init() {
@@ -213,9 +218,10 @@ class Game {
                 this.dialogue.registerDialogues(window.LEVEL1_DIALOGUES);
             }
 
-            // Try to load saved game data (position, stats, quest flags)
-            this.loadGame();
-            this.lastSaveTime = performance.now();
+            // Reset session start time for playtime tracking
+            this.sessionStartTime = performance.now();
+            this.lastSaveTime = this.sessionStartTime;
+
             this.changeState(GameState.PLAYING);
         } else {
             console.error('Failed to load level, returning to title');
@@ -294,13 +300,39 @@ class Game {
             case GameState.PAUSED:
                 this.updatePaused();
                 break;
+            case GameState.SETTINGS:
+                this.updateSettings();
+                break;
+            case GameState.SAVE_SLOTS:
+            case GameState.LOAD_SLOTS:
+                this.updateSlotPicker();
+                break;
         }
+
+        // Update notifications in HUD
+        this.hud.updateNotifications(deltaTime);
+        this.saveSystem.updateNotifications(deltaTime);
     }
 
     updateTitle() {
         const action = this.screens.update(this.input, 'title');
         if (action === 'new_game') {
             this.startNewGame();
+        } else if (action === 'continue') {
+            // Show load slot picker
+            this.previousState = GameState.TITLE;
+            this.saveSystem.showSlotPicker('load', (slotIndex) => {
+                if (slotIndex !== null) {
+                    this.loadGameFromSlot(slotIndex);
+                }
+                // Return to title if cancelled or after load attempt
+                this.changeState(GameState.TITLE);
+            });
+            this.changeState(GameState.LOAD_SLOTS);
+        } else if (action === 'settings') {
+            this.previousState = GameState.TITLE;
+            this.screens.resetSelection();
+            this.changeState(GameState.SETTINGS);
         }
     }
 
@@ -350,7 +382,7 @@ class Game {
 
         // Auto-save periodically
         if (currentTime - this.lastSaveTime >= CONFIG.AUTO_SAVE_INTERVAL) {
-            this.saveGame();
+            this.autoSave();
             this.lastSaveTime = currentTime;
         }
     }
@@ -496,7 +528,15 @@ class Game {
                 switch (result.type) {
                     case 'altar_save':
                         this.updateCheckpoint();
-                        this.saveGame();
+                        // Show save slot picker
+                        this.saveSystem.showSlotPicker('save', (slotIndex) => {
+                            if (slotIndex !== null) {
+                                this.saveToSlot(slotIndex);
+                            }
+                            this.changeState(GameState.PLAYING);
+                        });
+                        this.previousState = GameState.PLAYING;
+                        this.changeState(GameState.SAVE_SLOTS);
                         break;
                     case 'stairs':
                         console.log('Stairs interaction — level transition not yet implemented');
@@ -535,8 +575,12 @@ class Game {
         const action = this.screens.update(this.input, 'pause');
         if (action === 'resume') {
             this.changeState(GameState.PLAYING);
+        } else if (action === 'settings') {
+            this.previousState = GameState.PAUSED;
+            this.screens.resetSelection();
+            this.changeState(GameState.SETTINGS);
         } else if (action === 'exit_title') {
-            this.saveGame();
+            this.autoSave(); // Auto-save before exiting
             this.player = null;
             this.map = null;
             this.npcs = [];
@@ -545,6 +589,19 @@ class Game {
             this.screens.resetSelection();
             this.changeState(GameState.TITLE);
         }
+    }
+
+    updateSettings() {
+        const action = this.screens.update(this.input, 'settings');
+        if (action === 'back') {
+            this.screens.resetSelection();
+            this.changeState(this.previousState || GameState.TITLE);
+        }
+    }
+
+    updateSlotPicker() {
+        this.saveSystem.updateSlotPicker(this.input);
+        // Picker handles its own callback and state changes
     }
 
     updateDialogue(deltaTime) {
@@ -581,8 +638,8 @@ class Game {
                     }
                 }
 
-                // Save after combat victory
-                this.saveGame();
+                // Auto-save after combat victory
+                this.autoSave();
             } else {
                 // Defeat: respawn player at checkpoint with 50% HP
                 this.player.x = this.checkpointX;
@@ -628,7 +685,29 @@ class Game {
                 this.renderPlaying();
                 this.screens.renderPause(this.renderer.ctx, this.canvas);
                 break;
+            case GameState.SETTINGS:
+                // Render previous screen in background
+                if (this.previousState === GameState.PLAYING || this.previousState === GameState.PAUSED) {
+                    this.renderPlaying();
+                } else {
+                    this.screens.renderTitle(this.renderer.ctx, this.canvas);
+                }
+                this.screens.renderSettings(this.renderer.ctx, this.canvas);
+                break;
+            case GameState.SAVE_SLOTS:
+            case GameState.LOAD_SLOTS:
+                // Render previous screen in background
+                if (this.previousState === GameState.PLAYING) {
+                    this.renderPlaying();
+                } else {
+                    this.screens.renderTitle(this.renderer.ctx, this.canvas);
+                }
+                this.saveSystem.renderSlotPicker(this.renderer.ctx, this.canvas);
+                break;
         }
+
+        // Render save notification on top of everything
+        this.saveSystem.renderNotification(this.renderer.ctx, this.canvas);
     }
 
     renderLoading() {
@@ -658,7 +737,11 @@ class Game {
             worldItems: this.worldItems,
             nearInteractable: this.nearInteractable
         });
-        // Draw item notifications on top of the game world
+
+        // Render HUD on top of game world
+        this.hud.render(this.renderer.ctx, this.canvas, this);
+
+        // Draw item notifications on top of HUD
         this.inventory.renderNotifications(this.renderer.ctx, this.canvas);
     }
 
@@ -990,7 +1073,7 @@ class Game {
         }
     }
 
-    // Reset save
+    // Reset save (legacy — not used with slot system)
     resetSave() {
         localStorage.removeItem(this.saveKey);
         if (this.player && this.map) {
@@ -1000,6 +1083,143 @@ class Game {
             this.player.direction = 'down';
         }
         console.log('Save reset');
+    }
+
+    /**
+     * Auto-save to the current active slot.
+     */
+    autoSave() {
+        if (!this.player) return;
+        this.saveSystem.autoSave(this);
+    }
+
+    /**
+     * Save to a specific slot (called from save slot picker).
+     */
+    saveToSlot(slotIndex) {
+        if (!this.player) return;
+        this.saveSystem.saveToSlot(slotIndex, this);
+    }
+
+    /**
+     * Load game from a specific slot.
+     */
+    async loadGameFromSlot(slotIndex) {
+        const saveData = this.saveSystem.loadFromSlot(slotIndex);
+        if (!saveData) {
+            console.error('Failed to load save from slot', slotIndex);
+            return;
+        }
+
+        // Show loading state
+        this.changeState(GameState.LOADING);
+
+        // Create player at default position
+        this.player = new Player(
+            this.tileSize * 2.5,
+            this.tileSize * 2.5
+        );
+
+        // Load enemy definitions, questions, and item definitions in parallel
+        await Promise.all([
+            this.loadEnemyDefs(),
+            this.questions.load(),
+            this.inventory.load()
+        ]);
+
+        // Load the level from save data
+        const success = await this.loadLevel(saveData.currentLevel);
+
+        if (success) {
+            // Register level dialogue content
+            if (window.LEVEL1_DIALOGUES) {
+                this.dialogue.registerDialogues(window.LEVEL1_DIALOGUES);
+            }
+
+            // Restore all save data
+            this.restoreSaveData(saveData);
+
+            // Reset session start time
+            this.sessionStartTime = performance.now();
+            this.lastSaveTime = this.sessionStartTime;
+
+            this.changeState(GameState.PLAYING);
+        } else {
+            console.error('Failed to load level from save, returning to title');
+            this.changeState(GameState.TITLE);
+        }
+    }
+
+    /**
+     * Restore game state from save data.
+     */
+    restoreSaveData(data) {
+        // Restore player position and stats
+        this.player.x = data.playerX;
+        this.player.y = data.playerY;
+        this.player.direction = data.playerDirection || 'down';
+        this.player.hp = data.hp;
+        this.player.maxHp = data.maxHp;
+        this.player.attack = data.attack;
+        this.player.defense = data.defense;
+        this.player.xp = data.xp;
+        this.player.level = data.level;
+        this.player.xpThreshold = data.xpThreshold;
+
+        // Restore checkpoint
+        this.checkpointX = data.checkpointX;
+        this.checkpointY = data.checkpointY;
+
+        // Restore tile state (doors, chests, etc.)
+        if (data.tileState && this.map) {
+            for (const key of Object.keys(data.tileState)) {
+                if (this.map.tileState[key]) {
+                    Object.assign(this.map.tileState[key], data.tileState[key]);
+                }
+            }
+        }
+
+        // Restore NPC state
+        if (data.npcState && this.npcs.length > 0) {
+            for (const npc of this.npcs) {
+                if (data.npcState[npc.id]) {
+                    npc.hasBeenTalkedTo = data.npcState[npc.id].hasBeenTalkedTo;
+                }
+            }
+        }
+
+        // Restore quest flags
+        if (data.questFlags && this.dialogue) {
+            this.dialogue.questFlags = { ...data.questFlags };
+            console.log('Quest flags restored:', Object.keys(data.questFlags));
+        }
+
+        // Restore defeated enemies
+        if (data.defeatedEnemies) {
+            this.defeatedEnemies = new Set(data.defeatedEnemies);
+            this.enemies = this.enemies.filter(e => !this.defeatedEnemies.has(e.id));
+            console.log(`Defeated enemies restored: ${this.defeatedEnemies.size}`);
+        }
+
+        // Restore inventory
+        if (data.inventory && this.inventory) {
+            this.player.equipmentBonus = { defense: 0, attack: 0, wisdom: 0 };
+            this.inventory.fromSaveData(data.inventory, this.player);
+            console.log(`Inventory restored: ${this.inventory.items.length} items`);
+        }
+
+        // Restore picked-up world items
+        if (data.pickedUpItems && this.worldItems.length > 0) {
+            const pickedSet = new Set(data.pickedUpItems);
+            for (const item of this.worldItems) {
+                if (pickedSet.has(item.id)) {
+                    item.pickedUp = true;
+                }
+            }
+            console.log(`Picked-up items restored: ${data.pickedUpItems.length}`);
+        }
+
+        console.log('Game state restored from slot');
     }
 }
 

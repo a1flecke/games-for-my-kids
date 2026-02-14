@@ -10,6 +10,9 @@ const GameState = Object.freeze({
     COMBAT:    'COMBAT',
     INVENTORY: 'INVENTORY',
     PAUSED:    'PAUSED',
+    SETTINGS:  'SETTINGS',
+    SAVE_SLOTS: 'SAVE_SLOTS', // Save slot picker for manual saves
+    LOAD_SLOTS: 'LOAD_SLOTS', // Save slot picker for loading
     GAME_OVER: 'GAME_OVER',
     VICTORY:   'VICTORY'
 });

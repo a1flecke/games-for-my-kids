@@ -164,6 +164,17 @@ Full inventory system with item management, equipment, combat integration, and s
 - Updated `data/levels/level1.json` (4 floor items, chest contents mapped to item IDs)
 - Updated `data/enemies.json` (Roman Scout drops bread, Centurion drops scripture_scroll)
 
+### Session 7: Save System & HUD ✅
+
+Implemented complete 3-slot save system with auto-save, manual save at altars, and full heads-up display. Settings screen with persistent preferences. All dyslexia-friendly with OpenDyslexic font and accessibility features.
+
+- Created `js/save.js` (SaveSystem class: 3 slots, auto-save every 2min + event triggers, slot picker UI, preview with playtime/progress, error handling, toast notifications)
+- Created `js/hud.js` (HUD class: health bar with HP/MaxHP + XP bar, dynamic objective tracking, level progress indicator, quick-use item slots 1-2-3, toast notifications)
+- Updated `js/config.js` (added GameState.SETTINGS, GameState.SAVE_SLOTS, GameState.LOAD_SLOTS)
+- Refactored `js/screens.js` (+180 lines: full settings screen with text size/TTS/volume controls, settings persistence to localStorage, enabled Continue and Settings on title screen)
+- Refactored `js/game.js` (+200 lines: SaveSystem and HUD integration, title Continue→load slot picker, title/pause Settings→settings screen, altar→save slot picker, auto-save triggers, new methods: autoSave/saveToSlot/loadGameFromSlot/restoreSaveData, state handlers for SETTINGS/SAVE_SLOTS/LOAD_SLOTS, HUD rendering, playtime tracking)
+- Updated `index.html` (added script tags for save.js and hud.js)
+
 ---
 
 ## Remaining Sessions
@@ -172,7 +183,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 7 | [session-07.md](sessions/session-07.md) | Sonnet | Save System & HUD |
 | 8 | [session-08.md](sessions/session-08.md) | Opus | Level 1 Complete & Tutorial |
 | 9 | [session-09.md](sessions/session-09.md) | Opus | Level 2 - Persecutions & Stealth |
 | 10 | [session-10.md](sessions/session-10.md) | Sonnet | Level 3 - Creeds & Puzzles |

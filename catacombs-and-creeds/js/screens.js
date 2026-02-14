@@ -1,5 +1,5 @@
 /**
- * ScreenManager - Renders title screen and pause menu on the canvas
+ * ScreenManager - Renders title screen, pause menu, and settings screen
  * Uses CONFIG.ACCESSIBILITY colors/fonts for dyslexia-friendly styling.
  */
 class ScreenManager {
@@ -7,10 +7,16 @@ class ScreenManager {
         this.selectedIndex = 0;
 
         this.titleOptions = ['New Game', 'Continue', 'Settings'];
-        this.titleDisabled = [false, true, true]; // Continue & Settings are stubs
+        this.titleDisabled = [false, false, false]; // All enabled now
 
         this.pauseOptions = ['Resume', 'Settings', 'Exit to Title'];
-        this.pauseDisabled = [false, true, false];
+        this.pauseDisabled = [false, false, false];
+
+        this.settingsOptions = ['Text Size', 'TTS', 'Music Volume', 'SFX Volume', 'Colorblind Mode', 'Back'];
+        this.settingsDisabled = [false, false, false, false, true, false]; // Colorblind mode is stub
+
+        // Settings state
+        this.settings = this.loadSettings();
     }
 
     /** Reset cursor to top when entering a new screen */
@@ -21,9 +27,14 @@ class ScreenManager {
     /**
      * Handle menu input. Returns an action string or null.
      * @param {InputHandler} input
-     * @param {string} currentScreen - 'title' or 'pause'
+     * @param {string} currentScreen - 'title', 'pause', or 'settings'
      */
     update(input, currentScreen) {
+        // Special handling for settings screen
+        if (currentScreen === 'settings') {
+            return this.updateSettings(input);
+        }
+
         const options = currentScreen === 'title' ? this.titleOptions : this.pauseOptions;
         const disabled = currentScreen === 'title' ? this.titleDisabled : this.pauseDisabled;
 
@@ -56,6 +67,84 @@ class ScreenManager {
         return null;
     }
 
+    /**
+     * Handle settings screen input.
+     * @param {InputHandler} input
+     * @returns {string|null} - Action string or null
+     */
+    updateSettings(input) {
+        // Navigate up
+        if (input.wasPressed('ArrowUp') || input.wasPressed('w') || input.wasPressed('W')) {
+            do {
+                this.selectedIndex = (this.selectedIndex - 1 + this.settingsOptions.length) % this.settingsOptions.length;
+            } while (this.settingsDisabled[this.selectedIndex]);
+        }
+
+        // Navigate down
+        if (input.wasPressed('ArrowDown') || input.wasPressed('s') || input.wasPressed('S')) {
+            do {
+                this.selectedIndex = (this.selectedIndex + 1) % this.settingsOptions.length;
+            } while (this.settingsDisabled[this.selectedIndex]);
+        }
+
+        // Navigate left/right to change setting values
+        if (input.wasPressed('ArrowLeft') || input.wasPressed('a') || input.wasPressed('A')) {
+            this.changeSettingValue(this.selectedIndex, -1);
+        }
+        if (input.wasPressed('ArrowRight') || input.wasPressed('d') || input.wasPressed('D')) {
+            this.changeSettingValue(this.selectedIndex, 1);
+        }
+
+        // Select (only for "Back" option)
+        if (input.wasPressed('Enter') || input.wasPressed(' ')) {
+            if (this.selectedIndex === 5) { // Back
+                return 'back';
+            }
+        }
+
+        // Escape = back
+        if (input.wasPressed('Escape')) {
+            return 'back';
+        }
+
+        return null;
+    }
+
+    /**
+     * Change a setting value.
+     * @param {number} index - Settings option index
+     * @param {number} direction - -1 for left/decrease, 1 for right/increase
+     */
+    changeSettingValue(index, direction) {
+        switch (index) {
+            case 0: // Text Size
+                const sizes = ['Small', 'Medium', 'Large'];
+                let sizeIdx = sizes.indexOf(this.settings.textSize);
+                sizeIdx = (sizeIdx + direction + sizes.length) % sizes.length;
+                this.settings.textSize = sizes[sizeIdx];
+                this.applyTextSize();
+                break;
+
+            case 1: // TTS
+                this.settings.tts = !this.settings.tts;
+                break;
+
+            case 2: // Music Volume
+                this.settings.musicVolume = Math.max(0, Math.min(100, this.settings.musicVolume + direction * 10));
+                break;
+
+            case 3: // SFX Volume
+                this.settings.sfxVolume = Math.max(0, Math.min(100, this.settings.sfxVolume + direction * 10));
+                break;
+
+            case 4: // Colorblind Mode (stub)
+                // this.settings.colorblindMode = !this.settings.colorblindMode;
+                break;
+        }
+
+        this.saveSettings();
+    }
+
     /** Map menu index to action string */
     getAction(screen, index) {
         if (screen === 'title') {
@@ -64,11 +153,16 @@ class ScreenManager {
                 case 1: return 'continue';
                 case 2: return 'settings';
             }
-        } else {
+        } else if (screen === 'pause') {
             switch (index) {
                 case 0: return 'resume';
                 case 1: return 'settings';
                 case 2: return 'exit_title';
+            }
+        } else if (screen === 'settings') {
+            switch (index) {
+                case 5: return 'back'; // Back option
+                default: return null; // Settings items are handled in update
             }
         }
         return null;
@@ -174,6 +268,154 @@ class ScreenManager {
             // Cursor arrow for selected option
             const label = isSelected ? '\u25B6  ' + options[i] : options[i];
             ctx.fillText(label, centerX, y);
+        }
+    }
+
+    /** Draw the settings screen */
+    renderSettings(ctx, canvas) {
+        const a = CONFIG.ACCESSIBILITY;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        // Semi-transparent overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Box dimensions
+        const boxW = 500;
+        const boxH = 450;
+        const boxX = centerX - boxW / 2;
+        const boxY = centerY - boxH / 2;
+
+        // Box background
+        ctx.fillStyle = a.bgColor;
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+
+        // Box border
+        ctx.strokeStyle = CONFIG.COLORS.uiBorder;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+        // Title
+        ctx.fillStyle = a.textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold 32px ${a.fontFamily}`;
+        ctx.fillText('Settings', centerX, boxY + 40);
+
+        // Render settings options
+        const startY = boxY + 100;
+        const spacing = 55;
+
+        for (let i = 0; i < this.settingsOptions.length; i++) {
+            const y = startY + i * spacing;
+            const isSelected = i === this.selectedIndex;
+            const isDisabled = this.settingsDisabled[i];
+
+            // Option label (left-aligned)
+            ctx.font = `${isSelected ? 'bold ' : ''}20px ${a.fontFamily}`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+
+            if (isDisabled) {
+                ctx.fillStyle = '#999999';
+            } else if (isSelected) {
+                ctx.fillStyle = CONFIG.COLORS.info;
+            } else {
+                ctx.fillStyle = a.textColor;
+            }
+
+            const label = isSelected && i !== 5 ? '\u25B6  ' + this.settingsOptions[i] : this.settingsOptions[i];
+            ctx.fillText(label, boxX + 30, y);
+
+            // Value (right-aligned) — skip for "Back"
+            if (i < 5) {
+                const value = this.getSettingValueString(i);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = isSelected ? CONFIG.COLORS.info : CONFIG.COLORS.success;
+                ctx.fillText(value, boxX + boxW - 30, y);
+
+                // Left/right arrows for selected setting
+                if (isSelected && !isDisabled) {
+                    ctx.fillStyle = CONFIG.COLORS.info;
+                    ctx.font = `16px ${a.fontFamily}`;
+                    ctx.fillText('\u25C0', boxX + boxW - 150, y); // Left arrow
+                    ctx.fillText('\u25B6', boxX + boxW - 20, y);  // Right arrow
+                }
+            }
+        }
+
+        // Bottom instruction text
+        ctx.font = `${a.fontSize}px ${a.fontFamily}`;
+        ctx.fillStyle = a.textColor;
+        ctx.textAlign = 'center';
+        ctx.globalAlpha = 0.5;
+        ctx.fillText('Arrow Keys to navigate & change | Enter/Esc to go back', centerX, boxY + boxH - 25);
+        ctx.globalAlpha = 1.0;
+    }
+
+    /** Get setting value as display string */
+    getSettingValueString(index) {
+        switch (index) {
+            case 0: return this.settings.textSize;
+            case 1: return this.settings.tts ? 'On' : 'Off';
+            case 2: return `${this.settings.musicVolume}%`;
+            case 3: return `${this.settings.sfxVolume}%`;
+            case 4: return 'Off'; // Colorblind mode stub
+            default: return '';
+        }
+    }
+
+    /** Load settings from localStorage */
+    loadSettings() {
+        try {
+            const settingsStr = localStorage.getItem('catacombsCreeds_settings');
+            if (settingsStr) {
+                const settings = JSON.parse(settingsStr);
+                // Apply text size on load
+                this.applyTextSizeFromValue(settings.textSize);
+                return settings;
+            }
+        } catch (e) {
+            console.error('Failed to load settings:', e);
+        }
+
+        // Default settings
+        return {
+            textSize: 'Medium',
+            tts: false,
+            musicVolume: 70,
+            sfxVolume: 80,
+            colorblindMode: false
+        };
+    }
+
+    /** Save settings to localStorage */
+    saveSettings() {
+        try {
+            localStorage.setItem('catacombsCreeds_settings', JSON.stringify(this.settings));
+        } catch (e) {
+            console.error('Failed to save settings:', e);
+        }
+    }
+
+    /** Apply text size setting by updating CONFIG.ACCESSIBILITY.fontSize */
+    applyTextSize() {
+        this.applyTextSizeFromValue(this.settings.textSize);
+    }
+
+    /** Apply text size from a value string */
+    applyTextSizeFromValue(sizeStr) {
+        switch (sizeStr) {
+            case 'Small':
+                CONFIG.ACCESSIBILITY.fontSize = 14;
+                break;
+            case 'Medium':
+                CONFIG.ACCESSIBILITY.fontSize = 16;
+                break;
+            case 'Large':
+                CONFIG.ACCESSIBILITY.fontSize = 18;
+                break;
         }
     }
 }
