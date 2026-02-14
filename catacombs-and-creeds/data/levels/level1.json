@@ -86,6 +86,7 @@
     }
   ],
   "enemies": [
+    { "id": "villager_tutorial", "type": "doubtful_villager", "x": 7, "y": 19 },
     { "id": "guard_1", "type": "roman_guard", "x": 9, "y": 10 },
     { "id": "guard_2", "type": "roman_guard", "x": 20, "y": 10 },
     { "id": "guard_3", "type": "roman_guard", "x": 9, "y": 14 },

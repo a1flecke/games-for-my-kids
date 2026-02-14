@@ -404,6 +404,99 @@ class ScreenManager {
         this.applyTextSizeFromValue(this.settings.textSize);
     }
 
+    /** Draw the victory screen */
+    renderVictory(ctx, canvas, stats) {
+        const a = CONFIG.ACCESSIBILITY;
+        const centerX = canvas.width / 2;
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // Background - cream with gold border
+        ctx.fillStyle = a.bgColor;
+        ctx.fillRect(0, 0, w, h);
+
+        // Decorative gold border
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(20, 20, w - 40, h - 40);
+        ctx.strokeStyle = CONFIG.COLORS.uiBorder;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(26, 26, w - 52, h - 52);
+
+        // Title
+        ctx.fillStyle = '#d4af37';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold 42px ${a.fontFamily}`;
+        ctx.fillText('Level 1 Complete!', centerX, 100);
+
+        // Subtitle
+        ctx.font = `24px ${a.fontFamily}`;
+        ctx.fillStyle = a.textColor;
+        ctx.fillText('The Catacombs', centerX, 145);
+
+        // Stats box
+        const boxW = 400;
+        const boxH = 240;
+        const boxX = centerX - boxW / 2;
+        const boxY = 180;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.strokeStyle = CONFIG.COLORS.uiBorder;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+        // Stats
+        ctx.font = `18px ${a.fontFamily}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = a.textColor;
+
+        const statX = boxX + 30;
+        let statY = boxY + 20;
+        const lineH = 40;
+
+        const statLines = [
+            { label: 'Time Played:', value: stats.playtime || '0:00' },
+            { label: 'Enemies Defeated:', value: String(stats.enemiesDefeated || 0) },
+            { label: 'Apostle Coins:', value: `${stats.coinsCollected || 0} / 3` },
+            { label: 'Items Found:', value: String(stats.itemsFound || 0) },
+            { label: 'Player Level:', value: String(stats.playerLevel || 1) }
+        ];
+
+        for (const stat of statLines) {
+            ctx.fillStyle = a.textColor;
+            ctx.font = `18px ${a.fontFamily}`;
+            ctx.textAlign = 'left';
+            ctx.fillText(stat.label, statX, statY);
+
+            ctx.fillStyle = CONFIG.COLORS.success;
+            ctx.font = `bold 18px ${a.fontFamily}`;
+            ctx.textAlign = 'right';
+            ctx.fillText(stat.value, boxX + boxW - 30, statY);
+            statY += lineH;
+        }
+
+        // Message
+        ctx.fillStyle = CONFIG.COLORS.info;
+        ctx.font = `20px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.fillText('Your journey through the catacombs is complete!', centerX, boxY + boxH + 30);
+
+        // To be continued
+        ctx.fillStyle = a.textColor;
+        ctx.font = `bold 22px ${a.fontFamily}`;
+        ctx.fillText('To be continued...', centerX, boxY + boxH + 70);
+
+        // Continue prompt
+        ctx.fillStyle = '#888888';
+        ctx.font = `${a.fontSize}px ${a.fontFamily}`;
+        ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 500) * 0.3;
+        ctx.fillText('Press Enter to return to title', centerX, h - 50);
+        ctx.globalAlpha = 1.0;
+    }
+
     /** Apply text size from a value string */
     applyTextSizeFromValue(sizeStr) {
         switch (sizeStr) {

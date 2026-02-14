@@ -175,6 +175,16 @@ Implemented complete 3-slot save system with auto-save, manual save at altars, a
 - Refactored `js/game.js` (+200 lines: SaveSystem and HUD integration, title Continue→load slot picker, title/pause Settings→settings screen, altar→save slot picker, auto-save triggers, new methods: autoSave/saveToSlot/loadGameFromSlot/restoreSaveData, state handlers for SETTINGS/SAVE_SLOTS/LOAD_SLOTS, HUD rendering, playtime tracking)
 - Updated `index.html` (added script tags for save.js and hud.js)
 
+### Session 8: Level 1 Complete & Tutorial ✅
+
+Fully playable Level 1 from start to finish. Tutorial system teaches all mechanics. Victory condition with stats screen. Boss pre-fight dialogue and post-victory flow.
+
+- Updated `data/levels/level1.json` (added tutorial enemy: doubtful_villager near starting area)
+- Updated `content/level1_dialogue.js` (added boss_victory dialogue, tutorial_combat dialogue, expanded victory dialogue with level1_complete flag)
+- Refactored `js/hud.js` (fixed objective tracking: correct quest flag names, coin counting from quest flags instead of inventory, added boss_defeated and level1_complete objectives)
+- Refactored `js/screens.js` (+60 lines: renderVictory screen with playtime, enemies defeated, coins, items found, player level stats, "To be continued" message)
+- Refactored `js/game.js` (+120 lines: tutorial system via quest flags with HUD notifications for movement/interact/save/combat/inventory, checkDialogueRewards for awarding apostle_coin items from coin flags, boss pre-fight dialogue before centurion combat, boss_victory dialogue after centurion defeat, handleStairsInteraction with victory condition checking, enterVictoryState with stats collection, updateVictory state handler, fixed dialogue→combat state transition bug)
+
 ---
 
 ## Remaining Sessions
@@ -183,7 +193,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 8 | [session-08.md](sessions/session-08.md) | Opus | Level 1 Complete & Tutorial |
 | 9 | [session-09.md](sessions/session-09.md) | Opus | Level 2 - Persecutions & Stealth |
 | 10 | [session-10.md](sessions/session-10.md) | Sonnet | Level 3 - Creeds & Puzzles |
 | 11 | [session-11.md](sessions/session-11.md) | Sonnet | Level 4 - Church Fathers & Abilities |

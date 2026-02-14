@@ -356,13 +356,23 @@ class HUD {
         const flags = gameState.dialogue.questFlags;
         const coinsCollected = this._countApostleCoins(gameState);
 
-        // Check if player has collected all coins
-        if (coinsCollected >= 3) {
+        // Level complete
+        if (flags.level1_complete) {
+            return 'Level 1 Complete!';
+        }
+
+        // All coins + boss defeated
+        if (coinsCollected >= 3 && flags.boss_defeated) {
             return 'Find the exit stairs';
         }
 
-        // Check if any apostle has been found
-        if (flags.met_peter || flags.met_john || flags.met_paul) {
+        // All coins but boss not defeated
+        if (coinsCollected >= 3) {
+            return 'Defeat the Roman Centurion';
+        }
+
+        // Has talked to Peter guide — working on collecting coins
+        if (flags.met_peter_guide) {
             return `Find the Apostles (${coinsCollected}/3 coins)`;
         }
 
@@ -371,11 +381,16 @@ class HUD {
     }
 
     /**
-     * Count apostle coins collected.
+     * Count apostle coins collected based on quest flags.
      * @private
      */
     _countApostleCoins(gameState) {
-        if (!gameState.inventory) return 0;
-        return gameState.inventory.getItemCount('apostle_coin');
+        if (!gameState.dialogue) return 0;
+        const flags = gameState.dialogue.questFlags;
+        let count = 0;
+        if (flags.coin_peter) count++;
+        if (flags.coin_james) count++;
+        if (flags.coin_john) count++;
+        return count;
     }
 }

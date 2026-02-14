@@ -410,7 +410,23 @@ window.LEVEL1_DIALOGUES = {
         }
     ],
 
-    // ── Victory Dialogue (stub) ──────────────────────────────────────
+    // ── Boss Victory Dialogue ──────────────────────────────────────────
+
+    boss_victory: [
+        {
+            speaker: 'Roman Centurion',
+            portrait: 'centurion',
+            text: 'You... you have bested me. Your faith makes you stronger than I expected.'
+        },
+        {
+            speaker: 'Roman Centurion',
+            portrait: 'centurion',
+            text: 'Perhaps there is something to what you Christians believe. Go. The path is open.',
+            setFlag: 'boss_defeated'
+        }
+    ],
+
+    // ── Victory Dialogue (at stairs after all conditions met) ────────
 
     victory: [
         {
@@ -426,7 +442,29 @@ window.LEVEL1_DIALOGUES = {
         {
             speaker: 'Peter',
             portrait: 'peter',
-            text: 'You have shown great courage today. The next part of your journey awaits!'
+            text: 'Peter taught us to be strong. James showed us to act with faith. John reminded us to love.'
+        },
+        {
+            speaker: 'Peter',
+            portrait: 'peter',
+            text: 'You have shown great courage today. The next part of your journey awaits!',
+            setFlag: 'level1_complete'
+        }
+    ],
+
+    // ── Tutorial Dialogue ────────────────────────────────────────────
+
+    tutorial_combat: [
+        {
+            speaker: 'Peter',
+            portrait: 'peter',
+            text: 'Watch out! A doubtful villager blocks the way. You will need to fight!'
+        },
+        {
+            speaker: 'Peter',
+            portrait: 'peter',
+            text: 'In battle, choose Attack to deal damage, Defend to reduce incoming damage, or answer a Question for a bonus!',
+            setFlag: 'tutorial_combat'
         }
     ]
 };

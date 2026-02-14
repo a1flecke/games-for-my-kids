@@ -72,6 +72,9 @@ class Game {
 
         // Previous state (for returning from settings)
         this.previousState = null;
+
+        // Victory stats (set when entering VICTORY state)
+        this.victoryStats = null;
     }
 
     init() {
@@ -223,6 +226,10 @@ class Game {
             this.lastSaveTime = this.sessionStartTime;
 
             this.changeState(GameState.PLAYING);
+
+            // Tutorial: movement hint on first new game
+            this.hud.showNotification('Use WASD or Arrow Keys to move!', 'info');
+            this.dialogue.setFlag('tutorial_movement');
         } else {
             console.error('Failed to load level, returning to title');
             this.changeState(GameState.TITLE);
@@ -307,6 +314,9 @@ class Game {
             case GameState.LOAD_SLOTS:
                 this.updateSlotPicker();
                 break;
+            case GameState.VICTORY:
+                this.updateVictory();
+                break;
         }
 
         // Update notifications in HUD
@@ -360,6 +370,21 @@ class Game {
 
         // Check proximity to interactables
         this.checkNearInteractable();
+
+        // Tutorial: show interact hint when first near an NPC
+        if (this.nearNPC && !this.dialogue.getFlag('tutorial_interact')) {
+            this.dialogue.setFlag('tutorial_interact');
+            this.hud.showNotification('Press SPACE or E to talk!', 'info');
+        }
+
+        // Tutorial: show save hint when first near an altar
+        if (this.nearTile && !this.dialogue.getFlag('tutorial_save')) {
+            const tileType = this.map.getTile(this.nearTile.x, this.nearTile.y);
+            if (tileType === TileType.ALTAR) {
+                this.dialogue.setFlag('tutorial_save');
+                this.hud.showNotification('You can save at glowing altars!', 'info');
+            }
+        }
 
         // Handle SPACE interaction
         if (this.input.wasPressed(' ') || this.input.wasPressed('e') || this.input.wasPressed('E')) {
@@ -510,6 +535,8 @@ class Game {
 
             if (result.dialogueId) {
                 this.dialogue.startDialogue(result.dialogueId, () => {
+                    // Check for coin rewards after dialogue
+                    this.checkDialogueRewards();
                     // Dialogue ended — return to playing
                     this.changeState(GameState.PLAYING);
                 });
@@ -539,7 +566,7 @@ class Game {
                         this.changeState(GameState.SAVE_SLOTS);
                         break;
                     case 'stairs':
-                        console.log('Stairs interaction — level transition not yet implemented');
+                        this.handleStairsInteraction();
                         break;
                     case 'door_locked':
                         // Check if player has a key
@@ -608,7 +635,8 @@ class Game {
         this.dialogue.update(this.input);
 
         // If the dialogue system closed itself (e.g. via Escape), return to PLAYING
-        if (!this.dialogue.isActive()) {
+        // But only if the completion callback hasn't already changed state
+        if (!this.dialogue.isActive() && this.state === GameState.DIALOGUE) {
             this.changeState(GameState.PLAYING);
         }
     }
@@ -618,6 +646,7 @@ class Game {
 
         // Check if combat has finished (fade-out complete)
         if (this.combat.isFinished()) {
+            const wasBoss = this.combat.enemy && this.combat.enemy.isBoss;
             const result = this.combat.endCombat();
 
             if (result.outcome === 'victory') {
@@ -640,14 +669,26 @@ class Game {
 
                 // Auto-save after combat victory
                 this.autoSave();
+
+                // Boss post-victory dialogue
+                if (wasBoss) {
+                    this.dialogue.startDialogue('boss_victory', () => {
+                        this.checkDialogueRewards();
+                        this.changeState(GameState.PLAYING);
+                    });
+                    this.changeState(GameState.DIALOGUE);
+                    return;
+                }
+
+                this.changeState(GameState.PLAYING);
             } else {
                 // Defeat: respawn player at checkpoint with 50% HP
                 this.player.x = this.checkpointX;
                 this.player.y = this.checkpointY;
+                this.hud.showNotification('Try using Defend or Questions!', 'warning');
                 console.log('Player respawned at checkpoint');
+                this.changeState(GameState.PLAYING);
             }
-
-            this.changeState(GameState.PLAYING);
         }
     }
 
@@ -703,6 +744,9 @@ class Game {
                     this.screens.renderTitle(this.renderer.ctx, this.canvas);
                 }
                 this.saveSystem.renderSlotPicker(this.renderer.ctx, this.canvas);
+                break;
+            case GameState.VICTORY:
+                this.screens.renderVictory(this.renderer.ctx, this.canvas, this.victoryStats || {});
                 break;
         }
 
@@ -818,6 +862,30 @@ class Game {
             };
 
             if (aabbCollision(playerBox, enemyBox)) {
+                // Boss pre-fight dialogue (first encounter only)
+                if (enemy.isBoss && !this.dialogue.getFlag('boss_prefight_shown')) {
+                    this.dialogue.setFlag('boss_prefight_shown');
+                    // Push player back to avoid immediate re-trigger
+                    const dx = this.player.x - enemy.x;
+                    const dy = this.player.y - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    this.player.x += (dx / dist) * this.tileSize;
+                    this.player.y += (dy / dist) * this.tileSize;
+
+                    const enemyRef = enemy;
+                    this.dialogue.startDialogue('boss_prefight', () => {
+                        this.startCombatWithEnemy(enemyRef);
+                    });
+                    this.changeState(GameState.DIALOGUE);
+                    return;
+                }
+
+                // Tutorial combat hint (first combat only)
+                if (!this.dialogue.getFlag('tutorial_combat')) {
+                    this.hud.showNotification('Attack, Defend, or answer Questions!', 'info');
+                    this.dialogue.setFlag('tutorial_combat');
+                }
+
                 this.startCombatWithEnemy(enemy);
                 return;
             }
@@ -846,6 +914,12 @@ class Game {
                     const def = this.inventory.getDef(item.type);
                     const itemName = def ? def.name : item.type;
                     this.inventory.showNotification(`Obtained ${itemName}!`);
+
+                    // Tutorial: show inventory hint after first item pickup
+                    if (!this.dialogue.getFlag('tutorial_inventory')) {
+                        this.dialogue.setFlag('tutorial_inventory');
+                        this.hud.showNotification('Press I to see your items!', 'info');
+                    }
                 } else {
                     // Only show full message once per item
                     if (!item.fullWarningShown) {
@@ -881,6 +955,97 @@ class Game {
             this.checkpointX = this.player.x;
             this.checkpointY = this.player.y;
             console.log(`Checkpoint updated: ${worldToGrid(this.checkpointX, this.tileSize)}, ${worldToGrid(this.checkpointY, this.tileSize)}`);
+        }
+    }
+
+    /**
+     * Check if dialogue set any coin flags and award Apostle Coins.
+     * Called after dialogue completes.
+     */
+    checkDialogueRewards() {
+        const flags = this.dialogue.questFlags;
+        const coinFlags = ['coin_peter', 'coin_james', 'coin_john'];
+
+        for (const flag of coinFlags) {
+            if (flags[flag] && !flags[`awarded_${flag}`]) {
+                this.inventory.addItem('apostle_coin');
+                this.inventory.showNotification('Obtained Apostle Coin!');
+                this.dialogue.setFlag(`awarded_${flag}`);
+                console.log(`Awarded apostle coin for ${flag}`);
+            }
+        }
+    }
+
+    /**
+     * Handle stairs interaction — check victory conditions.
+     */
+    handleStairsInteraction() {
+        const flags = this.dialogue.questFlags;
+        const coins = (flags.coin_peter ? 1 : 0) +
+                      (flags.coin_james ? 1 : 0) +
+                      (flags.coin_john ? 1 : 0);
+
+        if (coins < 3) {
+            this.inventory.showNotification(`You need ${3 - coins} more Apostle Coin(s)!`);
+            return;
+        }
+
+        if (!flags.boss_defeated) {
+            this.inventory.showNotification('The Roman Centurion still guards the path!');
+            return;
+        }
+
+        // All conditions met — start victory dialogue then transition to victory screen
+        this.dialogue.startDialogue('victory', () => {
+            this.checkDialogueRewards();
+            this.enterVictoryState();
+        });
+        this.changeState(GameState.DIALOGUE);
+    }
+
+    /**
+     * Transition to the victory screen with stats.
+     */
+    enterVictoryState() {
+        const playtimeMs = performance.now() - this.sessionStartTime;
+        const minutes = Math.floor(playtimeMs / 60000);
+        const seconds = Math.floor((playtimeMs % 60000) / 1000);
+        const playtime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        const flags = this.dialogue.questFlags;
+        const coins = (flags.coin_peter ? 1 : 0) +
+                      (flags.coin_james ? 1 : 0) +
+                      (flags.coin_john ? 1 : 0);
+
+        this.victoryStats = {
+            playtime: playtime,
+            enemiesDefeated: this.defeatedEnemies.size,
+            coinsCollected: coins,
+            itemsFound: this.inventory.items.length +
+                         (this.inventory.equipped.shield ? 1 : 0) +
+                         (this.inventory.equipped.accessory ? 1 : 0),
+            playerLevel: this.player.level
+        };
+
+        // Auto-save with victory state
+        this.autoSave();
+
+        this.changeState(GameState.VICTORY);
+    }
+
+    /**
+     * Update victory screen — wait for Enter to return to title.
+     */
+    updateVictory() {
+        if (this.input.wasPressed('Enter') || this.input.wasPressed(' ')) {
+            this.player = null;
+            this.map = null;
+            this.npcs = [];
+            this.enemies = [];
+            this.worldItems = [];
+            this.victoryStats = null;
+            this.screens.resetSelection();
+            this.changeState(GameState.TITLE);
         }
     }
 
