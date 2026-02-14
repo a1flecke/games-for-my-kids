@@ -50,6 +50,7 @@ class Game {
         this.inventory = new InventorySystem();
         this.saveSystem = new SaveSystem();
         this.hud = new HUD();
+        this.puzzle = new PuzzleSystem();
 
         // Wire question system into combat
         this.combat.questionSystem = this.questions;
@@ -321,6 +322,9 @@ class Game {
             case GameState.INVENTORY:
                 this.updateInventory(deltaTime);
                 break;
+            case GameState.PUZZLE:
+                this.updatePuzzle(deltaTime);
+                break;
             case GameState.PAUSED:
                 this.updatePaused();
                 break;
@@ -569,9 +573,15 @@ class Game {
             const result = this.nearNPC.interact();
             console.log('NPC interaction:', result);
 
+            // Special handling for council lectern (puzzle trigger)
+            if (this.nearNPC.id === 'council_lectern' && this.currentLevel === 3) {
+                this._handleCouncilLectern();
+                return;
+            }
+
             if (result.dialogueId) {
                 this.dialogue.startDialogue(result.dialogueId, () => {
-                    // Check for coin rewards after dialogue
+                    // Check for coin/token/fragment rewards after dialogue
                     this.checkDialogueRewards();
                     // Dialogue ended — return to playing
                     this.changeState(GameState.PLAYING);
@@ -708,7 +718,8 @@ class Game {
 
                 // Boss post-victory dialogue
                 if (wasBoss) {
-                    const victoryDialogue = this.currentLevel === 2 ? 'boss_victory_l2' : 'boss_victory';
+                    const victoryDialogueMap = { 1: 'boss_victory', 2: 'boss_victory_l2', 3: 'boss_victory_l3' };
+                    const victoryDialogue = victoryDialogueMap[this.currentLevel] || 'boss_victory';
                     this.dialogue.startDialogue(victoryDialogue, () => {
                         this.checkDialogueRewards();
                         this.changeState(GameState.PLAYING);
@@ -737,6 +748,24 @@ class Game {
         }
     }
 
+    updatePuzzle(deltaTime) {
+        const result = this.puzzle.update(this.input, deltaTime);
+        if (result === 'solved') {
+            // Puzzle solved — unlock the debate hall door and show completion dialogue
+            this.dialogue.setFlag('puzzle_solved');
+            // Unlock the debate hall door at (10,3)
+            if (this.map) {
+                this.map.unlockDoor(10, 3);
+                this.map.interact(10, 3); // Open it
+            }
+            this.dialogue.startDialogue('puzzle_complete', () => {
+                this.checkDialogueRewards();
+                this.changeState(GameState.PLAYING);
+            });
+            this.changeState(GameState.DIALOGUE);
+        }
+    }
+
     render() {
         switch (this.state) {
             case GameState.LOADING:
@@ -758,6 +787,10 @@ class Game {
             case GameState.INVENTORY:
                 this.renderPlaying();
                 this.renderInventory();
+                break;
+            case GameState.PUZZLE:
+                this.renderPlaying();
+                this.puzzle.render(this.renderer.ctx, this.canvas);
                 break;
             case GameState.PAUSED:
                 this.renderPlaying();
@@ -1069,8 +1102,10 @@ class Game {
 
             if (aabbCollision(playerBox, enemyBox)) {
                 // Boss pre-fight dialogue (first encounter only)
-                const prefightFlag = this.currentLevel === 2 ? 'boss_prefight_l2_shown' : 'boss_prefight_shown';
-                const prefightDialogue = this.currentLevel === 2 ? 'boss_prefight_l2' : 'boss_prefight';
+                const prefightFlagMap = { 1: 'boss_prefight_shown', 2: 'boss_prefight_l2_shown', 3: 'boss_prefight_l3_shown' };
+                const prefightDialogueMap = { 1: 'boss_prefight', 2: 'boss_prefight_l2', 3: 'boss_prefight_l3' };
+                const prefightFlag = prefightFlagMap[this.currentLevel] || 'boss_prefight_shown';
+                const prefightDialogue = prefightDialogueMap[this.currentLevel] || 'boss_prefight';
                 if (enemy.isBoss && !this.dialogue.getFlag(prefightFlag)) {
                     this.dialogue.setFlag(prefightFlag);
                     // Push player back to avoid immediate re-trigger
@@ -1224,6 +1259,71 @@ class Game {
                 console.log(`Awarded martyr token for ${flag}`);
             }
         }
+
+        // Level 3: Creed Fragments
+        const fragmentFlags = ['fragment_1', 'fragment_2', 'fragment_3', 'fragment_4', 'fragment_5'];
+        for (const flag of fragmentFlags) {
+            if (flags[flag] && !flags[`awarded_${flag}`]) {
+                this.inventory.addItem('creed_fragment');
+                this.inventory.showNotification('Obtained Creed Fragment!');
+                this.dialogue.setFlag(`awarded_${flag}`);
+                console.log(`Awarded creed fragment for ${flag}`);
+            }
+        }
+    }
+
+    /**
+     * Handle council lectern interaction for Level 3 puzzle.
+     */
+    _handleCouncilLectern() {
+        const flags = this.dialogue.questFlags;
+
+        // Already solved?
+        if (flags.puzzle_solved) {
+            this.inventory.showNotification('The Creed is already assembled!');
+            return;
+        }
+
+        // Check if all 5 fragments are collected
+        const fragmentCount = this.countCreedFragments();
+        if (fragmentCount < 5) {
+            this.dialogue.startDialogue('puzzle_not_ready', () => {
+                this.changeState(GameState.PLAYING);
+            });
+            this.changeState(GameState.DIALOGUE);
+            return;
+        }
+
+        // All fragments collected — explain puzzle then start it
+        if (!flags.puzzle_explained) {
+            this.dialogue.startDialogue('puzzle_intro', () => {
+                this.checkDialogueRewards();
+                // Start puzzle after dialogue
+                this.puzzle.start(() => {
+                    // Puzzle solved callback handled in updatePuzzle
+                });
+                this.changeState(GameState.PUZZLE);
+            });
+            this.changeState(GameState.DIALOGUE);
+        } else {
+            // Already explained, start puzzle directly
+            this.puzzle.start(() => {});
+            this.changeState(GameState.PUZZLE);
+        }
+    }
+
+    /**
+     * Count creed fragments collected based on quest flags.
+     */
+    countCreedFragments() {
+        const flags = this.dialogue.questFlags;
+        let count = 0;
+        if (flags.fragment_1) count++;
+        if (flags.fragment_2) count++;
+        if (flags.fragment_3) count++;
+        if (flags.fragment_4) count++;
+        if (flags.fragment_5) count++;
+        return count;
     }
 
     /**
@@ -1234,6 +1334,8 @@ class Game {
             this.handleLevel1Stairs();
         } else if (this.currentLevel === 2) {
             this.handleLevel2Stairs();
+        } else if (this.currentLevel === 3) {
+            this.handleLevel3Stairs();
         }
     }
 
@@ -1281,8 +1383,32 @@ class Game {
             return;
         }
 
-        // All conditions met — start victory dialogue then show victory screen
+        // All conditions met — start victory dialogue then transition to Level 3
         this.dialogue.startDialogue('victory_l2', () => {
+            this.checkDialogueRewards();
+            this.transitionToLevel(3);
+        });
+        this.changeState(GameState.DIALOGUE);
+    }
+
+    /**
+     * Level 3 stairs: need puzzle solved + boss defeated → victory dialogue → next level or victory.
+     */
+    handleLevel3Stairs() {
+        const flags = this.dialogue.questFlags;
+
+        if (!flags.puzzle_solved) {
+            this.inventory.showNotification('You must assemble the Creed first!');
+            return;
+        }
+
+        if (!flags.boss_defeated_l3) {
+            this.inventory.showNotification('Arius still blocks the way!');
+            return;
+        }
+
+        // All conditions met — victory dialogue then victory screen
+        this.dialogue.startDialogue('victory_l3', () => {
             this.checkDialogueRewards();
             this.enterVictoryState();
         });
@@ -1360,6 +1486,11 @@ class Game {
             case 2:
                 if (window.LEVEL2_DIALOGUES) {
                     this.dialogue.registerDialogues(window.LEVEL2_DIALOGUES);
+                }
+                break;
+            case 3:
+                if (window.LEVEL3_DIALOGUES) {
+                    this.dialogue.registerDialogues(window.LEVEL3_DIALOGUES);
                 }
                 break;
         }

@@ -97,6 +97,9 @@ class Renderer {
             case TileType.HIDING:
                 this.drawHidingSpot(screenX, screenY);
                 break;
+            case TileType.BOOKSHELF:
+                this.drawBookshelf(screenX, screenY);
+                break;
         }
     }
 
@@ -461,6 +464,51 @@ class Renderer {
         const pulse = Math.sin(this.animTime * 1.5) * 0.05 + 0.1;
         ctx.fillStyle = `rgba(80, 60, 120, ${pulse})`;
         ctx.fillRect(x + 4, y + 4, size - 8, size - 8);
+    }
+
+    // Draw bookshelf tile (library decoration, solid)
+    drawBookshelf(x, y) {
+        const ctx = this.ctx;
+        const size = this.tileSize;
+
+        // Wall background
+        ctx.fillStyle = '#3a3a3a';
+        ctx.fillRect(x, y, size, size);
+
+        // Wooden shelf frame
+        ctx.fillStyle = '#6b4226';
+        ctx.fillRect(x + 1, y + 1, size - 2, size - 2);
+
+        // Shelf dividers (horizontal)
+        ctx.fillStyle = '#4a2d15';
+        ctx.fillRect(x + 1, y + size / 3, size - 2, 2);
+        ctx.fillRect(x + 1, y + size * 2 / 3, size - 2, 2);
+
+        // Books on top shelf (varied colors)
+        const bookColors = ['#8b2500', '#2e4a2e', '#2b3d6b', '#6b4a2b'];
+        for (let i = 0; i < 4; i++) {
+            ctx.fillStyle = bookColors[i];
+            ctx.fillRect(x + 3 + i * 7, y + 3, 5, size / 3 - 5);
+        }
+
+        // Books on middle shelf
+        const bookColors2 = ['#4a2d6b', '#8b6914', '#3a5a3a', '#6b3030'];
+        for (let i = 0; i < 4; i++) {
+            ctx.fillStyle = bookColors2[i];
+            ctx.fillRect(x + 3 + i * 7, y + size / 3 + 4, 5, size / 3 - 6);
+        }
+
+        // Books on bottom shelf
+        const bookColors3 = ['#5a3a1a', '#2b4a5a', '#6b5a2b', '#3a3a5a'];
+        for (let i = 0; i < 4; i++) {
+            ctx.fillStyle = bookColors3[i];
+            ctx.fillRect(x + 3 + i * 7, y + size * 2 / 3 + 4, 5, size / 3 - 6);
+        }
+
+        // Border
+        ctx.strokeStyle = '#2a1a0a';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, size, size);
     }
 
     // Draw a guard's vision cone (semi-transparent triangle)

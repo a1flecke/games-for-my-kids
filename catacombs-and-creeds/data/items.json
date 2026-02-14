@@ -106,5 +106,31 @@
     "category": "collectible",
     "stackable": false,
     "color": "#d4c090"
+  },
+  "creed_fragment": {
+    "id": "creed_fragment",
+    "name": "Creed Fragment",
+    "description": "A fragment of the Nicene Creed. Collect all five.",
+    "category": "quest",
+    "stackable": false,
+    "color": "#e8d8b0"
+  },
+  "athanasius_letter": {
+    "id": "athanasius_letter",
+    "name": "Athanasius's Letter",
+    "description": "A letter from Athanasius defending the faith.",
+    "category": "collectible",
+    "stackable": false,
+    "color": "#c8b890"
+  },
+  "trinity_shield": {
+    "id": "trinity_shield",
+    "name": "Trinity Shield",
+    "description": "A shield inscribed with the Trinity symbol. +8 Defense.",
+    "category": "equipment",
+    "slot": "shield",
+    "stackable": false,
+    "statBonus": { "defense": 8 },
+    "color": "#d4af37"
   }
 }

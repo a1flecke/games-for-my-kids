@@ -13,6 +13,7 @@ const GameState = Object.freeze({
     SETTINGS:  'SETTINGS',
     SAVE_SLOTS: 'SAVE_SLOTS', // Save slot picker for manual saves
     LOAD_SLOTS: 'LOAD_SLOTS', // Save slot picker for loading
+    PUZZLE:    'PUZZLE',
     GAME_OVER: 'GAME_OVER',
     VICTORY:   'VICTORY'
 });

@@ -200,6 +200,24 @@ Complete Level 2 with new stealth mechanic. Guards patrol with vision cones. Hid
 - Refactored `js/hud.js` (multi-level objective tracking with _getLevel1Objective/_getLevel2Objective, multi-level progress display with _countMartyrTokens, dynamic coins/tokens label)
 - Updated `index.html` (added level2_dialogue.js script tag)
 
+### Session 10: Level 3 - Creeds & Puzzles ✅
+
+Complete Level 3 (The Grand Library) with new puzzle mechanic and multi-phase boss. Players collect 5 Creed Fragments from bishops, assemble the Nicene Creed at the Council Lectern puzzle, then debate Arius in a multi-phase boss fight.
+
+- Created `data/levels/level3.json` (22x18 Grand Library with bookshelf-lined halls, council chamber, debate hall; 7 NPCs: Athanasius guide + 5 Bishops + Council Lectern; 5 enemies: 2 confused scholars, 2 Arian followers, boss Arius; puzzle-locked door; 2 chests; 4 floor items)
+- Created `content/level3_dialogue.js` (~35 dialogue nodes: Athanasius intro, 5 bishop quests with branching choices each granting a Creed Fragment flag, puzzle intro/not-ready/complete, Arius boss pre-fight/victory, level victory)
+- Created `js/puzzle.js` (PuzzleSystem class: 5 Creed Fragments with correct ordering, shuffle mechanics, source/target area navigation, pick-up/place/swap, hint system after 2 wrong attempts, result overlay, educational teaching text for each fragment)
+- Updated `data/enemies.json` (+3 enemy types: confused_scholar HP:40, arian_follower HP:60, arius boss HP:120 with bossPhases for multi-phase combat)
+- Updated `data/items.json` (+3 items: creed_fragment quest item, athanasius_letter collectible, trinity_shield equipment +8 defense)
+- Updated `data/questions.json` (+7 Level 3 questions: Nicene Creed, Council of Nicaea, Trinity, Athanasius, Arius teaching, creed purpose, homoousios)
+- Updated `js/config.js` (added GameState.PUZZLE)
+- Updated `js/tilemap.js` (added TileType.BOOKSHELF = 9, solid)
+- Updated `js/render.js` (+drawBookshelf method: wooden shelf with 3 rows of colored books, integrated into drawTile switch)
+- Updated `js/combat.js` (+multi-phase boss system: CombatState.PHASE_TRANSITION, bossPhases config from enemy definitions, _checkPhaseTransition at HP thresholds, _isQuestionRequiredPhase for question-gated damage, phase transition overlay rendering)
+- Updated `js/game.js` (+puzzle state management, council lectern interaction with fragment count check, countCreedFragments helper, Level 2→3 transition, Level 3 stairs/victory handling, level-aware boss dialogue maps, creed fragment reward tracking in checkDialogueRewards)
+- Updated `js/hud.js` (+_getLevel3Objective with full progression flow, _countCreedFragments helper, Level 3 progress display showing Fragments: X/5)
+- Updated `index.html` (added puzzle.js and level3_dialogue.js script tags)
+
 ---
 
 ## Remaining Sessions
@@ -208,7 +226,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 10 | [session-10.md](sessions/session-10.md) | Sonnet | Level 3 - Creeds & Puzzles |
 | 11 | [session-11.md](sessions/session-11.md) | Sonnet | Level 4 - Church Fathers & Abilities |
 | 12 | [session-12.md](sessions/session-12.md) | Opus | Level 5 - Constantine & Final Challenge |
 | 13 | [session-13.md](sessions/session-13.md) | Sonnet | Audio System |

@@ -75,5 +75,51 @@
     "patrolSpeed": 0.2,
     "specialAttackName": "Decree of Persecution",
     "specialAttackMultiplier": 1.8
+  },
+  "confused_scholar": {
+    "name": "Confused Scholar",
+    "hp": 40,
+    "attack": 6,
+    "defense": 3,
+    "xpReward": 25,
+    "itemDrops": ["bread"],
+    "color": "#7a6b5a",
+    "isBoss": false,
+    "patrolRange": 2,
+    "patrolSpeed": 0.4
+  },
+  "arian_follower": {
+    "name": "Arian Follower",
+    "hp": 60,
+    "attack": 11,
+    "defense": 5,
+    "xpReward": 45,
+    "itemDrops": ["bread"],
+    "color": "#6b4a6b",
+    "isBoss": false,
+    "patrolRange": 2,
+    "patrolSpeed": 0.5
+  },
+  "arius": {
+    "name": "Arius",
+    "hp": 120,
+    "attack": 14,
+    "defense": 7,
+    "xpReward": 120,
+    "itemDrops": ["scripture_scroll"],
+    "color": "#6b2d6b",
+    "isBoss": true,
+    "patrolRange": 1,
+    "patrolSpeed": 0.2,
+    "specialAttackName": "Heretical Argument",
+    "specialAttackMultiplier": 1.6,
+    "bossPhases": [
+      {
+        "phase": 2,
+        "hpThreshold": 0.5,
+        "message": "Arius grows desperate! His arguments become wilder!",
+        "behavior": "question_required"
+      }
+    ]
   }
 }

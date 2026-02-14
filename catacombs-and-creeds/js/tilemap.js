@@ -21,7 +21,8 @@ const TileType = Object.freeze({
     TORCH:  5,
     WATER:  6,
     STAIRS: 7,
-    HIDING: 8  // Alcove / hiding spot — walkable, hides player from guard vision cones
+    HIDING: 8,     // Alcove / hiding spot — walkable, hides player from guard vision cones
+    BOOKSHELF: 9   // Decorative bookshelf — solid, used in library level
 });
 
 class TileMap {
@@ -100,6 +101,7 @@ class TileMap {
             case TileType.WALL:
             case TileType.TORCH:
             case TileType.WATER:
+            case TileType.BOOKSHELF:
                 return true;
             case TileType.DOOR: {
                 // Locked or closed doors are solid

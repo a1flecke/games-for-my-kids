@@ -320,5 +320,166 @@
     ],
     "level": 2,
     "topic": "persecution"
+  },
+  {
+    "id": "q3_nicene_creed",
+    "question": "What is the Nicene Creed?",
+    "choices": [
+      {
+        "text": "A statement of Christian beliefs agreed upon at the Council of Nicaea",
+        "correct": true,
+        "explanation": "The Nicene Creed was written at the Council of Nicaea in 325 AD. It states the core beliefs that Christians share."
+      },
+      {
+        "text": "A Roman law about taxes",
+        "correct": false,
+        "explanation": "The Nicene Creed is not a law. It is a statement of faith written by church leaders at the Council of Nicaea in 325 AD."
+      },
+      {
+        "text": "A type of ancient book",
+        "correct": false,
+        "explanation": "A creed is a statement of beliefs, not a book. The Nicene Creed was agreed upon at the Council of Nicaea in 325 AD."
+      }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_council_nicaea",
+    "question": "Why was the Council of Nicaea important?",
+    "choices": [
+      {
+        "text": "Church leaders gathered to agree on what Christians believe",
+        "correct": true,
+        "explanation": "Emperor Constantine called the Council of Nicaea in 325 AD so church leaders could settle disagreements about core beliefs."
+      },
+      {
+        "text": "It was a meeting to plan a war",
+        "correct": false,
+        "explanation": "The Council of Nicaea was not about war. It was a meeting where church leaders agreed on the core beliefs of Christianity."
+      },
+      {
+        "text": "It was a marketplace for trading goods",
+        "correct": false,
+        "explanation": "Nicaea hosted a council, not a market. Over 300 bishops met to define what Christians believe about God and Jesus."
+      }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_trinity",
+    "question": "What is the Trinity?",
+    "choices": [
+      {
+        "text": "The belief that God is Father, Son, and Holy Spirit",
+        "correct": true,
+        "explanation": "The Trinity is the Christian teaching that God exists as three persons in one: Father, Son (Jesus), and Holy Spirit."
+      },
+      {
+        "text": "Three different gods",
+        "correct": false,
+        "explanation": "The Trinity is not three gods. Christians believe in one God who exists as three persons: Father, Son, and Holy Spirit."
+      },
+      {
+        "text": "A group of three Roman emperors",
+        "correct": false,
+        "explanation": "The Trinity is a Christian belief, not a political group. It means God is one being in three persons: Father, Son, and Holy Spirit."
+      }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_athanasius",
+    "question": "Who was Athanasius?",
+    "choices": [
+      {
+        "text": "A bishop who defended the belief that Jesus is truly God",
+        "correct": true,
+        "explanation": "Athanasius was the Bishop of Alexandria who fought to preserve the teaching that Jesus is fully God, not a lesser being."
+      },
+      {
+        "text": "A Roman emperor who banned Christianity",
+        "correct": false,
+        "explanation": "Athanasius was not an emperor. He was a brave bishop who defended the belief that Jesus is truly God, even when it was unpopular."
+      },
+      {
+        "text": "The person who built the first church",
+        "correct": false,
+        "explanation": "Athanasius did not build the first church. He was a bishop who defended the core Christian belief that Jesus is fully divine."
+      }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_arius_teaching",
+    "question": "What did Arius teach that the church disagreed with?",
+    "choices": [
+      {
+        "text": "That Jesus was created by God and was not equal to God",
+        "correct": true,
+        "explanation": "Arius taught that Jesus was a created being, not equal to God. The Council of Nicaea declared this teaching was wrong."
+      },
+      {
+        "text": "That people should be kind to each other",
+        "correct": false,
+        "explanation": "Everyone agreed on kindness! The disagreement was about whether Jesus is equal to God. Arius said no, the council said yes."
+      },
+      {
+        "text": "That the Bible should be read aloud",
+        "correct": false,
+        "explanation": "The dispute was about the nature of Jesus. Arius taught Jesus was not equal to God, which the Council of Nicaea rejected."
+      }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_creed_purpose",
+    "question": "Why do churches recite creeds?",
+    "choices": [
+      {
+        "text": "To remember and declare what they believe together",
+        "correct": true,
+        "explanation": "Creeds help Christians remember their shared beliefs. Saying them together unites believers across the world and through history."
+      },
+      {
+        "text": "Because it is a magic spell",
+        "correct": false,
+        "explanation": "Creeds are not magic. They are statements of belief that help Christians remember and declare their faith together."
+      },
+      {
+        "text": "To make services longer",
+        "correct": false,
+        "explanation": "Creeds are not about filling time. They are important statements that unite Christians by declaring their shared beliefs."
+      }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_one_being",
+    "question": "The Creed says Jesus is 'of one being with the Father.' What does that mean?",
+    "choices": [
+      {
+        "text": "Jesus shares the same divine nature as God the Father",
+        "correct": true,
+        "explanation": "Of one being means Jesus is not separate from God. He shares the same divine nature — fully God, not a lesser created being."
+      },
+      {
+        "text": "Jesus and God are the same person with no differences",
+        "correct": false,
+        "explanation": "They share the same nature but are distinct persons. The Father and Son are both fully God but are not identical persons."
+      },
+      {
+        "text": "Jesus was adopted by God later",
+        "correct": false,
+        "explanation": "The Creed teaches Jesus was always divine, not adopted. 'Of one being' means he shares God's nature from eternity."
+      }
+    ],
+    "level": 3,
+    "topic": "creeds"
   }
 ]

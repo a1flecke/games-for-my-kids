@@ -137,7 +137,11 @@ class HUD {
         const currentLevel = gameState.currentLevel || 1;
         let collected, total, progressText;
 
-        if (currentLevel === 2) {
+        if (currentLevel === 3) {
+            collected = this._countCreedFragments(gameState);
+            total = 5;
+            progressText = `Fragments: ${collected}/${total}`;
+        } else if (currentLevel === 2) {
             collected = this._countMartyrTokens(gameState);
             total = 4;
             progressText = `Tokens: ${collected}/${total}`;
@@ -365,7 +369,9 @@ class HUD {
         const flags = gameState.dialogue.questFlags;
         const currentLevel = gameState.currentLevel || 1;
 
-        if (currentLevel === 2) {
+        if (currentLevel === 3) {
+            return this._getLevel3Objective(flags, gameState);
+        } else if (currentLevel === 2) {
             return this._getLevel2Objective(flags, gameState);
         }
         return this._getLevel1Objective(flags, gameState);
@@ -393,6 +399,18 @@ class HUD {
         return 'Explore the catacombs';
     }
 
+    /** @private */
+    _getLevel3Objective(flags, gameState) {
+        const fragments = this._countCreedFragments(gameState);
+
+        if (flags.level3_complete) return 'Level 3 Complete!';
+        if (flags.boss_defeated_l3) return 'Find the exit stairs';
+        if (flags.puzzle_solved) return 'Defeat Arius in the Debate Hall';
+        if (fragments >= 5) return 'Assemble the Creed at the Lectern';
+        if (flags.met_athanasius) return `Find the Bishops (${fragments}/5 fragments)`;
+        return 'Explore the Grand Library';
+    }
+
     /**
      * Count apostle coins collected based on quest flags.
      * @private
@@ -404,6 +422,22 @@ class HUD {
         if (flags.coin_peter) count++;
         if (flags.coin_james) count++;
         if (flags.coin_john) count++;
+        return count;
+    }
+
+    /**
+     * Count creed fragments collected based on quest flags.
+     * @private
+     */
+    _countCreedFragments(gameState) {
+        if (!gameState.dialogue) return 0;
+        const flags = gameState.dialogue.questFlags;
+        let count = 0;
+        if (flags.fragment_1) count++;
+        if (flags.fragment_2) count++;
+        if (flags.fragment_3) count++;
+        if (flags.fragment_4) count++;
+        if (flags.fragment_5) count++;
         return count;
     }
 

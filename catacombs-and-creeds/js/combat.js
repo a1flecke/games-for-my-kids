@@ -19,7 +19,8 @@ const CombatState = Object.freeze({
     ITEM_SELECT:  'ITEM_SELECT',
     VICTORY:      'VICTORY',
     DEFEAT:       'DEFEAT',
-    FADE_OUT:     'FADE_OUT'
+    FADE_OUT:     'FADE_OUT',
+    PHASE_TRANSITION: 'PHASE_TRANSITION'
 });
 
 class CombatSystem {
@@ -84,6 +85,9 @@ class CombatSystem {
 
         // Boss state
         this.bossTurnCount = 0;
+        this.bossPhases = null;       // Phase config from enemy definition
+        this.currentPhase = 1;        // Current boss phase
+        this.phaseTransitionTimer = 0;
 
         // Question system reference (set by Game)
         this.questionSystem = null;
@@ -159,6 +163,9 @@ class CombatSystem {
         this.defeatHint = '';
         this.resultTimer = 0;
         this.bossTurnCount = 0;
+        this.currentPhase = 1;
+        this.bossPhases = enemyDef.bossPhases || null;
+        this.phaseTransitionTimer = 0;
         this.currentQuestion = null;
         this.questionResult = null;
         this.enemyShakeX = 0;
@@ -406,6 +413,10 @@ class CombatSystem {
             case CombatState.DEFEAT:
                 this.updateDefeat(deltaTime, input);
                 break;
+
+            case CombatState.PHASE_TRANSITION:
+                this.updatePhaseTransition(deltaTime, input);
+                break;
         }
     }
 
@@ -455,6 +466,9 @@ class CombatSystem {
     }
 
     playerAttack() {
+        // In boss phase 2 with question_required, reduce damage unless boosted
+        const isQuestionPhase = this._isQuestionRequiredPhase();
+
         const result = this.calculatePlayerDamage();
 
         if (result.isMiss) {
@@ -466,21 +480,28 @@ class CombatSystem {
             return;
         }
 
+        // In question phase, attacks deal half damage without a boost
+        let finalDamage = result.damage;
+        if (isQuestionPhase && !this.attackBoost) {
+            finalDamage = Math.max(1, Math.round(result.damage * 0.5));
+            this.setTurnMessage(`Reduced damage! Answer Questions for full power!`);
+        }
+
         // Apply damage to enemy
-        this.enemyHP = Math.max(0, this.enemyHP - result.damage);
+        this.enemyHP = Math.max(0, this.enemyHP - finalDamage);
 
         // Trigger shake
         this.enemyShakeTimer = 400;
 
         // Floating number
         const dmgColor = result.isCrit ? '#ff4444' : '#ffffff';
-        const dmgText = result.isCrit ? `${result.damage} CRIT!` : String(result.damage);
+        const dmgText = result.isCrit ? `${finalDamage} CRIT!` : String(finalDamage);
         this.addFloatingNumber(dmgText, 400, 120, dmgColor);
 
         if (result.isCrit) {
-            this.setTurnMessage(`Critical hit! ${result.damage} damage!`);
-        } else {
-            this.setTurnMessage(`You deal ${result.damage} damage!`);
+            this.setTurnMessage(`Critical hit! ${finalDamage} damage!`);
+        } else if (!isQuestionPhase || this.attackBoost) {
+            this.setTurnMessage(`You deal ${finalDamage} damage!`);
         }
 
         // Check for enemy defeat
@@ -489,8 +510,15 @@ class CombatSystem {
                 this.onVictory();
             });
         } else {
+            // Check for boss phase transition
+            const phaseChanged = this._checkPhaseTransition();
             this.startAnimation('player_attack', 600, () => {
-                this.startEnemyTurn();
+                if (phaseChanged) {
+                    this.state = CombatState.PHASE_TRANSITION;
+                    this.phaseTransitionTimer = 2500;
+                } else {
+                    this.startEnemyTurn();
+                }
             });
         }
     }
@@ -714,6 +742,48 @@ class CombatSystem {
         this.startEnemyTurn();
     }
 
+    // ── Boss Phase System ──────────────────────────────────────────
+
+    /**
+     * Check if the boss should transition to a new phase.
+     * @returns {boolean} true if phase changed
+     */
+    _checkPhaseTransition() {
+        if (!this.bossPhases || !this.enemy.isBoss) return false;
+
+        for (const phase of this.bossPhases) {
+            if (phase.phase > this.currentPhase &&
+                this.enemyHP <= this.enemyMaxHP * phase.hpThreshold) {
+                this.currentPhase = phase.phase;
+                this.setTurnMessage(phase.message);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the current boss phase requires questions for full damage.
+     */
+    _isQuestionRequiredPhase() {
+        if (!this.bossPhases || this.currentPhase <= 1) return false;
+        const phase = this.bossPhases.find(p => p.phase === this.currentPhase);
+        return phase && phase.behavior === 'question_required';
+    }
+
+    /**
+     * Update phase transition display.
+     */
+    updatePhaseTransition(deltaTime, input) {
+        this.phaseTransitionTimer -= deltaTime;
+        if (this.phaseTransitionTimer <= 0 ||
+            input.wasPressed('Enter') || input.wasPressed(' ')) {
+            this.state = CombatState.PLAYER_TURN;
+            this.selectedAction = 0;
+            this.setTurnMessage('Your turn! Answer Questions to deal full damage!');
+        }
+    }
+
     // ── Victory / Defeat ────────────────────────────────────────────
 
     onVictory() {
@@ -849,6 +919,11 @@ class CombatSystem {
             // Defeat screen
             if (this.state === CombatState.DEFEAT) {
                 this.drawDefeatScreen(ctx, w, h, a);
+            }
+
+            // Phase transition screen
+            if (this.state === CombatState.PHASE_TRANSITION) {
+                this.drawPhaseTransition(ctx, w, h, a);
             }
         }
 
@@ -1413,6 +1488,38 @@ class CombatSystem {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillText('Esc to cancel', menuX + menuW / 2, buttonStartY + itemCount * (buttonH + 4) + 2);
+    }
+
+    drawPhaseTransition(ctx, w, h, a) {
+        // Dramatic overlay
+        ctx.fillStyle = 'rgba(40, 0, 40, 0.6)';
+        ctx.fillRect(0, 0, w, h);
+
+        const boxW = 450;
+        const boxH = 150;
+        const boxX = w / 2 - boxW / 2;
+        const boxY = h / 2 - boxH / 2;
+
+        ctx.fillStyle = a.bgColor;
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.strokeStyle = CONFIG.COLORS.warning;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+        ctx.fillStyle = CONFIG.COLORS.warning;
+        ctx.font = `bold 24px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Phase 2!', w / 2, boxY + 15);
+
+        ctx.fillStyle = a.textColor;
+        ctx.font = `16px ${a.fontFamily}`;
+        this.drawWrappedText(ctx, this.turnMessage, boxX + 20, boxY + 55, boxW - 40, a);
+
+        ctx.fillStyle = '#888888';
+        ctx.font = `14px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.fillText('Press SPACE to continue', w / 2, boxY + boxH - 25);
     }
 
     /**

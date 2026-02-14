@@ -1,0 +1,130 @@
+{
+  "name": "The Grand Library",
+  "width": 22,
+  "height": 18,
+  "playerStart": { "x": 5, "y": 16 },
+  "tiles": [
+    1,1,1,1,1,1,1,5,0,0,0,0,0,0,5,1,1,1,1,1,1,1,
+    1,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,
+    1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,
+    1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1,
+    1,1,1,1,1,0,0,9,0,9,0,0,9,0,9,0,0,1,1,1,1,1,
+    1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,
+    1,0,0,0,2,0,9,0,0,0,4,0,0,0,0,9,0,2,0,0,0,1,
+    1,0,0,0,1,0,0,0,9,0,0,0,9,0,0,0,0,1,0,0,0,1,
+    1,1,1,1,1,0,0,9,0,0,0,0,0,0,9,0,0,1,1,1,1,1,
+    5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,
+    1,0,0,0,1,0,9,0,0,0,0,0,0,0,0,9,0,1,0,0,0,1,
+    1,0,0,0,2,0,0,0,9,0,0,0,9,0,0,0,0,2,0,0,0,1,
+    1,0,3,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,3,0,1,
+    1,1,1,1,1,5,0,0,0,0,0,0,0,0,0,0,5,1,1,1,1,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+  ],
+  "tileMetadata": [
+    { "x": 10, "y": 3, "locked": true, "lockedByPuzzle": true },
+    { "x": 4, "y": 5, "locked": false },
+    { "x": 18, "y": 5, "locked": false },
+    { "x": 4, "y": 8, "locked": false },
+    { "x": 17, "y": 8, "locked": false },
+    { "x": 4, "y": 13, "locked": false },
+    { "x": 17, "y": 13, "locked": false },
+    { "x": 2, "y": 14, "contents": "athanasius_letter" },
+    { "x": 19, "y": 14, "contents": "trinity_shield" },
+    { "x": 10, "y": 1, "direction": "up" },
+    { "x": 5, "y": 17, "direction": "down" }
+  ],
+  "npcs": [
+    {
+      "id": "athanasius",
+      "name": "Athanasius",
+      "dialogueId": "athanasius_intro",
+      "x": 10, "y": 16,
+      "direction": "up",
+      "color": "#c4a060"
+    },
+    {
+      "id": "bishop_basil",
+      "name": "Bishop Basil",
+      "dialogueId": "bishop_basil_quest",
+      "x": 2, "y": 8,
+      "direction": "right",
+      "color": "#7a6aaa"
+    },
+    {
+      "id": "bishop_gregory",
+      "name": "Bishop Gregory",
+      "dialogueId": "bishop_gregory_quest",
+      "x": 2, "y": 13,
+      "direction": "right",
+      "color": "#6a8aaa"
+    },
+    {
+      "id": "bishop_ambrose",
+      "name": "Bishop Ambrose",
+      "dialogueId": "bishop_ambrose_quest",
+      "x": 19, "y": 8,
+      "direction": "left",
+      "color": "#8a7a5a"
+    },
+    {
+      "id": "bishop_cyril",
+      "name": "Bishop Cyril",
+      "dialogueId": "bishop_cyril_quest",
+      "x": 2, "y": 5,
+      "direction": "right",
+      "color": "#5a7a6a"
+    },
+    {
+      "id": "bishop_augustine",
+      "name": "Bp. Augustine",
+      "dialogueId": "bishop_augustine_quest",
+      "x": 19, "y": 5,
+      "direction": "left",
+      "color": "#7a5a5a"
+    },
+    {
+      "id": "council_lectern",
+      "name": "Council Lectern",
+      "dialogueId": "puzzle_intro",
+      "x": 10, "y": 5,
+      "direction": "down",
+      "color": "#b8960f"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "scholar_1",
+      "type": "confused_scholar",
+      "x": 7, "y": 11
+    },
+    {
+      "id": "scholar_2",
+      "type": "confused_scholar",
+      "x": 14, "y": 11
+    },
+    {
+      "id": "arian_1",
+      "type": "arian_follower",
+      "x": 7, "y": 4
+    },
+    {
+      "id": "arian_2",
+      "type": "arian_follower",
+      "x": 14, "y": 4
+    },
+    {
+      "id": "boss_arius",
+      "type": "arius",
+      "x": 11, "y": 2
+    }
+  ],
+  "items": [
+    { "id": "bread_l3_1", "type": "bread", "x": 8, "y": 16 },
+    { "id": "bread_l3_2", "type": "bread", "x": 13, "y": 16 },
+    { "id": "scroll_l3_1", "type": "scripture_scroll", "x": 10, "y": 11 },
+    { "id": "scroll_l3_2", "type": "scripture_scroll", "x": 5, "y": 6 }
+  ]
+}
