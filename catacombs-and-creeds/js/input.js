@@ -59,14 +59,20 @@ class InputHandler {
         const cw = this.canvas.width;
         const ch = this.canvas.height;
 
+        // Responsive layout: ensure buttons stay within bounds with minimum spacing
+        const pad = Math.max(90, cw * 0.12);   // D-pad center from left edge
+        const rPad = Math.max(90, cw * 0.12);  // ACT button center from right edge
+        const bPad = Math.max(110, ch * 0.18); // D-pad center from bottom edge
+
         return {
             // Virtual D-pad (left side)
-            dpad: { cx: 90, cy: ch - 110, radius: 52 },
+            dpad: { cx: pad, cy: ch - bPad, radius: 52 },
 
-            // Action buttons (right side)
-            btnA: { cx: cw - 90, cy: ch - 120, radius: 30, key: ' ', label: 'ACT' },
-            btnB: { cx: cw - 30, cy: ch - 120, radius: 22, key: 'Escape', label: 'ESC' },
-            btnI: { cx: cw - 30, cy: ch - 60, radius: 18, key: 'i', label: 'INV' },
+            // Action buttons (right side) - ensure minimum 44px touch targets
+            btnA: { cx: cw - rPad, cy: ch - bPad - 10, radius: 30, key: ' ', label: 'ACT' },
+            btnB: { cx: cw - rPad + 60, cy: ch - bPad - 10, radius: 22, key: 'Escape', label: 'ESC' },
+            btnI: { cx: cw - rPad + 60, cy: ch - bPad + 50, radius: 22, key: 'i', label: 'INV' },
+            btnM: { cx: cw - rPad, cy: ch - bPad + 50, radius: 18, key: 'm', label: 'SND' },
         };
     }
 
@@ -108,7 +114,7 @@ class InputHandler {
         for (const touch of e.changedTouches) {
             const pos = this._touchToCanvas(touch);
             let hitButton = false;
-            const buttons = [layout.btnA, layout.btnB, layout.btnI];
+            const buttons = [layout.btnA, layout.btnB, layout.btnI, layout.btnM];
             for (const btn of buttons) {
                 const dx = pos.x - btn.cx;
                 const dy = pos.y - btn.cy;

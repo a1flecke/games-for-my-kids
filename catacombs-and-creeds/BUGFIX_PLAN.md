@@ -174,9 +174,9 @@ Comprehensive audit of bugs, boundary issues, and UX problems found during a ful
 - [x] #12 Wire TTS settings to dialogue
 - [x] #20 Exit-to-title confirmation
 
-### Phase 5 - Platform / Responsiveness
-- [ ] #13 Canvas resize handler
-- [ ] #14 Responsive touch button layout
-- [ ] #16 Tile data bounds checking
-- [ ] #24 Turn message overlap
-- [ ] #25 Additional touch controls
+### Phase 5 - Platform / Responsiveness ✓
+- [x] #13 Canvas resize handler
+- [x] #14 Responsive touch button layout
+- [x] #16 Tile data bounds checking
+- [x] #24 Turn message overlap
+- [x] #25 Additional touch controls

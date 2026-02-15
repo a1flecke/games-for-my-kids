@@ -1222,8 +1222,10 @@ class CombatSystem {
     drawTurnMessage(ctx, w, h, a) {
         if (this.turnMessageTimer <= 0 || !this.turnMessage) return;
 
-        // Message bar at the middle of the screen
-        const msgY = h / 2 - 15;
+        // Position between enemy area (ends ~200) and action menu (starts at h-220)
+        const enemyBottom = 200;
+        const menuTop = h - 220;
+        const msgY = enemyBottom + (menuTop - enemyBottom) / 2 - 15;
         const alpha = Math.min(1, this.turnMessageTimer / 500);
 
         ctx.globalAlpha = alpha;

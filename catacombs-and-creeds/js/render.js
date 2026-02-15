@@ -29,6 +29,18 @@ class Renderer {
 
         // Create camera after canvas dimensions are set
         this.camera = new Camera(this.canvas.width, this.canvas.height);
+
+        // Debounced resize handler for rotation/window resize
+        this._resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(this._resizeTimer);
+            this._resizeTimer = setTimeout(() => {
+                this.setupCanvas();
+                if (this.camera) {
+                    this.camera.resize(this.canvas.width, this.canvas.height);
+                }
+            }, 150);
+        });
     }
 
     setupCanvas() {
@@ -49,6 +61,9 @@ class Renderer {
 
         this.viewportTilesX = Math.ceil(this.canvas.width / this.tileSize);
         this.viewportTilesY = Math.ceil(this.canvas.height / this.tileSize);
+
+        // Re-apply after canvas size changes reset it
+        this.ctx.imageSmoothingEnabled = false;
     }
 
     // Clear the canvas

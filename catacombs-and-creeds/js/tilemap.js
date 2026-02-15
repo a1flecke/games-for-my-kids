@@ -39,12 +39,20 @@ class TileMap {
         this.height = levelData.height;
         this.name = levelData.name || 'Unknown';
 
-        // Build 2D tile array from flat array
+        // Validate tile data length
+        const expectedLength = this.width * this.height;
+        if (levelData.tiles.length !== expectedLength) {
+            console.error(`Tile data length mismatch: expected ${expectedLength}, got ${levelData.tiles.length}`);
+        }
+
+        // Build 2D tile array from flat array (default undefined tiles to WALL)
         this.tiles = [];
         for (let y = 0; y < this.height; y++) {
             this.tiles[y] = [];
             for (let x = 0; x < this.width; x++) {
-                this.tiles[y][x] = levelData.tiles[y * this.width + x];
+                const idx = y * this.width + x;
+                const tile = levelData.tiles[idx];
+                this.tiles[y][x] = (tile !== undefined) ? tile : TileType.WALL;
             }
         }
 

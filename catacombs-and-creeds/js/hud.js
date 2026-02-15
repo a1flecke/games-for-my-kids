@@ -472,7 +472,7 @@ class HUD {
         ctx.fill();
 
         // ── Action buttons ──
-        const buttons = [layout.btnA, layout.btnB, layout.btnI];
+        const buttons = [layout.btnA, layout.btnB, layout.btnI, layout.btnM];
         for (const btn of buttons) {
             const isPressed = input.touchButtonFeedback[btn.label] > 0;
 
