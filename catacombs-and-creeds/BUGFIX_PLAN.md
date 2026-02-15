@@ -159,12 +159,12 @@ Comprehensive audit of bugs, boundary issues, and UX problems found during a ful
 - [x] #9 `saveKey` undefined (remove legacy methods)
 - [x] #15 Inventory cursor bounds
 
-### Phase 3 - UI/Display Bugs
-- [ ] #3 Victory screen hardcoded to Level 1
-- [ ] #8 Dead victory state code cleanup
-- [ ] #10 Remove unused GAME_OVER state
-- [ ] #17 Disable Continue when no saves
-- [ ] #21 Hide debug UI
+### Phase 3 - UI/Display Bugs ✓
+- [x] #3 Victory screen hardcoded to Level 1
+- [x] #8 Dead victory state code cleanup
+- [x] #10 Remove unused GAME_OVER state
+- [x] #17 Disable Continue when no saves
+- [x] #21 Hide debug UI
 
 ### Phase 4 - UX Polish
 - [ ] #18 Quick-use keys during gameplay

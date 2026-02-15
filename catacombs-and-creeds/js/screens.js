@@ -436,12 +436,12 @@ class ScreenManager {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = `bold 42px ${a.fontFamily}`;
-        ctx.fillText('Level 1 Complete!', centerX, 100);
+        ctx.fillText(`${stats.levelName || 'Level'} Complete!`, centerX, 100);
 
         // Subtitle
         ctx.font = `24px ${a.fontFamily}`;
         ctx.fillStyle = a.textColor;
-        ctx.fillText('The Catacombs', centerX, 145);
+        ctx.fillText(stats.subtitle || '', centerX, 145);
 
         // Stats box
         const boxW = 400;
@@ -468,7 +468,7 @@ class ScreenManager {
         const statLines = [
             { label: 'Time Played:', value: stats.playtime || '0:00' },
             { label: 'Enemies Defeated:', value: String(stats.enemiesDefeated || 0) },
-            { label: 'Apostle Coins:', value: `${stats.coinsCollected || 0} / 3` },
+            { label: stats.collectibleLabel || 'Collectibles:', value: `${stats.coinsCollected || 0} / ${stats.coinsTotal || 3}` },
             { label: 'Items Found:', value: String(stats.itemsFound || 0) },
             { label: 'Player Level:', value: String(stats.playerLevel || 1) }
         ];
@@ -490,12 +490,12 @@ class ScreenManager {
         ctx.fillStyle = CONFIG.COLORS.info;
         ctx.font = `20px ${a.fontFamily}`;
         ctx.textAlign = 'center';
-        ctx.fillText('Your journey through the catacombs is complete!', centerX, boxY + boxH + 30);
+        ctx.fillText(stats.completionMessage || 'Level complete!', centerX, boxY + boxH + 30);
 
-        // To be continued
+        // Next level prompt
         ctx.fillStyle = a.textColor;
         ctx.font = `bold 22px ${a.fontFamily}`;
-        ctx.fillText('To be continued...', centerX, boxY + boxH + 70);
+        ctx.fillText(stats.nextMessage || 'Onward!', centerX, boxY + boxH + 70);
 
         // Continue prompt
         ctx.fillStyle = '#888888';

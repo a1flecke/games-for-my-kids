@@ -89,8 +89,9 @@ class Game {
         // Previous state (for returning from settings)
         this.previousState = null;
 
-        // Victory stats (set when entering VICTORY state)
+        // Victory stats and callback (set when entering VICTORY state)
         this.victoryStats = null;
+        this.victoryCallback = null;
     }
 
     init() {
@@ -113,6 +114,9 @@ class Game {
         // Register service worker for offline play
         this._registerServiceWorker();
 
+        // Disable "Continue" if no saves exist at startup
+        this.screens.titleDisabled[1] = !this.saveSystem.hasSaveData();
+
         this.start();
     }
 
@@ -133,6 +137,11 @@ class Game {
 
         // Update music based on new state
         this._updateMusicForState(newState);
+
+        // Disable "Continue" on title screen when no saves exist
+        if (newState === GameState.TITLE) {
+            this.screens.titleDisabled[1] = !this.saveSystem.hasSaveData();
+        }
     }
 
     /** Play the appropriate music track for the current game state. */
@@ -151,10 +160,6 @@ class Game {
             case GameState.GAME_COMPLETE:
                 this.audio.stopMusic(0.5);
                 this.audio.playSFX('victory');
-                break;
-            case GameState.GAME_OVER:
-                this.audio.stopMusic(0.5);
-                this.audio.playSFX('defeat');
                 break;
             // Paused/dialogue/inventory keep current music
         }
@@ -417,6 +422,14 @@ class Game {
         // Update notifications in HUD
         this.hud.updateNotifications(deltaTime);
         this.saveSystem.updateNotifications(deltaTime);
+
+        // F3 toggles debug UI overlay
+        if (this.input.wasPressed('F3')) {
+            const ui = document.getElementById('ui');
+            if (ui) {
+                ui.style.display = ui.style.display === 'none' ? '' : 'none';
+            }
+        }
     }
 
     updateTitle() {
@@ -1635,10 +1648,10 @@ class Game {
             return;
         }
 
-        // All conditions met — start victory dialogue then transition to Level 2
+        // All conditions met — start victory dialogue then show victory screen
         this.dialogue.startDialogue('victory', () => {
             this.checkDialogueRewards();
-            this.transitionToLevel(2);
+            this.enterVictoryState(() => this.transitionToLevel(2));
         });
         this.changeState(GameState.DIALOGUE);
     }
@@ -1660,10 +1673,10 @@ class Game {
             return;
         }
 
-        // All conditions met — start victory dialogue then transition to Level 3
+        // All conditions met — start victory dialogue then show victory screen
         this.dialogue.startDialogue('victory_l2', () => {
             this.checkDialogueRewards();
-            this.transitionToLevel(3);
+            this.enterVictoryState(() => this.transitionToLevel(3));
         });
         this.changeState(GameState.DIALOGUE);
     }
@@ -1684,10 +1697,10 @@ class Game {
             return;
         }
 
-        // All conditions met — victory dialogue then transition to Level 4
+        // All conditions met — victory dialogue then show victory screen
         this.dialogue.startDialogue('victory_l3', () => {
             this.checkDialogueRewards();
-            this.transitionToLevel(4);
+            this.enterVictoryState(() => this.transitionToLevel(4));
         });
         this.changeState(GameState.DIALOGUE);
     }
@@ -1708,10 +1721,10 @@ class Game {
             return;
         }
 
-        // All conditions met — victory dialogue then transition to Level 5
+        // All conditions met — victory dialogue then show victory screen
         this.dialogue.startDialogue('victory_l4', () => {
             this.checkDialogueRewards();
-            this.transitionToLevel(5);
+            this.enterVictoryState(() => this.transitionToLevel(5));
         });
         this.changeState(GameState.DIALOGUE);
     }
@@ -1878,42 +1891,37 @@ class Game {
 
     /**
      * Transition to the victory screen with stats.
+     * @param {function} [onContinue] - Called when player presses Enter (e.g., transition to next level)
      */
-    enterVictoryState() {
+    enterVictoryState(onContinue) {
         const playtimeMs = performance.now() - this.sessionStartTime;
         const minutes = Math.floor(playtimeMs / 60000);
         const seconds = Math.floor((playtimeMs % 60000) / 1000);
         const playtime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
         const flags = this.dialogue.questFlags;
+        const levelName = this.map ? this.map.name : `Level ${this.currentLevel}`;
 
-        // Level-specific collectible count
-        let collectiblesLabel, collectiblesCount;
-        if (this.currentLevel === 4) {
-            collectiblesLabel = 'scrollsCollected';
-            collectiblesCount = (flags.scroll_augustine ? 1 : 0) +
-                                (flags.scroll_jerome ? 1 : 0) +
-                                (flags.scroll_ambrose ? 1 : 0);
-        } else if (this.currentLevel === 2) {
-            collectiblesLabel = 'tokensCollected';
-            collectiblesCount = this.countMartyrTokens();
-        } else {
-            collectiblesLabel = 'coinsCollected';
-            collectiblesCount = (flags.coin_peter ? 1 : 0) +
-                                (flags.coin_james ? 1 : 0) +
-                                (flags.coin_john ? 1 : 0);
-        }
+        // Level-specific collectible info
+        const collectibleInfo = this._getLevelCollectibleInfo(flags);
 
         this.victoryStats = {
-            levelName: this.map ? this.map.name : `Level ${this.currentLevel}`,
+            levelName: `Level ${this.currentLevel}`,
+            subtitle: levelName,
             playtime: playtime,
             enemiesDefeated: this.defeatedEnemies.size,
-            coinsCollected: collectiblesCount,
+            coinsCollected: collectibleInfo.count,
+            coinsTotal: collectibleInfo.total,
+            collectibleLabel: collectibleInfo.label,
+            completionMessage: collectibleInfo.message,
+            nextMessage: onContinue ? 'To be continued...' : 'The End',
             itemsFound: this.inventory.items.length +
                          (this.inventory.equipped.shield ? 1 : 0) +
                          (this.inventory.equipped.accessory ? 1 : 0),
             playerLevel: this.player.level
         };
+
+        this.victoryCallback = onContinue || null;
 
         // Auto-save with victory state
         this.autoSave();
@@ -1921,19 +1929,67 @@ class Game {
         this.changeState(GameState.VICTORY);
     }
 
+    /** Get level-specific collectible info for victory stats */
+    _getLevelCollectibleInfo(flags) {
+        switch (this.currentLevel) {
+            case 1: return {
+                label: 'Apostle Coins:',
+                count: (flags.coin_peter ? 1 : 0) + (flags.coin_james ? 1 : 0) + (flags.coin_john ? 1 : 0),
+                total: 3,
+                message: 'Your journey through the catacombs is complete!'
+            };
+            case 2: return {
+                label: 'Martyr Tokens:',
+                count: this.countMartyrTokens(),
+                total: 4,
+                message: 'You escaped the hidden passages!'
+            };
+            case 3: return {
+                label: 'Creed Progress:',
+                count: flags.puzzle_solved ? 1 : 0,
+                total: 1,
+                message: 'The Creed has been assembled!'
+            };
+            case 4: return {
+                label: 'Father Scrolls:',
+                count: (flags.scroll_augustine ? 1 : 0) + (flags.scroll_jerome ? 1 : 0) + (flags.scroll_ambrose ? 1 : 0),
+                total: 3,
+                message: 'The Church Fathers have taught you well!'
+            };
+            case 5: return {
+                label: 'Final Victory:',
+                count: 1,
+                total: 1,
+                message: 'Freedom has been won!'
+            };
+            default: return {
+                label: 'Collectibles:',
+                count: 0,
+                total: 0,
+                message: 'Level complete!'
+            };
+        }
+    }
+
     /**
-     * Update victory screen — wait for Enter to return to title.
+     * Update victory screen — wait for Enter to continue.
      */
     updateVictory() {
         if (this.input.wasPressed('Enter') || this.input.wasPressed(' ')) {
-            this.player = null;
-            this.map = null;
-            this.npcs = [];
-            this.enemies = [];
-            this.worldItems = [];
+            const callback = this.victoryCallback;
             this.victoryStats = null;
-            this.screens.resetSelection();
-            this.changeState(GameState.TITLE);
+            this.victoryCallback = null;
+            if (callback) {
+                callback();
+            } else {
+                this.player = null;
+                this.map = null;
+                this.npcs = [];
+                this.enemies = [];
+                this.worldItems = [];
+                this.screens.resetSelection();
+                this.changeState(GameState.TITLE);
+            }
         }
     }
 
