@@ -166,13 +166,13 @@ Comprehensive audit of bugs, boundary issues, and UX problems found during a ful
 - [x] #17 Disable Continue when no saves
 - [x] #21 Hide debug UI
 
-### Phase 4 - UX Polish
-- [ ] #18 Quick-use keys during gameplay
-- [ ] #19 Less intrusive auto-save notification
-- [ ] #22 Less aggressive tap-to-interact
-- [ ] #23 Stealth bypass XP validation
-- [ ] #12 Wire TTS settings to dialogue
-- [ ] #20 Exit-to-title confirmation
+### Phase 4 - UX Polish ✓
+- [x] #18 Quick-use keys during gameplay
+- [x] #19 Less intrusive auto-save notification
+- [x] #22 Less aggressive tap-to-interact
+- [x] #23 Stealth bypass XP validation
+- [x] #12 Wire TTS settings to dialogue
+- [x] #20 Exit-to-title confirmation
 
 ### Phase 5 - Platform / Responsiveness
 - [ ] #13 Canvas resize handler

@@ -67,10 +67,11 @@ class Game {
         this.dialogue.audio = this.audio;
         this.saveSystem.audio = this.audio;
 
-        // Wire settings changes to audio system and colorblind mode
+        // Wire settings changes to audio, colorblind mode, and TTS
         this.screens.onSettingsChanged = (settings) => {
             this.audio.applySettings(settings);
             this._applyColorblindMode(settings.colorblindMode);
+            this.dialogue.ttsEnabled = settings.tts;
         };
 
         // Game loop
@@ -92,6 +93,10 @@ class Game {
         // Victory stats and callback (set when entering VICTORY state)
         this.victoryStats = null;
         this.victoryCallback = null;
+
+        // Exit confirmation state
+        this.exitConfirmActive = false;
+        this.exitConfirmSelected = 1;
     }
 
     init() {
@@ -106,10 +111,11 @@ class Game {
         // Apply saved audio settings from ScreenManager
         this.audio.applySettings(this.screens.settings);
 
-        // Apply saved colorblind mode
+        // Apply saved colorblind mode and TTS setting
         if (this.screens.settings.colorblindMode) {
             this._applyColorblindMode(true);
         }
+        this.dialogue.ttsEnabled = this.screens.settings.tts;
 
         // Register service worker for offline play
         this._registerServiceWorker();
@@ -529,6 +535,24 @@ class Game {
             }
         }
 
+        // Quick-use consumable items with keys 1, 2, 3
+        for (let i = 0; i < 3; i++) {
+            if (this.input.wasPressed(String(i + 1))) {
+                const consumables = this.inventory.items
+                    .filter(item => {
+                        const def = this.inventory.getDef(item.id);
+                        return def && def.category === 'consumable';
+                    });
+                if (i < consumables.length) {
+                    const result = this.inventory.useItem(consumables[i].id, this.player);
+                    if (result) {
+                        this.hud.showNotification(result.message, 'success');
+                        this.audio.playSFX('item_pickup');
+                    }
+                }
+            }
+        }
+
         // Check M key -> mute toggle
         if (this.input.wasPressed('m') || this.input.wasPressed('M')) {
             const muted = this.audio.toggleMute();
@@ -769,6 +793,35 @@ class Game {
     }
 
     updatePaused() {
+        // Exit confirmation sub-state
+        if (this.exitConfirmActive) {
+            if (this.input.wasPressed('ArrowLeft') || this.input.wasPressed('a') || this.input.wasPressed('A') ||
+                this.input.wasPressed('ArrowRight') || this.input.wasPressed('d') || this.input.wasPressed('D')) {
+                this.exitConfirmSelected = this.exitConfirmSelected === 0 ? 1 : 0;
+            }
+            if (this.input.wasPressed('Enter') || this.input.wasPressed(' ')) {
+                if (this.exitConfirmSelected === 0) {
+                    // Yes - save and exit
+                    this.autoSave();
+                    this.exitConfirmActive = false;
+                    this.player = null;
+                    this.map = null;
+                    this.npcs = [];
+                    this.enemies = [];
+                    this.worldItems = [];
+                    this.screens.resetSelection();
+                    this.changeState(GameState.TITLE);
+                } else {
+                    // No - cancel
+                    this.exitConfirmActive = false;
+                }
+            }
+            if (this.input.wasPressed('Escape')) {
+                this.exitConfirmActive = false;
+            }
+            return;
+        }
+
         const action = this.screens.update(this.input, 'pause');
         if (action === 'resume') {
             this.changeState(GameState.PLAYING);
@@ -777,14 +830,9 @@ class Game {
             this.screens.resetSelection();
             this.changeState(GameState.SETTINGS);
         } else if (action === 'exit_title') {
-            this.autoSave(); // Auto-save before exiting
-            this.player = null;
-            this.map = null;
-            this.npcs = [];
-            this.enemies = [];
-            this.worldItems = [];
-            this.screens.resetSelection();
-            this.changeState(GameState.TITLE);
+            // Show confirmation instead of immediately exiting
+            this.exitConfirmActive = true;
+            this.exitConfirmSelected = 1; // Default to "No"
         }
     }
 
@@ -919,6 +967,9 @@ class Game {
             case GameState.PAUSED:
                 this.renderPlaying();
                 this.screens.renderPause(this.renderer.ctx, this.canvas);
+                if (this.exitConfirmActive) {
+                    this._renderExitConfirm(this.renderer.ctx, this.canvas);
+                }
                 break;
             case GameState.SETTINGS:
                 // Render previous screen in background
@@ -949,6 +1000,53 @@ class Game {
 
         // Render save notification on top of everything
         this.saveSystem.renderNotification(this.renderer.ctx, this.canvas);
+    }
+
+    _renderExitConfirm(ctx, canvas) {
+        const a = CONFIG.ACCESSIBILITY;
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+
+        // Darken overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Confirmation box
+        const boxW = 360;
+        const boxH = 140;
+        ctx.fillStyle = a.bgColor;
+        ctx.fillRect(cx - boxW / 2, cy - boxH / 2, boxW, boxH);
+        ctx.strokeStyle = CONFIG.COLORS.uiBorder;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(cx - boxW / 2, cy - boxH / 2, boxW, boxH);
+
+        // Message
+        ctx.fillStyle = a.textColor;
+        ctx.font = `bold 20px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Exit to title?', cx, cy - 30);
+        ctx.font = `16px ${a.fontFamily}`;
+        ctx.fillText('Progress will be auto-saved.', cx, cy - 5);
+
+        // Yes / No buttons
+        const btnW = 100;
+        const btnH = 36;
+        const btnY = cy + 25;
+        const yesX = cx - 70;
+        const noX = cx + 70;
+
+        for (const [i, label, bx] of [[0, 'Yes', yesX], [1, 'No', noX]]) {
+            const selected = this.exitConfirmSelected === i;
+            ctx.fillStyle = selected ? CONFIG.COLORS.info : 'rgba(0,0,0,0.2)';
+            ctx.fillRect(bx - btnW / 2, btnY - btnH / 2, btnW, btnH);
+            ctx.strokeStyle = selected ? CONFIG.COLORS.info : CONFIG.COLORS.uiBorder;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(bx - btnW / 2, btnY - btnH / 2, btnW, btnH);
+            ctx.fillStyle = selected ? '#ffffff' : a.textColor;
+            ctx.font = `bold 18px ${a.fontFamily}`;
+            ctx.fillText(label, bx, btnY);
+        }
     }
 
     renderLoading() {
@@ -1372,12 +1470,19 @@ class Game {
                 // Check if player was ever close to this enemy (within 5 tiles)
                 if (!enemy.playerWasNear) continue;
 
+                // Only award XP if player wasn't detected (alert never reached 0.5)
+                if (enemy.wasDetected) continue;
+
                 enemy.stealthBypassed = true;
                 const bonusXP = 15;
                 this.player.gainXP(bonusXP);
                 this.hud.showNotification(`Stealth bonus! +${bonusXP} XP`, 'success');
             } else if (dist < this.tileSize * 5) {
                 enemy.playerWasNear = true;
+                // Track if enemy became alerted while player was nearby
+                if (enemy.alertLevel >= 0.5) {
+                    enemy.wasDetected = true;
+                }
             }
         }
     }

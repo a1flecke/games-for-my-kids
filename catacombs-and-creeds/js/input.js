@@ -28,6 +28,7 @@ class InputHandler {
         this.isTouchDevice = false;
         this.canvas = null;
         this.touchButtonFeedback = {}; // label -> remaining frames for visual press feedback
+        this._worldTapTouches = {}; // touchId -> startTime for tap-to-interact timing
 
         window.addEventListener('keydown', (e) => this.onKeyDown(e));
         window.addEventListener('keyup', (e) => this.onKeyUp(e));
@@ -125,9 +126,9 @@ class InputHandler {
             const dpadDist = Math.sqrt(dpadDx * dpadDx + dpadDy * dpadDy);
             const hitDpad = dpadDist <= layout.dpad.radius * 1.4;
 
-            // Tap-to-interact: tapping game world (not controls) triggers SPACE
+            // Record world tap start time (SPACE fires on short tap in touchEnd)
             if (!hitButton && !hitDpad) {
-                this.justPressed[' '] = true;
+                this._worldTapTouches[touch.identifier] = performance.now();
             }
         }
 
@@ -146,6 +147,18 @@ class InputHandler {
         e.preventDefault();
         const layout = this.getTouchLayout();
         if (!layout) return;
+
+        // Check for short world taps (< 250ms) to fire SPACE
+        for (const touch of e.changedTouches) {
+            const startTime = this._worldTapTouches[touch.identifier];
+            if (startTime !== undefined) {
+                delete this._worldTapTouches[touch.identifier];
+                if (performance.now() - startTime < 250) {
+                    this.justPressed[' '] = true;
+                }
+            }
+        }
+
         this._rebuildDpad(e.touches, layout);
     }
 

@@ -113,8 +113,12 @@ class SaveSystem {
             this.saveMeta();
 
             console.log(`Game saved to slot ${slotIndex}`);
-            this.showNotification('Game Saved');
-            if (this.audio) this.audio.playSFX('save');
+            if (this._isAutoSave) {
+                this.showNotification('Auto-saved', 800);
+            } else {
+                this.showNotification('Game Saved');
+                if (this.audio) this.audio.playSFX('save');
+            }
             return true;
         } catch (e) {
             console.error('Failed to save game:', e);
@@ -229,7 +233,7 @@ class SaveSystem {
     }
 
     /**
-     * Auto-save to the current active slot.
+     * Auto-save to the current active slot (uses brief, subtle notification).
      * @param {object} gameState
      * @param {number} [sessionElapsedMs] - Milliseconds elapsed in current session
      */
@@ -238,7 +242,9 @@ class SaveSystem {
             // No active slot — pick slot 0 by default for new games
             this.currentSlot = 0;
         }
+        this._isAutoSave = true;
         this.saveToSlot(this.currentSlot, gameState, sessionElapsedMs);
+        this._isAutoSave = false;
     }
 
     /**
@@ -426,9 +432,9 @@ class SaveSystem {
     }
 
     /** Show a toast notification */
-    showNotification(message) {
+    showNotification(message, duration) {
         this.notification = message;
-        this.notificationTimer = 2000; // 2 seconds
+        this.notificationTimer = duration || 2000;
     }
 
     /** Update notification timer */
