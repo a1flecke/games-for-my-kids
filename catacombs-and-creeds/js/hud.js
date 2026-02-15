@@ -137,7 +137,11 @@ class HUD {
         const currentLevel = gameState.currentLevel || 1;
         let collected, total, progressText;
 
-        if (currentLevel === 4) {
+        if (currentLevel === 5) {
+            collected = this._countLevel5Progress(gameState);
+            total = 4;
+            progressText = `Progress: ${collected}/${total}`;
+        } else if (currentLevel === 4) {
             collected = this._countFatherScrolls(gameState);
             total = 3;
             progressText = `Scrolls: ${collected}/${total}`;
@@ -373,7 +377,9 @@ class HUD {
         const flags = gameState.dialogue.questFlags;
         const currentLevel = gameState.currentLevel || 1;
 
-        if (currentLevel === 4) {
+        if (currentLevel === 5) {
+            return this._getLevel5Objective(flags, gameState);
+        } else if (currentLevel === 4) {
             return this._getLevel4Objective(flags, gameState);
         } else if (currentLevel === 3) {
             return this._getLevel3Objective(flags, gameState);
@@ -418,6 +424,17 @@ class HUD {
     }
 
     /** @private */
+    _getLevel5Objective(flags, gameState) {
+        if (flags.game_complete) return 'Game Complete!';
+        if (flags.boss_defeated_l5) return 'Find the Victory Monument';
+        if (flags.arena_unlocked) return 'Defeat the General';
+        if (flags.met_constantine && flags.heard_edict) return 'Enter the Arena';
+        if (flags.met_constantine) return 'Hear the Edict of Milan';
+        if (flags.learned_chi_rho) return 'Meet Emperor Constantine';
+        return 'Explore and learn about Constantine';
+    }
+
+    /** @private */
     _getLevel4Objective(flags, gameState) {
         const scrolls = this._countFatherScrolls(gameState);
 
@@ -427,6 +444,21 @@ class HUD {
         if (scrolls >= 3) return 'Enter the Forbidden Library';
         if (flags.met_monastery_monk) return `Learn from the Fathers (${scrolls}/3)`;
         return 'Explore the monastery';
+    }
+
+    /**
+     * Count Level 5 progress milestones based on quest flags.
+     * @private
+     */
+    _countLevel5Progress(gameState) {
+        if (!gameState.dialogue) return 0;
+        const flags = gameState.dialogue.questFlags;
+        let count = 0;
+        if (flags.learned_chi_rho) count++;
+        if (flags.met_constantine) count++;
+        if (flags.heard_edict) count++;
+        if (flags.boss_defeated_l5) count++;
+        return count;
     }
 
     /**

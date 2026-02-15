@@ -236,6 +236,24 @@ Complete Level 4 (The Monastery) with new ability system. Three Church Fathers t
 - Updated `data/questions.json` (+8 Level 4 questions on church fathers topics)
 - Updated `index.html` (added abilities.js and level4_dialogue.js script tags)
 
+### Session 12: Level 5 - Constantine & Final Challenge ✅
+
+Complete Level 5 (Constantine's Palace) with 3-act narrative structure, new tile types, and multi-phase final boss integrating all game mechanics. Players witness Constantine's vision, learn about the Edict of Milan, then defeat The General in a 4-phase boss fight.
+
+- Created `data/levels/level5.json` (28x22 map with 3 acts: underground catacombs, marble palace, arena; 6 NPCs: Constantine, Narrator, Christian Scholar, Imperial Herald, Palace Guard, Arena Attendant; 5 enemies: 2 imperial soldiers, 2 old regime guards with patrols, The General boss; 5 floor items, 2 chests)
+- Created `content/level5_dialogue.js` (~25 dialogue nodes: vision narrative, Chi-Rho teaching with quiz, Constantine intro, Edict of Milan herald, palace guard, arena attendant, boss pre-fight/victory, victory epilogue with game_complete flag)
+- Updated `js/tilemap.js` (added TileType.MARBLE=13 bright palace floor, TileType.PILLAR=14 decorative column, PILLAR solid)
+- Updated `js/render.js` (+drawMarble with veining pattern and gold inlay, +drawPillar with gold/marble column capital/shaft/base)
+- Updated `js/combat.js` (+_isDefendRequiredPhase, +_isFinalStandPhase, defend heals 10 HP in defend_required phase, phase-specific hint messages, dynamic phase number display, 2x attack boost on correct answers in final_stand phase)
+- Updated `js/game.js` (+handleLevel5Stairs, +enterGameComplete, +updateGameComplete with scrolling credits, Level 4→5 transition, Level 5 boss dialogue maps, GAME_COMPLETE state handling)
+- Updated `js/hud.js` (+_getLevel5Objective with full progression flow, +_countLevel5Progress tracking 4 milestones, Level 5 progress display)
+- Updated `js/screens.js` (+renderGameComplete: scrolling credits with 5 eras of church history, player stats, golden border)
+- Updated `js/config.js` (added GameState.GAME_COMPLETE)
+- Updated `data/enemies.json` (+3 enemy types: imperial_soldier HP:65, old_regime_guard HP:80 stealth, the_general boss HP:200 with 4 phases using defend_required/question_required/final_stand behaviors)
+- Updated `data/items.json` (+3 items: chi_rho_shield +10 def equipment, imperial_seal quest, commemorative_coin collectible)
+- Updated `data/questions.json` (+4 Level 5 questions: Chi-Rho, Edict of Milan, Constantine's vision, Constantine's importance)
+- Updated `index.html` (added level5_dialogue.js script tag)
+
 ---
 
 ## Remaining Sessions
@@ -244,7 +262,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 12 | [session-12.md](sessions/session-12.md) | Opus | Level 5 - Constantine & Final Challenge |
 | 13 | [session-13.md](sessions/session-13.md) | Sonnet | Audio System |
 | 14 | [session-14.md](sessions/session-14.md) | Sonnet | Polish, Accessibility & Deployment |
 

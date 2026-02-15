@@ -112,6 +112,12 @@ class Renderer {
             case TileType.BARRIER:
                 this.drawBarrier(screenX, screenY);
                 break;
+            case TileType.MARBLE:
+                this.drawMarble(screenX, screenY);
+                break;
+            case TileType.PILLAR:
+                this.drawPillar(screenX, screenY);
+                break;
         }
     }
 
@@ -599,6 +605,78 @@ class Renderer {
             ctx.fillStyle = `rgba(204, 68, 68, ${pulse})`;
             ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
         }
+    }
+
+    // Draw marble floor tile (bright palace surface)
+    drawMarble(x, y) {
+        const ctx = this.ctx;
+        const size = this.tileSize;
+
+        // Light marble base
+        ctx.fillStyle = '#e8e0d0';
+        ctx.fillRect(x, y, size, size);
+
+        // Subtle veining pattern (deterministic from position)
+        const seed = (x * 11 + y * 17) % 100;
+        ctx.strokeStyle = 'rgba(200, 190, 170, 0.6)';
+        ctx.lineWidth = 1;
+        if (seed < 30) {
+            ctx.beginPath();
+            ctx.moveTo(x + 4, y + size / 3);
+            ctx.lineTo(x + size - 4, y + size * 2 / 3);
+            ctx.stroke();
+        } else if (seed < 60) {
+            ctx.beginPath();
+            ctx.moveTo(x + size / 4, y + 4);
+            ctx.lineTo(x + size * 3 / 4, y + size - 4);
+            ctx.stroke();
+        }
+
+        // Gold inlay accent at tile edges
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, size, size);
+
+        // Subtle specular highlight
+        if (seed > 80) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.fillRect(x + size / 3, y + size / 3, size / 3, size / 3);
+        }
+    }
+
+    // Draw pillar tile (gold/marble decorative column, solid)
+    drawPillar(x, y) {
+        const ctx = this.ctx;
+        const size = this.tileSize;
+
+        // Marble floor underneath
+        this.drawMarble(x, y);
+
+        // Pillar base (wider)
+        ctx.fillStyle = '#c0a030';
+        ctx.fillRect(x + 4, y + size - 8, size - 8, 8);
+
+        // Pillar shaft
+        ctx.fillStyle = '#d4c090';
+        ctx.fillRect(x + 8, y + 6, size - 16, size - 14);
+
+        // Pillar highlight (left side)
+        ctx.fillStyle = '#e8d8b0';
+        ctx.fillRect(x + 8, y + 6, 4, size - 14);
+
+        // Pillar shadow (right side)
+        ctx.fillStyle = '#b0a070';
+        ctx.fillRect(x + size - 12, y + 6, 4, size - 14);
+
+        // Pillar capital (top)
+        ctx.fillStyle = '#c0a030';
+        ctx.fillRect(x + 4, y + 2, size - 8, 6);
+
+        // Gold trim
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 4, y + 2, size - 8, 6);
+        ctx.strokeRect(x + 4, y + size - 8, size - 8, 8);
     }
 
     // Draw a guard's vision cone (semi-transparent triangle)

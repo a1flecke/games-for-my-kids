@@ -167,5 +167,64 @@
         "behavior": "question_required"
       }
     ]
+  },
+  "imperial_soldier": {
+    "name": "Imperial Soldier",
+    "hp": 65,
+    "attack": 13,
+    "defense": 7,
+    "xpReward": 55,
+    "itemDrops": ["bread"],
+    "color": "#7a5533",
+    "isBoss": false,
+    "patrolRange": 2,
+    "patrolSpeed": 0.5
+  },
+  "old_regime_guard": {
+    "name": "Old Regime Guard",
+    "hp": 80,
+    "attack": 15,
+    "defense": 8,
+    "xpReward": 65,
+    "itemDrops": ["bread"],
+    "color": "#6b3a3a",
+    "isBoss": false,
+    "patrolRange": 3,
+    "patrolSpeed": 0.4,
+    "stealth": true
+  },
+  "the_general": {
+    "name": "The General",
+    "hp": 200,
+    "attack": 18,
+    "defense": 10,
+    "xpReward": 250,
+    "itemDrops": ["scripture_scroll"],
+    "color": "#661111",
+    "isBoss": true,
+    "patrolRange": 1,
+    "patrolSpeed": 0.2,
+    "specialAttackName": "Persecution Decree",
+    "specialAttackMultiplier": 1.8,
+    "bossPhases": [
+      {
+        "phase": 2,
+        "hpThreshold": 0.75,
+        "message": "The General rallies his troops! His attacks become relentless!",
+        "behavior": "defend_required"
+      },
+      {
+        "phase": 3,
+        "hpThreshold": 0.50,
+        "message": "The General changes tactics! Answer Questions to break through!",
+        "behavior": "question_required"
+      },
+      {
+        "phase": 4,
+        "hpThreshold": 0.25,
+        "message": "The General is desperate! Use everything you have learned!",
+        "behavior": "final_stand"
+      }
+    ]
   }
 }

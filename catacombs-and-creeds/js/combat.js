@@ -537,7 +537,18 @@ class CombatSystem {
 
     playerDefend() {
         this.defending = true;
-        this.setTurnMessage('You brace for the next attack! (50% damage reduction)');
+
+        // In defend_required phase, defending also heals slightly
+        if (this._isDefendRequiredPhase()) {
+            const healAmount = Math.min(10, this.playerMaxHP - this.playerHP);
+            if (healAmount > 0) {
+                this.playerHP += healAmount;
+                this.addFloatingNumber(`+${healAmount} HP`, 200, 420, CONFIG.COLORS.success);
+            }
+            this.setTurnMessage('Perfect defense! You brace and recover! (50% reduction)');
+        } else {
+            this.setTurnMessage('You brace for the next attack! (50% damage reduction)');
+        }
         this.addFloatingNumber('DEFEND', 400, 450, CONFIG.COLORS.info);
 
         this.startAnimation('defend', 400, () => {
@@ -725,8 +736,15 @@ class CombatSystem {
             this.questionExplanation = choice.explanation;
             this.questionResultTimer = 3000;
 
-            // Reward: heal 20 HP or +50% next attack (random)
-            if (this.playerHP < this.playerMaxHP && Math.random() < 0.5) {
+            // In final stand phase, always give attack boost with higher multiplier
+            if (this._isFinalStandPhase()) {
+                this.attackBoost = true;
+                this.attackBoostMultiplier = 2.0;
+                this.addFloatingNumber('+100% ATK!', 200, 420, CONFIG.COLORS.warning);
+                this.setTurnMessage('Correct! Your faith empowers a mighty strike!');
+            }
+            // Otherwise: heal 20 HP or +50% next attack (random)
+            else if (this.playerHP < this.playerMaxHP && Math.random() < 0.5) {
                 const healAmount = Math.min(20, this.playerMaxHP - this.playerHP);
                 this.playerHP += healAmount;
                 this.addFloatingNumber(`+${healAmount} HP`, 200, 420, CONFIG.COLORS.success);
@@ -780,7 +798,25 @@ class CombatSystem {
     _isQuestionRequiredPhase() {
         if (!this.bossPhases || this.currentPhase <= 1) return false;
         const phase = this.bossPhases.find(p => p.phase === this.currentPhase);
-        return phase && phase.behavior === 'question_required';
+        return phase && (phase.behavior === 'question_required' || phase.behavior === 'final_stand');
+    }
+
+    /**
+     * Check if the current boss phase makes defend extra effective.
+     */
+    _isDefendRequiredPhase() {
+        if (!this.bossPhases || this.currentPhase <= 1) return false;
+        const phase = this.bossPhases.find(p => p.phase === this.currentPhase);
+        return phase && phase.behavior === 'defend_required';
+    }
+
+    /**
+     * Check if the current boss phase is the final stand (all mechanics boosted).
+     */
+    _isFinalStandPhase() {
+        if (!this.bossPhases || this.currentPhase <= 1) return false;
+        const phase = this.bossPhases.find(p => p.phase === this.currentPhase);
+        return phase && phase.behavior === 'final_stand';
     }
 
     /**
@@ -792,7 +828,26 @@ class CombatSystem {
             input.wasPressed('Enter') || input.wasPressed(' ')) {
             this.state = CombatState.PLAYER_TURN;
             this.selectedAction = 0;
-            this.setTurnMessage('Your turn! Answer Questions to deal full damage!');
+
+            // Phase-specific hint messages
+            const phase = this.bossPhases ? this.bossPhases.find(p => p.phase === this.currentPhase) : null;
+            if (phase) {
+                switch (phase.behavior) {
+                    case 'defend_required':
+                        this.setTurnMessage('Your turn! Use Defend to survive the onslaught!');
+                        break;
+                    case 'question_required':
+                        this.setTurnMessage('Your turn! Answer Questions to deal full damage!');
+                        break;
+                    case 'final_stand':
+                        this.setTurnMessage('Your turn! Use everything you have learned!');
+                        break;
+                    default:
+                        this.setTurnMessage('Your turn! Choose an action.');
+                }
+            } else {
+                this.setTurnMessage('Your turn! Answer Questions to deal full damage!');
+            }
         }
     }
 
@@ -1522,7 +1577,7 @@ class CombatSystem {
         ctx.font = `bold 24px ${a.fontFamily}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText('Phase 2!', w / 2, boxY + 15);
+        ctx.fillText(`Phase ${this.currentPhase}!`, w / 2, boxY + 15);
 
         ctx.fillStyle = a.textColor;
         ctx.font = `16px ${a.fontFamily}`;

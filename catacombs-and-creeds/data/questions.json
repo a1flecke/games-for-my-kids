@@ -665,5 +665,97 @@
     ],
     "level": 4,
     "topic": "church_fathers"
+  },
+  {
+    "id": "q5_chi_rho",
+    "question": "What is the Chi-Rho symbol?",
+    "choices": [
+      {
+        "text": "The first two Greek letters of Christ's name, used as a Christian symbol",
+        "correct": true,
+        "explanation": "Chi (X) and Rho (P) are the first two letters of Christos in Greek. Constantine saw this symbol in a vision before battle."
+      },
+      {
+        "text": "A Roman military flag",
+        "correct": false,
+        "explanation": "The Chi-Rho is not a military flag. It combines the first two Greek letters of Christ's name and became a powerful Christian symbol."
+      },
+      {
+        "text": "An ancient Egyptian hieroglyph",
+        "correct": false,
+        "explanation": "The Chi-Rho is Greek, not Egyptian. It combines X (Chi) and P (Rho), the first letters of Christ in Greek."
+      }
+    ],
+    "level": 5,
+    "topic": "constantine"
+  },
+  {
+    "id": "q5_edict_milan",
+    "question": "What did the Edict of Milan do?",
+    "choices": [
+      {
+        "text": "It allowed Christians to worship freely and ended official persecution",
+        "correct": true,
+        "explanation": "In 313 AD, Emperor Constantine issued the Edict of Milan, granting religious freedom throughout the Roman Empire."
+      },
+      {
+        "text": "It banned all religions except Christianity",
+        "correct": false,
+        "explanation": "The Edict of Milan did not ban other religions. It granted freedom to ALL religions, including Christianity."
+      },
+      {
+        "text": "It created a new Roman city",
+        "correct": false,
+        "explanation": "The Edict of Milan was about religious freedom. It ended the persecution of Christians in the Roman Empire in 313 AD."
+      }
+    ],
+    "level": 5,
+    "topic": "constantine"
+  },
+  {
+    "id": "q5_constantine_vision",
+    "question": "What did Constantine see before the Battle of Milvian Bridge?",
+    "choices": [
+      {
+        "text": "A vision of the cross with the words 'In this sign, conquer'",
+        "correct": true,
+        "explanation": "Constantine reported seeing a cross of light in the sky with the Latin words 'In hoc signo vinces' — In this sign, you shall conquer."
+      },
+      {
+        "text": "A vision of a golden eagle",
+        "correct": false,
+        "explanation": "Constantine saw a cross, not an eagle. The vision came with the words 'In this sign, conquer' and led him to adopt Christianity."
+      },
+      {
+        "text": "A vision of the sea parting",
+        "correct": false,
+        "explanation": "That was Moses! Constantine saw a cross of light with the message 'In this sign, conquer' before winning the battle."
+      }
+    ],
+    "level": 5,
+    "topic": "constantine"
+  },
+  {
+    "id": "q5_constantine_importance",
+    "question": "Why was Constantine important to the history of Christianity?",
+    "choices": [
+      {
+        "text": "He was the first Roman emperor to support Christianity",
+        "correct": true,
+        "explanation": "Constantine ended centuries of persecution and made it safe for Christians to worship openly. He also called the Council of Nicaea."
+      },
+      {
+        "text": "He wrote the Bible",
+        "correct": false,
+        "explanation": "Constantine did not write the Bible. He was important because he was the first emperor to support Christianity and end persecution."
+      },
+      {
+        "text": "He was one of the twelve apostles",
+        "correct": false,
+        "explanation": "Constantine lived nearly 300 years after the apostles. He was the first Roman emperor to support and protect Christians."
+      }
+    ],
+    "level": 5,
+    "topic": "constantine"
   }
 ]

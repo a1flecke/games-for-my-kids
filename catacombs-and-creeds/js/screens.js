@@ -497,6 +497,110 @@ class ScreenManager {
         ctx.globalAlpha = 1.0;
     }
 
+    /** Draw the final game completion screen with credits */
+    renderGameComplete(ctx, canvas, stats, scrollY) {
+        const a = CONFIG.ACCESSIBILITY;
+        const centerX = canvas.width / 2;
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // Dark background with golden tone
+        ctx.fillStyle = '#1a1510';
+        ctx.fillRect(0, 0, w, h);
+
+        // Golden border
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(10, 10, w - 20, h - 20);
+
+        // Credits content (scrolls upward based on scrollY)
+        const baseY = h - scrollY * 15;
+
+        // Title
+        ctx.fillStyle = '#d4af37';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.font = `bold 38px ${a.fontFamily}`;
+        ctx.fillText('Catacombs & Creeds', centerX, baseY + 0);
+
+        ctx.font = `bold 28px ${a.fontFamily}`;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Journey Complete!', centerX, baseY + 55);
+
+        // Historical summary
+        ctx.font = `20px ${a.fontFamily}`;
+        ctx.fillStyle = '#e8d8b0';
+
+        const facts = [
+            '300 Years of Early Church History',
+            '',
+            '64 AD - The Apostles spread the Gospel',
+            'Christians meet in secret catacombs',
+            '',
+            '100-300 AD - The Age of Martyrs',
+            'Polycarp, Ignatius, Perpetua stand firm',
+            '',
+            '325 AD - The Council of Nicaea',
+            'The Nicene Creed unites believers',
+            '',
+            '350-400 AD - The Church Fathers',
+            'Augustine, Jerome, and Ambrose teach',
+            '',
+            '312 AD - Constantine\'s Vision',
+            'The Edict of Milan brings freedom',
+            '',
+            'The faith that began underground',
+            'now stands in the light of day.'
+        ];
+
+        let factY = baseY + 120;
+        for (const fact of facts) {
+            if (fact === '') {
+                factY += 15;
+                continue;
+            }
+            ctx.fillText(fact, centerX, factY);
+            factY += 32;
+        }
+
+        // Stats section
+        factY += 30;
+        ctx.fillStyle = '#d4af37';
+        ctx.font = `bold 22px ${a.fontFamily}`;
+        ctx.fillText('Your Adventure', centerX, factY);
+        factY += 40;
+
+        ctx.font = `18px ${a.fontFamily}`;
+        ctx.fillStyle = '#e8d8b0';
+        const statLines = [
+            `Level Playtime: ${stats.playtime || '0:00'}`,
+            `Enemies Defeated: ${stats.enemiesDefeated || 0}`,
+            `Items Found: ${stats.itemsFound || 0}`,
+            `Player Level: ${stats.playerLevel || 1}`
+        ];
+
+        for (const line of statLines) {
+            ctx.fillText(line, centerX, factY);
+            factY += 30;
+        }
+
+        // Thank you message
+        factY += 30;
+        ctx.fillStyle = '#d4af37';
+        ctx.font = `bold 24px ${a.fontFamily}`;
+        ctx.fillText('Thank you for playing!', centerX, factY);
+
+        // Continue prompt (always visible at bottom)
+        if (scrollY > 10) {
+            ctx.fillStyle = '#888888';
+            ctx.font = `${a.fontSize}px ${a.fontFamily}`;
+            ctx.textBaseline = 'bottom';
+            ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 500) * 0.3;
+            ctx.fillText('Press Enter to return to title', centerX, h - 20);
+            ctx.globalAlpha = 1.0;
+        }
+    }
+
     /** Apply text size from a value string */
     applyTextSizeFromValue(sizeStr) {
         switch (sizeStr) {

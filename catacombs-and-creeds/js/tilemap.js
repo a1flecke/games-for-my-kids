@@ -25,7 +25,9 @@ const TileType = Object.freeze({
     BOOKSHELF: 9,  // Decorative bookshelf — solid, used in library level
     HIDDEN_WALL: 10, // Wall that can be revealed by Augustine's Wisdom ability
     LATIN_TILE: 11,  // Floor tile with Latin inscription, interactable with Jerome's Translation
-    BARRIER: 12      // Destructible barrier, breakable with Ambrose's Courage
+    BARRIER: 12,     // Destructible barrier, breakable with Ambrose's Courage
+    MARBLE: 13,      // Bright marble floor — walkable, palace/surface aesthetic
+    PILLAR: 14       // Gold/marble pillar — solid, decorative palace element
 });
 
 class TileMap {
@@ -107,6 +109,7 @@ class TileMap {
             case TileType.BOOKSHELF:
             case TileType.HIDDEN_WALL:
             case TileType.BARRIER:
+            case TileType.PILLAR:
                 return true;
             case TileType.DOOR: {
                 // Locked or closed doors are solid

@@ -166,5 +166,31 @@
     "stackable": false,
     "statBonus": { "attack": 3, "wisdom": 2 },
     "color": "#cc6644"
+  },
+  "chi_rho_shield": {
+    "id": "chi_rho_shield",
+    "name": "Chi-Rho Shield",
+    "description": "A shield bearing the Chi-Rho symbol of Constantine. +10 Defense.",
+    "category": "equipment",
+    "slot": "shield",
+    "stackable": false,
+    "statBonus": { "defense": 10 },
+    "color": "#d4af37"
+  },
+  "imperial_seal": {
+    "id": "imperial_seal",
+    "name": "Imperial Seal",
+    "description": "The seal of Emperor Constantine. A priceless artifact.",
+    "category": "quest",
+    "stackable": false,
+    "color": "#c0a030"
+  },
+  "commemorative_coin": {
+    "id": "commemorative_coin",
+    "name": "Commemorative Coin",
+    "description": "A coin minted to honor the Edict of Milan.",
+    "category": "collectible",
+    "stackable": false,
+    "color": "#e8c840"
   }
 }

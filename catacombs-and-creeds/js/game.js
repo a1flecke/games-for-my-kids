@@ -340,6 +340,9 @@ class Game {
             case GameState.VICTORY:
                 this.updateVictory();
                 break;
+            case GameState.GAME_COMPLETE:
+                this.updateGameComplete(deltaTime);
+                break;
         }
 
         // Update notifications in HUD
@@ -433,7 +436,7 @@ class Game {
             this.handleInteract();
         }
 
-        // Check ability keys (4, 5, 6) when abilities are available
+        // Check ability keys (4, 5, 6) when abilities are available (Level 4+)
         if (this.currentLevel >= 4) {
             const abilityMsg = this.abilities.update(this.input, this.dialogue.questFlags);
             if (abilityMsg) {
@@ -743,7 +746,7 @@ class Game {
 
                 // Boss post-victory dialogue
                 if (wasBoss) {
-                    const victoryDialogueMap = { 1: 'boss_victory', 2: 'boss_victory_l2', 3: 'boss_victory_l3', 4: 'boss_victory_l4' };
+                    const victoryDialogueMap = { 1: 'boss_victory', 2: 'boss_victory_l2', 3: 'boss_victory_l3', 4: 'boss_victory_l4', 5: 'boss_victory_l5' };
                     const victoryDialogue = victoryDialogueMap[this.currentLevel] || 'boss_victory';
                     this.dialogue.startDialogue(victoryDialogue, () => {
                         this.checkDialogueRewards();
@@ -842,6 +845,9 @@ class Game {
                 break;
             case GameState.VICTORY:
                 this.screens.renderVictory(this.renderer.ctx, this.canvas, this.victoryStats || {});
+                break;
+            case GameState.GAME_COMPLETE:
+                this.screens.renderGameComplete(this.renderer.ctx, this.canvas, this.victoryStats || {}, this.creditsScrollY || 0);
                 break;
         }
 
@@ -1135,8 +1141,8 @@ class Game {
 
             if (aabbCollision(playerBox, enemyBox)) {
                 // Boss pre-fight dialogue (first encounter only)
-                const prefightFlagMap = { 1: 'boss_prefight_shown', 2: 'boss_prefight_l2_shown', 3: 'boss_prefight_l3_shown', 4: 'boss_prefight_l4_shown' };
-                const prefightDialogueMap = { 1: 'boss_prefight', 2: 'boss_prefight_l2', 3: 'boss_prefight_l3', 4: 'boss_prefight_l4' };
+                const prefightFlagMap = { 1: 'boss_prefight_shown', 2: 'boss_prefight_l2_shown', 3: 'boss_prefight_l3_shown', 4: 'boss_prefight_l4_shown', 5: 'boss_prefight_l5_shown' };
+                const prefightDialogueMap = { 1: 'boss_prefight', 2: 'boss_prefight_l2', 3: 'boss_prefight_l3', 4: 'boss_prefight_l4', 5: 'boss_prefight_l5' };
                 const prefightFlag = prefightFlagMap[this.currentLevel] || 'boss_prefight_shown';
                 const prefightDialogue = prefightDialogueMap[this.currentLevel] || 'boss_prefight';
                 if (enemy.isBoss && !this.dialogue.getFlag(prefightFlag)) {
@@ -1479,6 +1485,8 @@ class Game {
             this.handleLevel3Stairs();
         } else if (this.currentLevel === 4) {
             this.handleLevel4Stairs();
+        } else if (this.currentLevel === 5) {
+            this.handleLevel5Stairs();
         }
     }
 
@@ -1574,12 +1582,81 @@ class Game {
             return;
         }
 
-        // All conditions met — victory dialogue then victory screen (or next level)
+        // All conditions met — victory dialogue then transition to Level 5
         this.dialogue.startDialogue('victory_l4', () => {
             this.checkDialogueRewards();
-            this.enterVictoryState();
+            this.transitionToLevel(5);
         });
         this.changeState(GameState.DIALOGUE);
+    }
+
+    /**
+     * Level 5 stairs: need boss defeated → final victory dialogue → game complete.
+     */
+    handleLevel5Stairs() {
+        const flags = this.dialogue.questFlags;
+
+        if (!flags.boss_defeated_l5) {
+            this.inventory.showNotification('The General still opposes you!');
+            return;
+        }
+
+        // All conditions met — victory dialogue then game complete
+        this.dialogue.startDialogue('victory_l5', () => {
+            this.checkDialogueRewards();
+            this.enterGameComplete();
+        });
+        this.changeState(GameState.DIALOGUE);
+    }
+
+    /**
+     * Enter the final game completion state with credits and stats.
+     */
+    enterGameComplete() {
+        const playtimeMs = performance.now() - this.sessionStartTime;
+        const minutes = Math.floor(playtimeMs / 60000);
+        const seconds = Math.floor((playtimeMs % 60000) / 1000);
+        const playtime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        this.victoryStats = {
+            levelName: 'All Levels Complete',
+            playtime: playtime,
+            enemiesDefeated: this.defeatedEnemies.size,
+            itemsFound: this.inventory.items.length +
+                         (this.inventory.equipped.shield ? 1 : 0) +
+                         (this.inventory.equipped.accessory ? 1 : 0),
+            playerLevel: this.player.level,
+            isGameComplete: true
+        };
+
+        // Credits scroll position (animated in updateGameComplete)
+        this.creditsScrollY = 0;
+
+        // Auto-save with final state
+        this.autoSave();
+
+        this.changeState(GameState.GAME_COMPLETE);
+    }
+
+    /**
+     * Update game complete / credits screen.
+     */
+    updateGameComplete(deltaTime) {
+        // Scroll credits upward
+        this.creditsScrollY += (deltaTime || 16) * 0.03;
+
+        // Press Enter after credits reach a threshold to return to title
+        if (this.creditsScrollY > 10 &&
+            (this.input.wasPressed('Enter') || this.input.wasPressed(' '))) {
+            this.player = null;
+            this.map = null;
+            this.npcs = [];
+            this.enemies = [];
+            this.worldItems = [];
+            this.victoryStats = null;
+            this.screens.resetSelection();
+            this.changeState(GameState.TITLE);
+        }
     }
 
     /**
@@ -1663,6 +1740,11 @@ class Game {
             case 4:
                 if (window.LEVEL4_DIALOGUES) {
                     this.dialogue.registerDialogues(window.LEVEL4_DIALOGUES);
+                }
+                break;
+            case 5:
+                if (window.LEVEL5_DIALOGUES) {
+                    this.dialogue.registerDialogues(window.LEVEL5_DIALOGUES);
                 }
                 break;
         }
