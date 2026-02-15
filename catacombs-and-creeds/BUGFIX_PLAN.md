@@ -146,12 +146,12 @@ Comprehensive audit of bugs, boundary issues, and UX problems found during a ful
 
 ## Implementation Priority
 
-### Phase 1 - Critical Bugs (breaks gameplay)
-- [ ] #1 Frame-rate dependent movement
-- [ ] #2 Enemy patrol wall-collision reversal
-- [ ] #5 Save validation rejects coordinate 0
-- [ ] #7 Boss push-back clips into walls
-- [ ] #4 HUD notification fade broken
+### Phase 1 - Critical Bugs (breaks gameplay) ✓
+- [x] #1 Frame-rate dependent movement
+- [x] #2 Enemy patrol wall-collision reversal
+- [x] #5 Save validation rejects coordinate 0
+- [x] #7 Boss push-back clips into walls
+- [x] #4 HUD notification fade broken
 
 ### Phase 2 - Save/Progress Bugs (data loss or incorrect state)
 - [ ] #6 Playtime never tracked

@@ -340,6 +340,11 @@ class HUD {
                     textColor = CONFIG.COLORS.info;
             }
 
+            // Fade out in last 500ms
+            if (notif.timer < 500) {
+                ctx.globalAlpha = notif.timer / 500;
+            }
+
             // Measure text
             ctx.font = `bold 16px ${a.fontFamily}`;
             const textWidth = ctx.measureText(notif.message).width;
@@ -363,10 +368,6 @@ class HUD {
             ctx.textBaseline = 'middle';
             ctx.fillText(notif.message, boxX + boxWidth / 2, y + boxHeight / 2);
 
-            // Fade out in last 500ms
-            if (notif.timer < 500) {
-                ctx.globalAlpha = notif.timer / 500;
-            }
             ctx.globalAlpha = 1.0;
         }
     }

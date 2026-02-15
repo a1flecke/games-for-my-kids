@@ -449,7 +449,7 @@ class Game {
         this.player.moving.right = this.input.isDown('d') || this.input.isDown('D') || this.input.isDown('ArrowRight');
 
         // Update player with NPC collision
-        this.updatePlayerMovement();
+        this.updatePlayerMovement(deltaTime);
 
         // Update enemy patrol movement
         this.updateEnemies(deltaTime);
@@ -547,25 +547,27 @@ class Game {
      * Update player movement with NPC collision.
      * Players collide against both tiles and NPCs.
      */
-    updatePlayerMovement() {
+    updatePlayerMovement(deltaTime) {
         const player = this.player;
+        const timeScale = (deltaTime || 16.67) / 16.67; // Normalize to 60fps
+        const speed = player.speed * timeScale;
         let dx = 0;
         let dy = 0;
 
         if (player.moving.up) {
-            dy -= player.speed;
+            dy -= speed;
             player.direction = 'up';
         }
         if (player.moving.down) {
-            dy += player.speed;
+            dy += speed;
             player.direction = 'down';
         }
         if (player.moving.left) {
-            dx -= player.speed;
+            dx -= speed;
             player.direction = 'left';
         }
         if (player.moving.right) {
-            dx += player.speed;
+            dx += speed;
             player.direction = 'right';
         }
 
@@ -1040,11 +1042,12 @@ class Game {
      * For stealth enemies, also updates vision cones and detection.
      */
     updateEnemies(deltaTime) {
+        const timeScale = (deltaTime || 16.67) / 16.67;
         for (const enemy of this.enemies) {
             if (enemy.useWaypoints) {
-                this.updateWaypointPatrol(enemy);
+                this.updateWaypointPatrol(enemy, timeScale);
             } else {
-                this.updateSimplePatrol(enemy);
+                this.updateSimplePatrol(enemy, timeScale);
             }
 
             // Update vision cone for stealth enemies
@@ -1058,8 +1061,9 @@ class Game {
     /**
      * Simple horizontal back-and-forth patrol (original behavior).
      */
-    updateSimplePatrol(enemy) {
-        enemy.x += enemy.patrolSpeed * enemy.patrolDirection;
+    updateSimplePatrol(enemy, timeScale) {
+        const scaledSpeed = enemy.patrolSpeed * timeScale;
+        enemy.x += scaledSpeed * enemy.patrolDirection;
 
         // Reverse direction at patrol bounds
         const distFromOrigin = enemy.x - enemy.originX;
@@ -1080,30 +1084,32 @@ class Game {
         const tileY = worldToGrid(enemy.y, this.tileSize);
 
         if (this.map && this.map.isSolid(tileX, tileY)) {
+            // Correct position before flipping (undo this frame's move)
+            enemy.x -= scaledSpeed * enemy.patrolDirection;
             enemy.patrolDirection *= -1;
-            enemy.x -= enemy.patrolSpeed * enemy.patrolDirection;
         }
     }
 
     /**
      * Waypoint-based patrol: enemy moves toward next waypoint, advances when reached.
      */
-    updateWaypointPatrol(enemy) {
+    updateWaypointPatrol(enemy, timeScale) {
+        const scaledSpeed = enemy.patrolSpeed * timeScale;
         const route = enemy.patrolRoute;
         const target = route[enemy.patrolWaypointIndex];
         const dx = target.x - enemy.x;
         const dy = target.y - enemy.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < enemy.patrolSpeed * 2) {
+        if (dist < scaledSpeed * 2) {
             // Reached waypoint — advance to next
             enemy.patrolWaypointIndex = (enemy.patrolWaypointIndex + 1) % route.length;
         } else {
             // Move toward waypoint
             const nx = dx / dist;
             const ny = dy / dist;
-            enemy.x += nx * enemy.patrolSpeed;
-            enemy.y += ny * enemy.patrolSpeed;
+            enemy.x += nx * scaledSpeed;
+            enemy.y += ny * scaledSpeed;
 
             // Update facing direction based on dominant movement axis
             if (Math.abs(dx) > Math.abs(dy)) {
@@ -1254,8 +1260,24 @@ class Game {
                     const dx = this.player.x - enemy.x;
                     const dy = this.player.y - enemy.y;
                     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    this.player.x += (dx / dist) * this.tileSize;
-                    this.player.y += (dy / dist) * this.tileSize;
+                    const halfSize = this.player.size / 2;
+
+                    // Try full tile push-back, then half, then quarter
+                    let pushed = false;
+                    for (const scale of [1, 0.5, 0.25]) {
+                        const newX = this.player.x + (dx / dist) * this.tileSize * scale;
+                        const newY = this.player.y + (dy / dist) * this.tileSize * scale;
+                        if (this.map.isAreaWalkable(
+                            newX - halfSize, newY - halfSize,
+                            this.player.size, this.player.size
+                        )) {
+                            this.player.x = newX;
+                            this.player.y = newY;
+                            pushed = true;
+                            break;
+                        }
+                    }
+                    // If no valid push-back position, leave player in place
 
                     const enemyRef = enemy;
                     this.dialogue.startDialogue(prefightDialogue, () => {

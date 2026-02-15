@@ -31,24 +31,26 @@ class Player {
     }
 
     /** Update player position based on movement flags */
-    update(map) {
+    update(map, deltaTime) {
+        const timeScale = (deltaTime || 16.67) / 16.67; // Normalize to 60fps
+        const speed = this.speed * timeScale;
         let dx = 0;
         let dy = 0;
 
         if (this.moving.up) {
-            dy -= this.speed;
+            dy -= speed;
             this.direction = 'up';
         }
         if (this.moving.down) {
-            dy += this.speed;
+            dy += speed;
             this.direction = 'down';
         }
         if (this.moving.left) {
-            dx -= this.speed;
+            dx -= speed;
             this.direction = 'left';
         }
         if (this.moving.right) {
-            dx += this.speed;
+            dx += speed;
             this.direction = 'right';
         }
 

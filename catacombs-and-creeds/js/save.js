@@ -147,7 +147,7 @@ class SaveSystem {
             const saveData = JSON.parse(saveStr);
 
             // Basic validation
-            if (!saveData.playerX || !saveData.currentLevel) {
+            if (saveData.playerX === undefined || saveData.currentLevel === undefined) {
                 console.error('Corrupted save data in slot', slotIndex);
                 return null;
             }
