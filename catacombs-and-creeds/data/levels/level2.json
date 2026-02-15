@@ -114,7 +114,7 @@
     },
     {
       "id": "patrol_2", "type": "roman_patrol", "x": 3, "y": 14,
-      "patrolRoute": [{"x": 3, "y": 14}, {"x": 11, "y": 14}, {"x": 11, "y": 15}, {"x": 3, "y": 15}]
+      "patrolRoute": [{"x": 3, "y": 14}, {"x": 11, "y": 14}, {"x": 11, "y": 15}, {"x": 2, "y": 15}]
     },
     {
       "id": "patrol_3", "type": "roman_patrol", "x": 13, "y": 15,
@@ -124,7 +124,7 @@
     { "id": "informant_2", "type": "informant", "x": 8, "y": 11 },
     {
       "id": "prefect_boss", "type": "prefect", "x": 16, "y": 18,
-      "patrolRoute": [{"x": 14, "y": 18}, {"x": 18, "y": 18}]
+      "patrolRoute": [{"x": 14, "y": 18}, {"x": 17, "y": 18}]
     }
   ],
   "items": [
