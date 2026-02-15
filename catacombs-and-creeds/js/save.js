@@ -279,18 +279,20 @@ class SaveSystem {
         // Confirm selection
         if (input.wasPressed('Enter') || input.wasPressed(' ')) {
             const selected = this.pickerSelectedIndex;
+            const callback = this.pickerCallback; // Save ref before close nullifies it
             this.closeSlotPicker();
-            if (this.pickerCallback) {
-                this.pickerCallback(selected);
+            if (callback) {
+                callback(selected);
             }
             return selected;
         }
 
         // Cancel
         if (input.wasPressed('Escape')) {
+            const callback = this.pickerCallback; // Save ref before close nullifies it
             this.closeSlotPicker();
-            if (this.pickerCallback) {
-                this.pickerCallback(null);
+            if (callback) {
+                callback(null);
             }
             return null;
         }

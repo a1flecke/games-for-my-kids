@@ -174,6 +174,7 @@ class CombatSystem {
         this.phaseTransitionTimer = 0;
         this.currentQuestion = null;
         this.questionResult = null;
+        this.wonCombat = false;
         this.enemyShakeX = 0;
         this.enemyShakeTimer = 0;
         this.playerFlashTimer = 0;
@@ -200,7 +201,7 @@ class CombatSystem {
     endCombat() {
         this.active = false;
         const result = {
-            outcome: this.state === CombatState.VICTORY ? 'victory' : 'defeat',
+            outcome: this.wonCombat ? 'victory' : 'defeat',
             enemyId: this.enemyId,
             xpGained: this.xpGained,
             itemsGained: this.itemsGained,
@@ -855,6 +856,7 @@ class CombatSystem {
 
     onVictory() {
         this.state = CombatState.VICTORY;
+        this.wonCombat = true; // Track victory for endCombat outcome
         this.resultTimer = 0;
 
         // Calculate rewards

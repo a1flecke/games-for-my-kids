@@ -388,6 +388,9 @@ class Game {
         // Check player-enemy collision (triggers combat)
         this.checkEnemyCollision();
 
+        // If enemy collision changed state (combat or boss dialogue), stop processing
+        if (this.state !== GameState.PLAYING) return;
+
         // Check stealth bypass bonus (sneaking past patrol guards)
         this.checkStealthBypass();
 
