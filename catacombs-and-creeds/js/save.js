@@ -19,6 +19,9 @@ class SaveSystem {
         this.pickerSelectedIndex = 0;
         this.pickerCallback = null;
 
+        // Audio reference (set by Game)
+        this.audio = null;
+
         // Load metadata (last played slot)
         this.loadMeta();
     }
@@ -109,6 +112,7 @@ class SaveSystem {
 
             console.log(`Game saved to slot ${slotIndex}`);
             this.showNotification('Game Saved');
+            if (this.audio) this.audio.playSFX('save');
             return true;
         } catch (e) {
             console.error('Failed to save game:', e);

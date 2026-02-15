@@ -52,6 +52,7 @@ class Game {
         this.hud = new HUD();
         this.puzzle = new PuzzleSystem();
         this.abilities = new AbilitySystem();
+        this.audio = new AudioManager();
 
         // Wire question system into combat
         this.combat.questionSystem = this.questions;
@@ -59,6 +60,16 @@ class Game {
         // Wire inventory and abilities into combat
         this.combat.inventory = this.inventory;
         this.combat.abilities = this.abilities;
+
+        // Wire audio into subsystems
+        this.combat.audio = this.audio;
+        this.dialogue.audio = this.audio;
+        this.saveSystem.audio = this.audio;
+
+        // Wire settings changes to audio system
+        this.screens.onSettingsChanged = (settings) => {
+            this.audio.applySettings(settings);
+        };
 
         // Game loop
         this.lastTime = 0;
@@ -82,6 +93,13 @@ class Game {
 
     init() {
         console.log('Game initialized');
+
+        // Attach audio listeners for Safari interaction gate
+        this.audio.attachListeners();
+
+        // Apply saved audio settings from ScreenManager
+        this.audio.applySettings(this.screens.settings);
+
         this.start();
     }
 
@@ -99,6 +117,34 @@ class Game {
     changeState(newState) {
         console.log(`State: ${this.state} -> ${newState}`);
         this.state = newState;
+
+        // Update music based on new state
+        this._updateMusicForState(newState);
+    }
+
+    /** Play the appropriate music track for the current game state. */
+    _updateMusicForState(state) {
+        switch (state) {
+            case GameState.TITLE:
+                this.audio.playMusic('title');
+                break;
+            case GameState.PLAYING:
+                this.audio.playMusic('exploration');
+                break;
+            case GameState.COMBAT:
+                this.audio.playMusic('combat');
+                break;
+            case GameState.VICTORY:
+            case GameState.GAME_COMPLETE:
+                this.audio.stopMusic(0.5);
+                this.audio.playSFX('victory');
+                break;
+            case GameState.GAME_OVER:
+                this.audio.stopMusic(0.5);
+                this.audio.playSFX('defeat');
+                break;
+            // Paused/dialogue/inventory keep current music
+        }
     }
 
     /**
@@ -447,6 +493,12 @@ class Game {
             }
         }
 
+        // Check M key -> mute toggle
+        if (this.input.wasPressed('m') || this.input.wasPressed('M')) {
+            const muted = this.audio.toggleMute();
+            this.hud.showNotification(muted ? 'Audio Muted' : 'Audio Unmuted', 'info');
+        }
+
         // Check I key -> inventory
         if (this.input.wasPressed('i') || this.input.wasPressed('I')) {
             this.inventory.open();
@@ -622,6 +674,7 @@ class Game {
                 // Handle specific results
                 switch (result.type) {
                     case 'altar_save':
+                        this.audio.playSFX('save');
                         this.updateCheckpoint();
                         // Show save slot picker
                         this.saveSystem.showSlotPicker('save', (slotIndex) => {
@@ -644,12 +697,14 @@ class Game {
                             // Open the door immediately after unlocking
                             this.map.interact(this.nearTile.x, this.nearTile.y);
                             this.inventory.showNotification('Used Catacomb Key!');
+                            this.audio.playSFX('door_open');
                         } else {
                             this.inventory.showNotification('This door is locked.');
                         }
                         break;
                     case 'chest_opened':
                         // Add chest contents to inventory
+                        this.audio.playSFX('chest');
                         if (result.contents) {
                             const added = this.inventory.addItem(result.contents);
                             if (added) {
@@ -1199,6 +1254,7 @@ class Game {
                     const def = this.inventory.getDef(item.type);
                     const itemName = def ? def.name : item.type;
                     this.inventory.showNotification(`Obtained ${itemName}!`);
+                    this.audio.playSFX('item_pickup');
 
                     // Tutorial: show inventory hint after first item pickup
                     if (!this.dialogue.getFlag('tutorial_inventory')) {

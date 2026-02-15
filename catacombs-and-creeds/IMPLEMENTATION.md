@@ -254,6 +254,20 @@ Complete Level 5 (Constantine's Palace) with 3-act narrative structure, new tile
 - Updated `data/questions.json` (+4 Level 5 questions: Chi-Rho, Edict of Milan, Constantine's vision, Constantine's importance)
 - Updated `index.html` (added level5_dialogue.js script tag)
 
+### Session 13: Audio System ✅
+
+Complete audio system with Web Audio API synthesized chiptune music and sound effects. No external audio files — everything generated programmatically. Safari-compatible with user interaction gate.
+
+- Created `js/audio.js` (AudioManager class: Web Audio API context with Safari interaction gate, 3 synthesized music tracks — title/exploration/combat with chiptune melodies and bass lines, 14 synthesized SFX — footstep/door_open/item_pickup/menu_navigate/menu_select/dialogue/attack/damage/heal/save/level_up/victory/defeat/chest, master/music/SFX gain node hierarchy, volume controls 0-100, mute toggle, music crossfade, settings serialization)
+- Refactored `js/game.js` (+AudioManager initialization, audio listener attachment, settings wiring, state-based music via _updateMusicForState, SFX triggers for item pickup/door unlock/chest open/altar save, M key mute toggle, audio reference wiring to combat/dialogue/save subsystems)
+- Refactored `js/combat.js` (+audio SFX triggers: attack hit, damage taken, defend, heal from question/item, victory jingle, level up, defeat)
+- Refactored `js/dialogue.js` (+audio SFX triggers: dialogue advance pop, choice selection)
+- Refactored `js/save.js` (+audio reference, save chime SFX on successful save)
+- Refactored `js/screens.js` (+onSettingsChanged callback for live volume adjustment)
+- Refactored `js/hud.js` (+renderMuteIndicator showing mute status and M key hint in bottom-right)
+- Updated `js/input.js` (added 'm' and 'M' to gameKeys for mute toggle)
+- Updated `index.html` (added audio.js script tag, updated controls hint with M key)
+
 ---
 
 ## Remaining Sessions
@@ -262,7 +276,6 @@ Each session plan is in its own file under `sessions/`:
 
 | Session | File | Model | Description |
 |---------|------|-------|-------------|
-| 13 | [session-13.md](sessions/session-13.md) | Sonnet | Audio System |
 | 14 | [session-14.md](sessions/session-14.md) | Sonnet | Polish, Accessibility & Deployment |
 
 ---

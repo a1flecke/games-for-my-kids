@@ -21,6 +21,7 @@ class HUD {
         this.renderObjective(ctx, canvas, gameState);
         this.renderLevelProgress(ctx, canvas, gameState);
         this.renderQuickUseSlots(ctx, gameState.inventory);
+        this.renderMuteIndicator(ctx, canvas, gameState.audio);
         this.renderNotifications(ctx, canvas);
     }
 
@@ -363,6 +364,29 @@ class HUD {
             }
             ctx.globalAlpha = 1.0;
         }
+    }
+
+    /**
+     * Render mute indicator in bottom-right corner.
+     */
+    renderMuteIndicator(ctx, canvas, audio) {
+        if (!audio) return;
+
+        const a = CONFIG.ACCESSIBILITY;
+        const x = canvas.width - 90;
+        const y = canvas.height - 40;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(x, y, 70, 24);
+        ctx.strokeStyle = CONFIG.COLORS.uiBorder;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, 70, 24);
+
+        ctx.fillStyle = audio.muted ? CONFIG.COLORS.danger : '#aaaaaa';
+        ctx.font = `bold 12px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(audio.muted ? 'MUTED (M)' : 'M: Mute', x + 35, y + 12);
     }
 
     // --- Helper methods ---

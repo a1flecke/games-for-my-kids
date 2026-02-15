@@ -39,6 +39,9 @@ class DialogueSystem {
         this.ttsEnabled = false;
         this.ttsUtterance = null;
 
+        // Audio reference (set by Game)
+        this.audio = null;
+
         // Portrait colors for character placeholders
         this.portraitColors = {
             peter: '#c4a44a',
@@ -417,6 +420,7 @@ class DialogueSystem {
      */
     _advanceNode() {
         this._cancelTTS();
+        if (this.audio) this.audio.playSFX('dialogue');
         const currentNode = this.nodes[this.nodeIndex];
 
         // Check for nextDialogue jump on the current node
@@ -476,6 +480,7 @@ class DialogueSystem {
         const choice = node.choices[this.selectedChoice];
         if (!choice) return;
 
+        if (this.audio) this.audio.playSFX('menu_select');
         console.log(`Choice selected: "${choice.text}"`);
 
         // Set flag from choice

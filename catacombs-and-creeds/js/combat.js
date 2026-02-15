@@ -118,6 +118,9 @@ class CombatSystem {
 
         // Ambrose's Courage combat bonus (set by Game when starting combat)
         this.courageBonus = false;
+
+        // Audio reference (set by Game)
+        this.audio = null;
     }
 
     /**
@@ -487,6 +490,7 @@ class CombatSystem {
         if (result.isMiss) {
             this.setTurnMessage('You missed!');
             this.addFloatingNumber('MISS', 400, 150, '#888888');
+            if (this.audio) this.audio.playSFX('footstep');
             this.startAnimation('player_attack', 600, () => {
                 this.startEnemyTurn();
             });
@@ -502,6 +506,7 @@ class CombatSystem {
 
         // Apply damage to enemy
         this.enemyHP = Math.max(0, this.enemyHP - finalDamage);
+        if (this.audio) this.audio.playSFX('attack');
 
         // Trigger shake
         this.enemyShakeTimer = 400;
@@ -538,6 +543,7 @@ class CombatSystem {
 
     playerDefend() {
         this.defending = true;
+        if (this.audio) this.audio.playSFX('menu_select');
 
         // In defend_required phase, defending also heals slightly
         if (this._isDefendRequiredPhase()) {
@@ -632,6 +638,7 @@ class CombatSystem {
             this.setTurnMessage(result.message);
             if (result.healed > 0) {
                 this.addFloatingNumber(`+${result.healed} HP`, 200, 420, CONFIG.COLORS.success);
+                if (this.audio) this.audio.playSFX('heal');
             }
             // Using an item consumes the turn
             this.startAnimation('heal', 400, () => {
@@ -664,6 +671,7 @@ class CombatSystem {
 
         // Apply damage to player
         this.playerHP = Math.max(0, this.playerHP - damage);
+        if (this.audio) this.audio.playSFX('damage');
 
         // Trigger player flash
         this.playerFlashTimer = 400;
@@ -750,6 +758,7 @@ class CombatSystem {
                 this.playerHP += healAmount;
                 this.addFloatingNumber(`+${healAmount} HP`, 200, 420, CONFIG.COLORS.success);
                 this.setTurnMessage(`Correct! You heal ${healAmount} HP!`);
+                if (this.audio) this.audio.playSFX('heal');
             } else {
                 this.attackBoost = true;
                 this.attackBoostMultiplier = 1.5;
@@ -873,6 +882,10 @@ class CombatSystem {
         this.playerHP = this.player.hp;
         this.playerMaxHP = this.player.maxHp;
 
+        if (this.audio) {
+            this.audio.playSFX('victory');
+            if (this.leveledUp) this.audio.playSFX('level_up');
+        }
         this.setTurnMessage(`Victory! +${this.xpGained} XP`);
         console.log(`Combat victory: +${this.xpGained} XP, leveled up: ${this.leveledUp}`);
     }
@@ -893,6 +906,7 @@ class CombatSystem {
         this.state = CombatState.DEFEAT;
         this.resultTimer = 0;
         this.defeatHint = 'Try using Defend to reduce damage, or answer Questions to heal!';
+        if (this.audio) this.audio.playSFX('defeat');
         this.setTurnMessage('You were defeated...');
         console.log('Combat defeat');
     }

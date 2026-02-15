@@ -6,6 +6,9 @@ class ScreenManager {
     constructor() {
         this.selectedIndex = 0;
 
+        // Audio callback (set by Game)
+        this.onSettingsChanged = null;
+
         this.titleOptions = ['New Game', 'Continue', 'Settings'];
         this.titleDisabled = [false, false, false]; // All enabled now
 
@@ -143,6 +146,11 @@ class ScreenManager {
         }
 
         this.saveSettings();
+
+        // Notify audio system if available (Game wires this up)
+        if (this.onSettingsChanged) {
+            this.onSettingsChanged(this.settings);
+        }
     }
 
     /** Map menu index to action string */
