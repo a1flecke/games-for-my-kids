@@ -1962,193 +1962,13 @@ class Game {
         }
     }
 
-    // Save game to localStorage
-    saveGame() {
-        if (!this.player) return;
-
-        const saveData = {
-            playerX: this.player.x,
-            playerY: this.player.y,
-            playerDirection: this.player.direction,
-            hp: this.player.hp,
-            maxHp: this.player.maxHp,
-            attack: this.player.attack,
-            defense: this.player.defense,
-            xp: this.player.xp,
-            level: this.player.level,
-            xpThreshold: this.player.xpThreshold,
-            currentLevel: this.currentLevel,
-            timestamp: Date.now()
-        };
-
-        // Save tile state (doors opened, chests looted, etc.)
-        if (this.map) {
-            saveData.tileState = this.map.tileState;
-        }
-
-        // Save NPC talked-to state
-        if (this.npcs.length > 0) {
-            saveData.npcState = {};
-            for (const npc of this.npcs) {
-                saveData.npcState[npc.id] = {
-                    hasBeenTalkedTo: npc.hasBeenTalkedTo
-                };
-            }
-        }
-
-        // Save quest flags from dialogue system
-        if (this.dialogue) {
-            saveData.questFlags = { ...this.dialogue.questFlags };
-        }
-
-        // Save defeated enemies
-        saveData.defeatedEnemies = [...this.defeatedEnemies];
-
-        // Save inventory
-        if (this.inventory) {
-            saveData.inventory = this.inventory.toSaveData();
-        }
-
-        // Save equipment bonus
-        if (this.player.equipmentBonus) {
-            saveData.equipmentBonus = { ...this.player.equipmentBonus };
-        }
-
-        // Save picked-up state of world items
-        if (this.worldItems.length > 0) {
-            saveData.pickedUpItems = this.worldItems
-                .filter(i => i.pickedUp)
-                .map(i => i.id);
-        }
-
-        // Save checkpoint
-        saveData.checkpointX = this.checkpointX;
-        saveData.checkpointY = this.checkpointY;
-
-        // Save ability state
-        if (this.abilities) {
-            saveData.abilities = this.abilities.toSaveData();
-        }
-
-        try {
-            localStorage.setItem(this.saveKey, JSON.stringify(saveData));
-            console.log('Game saved');
-        } catch (e) {
-            console.error('Failed to save game:', e);
-        }
-    }
-
-    // Load game from localStorage
-    loadGame() {
-        if (!this.player) return;
-
-        try {
-            const saveData = localStorage.getItem(this.saveKey);
-            if (saveData) {
-                const data = JSON.parse(saveData);
-
-                // Only restore if same level
-                if (data.currentLevel === this.currentLevel) {
-                    this.player.x = data.playerX;
-                    this.player.y = data.playerY;
-                    this.player.direction = data.playerDirection || 'down';
-
-                    // Restore stats if present in save
-                    if (data.hp !== undefined) {
-                        this.player.hp = data.hp;
-                        this.player.maxHp = data.maxHp;
-                        this.player.attack = data.attack;
-                        this.player.defense = data.defense;
-                        this.player.xp = data.xp;
-                        this.player.level = data.level;
-                        this.player.xpThreshold = data.xpThreshold;
-                    }
-
-                    // Restore tile state
-                    if (data.tileState && this.map) {
-                        for (const key of Object.keys(data.tileState)) {
-                            if (this.map.tileState[key]) {
-                                Object.assign(this.map.tileState[key], data.tileState[key]);
-                            }
-                        }
-                    }
-
-                    // Restore NPC state
-                    if (data.npcState && this.npcs.length > 0) {
-                        for (const npc of this.npcs) {
-                            if (data.npcState[npc.id]) {
-                                npc.hasBeenTalkedTo = data.npcState[npc.id].hasBeenTalkedTo;
-                            }
-                        }
-                    }
-
-                    // Restore quest flags
-                    if (data.questFlags && this.dialogue) {
-                        this.dialogue.questFlags = { ...data.questFlags };
-                        console.log('Quest flags restored:', Object.keys(data.questFlags));
-                    }
-
-                    // Restore defeated enemies
-                    if (data.defeatedEnemies) {
-                        this.defeatedEnemies = new Set(data.defeatedEnemies);
-                        // Remove defeated enemies from current enemy list
-                        this.enemies = this.enemies.filter(e => !this.defeatedEnemies.has(e.id));
-                        console.log(`Defeated enemies restored: ${this.defeatedEnemies.size}`);
-                    }
-
-                    // Restore checkpoint
-                    if (data.checkpointX !== undefined) {
-                        this.checkpointX = data.checkpointX;
-                        this.checkpointY = data.checkpointY;
-                    }
-
-                    // Restore inventory
-                    if (data.inventory && this.inventory) {
-                        // Reset equipment bonus before restoring (fromSaveData re-applies)
-                        this.player.equipmentBonus = { defense: 0, attack: 0, wisdom: 0 };
-                        this.inventory.fromSaveData(data.inventory, this.player);
-                        console.log(`Inventory restored: ${this.inventory.items.length} items`);
-                    }
-
-                    // Restore picked-up world items
-                    if (data.pickedUpItems && this.worldItems.length > 0) {
-                        const pickedSet = new Set(data.pickedUpItems);
-                        for (const item of this.worldItems) {
-                            if (pickedSet.has(item.id)) {
-                                item.pickedUp = true;
-                            }
-                        }
-                        console.log(`Picked-up items restored: ${data.pickedUpItems.length}`);
-                    }
-
-                    console.log('Game loaded from save');
-                } else {
-                    console.log('Save data is for a different level, starting fresh');
-                }
-            }
-        } catch (e) {
-            console.error('Failed to load game:', e);
-        }
-    }
-
-    // Reset save (legacy — not used with slot system)
-    resetSave() {
-        localStorage.removeItem(this.saveKey);
-        if (this.player && this.map) {
-            // Reset to level start position
-            this.player.x = this.tileSize * 2.5;
-            this.player.y = this.tileSize * 2.5;
-            this.player.direction = 'down';
-        }
-        console.log('Save reset');
-    }
-
     /**
      * Auto-save to the current active slot.
      */
     autoSave() {
         if (!this.player) return;
-        this.saveSystem.autoSave(this);
+        const elapsed = performance.now() - this.sessionStartTime;
+        this.saveSystem.autoSave(this, elapsed);
     }
 
     /**
@@ -2156,7 +1976,8 @@ class Game {
      */
     saveToSlot(slotIndex) {
         if (!this.player) return;
-        this.saveSystem.saveToSlot(slotIndex, this);
+        const elapsed = performance.now() - this.sessionStartTime;
+        this.saveSystem.saveToSlot(slotIndex, this, elapsed);
     }
 
     /**
@@ -2233,6 +2054,11 @@ class Game {
                     Object.assign(this.map.tileState[key], data.tileState[key]);
                 }
             }
+        }
+
+        // Restore modified tiles (revealed walls, broken barriers)
+        if (data.modifiedTiles && this.map) {
+            this.map.replayModifiedTiles(data.modifiedTiles);
         }
 
         // Restore NPC state

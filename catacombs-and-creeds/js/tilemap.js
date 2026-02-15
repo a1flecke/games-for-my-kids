@@ -52,6 +52,10 @@ class TileMap {
         // e.g. { "5,3": { open: false, locked: true } }
         this.tileState = {};
 
+        // Track tiles modified at runtime (revealed walls, broken barriers)
+        // Array of {x, y, newType} — replayed on save/load
+        this.modifiedTiles = [];
+
         // Initialize interactive tile state from level metadata
         this.initTileState(levelData.tileMetadata || []);
     }
@@ -276,6 +280,7 @@ class TileMap {
     revealHiddenWall(x, y) {
         if (this.getTile(x, y) === TileType.HIDDEN_WALL) {
             this.tiles[y][x] = TileType.FLOOR;
+            this.modifiedTiles.push({ x, y, newType: TileType.FLOOR });
             console.log(`Hidden wall at ${x},${y} revealed.`);
             return true;
         }
@@ -288,10 +293,25 @@ class TileMap {
     breakBarrier(x, y) {
         if (this.getTile(x, y) === TileType.BARRIER) {
             this.tiles[y][x] = TileType.FLOOR;
+            this.modifiedTiles.push({ x, y, newType: TileType.FLOOR });
             console.log(`Barrier at ${x},${y} broken.`);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Replay tile modifications from save data.
+     * @param {Array} modifications - [{x, y, newType}]
+     */
+    replayModifiedTiles(modifications) {
+        if (!modifications) return;
+        for (const mod of modifications) {
+            if (mod.y >= 0 && mod.y < this.height && mod.x >= 0 && mod.x < this.width) {
+                this.tiles[mod.y][mod.x] = mod.newType;
+            }
+        }
+        this.modifiedTiles = [...modifications];
     }
 
     /**

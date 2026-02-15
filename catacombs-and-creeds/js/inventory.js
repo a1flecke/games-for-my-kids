@@ -114,6 +114,11 @@ class InventorySystem {
             slot.quantity -= quantity;
         } else {
             this.items.splice(index, 1);
+            // Clamp cursor to prevent out-of-bounds after removal
+            const { regular } = this.getDisplayItems();
+            if (this.cursorIndex >= regular.length) {
+                this.cursorIndex = Math.max(0, regular.length - 1);
+            }
         }
         return true;
     }

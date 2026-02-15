@@ -153,11 +153,11 @@ Comprehensive audit of bugs, boundary issues, and UX problems found during a ful
 - [x] #7 Boss push-back clips into walls
 - [x] #4 HUD notification fade broken
 
-### Phase 2 - Save/Progress Bugs (data loss or incorrect state)
-- [ ] #6 Playtime never tracked
-- [ ] #11 Hidden walls/barriers not persisted
-- [ ] #9 `saveKey` undefined (remove legacy methods)
-- [ ] #15 Inventory cursor bounds
+### Phase 2 - Save/Progress Bugs (data loss or incorrect state) ✓
+- [x] #6 Playtime never tracked
+- [x] #11 Hidden walls/barriers not persisted
+- [x] #9 `saveKey` undefined (remove legacy methods)
+- [x] #15 Inventory cursor bounds
 
 ### Phase 3 - UI/Display Bugs
 - [ ] #3 Victory screen hardcoded to Level 1

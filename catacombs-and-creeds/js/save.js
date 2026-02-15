@@ -54,9 +54,10 @@ class SaveSystem {
      * Save current game state to a slot.
      * @param {number} slotIndex - 0, 1, or 2
      * @param {object} gameState - Game state object from Game class
+     * @param {number} [sessionElapsedMs] - Milliseconds elapsed in current session
      * @returns {boolean} - true if saved successfully
      */
-    saveToSlot(slotIndex, gameState) {
+    saveToSlot(slotIndex, gameState, sessionElapsedMs) {
         if (slotIndex < 0 || slotIndex >= this.slotCount) {
             console.error('Invalid slot index:', slotIndex);
             return false;
@@ -84,6 +85,7 @@ class SaveSystem {
 
             // Progression tracking
             tileState: gameState.map ? gameState.map.tileState : {},
+            modifiedTiles: gameState.map ? gameState.map.modifiedTiles : [],
             npcState: this._collectNPCState(gameState.npcs),
             questFlags: gameState.dialogue ? { ...gameState.dialogue.questFlags } : {},
             defeatedEnemies: Array.from(gameState.defeatedEnemies),
@@ -96,7 +98,7 @@ class SaveSystem {
 
             // Metadata
             timestamp: Date.now(),
-            playtime: this._getPlaytime(slotIndex), // Track cumulative playtime
+            playtime: this._getPlaytime(slotIndex, sessionElapsedMs),
             version: '1.0'
         };
 
@@ -229,13 +231,14 @@ class SaveSystem {
     /**
      * Auto-save to the current active slot.
      * @param {object} gameState
+     * @param {number} [sessionElapsedMs] - Milliseconds elapsed in current session
      */
-    autoSave(gameState) {
+    autoSave(gameState, sessionElapsedMs) {
         if (this.currentSlot === null) {
             // No active slot — pick slot 0 by default for new games
             this.currentSlot = 0;
         }
-        this.saveToSlot(this.currentSlot, gameState);
+        this.saveToSlot(this.currentSlot, gameState, sessionElapsedMs);
     }
 
     /**
@@ -483,11 +486,18 @@ class SaveSystem {
         return state;
     }
 
-    /** Get cumulative playtime for a slot (placeholder) */
-    _getPlaytime(slotIndex) {
-        // TODO: Track playtime properly (requires game to track session start time)
-        const preview = this.getSlotPreview(slotIndex);
-        return preview.isEmpty ? 0 : (preview.playtime || 0);
+    /** Get cumulative playtime in milliseconds for a slot */
+    _getPlaytime(slotIndex, sessionElapsedMs) {
+        try {
+            const key = this.slotPrefix + slotIndex;
+            const saveStr = localStorage.getItem(key);
+            if (!saveStr) return sessionElapsedMs || 0;
+            const data = JSON.parse(saveStr);
+            const previousMs = (typeof data.playtime === 'number') ? data.playtime : 0;
+            return previousMs + (sessionElapsedMs || 0);
+        } catch (e) {
+            return sessionElapsedMs || 0;
+        }
     }
 
     /** Format playtime in minutes */
