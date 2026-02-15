@@ -63,12 +63,14 @@ class Game {
 
         // Wire audio into subsystems
         this.combat.audio = this.audio;
+        this.combat.canvas = canvas;
         this.dialogue.audio = this.audio;
         this.saveSystem.audio = this.audio;
 
-        // Wire settings changes to audio system
+        // Wire settings changes to audio system and colorblind mode
         this.screens.onSettingsChanged = (settings) => {
             this.audio.applySettings(settings);
+            this._applyColorblindMode(settings.colorblindMode);
         };
 
         // Game loop
@@ -94,11 +96,22 @@ class Game {
     init() {
         console.log('Game initialized');
 
+        // Attach canvas for touch controls (detects touch device, sets up listeners)
+        this.input.attachCanvas(this.canvas);
+
         // Attach audio listeners for Safari interaction gate
         this.audio.attachListeners();
 
         // Apply saved audio settings from ScreenManager
         this.audio.applySettings(this.screens.settings);
+
+        // Apply saved colorblind mode
+        if (this.screens.settings.colorblindMode) {
+            this._applyColorblindMode(true);
+        }
+
+        // Register service worker for offline play
+        this._registerServiceWorker();
 
         this.start();
     }
@@ -262,10 +275,17 @@ class Game {
         }
     }
 
+    /** Update HTML loading progress bar (0-100) */
+    _setLoadingProgress(percent) {
+        const el = document.getElementById('loadingProgress');
+        if (el) el.style.width = `${percent}%`;
+    }
+
     /** Create player, load level, transition to PLAYING */
     async startNewGame() {
         // Show loading state
         this.changeState(GameState.LOADING);
+        this._setLoadingProgress(10);
 
         // Create player at default position (will be updated by loadLevel)
         this.player = new Player(
@@ -274,14 +294,17 @@ class Game {
         );
 
         // Load enemy definitions, questions, and item definitions in parallel
+        this._setLoadingProgress(30);
         await Promise.all([
             this.loadEnemyDefs(),
             this.questions.load(),
             this.inventory.load()
         ]);
+        this._setLoadingProgress(70);
 
         // Load level 1
         const success = await this.loadLevel(1);
+        this._setLoadingProgress(100);
 
         if (success) {
             // Register level dialogue content
@@ -916,6 +939,8 @@ class Game {
     renderLoading() {
         const ctx = this.renderer.ctx;
         const a = CONFIG.ACCESSIBILITY;
+        const cx = this.canvas.width / 2;
+        const cy = this.canvas.height / 2;
 
         ctx.fillStyle = a.bgColor;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -924,11 +949,31 @@ class Game {
         ctx.font = `bold 28px ${a.fontFamily}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('Loading...', this.canvas.width / 2, this.canvas.height / 2);
+        ctx.fillText('Loading...', cx, cy - 20);
 
         ctx.font = `18px ${a.fontFamily}`;
         ctx.fillStyle = CONFIG.COLORS.info;
-        ctx.fillText('Preparing the catacombs', this.canvas.width / 2, this.canvas.height / 2 + 40);
+        ctx.fillText('Preparing the catacombs', cx, cy + 20);
+
+        // Canvas-based progress bar
+        const barW = 240;
+        const barH = 12;
+        const barX = cx - barW / 2;
+        const barY = cy + 50;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(barX, barY, barW, barH);
+
+        // Animated indeterminate shimmer
+        const shimmer = (Date.now() % 2000) / 2000;
+        const fillW = barW * 0.3;
+        const fillX = barX + (barW - fillW) * shimmer;
+        ctx.fillStyle = CONFIG.COLORS.info;
+        ctx.fillRect(fillX, barY, fillW, barH);
+
+        ctx.strokeStyle = CONFIG.COLORS.uiBorder;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barW, barH);
     }
 
     renderPlaying() {
@@ -962,7 +1007,7 @@ class Game {
             }
         }
 
-        // Render HUD on top of game world
+        // Render HUD on top of game world (pass input for touch controls)
         this.hud.render(this.renderer.ctx, this.canvas, this);
 
         // Render ability icons (Level 4+)
@@ -2214,6 +2259,29 @@ class Game {
         }
 
         console.log('Game state restored from slot');
+    }
+    /**
+     * Apply or remove colorblind-safe color palette.
+     * @param {boolean} enabled
+     */
+    _applyColorblindMode(enabled) {
+        const target = enabled ? CONFIG._COLORBLIND_COLORS : CONFIG._DEFAULT_COLORS;
+        for (const key of Object.keys(target)) {
+            CONFIG.COLORS[key] = target[key];
+        }
+    }
+
+    /**
+     * Register service worker for offline play.
+     */
+    _registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js').then(reg => {
+                console.log('Service worker registered:', reg.scope);
+            }).catch(err => {
+                console.warn('Service worker registration failed:', err);
+            });
+        }
     }
 }
 

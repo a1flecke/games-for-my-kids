@@ -16,7 +16,7 @@ class ScreenManager {
         this.pauseDisabled = [false, false, false];
 
         this.settingsOptions = ['Text Size', 'TTS', 'Music Volume', 'SFX Volume', 'Colorblind Mode', 'Back'];
-        this.settingsDisabled = [false, false, false, false, true, false]; // Colorblind mode is stub
+        this.settingsDisabled = [false, false, false, false, false, false];
 
         // Settings state
         this.settings = this.loadSettings();
@@ -140,8 +140,8 @@ class ScreenManager {
                 this.settings.sfxVolume = Math.max(0, Math.min(100, this.settings.sfxVolume + direction * 10));
                 break;
 
-            case 4: // Colorblind Mode (stub)
-                // this.settings.colorblindMode = !this.settings.colorblindMode;
+            case 4: // Colorblind Mode
+                this.settings.colorblindMode = !this.settings.colorblindMode;
                 break;
         }
 
@@ -369,7 +369,7 @@ class ScreenManager {
             case 1: return this.settings.tts ? 'On' : 'Off';
             case 2: return `${this.settings.musicVolume}%`;
             case 3: return `${this.settings.sfxVolume}%`;
-            case 4: return 'Off'; // Colorblind mode stub
+            case 4: return this.settings.colorblindMode ? 'On' : 'Off';
             default: return '';
         }
     }

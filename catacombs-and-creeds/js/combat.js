@@ -62,8 +62,9 @@ class CombatSystem {
         this.animType = null;          // 'player_attack', 'enemy_attack', 'heal', etc.
         this.animCallback = null;
 
-        // Floating damage numbers
-        this.floatingNumbers = [];     // [{text, x, y, color, timer, duration}]
+        // Floating damage numbers (object pool to minimize GC)
+        this.floatingNumbers = [];     // [{text, x, y, color, timer, duration, active}]
+        this._floatingPool = [];       // Recycled number objects
 
         // Turn indicator
         this.turnMessage = '';
@@ -121,6 +122,9 @@ class CombatSystem {
 
         // Audio reference (set by Game)
         this.audio = null;
+
+        // Touch support: canvas reference for tap-to-select in combat
+        this.canvas = null;
     }
 
     /**
@@ -263,14 +267,19 @@ class CombatSystem {
     // ── Floating damage numbers ─────────────────────────────────────
 
     addFloatingNumber(text, x, y, color) {
-        this.floatingNumbers.push({
-            text: text,
-            x: x,
-            y: y,
-            color: color || '#ffffff',
-            timer: 0,
-            duration: 1200
-        });
+        // Reuse from pool if available to minimize GC pressure
+        let fn = this._floatingPool.pop();
+        if (fn) {
+            fn.text = text;
+            fn.x = x;
+            fn.y = y;
+            fn.color = color || '#ffffff';
+            fn.timer = 0;
+            fn.duration = 1200;
+        } else {
+            fn = { text, x, y, color: color || '#ffffff', timer: 0, duration: 1200 };
+        }
+        this.floatingNumbers.push(fn);
     }
 
     updateFloatingNumbers(deltaTime) {
@@ -279,6 +288,8 @@ class CombatSystem {
             fn.timer += deltaTime;
             fn.y -= deltaTime * 0.03; // Float upward
             if (fn.timer >= fn.duration) {
+                // Return to pool instead of discarding
+                this._floatingPool.push(this.floatingNumbers[i]);
                 this.floatingNumbers.splice(i, 1);
             }
         }

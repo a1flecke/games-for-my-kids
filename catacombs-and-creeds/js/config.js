@@ -38,8 +38,8 @@ const CONFIG = Object.freeze({
     // Dialogue
     MAX_WORDS_PER_BOX: 15,
 
-    // Colors - from plan Section 6.2
-    COLORS: Object.freeze({
+    // Colors - from plan Section 6.2 (mutable for colorblind mode)
+    COLORS: {
         // Tile colors
         floor: '#8b7355',
         wall: '#4a4a4a',
@@ -65,14 +65,30 @@ const CONFIG = Object.freeze({
         highlight: '#ff6b6b',
         accent1: '#4ecdc4',
         accent2: '#95e1d3'
+    },
+
+    // Default (non-colorblind) colors for restoring
+    _DEFAULT_COLORS: Object.freeze({
+        success: '#4a7c59',
+        danger: '#a64253',
+        enemy: '#a64253',
+        highlight: '#ff6b6b'
     }),
 
-    // Accessibility / Dyslexia-friendly defaults
-    ACCESSIBILITY: Object.freeze({
+    // Colorblind-safe palette (blue/orange swap for red/green)
+    _COLORBLIND_COLORS: Object.freeze({
+        success: '#4a7ca5',
+        danger: '#cc6600',
+        enemy: '#cc6600',
+        highlight: '#ff9933'
+    }),
+
+    // Accessibility / Dyslexia-friendly defaults (mutable for text size)
+    ACCESSIBILITY: {
         fontFamily: "'OpenDyslexic', 'Comic Sans MS', cursive",
         fontSize: 16,
         lineHeight: 1.5,
         bgColor: '#F5F0E8',
         textColor: '#2C2416'
-    })
+    }
 });

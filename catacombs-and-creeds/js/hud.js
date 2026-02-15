@@ -23,6 +23,11 @@ class HUD {
         this.renderQuickUseSlots(ctx, gameState.inventory);
         this.renderMuteIndicator(ctx, canvas, gameState.audio);
         this.renderNotifications(ctx, canvas);
+
+        // Touch controls overlay (only on touch devices)
+        if (gameState.input && gameState.input.isTouchDevice) {
+            this.renderTouchControls(ctx, canvas, gameState.input);
+        }
     }
 
     /**
@@ -387,6 +392,112 @@ class HUD {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(audio.muted ? 'MUTED (M)' : 'M: Mute', x + 35, y + 12);
+    }
+
+    /**
+     * Render on-screen touch controls (D-pad + action buttons).
+     * Only called when isTouchDevice is true.
+     */
+    renderTouchControls(ctx, canvas, input) {
+        const layout = input.getTouchLayout();
+        if (!layout) return;
+
+        const a = CONFIG.ACCESSIBILITY;
+        ctx.save();
+        ctx.globalAlpha = 0.35;
+
+        // ── D-pad ──
+        const dpad = layout.dpad;
+        const r = dpad.radius;
+
+        // D-pad background circle
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.beginPath();
+        ctx.arc(dpad.cx, dpad.cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Direction arrows
+        ctx.globalAlpha = 0.6;
+        const arrowLen = 14;
+        const arrowOff = r * 0.55;
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `bold 20px ${a.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Highlight active directions
+        const up = input.touchKeysDown['ArrowUp'];
+        const down = input.touchKeysDown['ArrowDown'];
+        const left = input.touchKeysDown['ArrowLeft'];
+        const right = input.touchKeysDown['ArrowRight'];
+
+        // Up arrow
+        ctx.fillStyle = up ? '#ffcc00' : '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(dpad.cx, dpad.cy - arrowOff - arrowLen);
+        ctx.lineTo(dpad.cx - 10, dpad.cy - arrowOff);
+        ctx.lineTo(dpad.cx + 10, dpad.cy - arrowOff);
+        ctx.closePath();
+        ctx.fill();
+
+        // Down arrow
+        ctx.fillStyle = down ? '#ffcc00' : '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(dpad.cx, dpad.cy + arrowOff + arrowLen);
+        ctx.lineTo(dpad.cx - 10, dpad.cy + arrowOff);
+        ctx.lineTo(dpad.cx + 10, dpad.cy + arrowOff);
+        ctx.closePath();
+        ctx.fill();
+
+        // Left arrow
+        ctx.fillStyle = left ? '#ffcc00' : '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(dpad.cx - arrowOff - arrowLen, dpad.cy);
+        ctx.lineTo(dpad.cx - arrowOff, dpad.cy - 10);
+        ctx.lineTo(dpad.cx - arrowOff, dpad.cy + 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // Right arrow
+        ctx.fillStyle = right ? '#ffcc00' : '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(dpad.cx + arrowOff + arrowLen, dpad.cy);
+        ctx.lineTo(dpad.cx + arrowOff, dpad.cy - 10);
+        ctx.lineTo(dpad.cx + arrowOff, dpad.cy + 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // ── Action buttons ──
+        const buttons = [layout.btnA, layout.btnB, layout.btnI];
+        for (const btn of buttons) {
+            const isPressed = input.touchButtonFeedback[btn.label] > 0;
+
+            ctx.globalAlpha = isPressed ? 0.7 : 0.35;
+
+            // Button circle
+            ctx.fillStyle = isPressed ? 'rgba(255, 204, 0, 0.4)' : 'rgba(255, 255, 255, 0.15)';
+            ctx.beginPath();
+            ctx.arc(btn.cx, btn.cy, btn.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = isPressed ? '#ffcc00' : '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Button label
+            ctx.globalAlpha = isPressed ? 0.9 : 0.6;
+            ctx.fillStyle = '#ffffff';
+            const fontSize = btn.radius > 24 ? 14 : 11;
+            ctx.font = `bold ${fontSize}px ${a.fontFamily}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(btn.label, btn.cx, btn.cy);
+        }
+
+        ctx.restore();
     }
 
     // --- Helper methods ---
