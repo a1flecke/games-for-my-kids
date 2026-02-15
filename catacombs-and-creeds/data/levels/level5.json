@@ -145,8 +145,8 @@
     }
   ],
   "items": [
-    { "id": "bread_l5_1", "type": "bread", "x": 1, "y": 7 },
-    { "id": "bread_l5_2", "type": "bread", "x": 5, "y": 1 },
+    { "id": "bread_l5_1", "type": "bread", "x": 2, "y": 7 },
+    { "id": "bread_l5_2", "type": "bread", "x": 4, "y": 1 },
     { "id": "bread_l5_3", "type": "bread", "x": 1, "y": 15 },
     { "id": "bread_l5_4", "type": "bread", "x": 18, "y": 1 },
     { "id": "bread_l5_5", "type": "bread", "x": 12, "y": 19 }
