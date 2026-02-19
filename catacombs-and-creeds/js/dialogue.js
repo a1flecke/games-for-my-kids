@@ -44,6 +44,7 @@ class DialogueSystem {
 
         // Portrait colors for character placeholders
         this.portraitColors = {
+            priscilla: '#a06090',
             peter: '#c4a44a',
             peter_apostle: '#a07030',
             james: '#5070a0',
@@ -507,33 +508,34 @@ class DialogueSystem {
     // ── Drawing helpers ───────────────────────────────────────────────
 
     /**
-     * Draw a portrait placeholder (colored rectangle with initial).
+     * Draw a character portrait using pixel-art from portraits.js.
+     * Falls back to colored circle with initial if portraits.js is unavailable.
      */
     _drawPortrait(ctx, node, x, y) {
         const size = this.PORTRAIT_SIZE;
         const portraitId = node.portrait || 'default';
-        const color = this.portraitColors[portraitId] || this.portraitColors.default;
 
-        // Background circle
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Border
-        ctx.strokeStyle = CONFIG.COLORS.uiBorder;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Initial letter
-        const initial = (node.speaker || '?')[0].toUpperCase();
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `bold 28px ${CONFIG.ACCESSIBILITY.fontFamily}`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(initial, x + size / 2, y + size / 2);
+        if (typeof drawPortrait === 'function') {
+            drawPortrait(ctx, portraitId, x, y, size);
+        } else {
+            // Fallback: colored circle with initial
+            const color = this.portraitColors[portraitId] || this.portraitColors.default;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = CONFIG.COLORS.uiBorder;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+            ctx.stroke();
+            const initial = (node.speaker || '?')[0].toUpperCase();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold 28px ${CONFIG.ACCESSIBILITY.fontFamily}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(initial, x + size / 2, y + size / 2);
+        }
 
         // Reset alignment
         ctx.textAlign = 'left';

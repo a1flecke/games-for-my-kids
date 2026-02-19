@@ -13,6 +13,9 @@ class QuestionSystem {
         /** @type {Set} IDs of questions already asked in this combat session */
         this.askedThisCombat = new Set();
 
+        /** @type {Set} IDs of questions already asked in this play session (across combats) */
+        this.askedThisSession = new Set();
+
         /** @type {boolean} Whether questions have been loaded */
         this.loaded = false;
     }
@@ -56,25 +59,32 @@ class QuestionSystem {
             return null;
         }
 
-        // Try to find an unasked question for this level
+        // Try to find an unasked question for this level (prefer session-unasked)
         let candidates = this.allQuestions.filter(
-            q => q.level === level && !this.askedThisCombat.has(q.id)
+            q => q.level === level && !this.askedThisSession.has(q.id)
         );
 
-        // Fallback: any unasked question
+        // Fallback: any session-unasked question
         if (candidates.length === 0) {
             candidates = this.allQuestions.filter(
-                q => !this.askedThisCombat.has(q.id)
+                q => !this.askedThisSession.has(q.id)
             );
         }
 
-        // If all questions have been asked, reset and try again
+        // If all questions have been asked this session, reset session tracker and try again
         if (candidates.length === 0) {
+            this.askedThisSession.clear();
             this.askedThisCombat.clear();
             candidates = this.allQuestions.filter(q => q.level === level);
             if (candidates.length === 0) {
                 candidates = [...this.allQuestions];
             }
+        }
+
+        // Within candidates, prefer ones not asked this combat
+        const combatFresh = candidates.filter(q => !this.askedThisCombat.has(q.id));
+        if (combatFresh.length > 0) {
+            candidates = combatFresh;
         }
 
         if (candidates.length === 0) {
@@ -84,7 +94,15 @@ class QuestionSystem {
         // Pick a random question
         const question = candidates[randomInt(0, candidates.length - 1)];
         this.askedThisCombat.add(question.id);
-        return question;
+        this.askedThisSession.add(question.id);
+
+        // Clone question and shuffle choices (Fisher-Yates) so correct answer isn't always in position A
+        const shuffled = { ...question, choices: [...question.choices] };
+        for (let i = shuffled.choices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled.choices[i], shuffled.choices[j]] = [shuffled.choices[j], shuffled.choices[i]];
+        }
+        return shuffled;
     }
 }
 

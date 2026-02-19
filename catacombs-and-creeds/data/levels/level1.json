@@ -47,14 +47,14 @@
   ],
   "npcs": [
     {
-      "id": "peter_guide",
-      "name": "Peter",
+      "id": "priscilla_guide",
+      "name": "Priscilla",
       "x": 14,
       "y": 18,
       "direction": "down",
-      "dialogueId": "peter_intro",
-      "portrait": "peter",
-      "color": "#c4a44a"
+      "dialogueId": "priscilla_intro",
+      "portrait": "priscilla",
+      "color": "#a06090"
     },
     {
       "id": "apostle_peter",

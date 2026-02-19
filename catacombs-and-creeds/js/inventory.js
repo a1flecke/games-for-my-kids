@@ -502,9 +502,9 @@ class InventorySystem {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, w, h);
 
-        // Inventory panel
-        const panelW = 480;
-        const panelH = 480;
+        // Inventory panel — responsive sizing to avoid text overlap
+        const panelW = Math.min(w - 40, 580);
+        const panelH = Math.min(h - 40, 560);
         const panelX = (w - panelW) / 2;
         const panelY = (h - panelH) / 2;
 
@@ -524,16 +524,22 @@ class InventorySystem {
 
         // Item grid
         const { regular, quest } = this.getDisplayItems();
-        const gridX = panelX + 20;
+        const gridX = panelX + 16;
         const gridY = panelY + 45;
+        const gridContentWidth = this.GRID_COLS * (this.SLOT_SIZE + this.SLOT_GAP);
 
         this.drawItemGrid(ctx, regular, gridX, gridY, a);
 
-        // Equipped items sidebar
-        this.drawEquipmentSidebar(ctx, panelX + panelW - 150, gridY, a);
+        // Equipped items sidebar — placed to the right of the grid
+        const sidebarX = gridX + gridContentWidth + 10;
+        this.drawEquipmentSidebar(ctx, sidebarX, gridY, a);
 
-        // Quest items section (below grid)
-        const questY = gridY + this.GRID_ROWS * (this.SLOT_SIZE + this.SLOT_GAP) + 10;
+        // Item description area — dedicated section below grid with proper spacing
+        const gridBottom = gridY + this.GRID_ROWS * (this.SLOT_SIZE + this.SLOT_GAP);
+        this.drawItemDescription(ctx, regular, gridX, gridBottom + 8, panelW - 32, a);
+
+        // Quest items section — below description
+        const questY = gridBottom + 52;
         this.drawQuestItems(ctx, quest, gridX, questY, a);
 
         // Sub-menu (if open)
@@ -577,24 +583,33 @@ class InventorySystem {
             }
         }
 
-        // Draw item name/description below grid for selected item
-        const { regular } = this.getDisplayItems();
-        if (this.cursorIndex < regular.length && !this.subMenuOpen) {
-            const slot = regular[this.cursorIndex];
-            const def = this.getDef(slot.id);
-            if (def) {
-                const descY = startY + this.GRID_ROWS * (this.SLOT_SIZE + this.SLOT_GAP) - 8;
-                ctx.fillStyle = a.textColor;
-                ctx.font = `bold 14px ${a.fontFamily}`;
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'top';
-                ctx.fillText(def.name, startX, descY);
+    }
 
-                ctx.font = `12px ${a.fontFamily}`;
-                ctx.fillStyle = '#666666';
-                ctx.fillText(def.description, startX, descY + 18);
-            }
+    /**
+     * Draw item name and description in a dedicated area below the grid.
+     * Separated from drawItemGrid to avoid overlap with quest items section.
+     */
+    drawItemDescription(ctx, items, x, y, maxWidth, a) {
+        if (this.cursorIndex >= items.length || this.subMenuOpen) return;
+        const slot = items[this.cursorIndex];
+        const def = this.getDef(slot.id);
+        if (!def) return;
+
+        ctx.fillStyle = a.textColor;
+        ctx.font = `bold 14px ${a.fontFamily}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(def.name, x, y);
+
+        // Truncate long descriptions to fit in one line
+        ctx.font = `12px ${a.fontFamily}`;
+        ctx.fillStyle = '#666666';
+        let desc = def.description || '';
+        while (desc.length > 0 && ctx.measureText(desc).width > maxWidth) {
+            desc = desc.slice(0, -1);
         }
+        if (desc.length < (def.description || '').length) desc = desc.trimEnd() + '\u2026';
+        ctx.fillText(desc, x, y + 18);
     }
 
     drawItemIcon(ctx, def, x, y, quantity) {

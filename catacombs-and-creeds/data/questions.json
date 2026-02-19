@@ -757,5 +757,468 @@
     ],
     "level": 5,
     "topic": "constantine"
+  },
+
+  {
+    "id": "q1_holy_spirit_pentecost",
+    "question": "What happened to the disciples on the Day of Pentecost?",
+    "choices": [
+      { "text": "The Holy Spirit came upon them like wind and fire", "correct": true,
+        "explanation": "On Pentecost, God's Holy Spirit came to the disciples. They saw flames of fire and heard a rushing wind, giving them boldness to share the good news." },
+      { "text": "They sailed to a new country", "correct": false,
+        "explanation": "The disciples were in Jerusalem on Pentecost when the Holy Spirit came upon them like fire and wind, giving them courage to preach." },
+      { "text": "Jesus returned and spoke to them", "correct": false,
+        "explanation": "Jesus had already ascended to heaven. On Pentecost, the Holy Spirit — which Jesus had promised — came upon the disciples." }
+    ],
+    "level": 1,
+    "topic": "early_church"
+  },
+  {
+    "id": "q1_paul_before_christian",
+    "question": "What was the Apostle Paul doing before he became a Christian?",
+    "choices": [
+      { "text": "He was persecuting Christians and trying to stop them", "correct": true,
+        "explanation": "Paul (then called Saul) arrested Christians and approved of their punishment. He had a dramatic encounter with Jesus on the road to Damascus that changed his life." },
+      { "text": "He was already a follower of Jesus", "correct": false,
+        "explanation": "Actually the opposite! Paul persecuted Christians until a blinding light knocked him down on the road to Damascus and Jesus spoke to him." },
+      { "text": "He was a Roman soldier", "correct": false,
+        "explanation": "Paul was a Jewish scholar called a Pharisee. He persecuted Christians until Jesus appeared to him on the road to Damascus." }
+    ],
+    "level": 1,
+    "topic": "apostles"
+  },
+  {
+    "id": "q1_great_commission",
+    "question": "What did Jesus tell his followers to do before he went to heaven?",
+    "choices": [
+      { "text": "Go and teach all nations and baptize them", "correct": true,
+        "explanation": "The Great Commission is Jesus's command to spread his teachings to all people and baptize them. It launched the mission of the church." },
+      { "text": "Stay in Jerusalem and wait", "correct": false,
+        "explanation": "Jesus told his followers to go out and teach all nations. This command is called the Great Commission." },
+      { "text": "Build a great temple in Rome", "correct": false,
+        "explanation": "Jesus commanded his followers to go to all nations with his message, not to build a temple. This is called the Great Commission." }
+    ],
+    "level": 1,
+    "topic": "teachings"
+  },
+  {
+    "id": "q1_early_church_sharing",
+    "question": "How did the first Christians in Jerusalem treat each other?",
+    "choices": [
+      { "text": "They shared everything and took care of those who had less", "correct": true,
+        "explanation": "The Book of Acts tells us the first Christians shared their possessions so no one went without food or shelter. This generosity attracted many people." },
+      { "text": "They competed to see who could earn the most money", "correct": false,
+        "explanation": "Early Christians did the opposite! They shared everything they had and made sure everyone in their community was cared for." },
+      { "text": "They only helped people from their own family", "correct": false,
+        "explanation": "Early Christians shared with everyone in their community, not just family. Acts tells us they sold possessions to help those in need." }
+    ],
+    "level": 1,
+    "topic": "early_church"
+  },
+  {
+    "id": "q1_john_beloved",
+    "question": "Which apostle was often called 'the disciple whom Jesus loved'?",
+    "choices": [
+      { "text": "John", "correct": true,
+        "explanation": "The Gospel of John refers to the author as 'the disciple whom Jesus loved.' John was one of the three apostles closest to Jesus." },
+      { "text": "Peter", "correct": false,
+        "explanation": "Peter was close to Jesus, but John wrote about himself as 'the disciple whom Jesus loved' in his Gospel." },
+      { "text": "Matthew", "correct": false,
+        "explanation": "Matthew was one of the twelve apostles, but it was John who described himself as 'the disciple whom Jesus loved.'" }
+    ],
+    "level": 1,
+    "topic": "apostles"
+  },
+  {
+    "id": "q1_catacomb_meaning",
+    "question": "What are catacombs?",
+    "choices": [
+      { "text": "Underground tunnels used as burial places and hiding spots", "correct": true,
+        "explanation": "Catacombs are networks of underground tunnels carved into rock. Romans used them for burials, and early Christians used them for secret worship." },
+      { "text": "Large buildings on top of hills", "correct": false,
+        "explanation": "Catacombs are the opposite — underground tunnels! Early Christians used these hidden tunnels to worship and bury their dead safely." },
+      { "text": "A type of ship used by Romans", "correct": false,
+        "explanation": "Catacombs are underground tunnels, not ships. Early Christians met in these hidden underground passages to worship safely." }
+    ],
+    "level": 1,
+    "topic": "early_church"
+  },
+  {
+    "id": "q1_rome_fire",
+    "question": "What event did Emperor Nero blame on Christians?",
+    "choices": [
+      { "text": "The Great Fire of Rome in 64 AD", "correct": true,
+        "explanation": "A huge fire destroyed much of Rome in 64 AD. Nero blamed Christians to distract people from suspecting he started it himself." },
+      { "text": "A flood of the Tiber River", "correct": false,
+        "explanation": "It was fire, not a flood! Nero blamed Christians for the Great Fire of Rome in 64 AD, using it as an excuse to persecute them." },
+      { "text": "A defeat of the Roman army", "correct": false,
+        "explanation": "Nero blamed Christians for the Great Fire of Rome in 64 AD. This began a period of terrible persecution of Christians." }
+    ],
+    "level": 1,
+    "topic": "history"
+  },
+  {
+    "id": "q1_bread_fish_meaning",
+    "question": "What miracle did Jesus do with five loaves of bread and two fish?",
+    "choices": [
+      { "text": "He fed five thousand people with that small amount", "correct": true,
+        "explanation": "The feeding of the 5000 showed Jesus's power and care for people. It is one of the few miracles recorded in all four Gospels." },
+      { "text": "He turned them into gold coins", "correct": false,
+        "explanation": "Jesus shared the food — he fed five thousand people from just five loaves and two fish. It was a miracle of multiplication." },
+      { "text": "He used them to calm a storm", "correct": false,
+        "explanation": "The bread and fish were for feeding people, not calming storms. Jesus fed five thousand people from this tiny amount of food." }
+    ],
+    "level": 1,
+    "topic": "teachings"
+  },
+  {
+    "id": "q1_baptism_meaning",
+    "question": "What does baptism mean in the Christian faith?",
+    "choices": [
+      { "text": "It is a sign of starting a new life as a follower of Jesus", "correct": true,
+        "explanation": "Baptism is a ceremony using water that symbolizes washing away the old life and starting fresh as a follower of Jesus. Early Christians baptized new believers." },
+      { "text": "It is a way to become a Roman citizen", "correct": false,
+        "explanation": "Baptism has nothing to do with Roman citizenship. It is a Christian ceremony symbolizing new life and commitment to following Jesus." },
+      { "text": "It is a swimming test for new Christians", "correct": false,
+        "explanation": "Baptism is not a swimming test! It is a meaningful ceremony using water to symbolize starting a new life following Jesus." }
+    ],
+    "level": 1,
+    "topic": "early_church"
+  },
+  {
+    "id": "q1_james_brothers",
+    "question": "Which apostle was the brother of John?",
+    "choices": [
+      { "text": "James", "correct": true,
+        "explanation": "James and John were brothers and both fishermen. Jesus called them the 'Sons of Thunder.' Both were among Jesus's closest disciples." },
+      { "text": "Peter", "correct": false,
+        "explanation": "John's brother was James, not Peter. James and John were brothers who were both fishermen called by Jesus to be apostles." },
+      { "text": "Andrew", "correct": false,
+        "explanation": "Andrew was Peter's brother. John's brother was James. Together, the two pairs of brothers — Peter and Andrew, James and John — were among the first apostles called." }
+    ],
+    "level": 1,
+    "topic": "apostles"
+  },
+  {
+    "id": "q2_ignatius_letters",
+    "question": "Who wrote letters to churches while being taken to Rome to be executed?",
+    "choices": [
+      { "text": "Ignatius of Antioch", "correct": true,
+        "explanation": "Ignatius was the bishop of Antioch. While traveling under guard to be executed in Rome, he wrote seven letters to churches encouraging them to stay faithful." },
+      { "text": "Emperor Nero", "correct": false,
+        "explanation": "Ignatius was the bishop who wrote the letters, not the emperor. He encouraged Christians to stay faithful while being taken to his own execution." },
+      { "text": "The Apostle Peter", "correct": false,
+        "explanation": "Ignatius of Antioch wrote those courageous letters. He was a student of the apostles and wrote seven letters to churches on his way to being martyred." }
+    ],
+    "level": 2,
+    "topic": "persecution"
+  },
+  {
+    "id": "q2_justin_martyr",
+    "question": "Why was Justin called 'Justin Martyr'?",
+    "choices": [
+      { "text": "He died for his Christian faith and refused to deny it", "correct": true,
+        "explanation": "Justin was a philosopher who became a Christian and wrote defenses of the faith. He was beheaded around 165 AD for refusing to offer sacrifices to Roman gods." },
+      { "text": "He was a very good fighter", "correct": false,
+        "explanation": "Martyr does not mean fighter. Justin was called a martyr because he died for his Christian faith rather than deny it." },
+      { "text": "It was his family name", "correct": false,
+        "explanation": "Martyr is not a last name. Justin earned this title because he died for his Christian faith, which is what the word martyr means." }
+    ],
+    "level": 2,
+    "topic": "persecution"
+  },
+  {
+    "id": "q2_gladiators",
+    "question": "Some Christians were thrown to wild animals in Roman arenas. What were these places called?",
+    "choices": [
+      { "text": "Amphitheaters or arenas like the Colosseum", "correct": true,
+        "explanation": "The Romans used huge arenas called amphitheaters for entertainment. Some Christians were martyred there rather than deny their faith." },
+      { "text": "Catacombs", "correct": false,
+        "explanation": "Catacombs were underground tunnels. The Colosseum and other amphitheaters were the arenas where Roman games and sometimes executions took place." },
+      { "text": "Temples", "correct": false,
+        "explanation": "Temples were places of worship. The Colosseum was the famous arena in Rome where gladiators fought and where some Christians were martyred." }
+    ],
+    "level": 2,
+    "topic": "persecution"
+  },
+  {
+    "id": "q2_tertullian_blood",
+    "question": "What did Tertullian mean when he said 'The blood of martyrs is seed of the church'?",
+    "choices": [
+      { "text": "Christians dying for their faith made the church grow stronger, not weaker", "correct": true,
+        "explanation": "Tertullian observed that when Christians were killed for their faith, their courage convinced many observers to become Christians themselves." },
+      { "text": "Churches needed blood to grow their gardens", "correct": false,
+        "explanation": "Tertullian spoke figuratively. He meant that seeing Christians die bravely for their faith inspired others to become Christians too." },
+      { "text": "Martyrs were buried in churchyards to help crops grow", "correct": false,
+        "explanation": "Tertullian used a metaphor: seeds grow into plants. Martyrs' deaths seemed to make Christianity spread and grow stronger." }
+    ],
+    "level": 2,
+    "topic": "persecution"
+  },
+  {
+    "id": "q2_first_martyr",
+    "question": "Who is considered the first Christian martyr?",
+    "choices": [
+      { "text": "Stephen, who was stoned to death for preaching about Jesus", "correct": true,
+        "explanation": "Stephen was a deacon in the early church. He was stoned to death for preaching boldly about Jesus, making him the first recorded Christian martyr." },
+      { "text": "Peter, who was crucified upside down", "correct": false,
+        "explanation": "Peter was martyred later. Stephen was the first Christian martyr, stoned to death for his bold preaching in Jerusalem." },
+      { "text": "Paul, who was beheaded", "correct": false,
+        "explanation": "Paul was martyred later in Rome. Stephen was the first Christian martyr, killed by stoning in Jerusalem early in the church's history." }
+    ],
+    "level": 2,
+    "topic": "persecution"
+  },
+  {
+    "id": "q3_apostles_creed",
+    "question": "What is the Apostles' Creed?",
+    "choices": [
+      { "text": "A short statement of the most basic Christian beliefs", "correct": true,
+        "explanation": "The Apostles' Creed is one of the earliest Christian statements of faith. It summarizes belief in God, Jesus, and the Holy Spirit in simple language." },
+      { "text": "A list of the twelve apostles' names", "correct": false,
+        "explanation": "The Apostles' Creed is not a name list. It is a statement of Christian beliefs covering God, Jesus, the Holy Spirit, and the church." },
+      { "text": "Instructions for how to pray", "correct": false,
+        "explanation": "A creed is a statement of belief, not prayer instructions. The Apostles' Creed summarizes the core things Christians believe." }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_council_chalcedon",
+    "question": "What did the Council of Chalcedon in 451 AD decide about Jesus?",
+    "choices": [
+      { "text": "Jesus is fully God and fully human at the same time", "correct": true,
+        "explanation": "Chalcedon declared that Jesus has two complete natures — divine and human — in one person. He is not half-god and half-human, but fully both." },
+      { "text": "Jesus was only pretending to be human", "correct": false,
+        "explanation": "Chalcedon rejected that idea! The council declared Jesus is genuinely and fully human, as well as fully divine." },
+      { "text": "Jesus was fully human but not really divine", "correct": false,
+        "explanation": "Chalcedon rejected this view. The council declared Jesus is both fully God and fully human, two natures in one person." }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_constantine_christian",
+    "question": "Who was the first Roman emperor to become a Christian?",
+    "choices": [
+      { "text": "Constantine", "correct": true,
+        "explanation": "Constantine became the first Christian Roman emperor after his famous vision before the Battle of Milvian Bridge in 312 AD." },
+      { "text": "Julius Caesar", "correct": false,
+        "explanation": "Julius Caesar lived over 300 years before Christianity. Constantine was the first Roman emperor to become a Christian, in the 300s AD." },
+      { "text": "Nero", "correct": false,
+        "explanation": "Nero was the opposite — he persecuted Christians! Constantine was the first emperor to embrace Christianity, around 300 years after Nero." }
+    ],
+    "level": 3,
+    "topic": "history"
+  },
+  {
+    "id": "q3_bishops_role",
+    "question": "What was the role of a bishop in the early church?",
+    "choices": [
+      { "text": "To lead and care for a group of churches in a region", "correct": true,
+        "explanation": "Bishops were leaders who oversaw churches in a city or region. They taught, settled disputes, and represented their churches at councils." },
+      { "text": "To be a soldier who protected the church", "correct": false,
+        "explanation": "Bishops were spiritual leaders, not soldiers. They taught the faith, cared for their communities, and represented churches at councils." },
+      { "text": "To collect taxes for the Roman emperor", "correct": false,
+        "explanation": "Bishops served the church, not the tax collector! They were spiritual leaders who oversaw multiple churches in a region." }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_heresy_meaning",
+    "question": "What does the word 'heresy' mean in church history?",
+    "choices": [
+      { "text": "A teaching that contradicts the agreed-upon beliefs of the church", "correct": true,
+        "explanation": "A heresy is a teaching that goes against the core beliefs that the church has established. Councils met to define correct belief and reject heresies." },
+      { "text": "A type of ancient weapon", "correct": false,
+        "explanation": "Heresy has nothing to do with weapons. It means a teaching that contradicts the established beliefs of the Christian faith." },
+      { "text": "A secret language used by priests", "correct": false,
+        "explanation": "Heresy is not a language. It refers to a teaching or belief that contradicts the core doctrines of the Christian faith." }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q3_scripture_authority",
+    "question": "Why do Christians consider the Bible to be special?",
+    "choices": [
+      { "text": "They believe it is God's word written through inspired human authors", "correct": true,
+        "explanation": "Christians believe God worked through human authors to write the Bible. They consider it the highest authority for faith and life." },
+      { "text": "Because it is very old and ancient things are always right", "correct": false,
+        "explanation": "Age alone is not the reason. Christians value the Bible because they believe it is God's inspired word, revealed through human authors." },
+      { "text": "It was written by the Roman emperor to rule his people", "correct": false,
+        "explanation": "The Bible was not written by emperors! Christians believe it is God's word written through many different human authors over centuries." }
+    ],
+    "level": 3,
+    "topic": "creeds"
+  },
+  {
+    "id": "q4_augustine_early_life",
+    "question": "What famous quote comes from Augustine about his spiritual journey?",
+    "choices": [
+      { "text": "'Our heart is restless until it finds rest in you, O God'", "correct": true,
+        "explanation": "This beautiful line from Augustine's Confessions describes how he searched everywhere for meaning until he found it in God." },
+      { "text": "'God helps those who help themselves'", "correct": false,
+        "explanation": "That quote is from Benjamin Franklin, not Augustine! Augustine's famous quote is about the restless heart that only finds peace in God." },
+      { "text": "'Give me liberty or give me death'", "correct": false,
+        "explanation": "That was Patrick Henry, an American patriot. Augustine's famous line is 'Our heart is restless until it finds rest in you, O God.'" }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_chrysostom_meaning",
+    "question": "What does John Chrysostom's nickname 'Chrysostom' mean?",
+    "choices": [
+      { "text": "Golden-mouthed, because he was a brilliant preacher", "correct": true,
+        "explanation": "Chrysostom comes from Greek words meaning 'golden mouth.' John was called this because he was one of the greatest preachers in church history." },
+      { "text": "He had gold teeth", "correct": false,
+        "explanation": "It is a nickname meaning 'golden-mouthed' referring to his speaking ability, not his teeth! John Chrysostom was a legendary preacher." },
+      { "text": "He was born in a city called Chrysostom", "correct": false,
+        "explanation": "Chrysostom is a nickname, not a city name. It means golden-mouthed in Greek, honoring John's reputation as an extraordinary preacher." }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_basil_monks",
+    "question": "What is Basil of Caesarea famous for?",
+    "choices": [
+      { "text": "Creating rules for monks to live by and starting hospitals for the poor", "correct": true,
+        "explanation": "Basil wrote guidelines for monastic life still used today. He also built the Basiliad, an early hospital and shelter complex for the poor and sick." },
+      { "text": "Writing the Bible in Greek", "correct": false,
+        "explanation": "Basil did not write the Bible. He created rules for monks and started one of the world's first hospitals to care for poor and sick people." },
+      { "text": "Becoming the first bishop of Rome", "correct": false,
+        "explanation": "Basil was the bishop of Caesarea, not Rome. He is famous for rules of monastic life and for building hospitals to serve the poor." }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_grace_meaning",
+    "question": "In Christian teaching, what does 'grace' mean?",
+    "choices": [
+      { "text": "Undeserved love and kindness from God", "correct": true,
+        "explanation": "Grace means God's free, unearned gift of love and forgiveness. Augustine emphasized that humans cannot save themselves — only God's grace can." },
+      { "text": "The reward you earn for being good", "correct": false,
+        "explanation": "That is the opposite of grace! Grace means God gives his love and forgiveness freely, not because we earned it." },
+      { "text": "A type of prayer said before meals", "correct": false,
+        "explanation": "While saying grace before meals is one use of the word, in Christian theology grace means God's undeserved love and forgiveness given as a gift." }
+    ],
+    "level": 4,
+    "topic": "church_fathers"
+  },
+  {
+    "id": "q4_dead_sea_scrolls",
+    "question": "What are the Dead Sea Scrolls?",
+    "choices": [
+      { "text": "Ancient copies of Bible texts found in caves near the Dead Sea", "correct": true,
+        "explanation": "The Dead Sea Scrolls were discovered in 1947 in caves in Israel. They include the oldest known copies of most Old Testament books, confirming the Bible was accurately copied." },
+      { "text": "Maps of ancient Rome drawn on scrolls", "correct": false,
+        "explanation": "The Dead Sea Scrolls are not maps. They are ancient manuscripts discovered in Israel — the oldest known copies of most books in the Old Testament." },
+      { "text": "Letters written by the Roman emperors", "correct": false,
+        "explanation": "The Dead Sea Scrolls are not Roman documents. They are ancient Jewish manuscripts including early copies of much of the Old Testament, found in caves in 1947." }
+    ],
+    "level": 4,
+    "topic": "scripture"
+  },
+  {
+    "id": "q4_gospel_meaning",
+    "question": "What does the word 'Gospel' mean?",
+    "choices": [
+      { "text": "Good news", "correct": true,
+        "explanation": "Gospel comes from an old English word meaning good news. The four Gospels — Matthew, Mark, Luke, and John — tell the good news of Jesus's life, death, and resurrection." },
+      { "text": "Holy book", "correct": false,
+        "explanation": "Gospel specifically means good news. The four Gospels are called this because they share the good news of Jesus with the world." },
+      { "text": "Old story", "correct": false,
+        "explanation": "Gospel means good news, not old story! The four Gospels — Matthew, Mark, Luke, and John — tell the good news about Jesus." }
+    ],
+    "level": 4,
+    "topic": "scripture"
+  },
+  {
+    "id": "q5_benedict_rule",
+    "question": "What is the Rule of Saint Benedict?",
+    "choices": [
+      { "text": "A set of guidelines for monks about how to live, pray, and work", "correct": true,
+        "explanation": "Benedict of Nursia wrote a practical guide for monastic life in the 500s AD. His Rule emphasized balance, prayer, work, and community. It shaped Western monasticism." },
+      { "text": "A list of laws for all citizens to follow", "correct": false,
+        "explanation": "The Rule of Benedict was written for monks, not all citizens. It guided how monks should pray, work, and live together in community." },
+      { "text": "A treaty between Rome and the barbarians", "correct": false,
+        "explanation": "The Rule of Benedict was not a political treaty. It was a guide for monastic life that shaped how Christian monks lived and served for centuries." }
+    ],
+    "level": 5,
+    "topic": "monasticism"
+  },
+  {
+    "id": "q5_celtic_christianity",
+    "question": "Who brought Christianity to Ireland in the 400s AD?",
+    "choices": [
+      { "text": "Saint Patrick", "correct": true,
+        "explanation": "Patrick was kidnapped and brought to Ireland as a slave. After escaping and becoming a monk, he returned to Ireland to share the Christian faith with its people." },
+      { "text": "Emperor Constantine", "correct": false,
+        "explanation": "Constantine was emperor of Rome, not Britain or Ireland. It was Saint Patrick who brought Christianity to Ireland in the 400s AD." },
+      { "text": "Pope Gregory the Great", "correct": false,
+        "explanation": "Gregory the Great sent missionaries to England (not Ireland). It was Saint Patrick who brought Christianity to Ireland." }
+    ],
+    "level": 5,
+    "topic": "missions"
+  },
+  {
+    "id": "q5_gregory_great",
+    "question": "Why is Pope Gregory I called 'the Great'?",
+    "choices": [
+      { "text": "He sent missionaries to England and was a great church leader and writer", "correct": true,
+        "explanation": "Gregory the Great reformed the church, sent missionaries to England, cared for the poor, and wrote influential books on faith and leadership." },
+      { "text": "He was very tall and strong", "correct": false,
+        "explanation": "Great refers to his achievements, not his height! Gregory sent missionaries to England, reformed the church, and cared for the poor." },
+      { "text": "He defeated the Roman army in battle", "correct": false,
+        "explanation": "Gregory was a church leader, not a general. He was called 'the Great' for his church reforms, missionary work, and care for poor people." }
+    ],
+    "level": 5,
+    "topic": "missions"
+  },
+  {
+    "id": "q5_church_growth",
+    "question": "How did Christianity spread from a small group in Jerusalem to all of Europe?",
+    "choices": [
+      { "text": "Through missionaries, martyrs, and the Roman road network", "correct": true,
+        "explanation": "The Roman Empire's road system let Christians travel and share their faith widely. Martyrs' courage convinced many. Missionaries like Paul traveled thousands of miles." },
+      { "text": "The Roman Empire forced everyone to become Christian", "correct": false,
+        "explanation": "At first Rome persecuted Christians! Christianity spread through missionaries sharing the faith and the courage of martyrs who died for their beliefs." },
+      { "text": "People only became Christian if they were born into Christian families", "correct": false,
+        "explanation": "Christianity grew because people chose to believe after hearing it from missionaries. Paul traveled thousands of miles spreading the message." }
+    ],
+    "level": 5,
+    "topic": "missions"
+  },
+  {
+    "id": "q5_sunday_worship",
+    "question": "Why did early Christians begin meeting to worship on Sunday?",
+    "choices": [
+      { "text": "Sunday was the day Jesus rose from the dead — called the Resurrection", "correct": true,
+        "explanation": "Early Christians called Sunday the Lord's Day because Jesus rose from the dead on a Sunday. Meeting on that day celebrated his resurrection each week." },
+      { "text": "It was a Roman holiday and people had the day off", "correct": false,
+        "explanation": "Christians chose Sunday because it was the day of Jesus's resurrection. They called it the Lord's Day to celebrate that weekly." },
+      { "text": "The Roman emperor ordered everyone to rest on Sundays", "correct": false,
+        "explanation": "Early Christians worshiped on Sunday because Jesus rose from the dead on that day. Constantine later made Sunday a public holiday, but the reason was religious." }
+    ],
+    "level": 5,
+    "topic": "early_church"
+  },
+  {
+    "id": "q5_what_is_creed",
+    "question": "Why are creeds important for the church through history?",
+    "choices": [
+      { "text": "They unite Christians across time and place with shared beliefs", "correct": true,
+        "explanation": "Creeds let Christians throughout history say the same beliefs together. When you recite the Nicene Creed, you are saying what Christians have believed for 1700 years." },
+      { "text": "They are magic words that protect Christians from harm", "correct": false,
+        "explanation": "Creeds are not magic. They are statements of faith that connect Christians across thousands of years and around the world." },
+      { "text": "They replace the Bible so people do not have to read it", "correct": false,
+        "explanation": "Creeds summarize the Bible — they do not replace it! They help Christians remember the core of what the Bible teaches." }
+    ],
+    "level": 5,
+    "topic": "constantine"
   }
 ]

@@ -239,8 +239,9 @@ class SaveSystem {
      */
     autoSave(gameState, sessionElapsedMs) {
         if (this.currentSlot === null) {
-            // No active slot — pick slot 0 by default for new games
-            this.currentSlot = 0;
+            // No active slot — skip auto-save to prevent overwriting another player's data
+            console.warn('AutoSave skipped: no active save slot selected. Start a new game and choose a slot first.');
+            return;
         }
         this._isAutoSave = true;
         this.saveToSlot(this.currentSlot, gameState, sessionElapsedMs);
@@ -249,7 +250,7 @@ class SaveSystem {
 
     /**
      * Show save slot picker UI.
-     * @param {string} mode - 'save' or 'load'
+     * @param {string} mode - 'save', 'load', or 'new_game'
      * @param {function} callback - Called with selected slot index, or null if cancelled
      */
     showSlotPicker(mode, callback) {
@@ -257,6 +258,7 @@ class SaveSystem {
         this.pickerMode = mode;
         this.pickerSelectedIndex = this.meta.lastSlot || 0;
         this.pickerCallback = callback;
+        this.pickerConfirmActive = false; // Overwrite confirmation state
     }
 
     /** Close slot picker without selecting */
@@ -349,7 +351,9 @@ class SaveSystem {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = `bold 28px ${a.fontFamily}`;
-        const title = this.pickerMode === 'save' ? 'Save Game' : 'Load Game';
+        let title = 'Load Game';
+        if (this.pickerMode === 'save') title = 'Save Game';
+        if (this.pickerMode === 'new_game') title = 'Choose a Save Slot';
         ctx.fillText(title, centerX, boxY + 40);
 
         // Render 3 save slots

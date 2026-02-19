@@ -39,6 +39,7 @@ class Game {
         this.nearInteractable = false;
         this.nearNPC = null;
         this.nearTile = null;
+        this.interactLabel = 'SPACE'; // Contextual label shown in prompt
 
         // Systems
         this.renderer = new Renderer(canvas);
@@ -441,7 +442,18 @@ class Game {
     updateTitle() {
         const action = this.screens.update(this.input, 'title');
         if (action === 'new_game') {
-            this.startNewGame();
+            // Show slot picker before starting — prevents auto-save from defaulting to slot 0
+            this.previousState = GameState.TITLE;
+            this.saveSystem.showSlotPicker('new_game', (slotIndex) => {
+                if (slotIndex !== null) {
+                    // Pre-assign slot so auto-save uses it from the start
+                    this.saveSystem.currentSlot = slotIndex;
+                    this.startNewGame();
+                } else {
+                    this.changeState(GameState.TITLE);
+                }
+            });
+            this.changeState(GameState.LOAD_SLOTS);
         } else if (action === 'continue') {
             // Show load slot picker
             this.previousState = GameState.TITLE;
@@ -649,12 +661,14 @@ class Game {
         this.nearInteractable = false;
         this.nearNPC = null;
         this.nearTile = null;
+        this.interactLabel = 'SPACE';
 
         // Check NPCs first (higher priority)
         for (const npc of this.npcs) {
             if (npc.isPlayerInRange(this.player)) {
                 this.nearInteractable = true;
                 this.nearNPC = npc;
+                this.interactLabel = 'SPACE: Talk';
                 return;
             }
         }
@@ -667,14 +681,46 @@ class Game {
             if (this.map.isInteractable(tile.x, tile.y)) {
                 this.nearInteractable = true;
                 this.nearTile = tile;
+                this.interactLabel = this._getInteractLabel(tile.x, tile.y);
                 return;
             }
         }
 
-        // Also check the tile the player is standing on
+        // Also check the tile the player is standing on (with filtering for no-op interactions)
         if (this.map.isInteractable(playerTile.x, playerTile.y)) {
-            this.nearInteractable = true;
-            this.nearTile = { x: playerTile.x, y: playerTile.y };
+            const tileType = this.map.getTile(playerTile.x, playerTile.y);
+            const state = this.map.getTileState(playerTile.x, playerTile.y);
+            // Skip open doors on standing tile — closing it would trap the player (#15)
+            // Skip already-opened chests — they have no remaining interaction
+            const isOpenDoor = (tileType === TileType.DOOR && state && state.open);
+            const isOpenChest = (tileType === TileType.CHEST && state && state.open);
+            if (!isOpenDoor && !isOpenChest) {
+                this.nearInteractable = true;
+                this.nearTile = { x: playerTile.x, y: playerTile.y };
+                this.interactLabel = this._getInteractLabel(playerTile.x, playerTile.y);
+            }
+        }
+    }
+
+    /**
+     * Get a contextual label for the interaction prompt based on tile type and state.
+     */
+    _getInteractLabel(tileX, tileY) {
+        const tileType = this.map.getTile(tileX, tileY);
+        const state = this.map.getTileState(tileX, tileY);
+        switch (tileType) {
+            case TileType.DOOR:
+                if (state && state.locked) return 'SPACE: Unlock';
+                if (state && state.open) return 'SPACE: Close';
+                return 'SPACE: Open';
+            case TileType.CHEST:
+                return state && state.open ? 'SPACE: Empty' : 'SPACE: Open';
+            case TileType.ALTAR:
+                return 'SPACE: Save';
+            case TileType.STAIRS:
+                return 'SPACE: Descend';
+            default:
+                return 'SPACE';
         }
     }
 
@@ -729,7 +775,8 @@ class Game {
 
         // Tile interaction
         if (this.nearTile) {
-            const result = this.map.interact(this.nearTile.x, this.nearTile.y);
+            const playerTile = this.player.getTilePosition();
+            const result = this.map.interact(this.nearTile.x, this.nearTile.y, playerTile);
             if (result) {
                 console.log('Tile interaction:', result);
 
@@ -750,6 +797,9 @@ class Game {
                         break;
                     case 'stairs':
                         this.handleStairsInteraction();
+                        break;
+                    case 'door_occupied':
+                        this.hud.showNotification(result.message, 'info');
                         break;
                     case 'door_locked':
                         // Check if player has a key

@@ -532,7 +532,7 @@ class HUD {
         if (flags.level1_complete) return 'Level 1 Complete!';
         if (coinsCollected >= 3 && flags.boss_defeated) return 'Find the exit stairs';
         if (coinsCollected >= 3) return 'Defeat the Roman Centurion';
-        if (flags.met_peter_guide) return `Find the Apostles (${coinsCollected}/3 coins)`;
+        if (flags.met_priscilla_guide || flags.met_peter_guide) return `Find the Apostles (${coinsCollected}/3 coins)`;
         return 'Explore the catacombs';
     }
 

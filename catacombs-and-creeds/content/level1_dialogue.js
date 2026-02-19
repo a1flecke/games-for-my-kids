@@ -10,29 +10,29 @@
 
 window.LEVEL1_DIALOGUES = {
 
-    // ── Peter the Guide (starting chamber NPC) ───────────────────────
+    // ── Priscilla the Guide (starting chamber NPC) ───────────────────────
 
-    peter_intro: [
+    priscilla_intro: [
         {
-            speaker: 'Peter',
-            portrait: 'peter',
-            text: 'Welcome, young friend! I am Peter, your guide through these catacombs beneath Rome.'
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
+            text: 'Welcome, young friend! I am Priscilla, your guide through these catacombs beneath Rome.'
         },
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'The year is 64 AD. Christians must meet in secret to stay safe from the Roman Empire.'
         },
         {
-            speaker: 'Peter',
-            portrait: 'peter',
-            text: 'Your mission is to find the three apostles hidden in these tunnels. They each carry an Apostle Coin.'
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
+            text: 'Find Apostle Peter, Apostle James, and Apostle John. They each carry an Apostle Coin.'
         },
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'Collect all three coins to unlock the path forward. Be brave, and watch out for Roman guards!',
-            setFlag: 'met_peter_guide'
+            setFlag: 'met_priscilla_guide'
         }
     ],
 
@@ -430,23 +430,23 @@ window.LEVEL1_DIALOGUES = {
 
     victory: [
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'You did it! You collected all three Apostle Coins and made it through the catacombs!'
         },
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'The early Christians faced many dangers, but their faith and love kept them strong.'
         },
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'Peter taught us to be strong. James showed us to act with faith. John reminded us to love.'
         },
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'You have shown great courage today. The next part of your journey awaits!',
             setFlag: 'level1_complete'
         }
@@ -456,13 +456,13 @@ window.LEVEL1_DIALOGUES = {
 
     tutorial_combat: [
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'Watch out! A doubtful villager blocks the way. You will need to fight!'
         },
         {
-            speaker: 'Peter',
-            portrait: 'peter',
+            speaker: 'Priscilla',
+            portrait: 'priscilla',
             text: 'In battle, choose Attack to deal damage, Defend to reduce incoming damage, or answer a Question for a bonus!',
             setFlag: 'tutorial_combat'
         }

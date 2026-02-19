@@ -797,8 +797,8 @@ class Renderer {
 
         const ctx = this.ctx;
 
-        // Player shadow
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        // Player shadow (subtle — reduced opacity to avoid distracting black dots)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
         ctx.beginPath();
         ctx.ellipse(screenX, screenY + size - 4, size * 0.4, size * 0.2, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -853,8 +853,8 @@ class Renderer {
             return;
         }
 
-        // NPC shadow
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        // NPC shadow (subtle — reduced opacity to avoid distracting black dots)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
         ctx.beginPath();
         ctx.ellipse(screenX, screenY + halfSize - 4, halfSize * 0.5, halfSize * 0.2, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -995,8 +995,8 @@ class Renderer {
             return;
         }
 
-        // Enemy shadow
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        // Enemy shadow (subtle — reduced opacity to avoid distracting black dots)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
         ctx.beginPath();
         ctx.ellipse(screenX, screenY + halfSize - 4, halfSize * 0.5, halfSize * 0.2, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -1175,7 +1175,7 @@ class Renderer {
 
         // Draw interaction prompt if near something interactable
         if (gameState.nearInteractable) {
-            this.drawInteractionPrompt(gameState.player, 'SPACE');
+            this.drawInteractionPrompt(gameState.player, gameState.interactLabel || 'SPACE');
         }
     }
 }

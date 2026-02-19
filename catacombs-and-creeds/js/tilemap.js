@@ -215,9 +215,10 @@ class TileMap {
      * Interact with a tile. Returns a result object describing what happened.
      * @param {number} x - Grid X
      * @param {number} y - Grid Y
+     * @param {Object} [playerTile] - { x, y } player's current tile position (for door safety check)
      * @returns {Object|null} - { type, message } or null if not interactable
      */
-    interact(x, y) {
+    interact(x, y, playerTile) {
         const tile = this.getTile(x, y);
         const state = this.getTileState(x, y);
 
@@ -225,7 +226,7 @@ class TileMap {
 
         switch (tile) {
             case TileType.DOOR:
-                return this.interactDoor(x, y, state);
+                return this.interactDoor(x, y, state, playerTile);
             case TileType.CHEST:
                 return this.interactChest(x, y, state);
             case TileType.ALTAR:
@@ -243,12 +244,17 @@ class TileMap {
         }
     }
 
-    interactDoor(x, y, state) {
+    interactDoor(x, y, state, playerTile) {
         if (state.locked) {
             console.log(`Door at ${x},${y} is locked!`);
             return { type: 'door_locked', message: 'This door is locked.' };
         }
         if (state.open) {
+            // Prevent closing if player is standing on this door tile — would trap them inside
+            if (playerTile && playerTile.x === x && playerTile.y === y) {
+                console.log(`Door at ${x},${y}: cannot close while standing on it.`);
+                return { type: 'door_occupied', message: 'Move away from the door first!' };
+            }
             // Close the door
             state.open = false;
             console.log(`Door at ${x},${y} closed.`);
