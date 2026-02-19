@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,7 +29,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
             pointer-events: none;
@@ -82,7 +81,7 @@
             font-family: 'Fredoka', sans-serif;
             font-size: 3em;
             color: white;
-            text-shadow: 
+            text-shadow:
                 0 4px 8px rgba(0, 0, 0, 0.3),
                 0 0 20px rgba(255, 255, 255, 0.5);
             margin-bottom: 10px;
@@ -99,7 +98,7 @@
             background: white;
             border-radius: 30px;
             padding: 30px;
-            box-shadow: 
+            box-shadow:
                 0 20px 60px rgba(0, 0, 0, 0.3),
                 0 0 0 8px rgba(255, 255, 255, 0.2);
             animation: popIn 0.6s ease-out 0.3s both;
@@ -149,6 +148,26 @@
 
         .level-btn.unicorns {
             background: linear-gradient(135deg, #a29bfe, #fd79a8);
+            color: white;
+        }
+
+        .level-btn.frogs {
+            background: linear-gradient(135deg, #55efc4, #00b894);
+            color: white;
+        }
+
+        .level-btn.elephants {
+            background: linear-gradient(135deg, #b2bec3, #636e72);
+            color: white;
+        }
+
+        .level-btn.turtles {
+            background: linear-gradient(135deg, #6ab04c, #badc58);
+            color: #2d3436;
+        }
+
+        .level-btn.butterflies {
+            background: linear-gradient(135deg, #fd79a8, #fdcb6e);
             color: white;
         }
 
@@ -326,6 +345,7 @@
 
         .celebration.show {
             animation: celebrate 0.6s ease-out forwards;
+            pointer-events: auto;
         }
 
         @keyframes celebrate {
@@ -366,7 +386,7 @@
             h1 {
                 font-size: 2em;
             }
-            
+
             .subtitle {
                 font-size: 1em;
             }
@@ -437,15 +457,13 @@
             </div>
 
             <div class="level-selector">
-                <button class="level-btn puppies active" onclick="selectLevel('puppies')">
-                    🐶 Puppies
-                </button>
-                <button class="level-btn kitties" onclick="selectLevel('kitties')">
-                    🐱 Kitties
-                </button>
-                <button class="level-btn unicorns" onclick="selectLevel('unicorns')">
-                    🦄 Unicorns
-                </button>
+                <button class="level-btn puppies active" data-level="puppies" onclick="selectLevel('puppies', this)">🐶 Puppies</button>
+                <button class="level-btn kitties" data-level="kitties" onclick="selectLevel('kitties', this)">🐱 Kitties</button>
+                <button class="level-btn unicorns" data-level="unicorns" onclick="selectLevel('unicorns', this)">🦄 Unicorns</button>
+                <button class="level-btn frogs" data-level="frogs" onclick="selectLevel('frogs', this)">🐸 Frogs</button>
+                <button class="level-btn elephants" data-level="elephants" onclick="selectLevel('elephants', this)">🐘 Elephants</button>
+                <button class="level-btn turtles" data-level="turtles" onclick="selectLevel('turtles', this)">🐢 Turtles</button>
+                <button class="level-btn butterflies" data-level="butterflies" onclick="selectLevel('butterflies', this)">🦋 Butterflies</button>
             </div>
 
             <div class="progress-bar">
@@ -475,6 +493,7 @@
     <div class="celebration" id="celebration">
         <h2>🎉 Amazing Work! 🎉</h2>
         <p>You're a math superstar!</p>
+        <button class="control-btn next" onclick="nextLesson(); hideCelebration();" style="margin-top:20px; pointer-events:auto;">➡️ Next Lesson</button>
     </div>
 
     <script>
@@ -482,11 +501,11 @@
         let selectedColor = null;
         let coloredSections = new Set();
         let currentLesson = 0;
-        
+
         const canvas = document.getElementById('coloringCanvas');
         const ctx = canvas.getContext('2d');
-        
-        // 20+ Lessons covering 2nd grade curriculum
+
+        // 25 Lessons covering 2nd grade curriculum
         const lessons = [
             {
                 title: "Lesson 1: Addition Fluency",
@@ -781,57 +800,142 @@
                     24: ['6 × 4', '? + 12 = 36', '48 - 24'],
                     25: ['5 × 5', '? + 20 = 45', '50 - 25']
                 }
+            },
+            {
+                title: "Lesson 22: Fair Shares — Halves",
+                description: "Find half of a number",
+                problems: {
+                    2: ['Half of 4 = ?', '1/2 of 4 = ?', '4 shared equally = ? each', '2 + ? = 4'],
+                    3: ['Half of 6 = ?', '1/2 of 6 = ?', '6 shared equally = ? each', '3 + ? = 6'],
+                    4: ['Half of 8 = ?', '1/2 of 8 = ?', '8 shared equally = ? each', '4 + ? = 8'],
+                    6: ['Half of 12 = ?', '1/2 of 12 = ?', '12 shared equally = ? each', '6 + ? = 12'],
+                    8: ['Half of 16 = ?', '1/2 of 16 = ?', '16 shared equally = ? each', '8 + ? = 16']
+                }
+            },
+            {
+                title: "Lesson 23: Telling Time",
+                description: "Read clocks to the hour and half-hour",
+                problems: {
+                    3: ['Hour hand → 3, minute → 12. What time?', 'Clock shows 3:00. What hour?', '1 + 2', '5 - 2'],
+                    6: ['Hour hand → 6, minute → 12. What time?', 'Clock shows 6:00. What hour?', '3 + 3', '9 - 3'],
+                    9: ['Hour hand → 9, minute → 12. What time?', 'Clock shows 9:00. What hour?', '4 + 5', '10 - 1'],
+                    12: ['Hour hand → 12, minute → 12. What time?', 'Noon: both hands at 12. Hour?', '6 + 6', '10 + 2'],
+                    30: ['Half past any hour = ? minutes', 'Minute hand at 6 = ? minutes past', '15 + 15', '20 + 10']
+                }
+            },
+            {
+                title: "Lesson 24: Money — Counting Coins",
+                description: "Count pennies, nickels, dimes, and quarters",
+                problems: {
+                    1: ['A penny = ? cent', 'The smallest coin = ?¢', '2 - 1', '1 + 0'],
+                    5: ['A nickel = ? cents', '5¢ coin = how many cents?', '3 + 2', '10 - 5'],
+                    10: ['A dime = ? cents', '2 nickels = ? cents', '5 + 5', '6 + 4'],
+                    25: ['A quarter = ? cents', '5 nickels = ? cents', '10 + 10 + 5', '20 + 5']
+                }
+            },
+            {
+                title: "Lesson 25: Geometry — Sides of Shapes",
+                description: "Count the sides of 2D shapes",
+                problems: {
+                    3: ['A triangle has ? sides', 'A triangle has ? corners', '1 + 2', '5 - 2'],
+                    4: ['A square has ? sides', 'A rectangle has ? sides', '2 + 2', '5 - 1'],
+                    5: ['A pentagon has ? sides', '5-sided shape has ? angles', '2 + 3', '6 - 1'],
+                    6: ['A hexagon has ? sides', '6-sided shape has ? corners', '3 + 3', '7 - 1'],
+                    8: ['An octagon has ? sides', 'A STOP sign has ? sides', '4 + 4', '10 - 2']
+                }
             }
         ];
 
         const colors = {
+            1: '#FFEAA7',
             2: '#FF6B9D', 3: '#4ECDC4', 4: '#FFE66D', 5: '#A8E6CF',
             6: '#C7CEEA', 7: '#FFA07A', 8: '#DDA0DD', 9: '#87CEEB',
             10: '#FFB6C1', 11: '#98FB98', 12: '#98D8C8', 13: '#F0E68C',
             14: '#DDA0DD', 15: '#F7DC6F', 16: '#BB8FCE', 17: '#85C1E2',
             18: '#85C1E2', 19: '#F8B88B', 20: '#F8B88B', 21: '#FFD700',
             22: '#FF69B4', 24: '#87CEEB', 25: '#98FB98', 27: '#DDA0DD',
-            30: '#F7DC6F', 35: '#FFA07A', 40: '#C7CEEA', 45: '#FF6B9D',
+            30: '#A8D8EA', 35: '#FFA07A', 40: '#C7CEEA', 45: '#FF6B9D',
             50: '#A8E6CF', 60: '#4ECDC4', 70: '#FFE66D', 80: '#87CEEB'
         };
 
         const themes = {
             puppies: [
-                { x: 150, y: 100, r: 80, answer: 6, type: 'circle' },
-                { x: 450, y: 100, r: 80, answer: 6, type: 'circle' },
-                { x: 300, y: 200, r: 120, answer: 8, type: 'circle' },
-                { x: 250, y: 200, r: 25, answer: 4, type: 'circle' },
-                { x: 350, y: 200, r: 25, answer: 4, type: 'circle' },
-                { x: 300, y: 250, r: 30, answer: 2, type: 'circle' },
-                { x: 300, y: 380, r: 100, answer: 10, type: 'circle' },
-                { x: 220, y: 520, r: 40, answer: 5, type: 'circle' },
-                { x: 380, y: 520, r: 40, answer: 5, type: 'circle' },
-                { x: 480, y: 350, r: 35, answer: 3, type: 'circle' }
+                { x: 150, y: 100, r: 80, answer: 6, type: 'circle' },    // left ear
+                { x: 450, y: 100, r: 80, answer: 6, type: 'circle' },    // right ear
+                { x: 300, y: 200, r: 120, answer: 8, type: 'circle' },   // head
+                { x: 250, y: 200, r: 25, answer: 4, type: 'circle' },    // left eye
+                { x: 350, y: 200, r: 25, answer: 4, type: 'circle' },    // right eye
+                { x: 300, y: 250, r: 30, answer: 2, type: 'circle' },    // nose
+                { x: 300, y: 380, r: 100, answer: 10, type: 'circle' },  // body
+                { x: 245, y: 488, r: 40, answer: 5, type: 'circle' },    // left paw (~19px overlap with body)
+                { x: 355, y: 488, r: 40, answer: 5, type: 'circle' },    // right paw (~19px overlap with body)
+                { x: 395, y: 340, r: 35, answer: 3, type: 'circle' }     // tail (fixed: was 480,350 — gap; now ~32px overlap)
             ],
             kitties: [
-                { x: 200, y: 80, points: [[200,80], [180,140], [220,140]], answer: 7, type: 'triangle' },
-                { x: 400, y: 80, points: [[400,80], [380,140], [420,140]], answer: 7, type: 'triangle' },
-                { x: 300, y: 200, r: 120, answer: 9, type: 'circle' },
-                { x: 250, y: 190, r: 25, answer: 4, type: 'circle' },
-                { x: 350, y: 190, r: 25, answer: 4, type: 'circle' },
-                { x: 300, y: 240, r: 20, answer: 2, type: 'circle' },
-                { x: 300, y: 380, r: 90, answer: 12, type: 'circle' },
-                { x: 230, y: 520, r: 35, answer: 6, type: 'circle' },
-                { x: 370, y: 520, r: 35, answer: 6, type: 'circle' },
-                { x: 450, y: 420, points: [[450,420], [480,380], [500,440], [470,480]], answer: 5, type: 'polygon' }
+                { x: 200, y: 80, points: [[200,80],[180,140],[220,140]], answer: 7, type: 'triangle' },    // left ear
+                { x: 400, y: 80, points: [[400,80],[380,140],[420,140]], answer: 7, type: 'triangle' },    // right ear
+                { x: 300, y: 200, r: 120, answer: 9, type: 'circle' },   // head
+                { x: 250, y: 190, r: 25, answer: 4, type: 'circle' },    // left eye
+                { x: 350, y: 190, r: 25, answer: 4, type: 'circle' },    // right eye
+                { x: 300, y: 240, r: 20, answer: 2, type: 'circle' },    // nose
+                { x: 300, y: 380, r: 90, answer: 12, type: 'circle' },   // body
+                { x: 250, y: 465, r: 35, answer: 6, type: 'circle' },    // left paw (fixed: was 230,520 — gap; now ~26px overlap)
+                { x: 350, y: 465, r: 35, answer: 6, type: 'circle' },    // right paw (fixed: was 370,520 — gap; now ~26px overlap)
+                { x: 385, y: 430, points: [[360,420],[390,380],[410,440],[380,480]], answer: 5, type: 'polygon' }  // tail (shifted further left; vertex 360,420 is ~72px from body, ~18px inside r=90)
             ],
             unicorns: [
-                { x: 300, y: 80, points: [[300,60], [280,120], [320,120]], answer: 15, type: 'triangle' },
-                { x: 150, y: 120, r: 70, answer: 8, type: 'circle' },
-                { x: 450, y: 120, r: 70, answer: 8, type: 'circle' },
-                { x: 300, y: 220, r: 130, answer: 18, type: 'circle' },
-                { x: 250, y: 210, r: 30, answer: 6, type: 'circle' },
-                { x: 350, y: 210, r: 30, answer: 6, type: 'circle' },
-                { x: 300, y: 280, r: 25, answer: 3, type: 'circle' },
-                { x: 300, y: 420, r: 110, answer: 20, type: 'circle' },
-                { x: 230, y: 560, r: 40, answer: 10, type: 'circle' },
-                { x: 370, y: 560, r: 40, answer: 10, type: 'circle' },
-                { x: 480, y: 380, points: [[480,380], [520,340], [540,400], [510,440], [480,420]], answer: 12, type: 'polygon' }
+                { x: 300, y: 80, points: [[300,60],[280,120],[320,120]], answer: 15, type: 'triangle' },   // horn
+                { x: 150, y: 120, r: 70, answer: 8, type: 'circle' },    // left ear
+                { x: 450, y: 120, r: 70, answer: 8, type: 'circle' },    // right ear
+                { x: 300, y: 220, r: 130, answer: 18, type: 'circle' },  // head
+                { x: 250, y: 210, r: 30, answer: 6, type: 'circle' },    // left eye
+                { x: 350, y: 210, r: 30, answer: 6, type: 'circle' },    // right eye
+                { x: 300, y: 280, r: 25, answer: 3, type: 'circle' },    // nose
+                { x: 300, y: 420, r: 110, answer: 20, type: 'circle' },  // body
+                { x: 248, y: 535, r: 40, answer: 10, type: 'circle' },   // left paw (fixed: was 230,560 — gap; now ~24px overlap)
+                { x: 352, y: 535, r: 40, answer: 10, type: 'circle' },   // right paw (fixed: was 370,560 — gap; now ~24px overlap)
+                { x: 415, y: 395, points: [[390,380],[430,340],[450,400],[420,440],[390,420]], answer: 12, type: 'polygon' }  // tail (fixed: shifted left; vertex 390,420 is 90px from body, inside r=110)
+            ],
+            frogs: [
+                { x: 240, y: 140, r: 35, answer: 2, type: 'circle' },   // left eye (~40px overlap with head)
+                { x: 360, y: 140, r: 35, answer: 2, type: 'circle' },   // right eye (~40px overlap with head)
+                { x: 300, y: 200, r: 90, answer: 4, type: 'circle' },   // head (~45px overlap with body)
+                { x: 300, y: 280, r: 30, answer: 6, type: 'circle' },   // throat (40px overlap with head; 65px with body)
+                { x: 175, y: 315, r: 45, answer: 3, type: 'circle' },   // left front leg (~24px overlap with body)
+                { x: 425, y: 315, r: 45, answer: 3, type: 'circle' },   // right front leg (~24px overlap with body)
+                { x: 300, y: 355, r: 110, answer: 8, type: 'circle' },  // body
+                { x: 215, y: 448, r: 40, answer: 6, type: 'circle' },   // left back foot (~24px overlap with body)
+                { x: 385, y: 448, r: 40, answer: 6, type: 'circle' }    // right back foot (~24px overlap with body)
+            ],
+            elephants: [
+                { x: 155, y: 195, r: 85, answer: 9, type: 'circle' },   // left ear (~39px overlap with head)
+                { x: 445, y: 195, r: 85, answer: 3, type: 'circle' },   // right ear (~39px overlap with head)
+                { x: 300, y: 210, r: 100, answer: 12, type: 'circle' }, // head (40px overlap with body)
+                { x: 240, y: 310, r: 35, answer: 30, type: 'circle' },  // upper trunk (~18px overlap with head; answer=30 min=half-hour)
+                { x: 225, y: 355, r: 30, answer: 30, type: 'circle' },  // lower trunk (~18px overlap with upper trunk)
+                { x: 300, y: 390, r: 120, answer: 6, type: 'circle' },  // body
+                { x: 205, y: 505, r: 50, answer: 6, type: 'circle' },   // left leg (~21px overlap with body)
+                { x: 395, y: 505, r: 50, answer: 6, type: 'circle' },   // right leg (~21px overlap with body)
+                { x: 415, y: 330, r: 25, answer: 3, type: 'circle' }    // tail (~15px overlap with body)
+            ],
+            turtles: [
+                { x: 300, y: 140, r: 55, answer: 10, type: 'circle' },  // head (30px overlap with neck)
+                { x: 300, y: 195, r: 30, answer: 5, type: 'circle' },   // neck (30px overlap with head; 45px with shell)
+                { x: 300, y: 310, r: 130, answer: 25, type: 'circle' }, // shell (body)
+                { x: 155, y: 260, r: 45, answer: 5, type: 'circle' },   // left front flipper (~22px overlap with shell)
+                { x: 445, y: 260, r: 45, answer: 5, type: 'circle' },   // right front flipper (~22px overlap with shell)
+                { x: 175, y: 400, r: 40, answer: 1, type: 'circle' },   // left back flipper (~16px overlap with shell)
+                { x: 425, y: 400, r: 40, answer: 1, type: 'circle' },   // right back flipper (~16px overlap with shell)
+                { x: 300, y: 448, r: 25, answer: 10, type: 'circle' }   // tail (~17px overlap with shell)
+            ],
+            butterflies: [
+                { x: 300, y: 248, r: 28, answer: 6, type: 'circle' },   // head (16px overlap with body)
+                { x: 300, y: 300, r: 40, answer: 5, type: 'circle' },   // body (thorax)
+                { x: 300, y: 348, r: 28, answer: 8, type: 'circle' },   // abdomen (20px overlap with body; moved from y=355)
+                { x: 206, y: 200, points: [[140,70],[290,180],[275,300],[120,230]], answer: 4, type: 'polygon' },   // upper-left wing (vertex 275,300 is 25px from body center, inside r=40)
+                { x: 394, y: 200, points: [[310,180],[460,70],[480,230],[325,300]], answer: 4, type: 'polygon' },   // upper-right wing (vertex 325,300 is 25px from body center, inside r=40)
+                { x: 197, y: 367, points: [[120,320],[278,305],[195,475]], answer: 3, type: 'triangle' },  // lower-left wing (vertex 278,305 is ~23px from body, ~17px inside r=40)
+                { x: 403, y: 367, points: [[322,305],[480,320],[405,475]], answer: 3, type: 'triangle' }   // lower-right wing (vertex 322,305 is ~23px from body, ~17px inside r=40)
             ]
         };
 
@@ -841,33 +945,36 @@
             document.getElementById('lessonDescription').textContent = lesson.description;
         }
 
+        // Bug 2 fix: generate a simple addition fact as fallback instead of showing bare number
         function getRandomProblem(answer) {
             const lesson = lessons[currentLesson];
             const problems = lesson.problems[answer];
-            if (!problems) return answer + '';
-            return problems[Math.floor(Math.random() * problems.length)];
+            if (problems) return problems[Math.floor(Math.random() * problems.length)];
+            const a = Math.floor(answer / 2);
+            const b = answer - a;
+            return `${a} + ${b} = ?`;
         }
 
         function renderColorPalette() {
             const palette = document.getElementById('colorPalette');
             palette.innerHTML = '';
-            
+
             const answers = [...new Set(themes[currentLevel].map(s => s.answer))].sort((a, b) => a - b);
-            
+
             answers.forEach((answer, index) => {
                 const option = document.createElement('div');
                 option.className = 'color-option';
-                
+
                 const problem = document.createElement('div');
                 problem.className = 'math-problem';
                 problem.textContent = getRandomProblem(answer);
-                
+
                 const btn = document.createElement('div');
                 btn.className = 'color-btn';
                 btn.style.backgroundColor = colors[answer] || '#FFB6C1';
                 btn.dataset.answer = answer;
                 btn.onclick = () => selectColor(answer, btn);
-                
+
                 option.appendChild(problem);
                 option.appendChild(btn);
                 palette.appendChild(option);
@@ -880,22 +987,16 @@
             selectedColor = answer;
         }
 
-        function drawSection(section, filled = false) {
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#2d3436';
-            
-            if (filled && coloredSections.has(section)) {
-                ctx.fillStyle = colors[section.answer] || '#FFB6C1';
-            } else {
-                ctx.fillStyle = 'white';
-            }
-            
+        // Bug 3 fix: two-pass rendering so outlines never get covered by later fills
+        function fillSection(section) {
+            ctx.fillStyle = coloredSections.has(section)
+                ? (colors[section.answer] || '#FFB6C1')
+                : 'white';
             if (section.type === 'circle') {
                 ctx.beginPath();
                 ctx.arc(section.x, section.y, section.r, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.stroke();
-            } else if (section.type === 'triangle' || section.type === 'polygon') {
+            } else {
                 ctx.beginPath();
                 ctx.moveTo(section.points[0][0], section.points[0][1]);
                 for (let i = 1; i < section.points.length; i++) {
@@ -903,11 +1004,28 @@
                 }
                 ctx.closePath();
                 ctx.fill();
+            }
+        }
+
+        function strokeSection(section) {
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#2d3436';
+            if (section.type === 'circle') {
+                ctx.beginPath();
+                ctx.arc(section.x, section.y, section.r, 0, Math.PI * 2);
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(section.points[0][0], section.points[0][1]);
+                for (let i = 1; i < section.points.length; i++) {
+                    ctx.lineTo(section.points[i][0], section.points[i][1]);
+                }
+                ctx.closePath();
                 ctx.stroke();
             }
-            
+            // Draw number label only if section not yet colored (#2d3436 for WCAG AA contrast)
             if (!coloredSections.has(section)) {
-                ctx.fillStyle = '#95a5a6';
+                ctx.fillStyle = '#2d3436';
                 ctx.font = 'bold 24px Fredoka';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -919,7 +1037,10 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#f8f9fa';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            themes[currentLevel].forEach(section => drawSection(section, true));
+            const current = themes[currentLevel];
+            if (!current) return;
+            current.forEach(section => fillSection(section));   // pass 1: all fills
+            current.forEach(section => strokeSection(section)); // pass 2: all outlines + labels
             updateProgress();
         }
 
@@ -950,16 +1071,42 @@
             return false;
         }
 
+        // Bug 1 fix: flash red overlay for wrong-color clicks
+        function drawSectionFlash(section, color) {
+            ctx.fillStyle = color;
+            if (section.type === 'circle') {
+                ctx.beginPath();
+                ctx.arc(section.x, section.y, section.r, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(section.points[0][0], section.points[0][1]);
+                for (let i = 1; i < section.points.length; i++) {
+                    ctx.lineTo(section.points[i][0], section.points[i][1]);
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        function flashWrongSection(section) {
+            drawSectionFlash(section, 'rgba(255, 0, 0, 0.35)');
+            setTimeout(() => drawCanvas(), 400);
+        }
+
+        // Bug 1 fix: reverse iteration so top-painted (small) shapes are hit-tested first
         function handleCanvasClick(event) {
             if (!selectedColor) return;
-            
+
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             const x = (event.clientX - rect.left) * scaleX;
             const y = (event.clientY - rect.top) * scaleY;
-            
-            for (const section of themes[currentLevel]) {
+
+            const sections = themes[currentLevel];
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const section = sections[i];
                 if (isPointInSection(x, y, section)) {
                     if (section.answer === selectedColor) {
                         coloredSections.add(section);
@@ -967,6 +1114,8 @@
                         if (coloredSections.size === themes[currentLevel].length) {
                             setTimeout(celebrate, 500);
                         }
+                    } else {
+                        flashWrongSection(section);
                     }
                     break;
                 }
@@ -994,6 +1143,10 @@
             }, 3000);
         }
 
+        function hideCelebration() {
+            document.getElementById('celebration').classList.remove('show');
+        }
+
         function createConfetti() {
             const confetti = document.createElement('div');
             confetti.className = 'confetti';
@@ -1005,13 +1158,12 @@
             setTimeout(() => confetti.remove(), 4000);
         }
 
-        function selectLevel(level) {
+        // Bug 4 fix: accept btn parameter instead of relying on implicit global event.target
+        function selectLevel(level, btn) {
             currentLevel = level;
             coloredSections.clear();
-            document.querySelectorAll('.level-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             renderColorPalette();
             drawCanvas();
         }
@@ -1021,8 +1173,9 @@
             drawCanvas();
         }
 
+        // Bug 4 fix: use data-level for reliable active-button detection; includes all 7 levels
         function newPicture() {
-            const levels = ['puppies', 'kitties', 'unicorns'];
+            const levels = ['puppies', 'kitties', 'unicorns', 'frogs', 'elephants', 'turtles', 'butterflies'];
             let newLevel;
             do {
                 newLevel = levels[Math.floor(Math.random() * levels.length)];
@@ -1030,12 +1183,7 @@
             currentLevel = newLevel;
             coloredSections.clear();
             document.querySelectorAll('.level-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if ((newLevel === 'puppies' && btn.textContent.includes('🐶')) ||
-                    (newLevel === 'kitties' && btn.textContent.includes('🐱')) ||
-                    (newLevel === 'unicorns' && btn.textContent.includes('🦄'))) {
-                    btn.classList.add('active');
-                }
+                btn.classList.toggle('active', btn.dataset.level === newLevel);
             });
             renderColorPalette();
             drawCanvas();
