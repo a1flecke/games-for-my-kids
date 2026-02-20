@@ -36,9 +36,11 @@ For every section in every theme (or the specified theme), verify it has at leas
 const fs = require('fs');
 const html = fs.readFileSync('math-coloring-2/index.html', 'utf8');
 
-// Extract themes object from the script block
-const match = html.match(/const themes = (\{[\s\S]*?\n        \};)/);
-if (!match) { console.error('Could not find themes object'); process.exit(1); }
+// Extract themes object from the script block.
+// NOTE: The regex below matches indentation as it exists in the file (8 spaces before closing `};`).
+// If extraction fails, inspect the actual indentation and adjust the pattern.
+const match = html.match(/const themes = (\{[\s\S]*?\n {8}\};)/);
+if (!match) { console.error('Could not find themes object — check indentation in regex'); process.exit(1); }
 
 // Evaluate the themes object (safe — it's our own file)
 const themes = eval('(' + match[1].replace(/;$/, '') + ')');

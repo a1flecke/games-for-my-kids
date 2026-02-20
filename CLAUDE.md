@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
 Collection of educational browser games for grades 2–6 (ages 7–12), some designed with dyslexia and ADHD accommodations. All games are self-contained in their own directories and deployed to GitHub Pages.
@@ -10,7 +8,6 @@ Collection of educational browser games for grades 2–6 (ages 7–12), some des
 
 - **Vanilla JavaScript (ES6+)**, HTML5, CSS3 — no frameworks, no bundlers, no npm
 - **HTML5 Canvas** for game rendering (catacombs-and-creeds)
-- **Web Audio API** for sound (planned)
 - **LocalStorage** for save data
 - Games run directly in-browser with no build step
 
@@ -48,7 +45,7 @@ Each game is independent — no shared libraries or components between games. Ga
 Educational dungeon crawler — the most complex game. Key docs:
 - `plan.md` — full design spec (1700 lines): levels, mechanics, accessibility requirements, content
 
-Current state (Feb 2026): All 5 levels built with full content. Core systems complete: combat, inventory (580×560 panel), 3-slot save system, dialogue with pixel-art portraits, question bank (66 questions), NPC/enemy/item placement verified reachable across all maps.
+All 5 levels built with full content. Core systems complete: combat, inventory (580×560 panel), 3-slot save system, dialogue with pixel-art portraits, question bank (66 questions), NPC/enemy/item placement verified reachable across all maps.
 
 **Key source files:**
 - `js/game.js` — main engine/state machine
@@ -108,36 +105,23 @@ Word Explorer — phonics matching game for grades 1–5. Multi-file modular JS.
 
 ## HTML/JS Coding Standards
 
-Rules that apply to ALL games in this repo. These prevent common bugs:
+Rules that apply to ALL games in this repo. These prevent recurring bugs:
 
-**Font loading:** Load OpenDyslexic via `<link rel="stylesheet">` in HTML only. Never also `@import` in CSS — causes a double HTTP request and render-blocking delay.
+**Font loading:** Load OpenDyslexic via `<link rel="stylesheet">` in HTML only — never also `@import` in CSS (double HTTP request, render-blocking).
 
-**Viewport:** Never use `user-scalable=no` — violates WCAG 1.4.4 (Resize Text). Users with dyslexia rely on browser zoom.
+**Viewport:** Never use `user-scalable=no` — violates WCAG 1.4.4. Users with dyslexia rely on browser zoom.
 
-**Modal dialogs:**
-- Use `<div role="dialog" aria-modal="true" aria-label="...">` — not `<aside>` (conflicting implicit landmark role)
-- First focusable element in the modal must be a close (✕) button
-- Implement a keyboard focus trap: Tab/Shift-Tab cycle within the modal; Escape closes it
-- On open: move focus to the close button. On close: return focus to the trigger element
-- Toggle `aria-hidden="true"/"false"` on the panel so AT ignores it when closed
-- Toggle `aria-expanded` on the trigger button
+**Modal dialogs:** Use `<div role="dialog" aria-modal="true" aria-label="...">` (not `<aside>` — conflicting landmark). First focusable element must be a close (✕) button. Implement Tab/Shift-Tab focus trap + Escape to close. On open: focus close button, set `aria-hidden="false"` on panel, set `aria-expanded="true"` on trigger. On close: reverse all three.
 
-**innerHTML safety:** Never interpolate external data into `innerHTML` without HTML-escaping. Use:
-```js
-function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-```
+**innerHTML safety:** HTML-escape any interpolated values: `String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')`. Use an `escHtml()` helper.
 
-**Locked/disabled interactive elements:** Set `tabindex="-1"` AND `aria-disabled="true"` — a visual `.locked` class alone is not enough.
+**Locked interactive elements:** Set `tabindex="-1"` AND `aria-disabled="true"` — a visual `.locked` class alone is invisible to assistive technology.
 
 **Filtered lists:** When hiding items with `display:none`, also set `aria-hidden="true"` so AT list counts stay accurate.
 
-**Font size scaling:** Apply font-size directly via `document.documentElement.style.fontSize = '20px'` rather than re-declaring a CSS custom property on `:root` from a class (fragile source-order dependency).
+**Font size scaling:** Apply via `document.documentElement.style.fontSize = '20px'` rather than re-declaring a CSS custom property on `:root` from a class (fragile source-order dependency).
 
-**Form inputs:** Don't add `aria-label` to an `<input>` that already has a `<label for="...">` pointing to it — the label is already the accessible name.
-
-**`window.game` init pattern:** Assign before calling init: `window.game = new Game(); window.game.init();` (not `game.init()` which relies on implicit global).
+**`window.game` init pattern:** `window.game = new Game(); window.game.init();` — never `game.init()` (relies on implicit global before assignment completes).
 
 ## Accessibility Requirements (All Games)
 
