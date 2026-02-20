@@ -102,8 +102,9 @@ class Game {
             document.getElementById('screen-select').classList.remove('active');
             document.getElementById('screen-board').classList.add('active');
             document.getElementById('board-lesson-title').textContent = lesson.title;
+            const gridSize = lesson.gridSize || 4;
             document.getElementById('board-progress').textContent =
-                `0 / ${lesson.gridSize * lesson.gridSize} matched`;
+                `0 / ${gridSize * gridSize} matched`;
             window.boardManager = new BoardManager();
             window.boardManager.init(lesson);
         } catch (err) {
@@ -279,8 +280,8 @@ class Game {
             document.removeEventListener('keydown', this._pinFocusTrapHandler);
             this._pinFocusTrapHandler = null;
         }
-        // Return focus to the unlock button
-        document.getElementById('unlock-btn').focus();
+        // Return focus to the settings gear button (unlock-btn is inside the hidden panel).
+        document.getElementById('settings-btn').focus();
     }
 
     _handlePinFocusTrap(e) {
@@ -339,8 +340,8 @@ class Game {
     }
 }
 
-// Assign to window immediately so other modules can reference window.game if needed.
+// Assign to window and init immediately — all defer scripts have run by the time
+// game.js executes, so SaveManager/DataManager/BoardManager etc. are all defined.
+// Using 'load' would delay the UI until fonts and images finish fetching.
 window.game = new Game();
-window.addEventListener('load', () => {
-    window.game.init();
-});
+window.game.init();

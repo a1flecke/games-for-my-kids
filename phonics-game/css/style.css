@@ -459,12 +459,18 @@ body {
 
 #screen-sort,
 #screen-summary {
+    /* No display:flex here — ID specificity would override .screen{display:none}.
+       Flex layout applied only when .active via the rules below. */
     padding: 80px 24px 32px;
+    gap: 16px;
+}
+
+#screen-sort.active,
+#screen-summary.active {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
 }
 
 .placeholder-msg {
@@ -564,7 +570,8 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-.tile:active { transform: scale(0.95); }
+/* Don't scale-down when tile is already in selected/expanded state */
+.tile:not(.tile-selected):active { transform: scale(0.95); }
 
 .tile-selected {
     background: #fff8e1;

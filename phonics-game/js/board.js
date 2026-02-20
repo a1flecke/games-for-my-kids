@@ -61,6 +61,7 @@ class BoardManager {
             el.setAttribute('role', 'button');
             el.setAttribute('tabindex', '0');
             el.setAttribute('aria-label', tile.word);
+            el.setAttribute('aria-pressed', 'false');
 
             const wordSpan = document.createElement('span');
             wordSpan.className = 'tile-word';
@@ -97,6 +98,8 @@ class BoardManager {
         const el = tile.element;
         el.className = `tile tile-${state}`;
         el.dataset.pattern = tile.pattern;
+        // Communicate selection state to screen readers (VoiceOver, TalkBack).
+        el.setAttribute('aria-pressed', state === 'selected' ? 'true' : 'false');
     }
 
     resetAllStates() {
