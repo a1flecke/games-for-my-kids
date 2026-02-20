@@ -13,7 +13,7 @@
   "wordPool": {
     "kn": ["knot", "kneel", "knew", "knife", "knight", "knit", "knock", "knowledge", "knob", "knack"],
     "wr": ["write", "wrong", "wrap", "wren", "wreck", "wrestle", "wrist", "wrote", "written", "wrench"],
-    "gn": ["gnome", "gnaw", "gnat", "gnu", "gnarled", "gnarly", "gnash", "gnarl", "sign", "design"]
+    "gn": ["gnome", "gnaw", "gnat", "gnu", "sign", "design", "assign", "align", "reign", "benign"]
   },
   "patternHint": "Sometimes letters at the beginning of words are silent — sneaky!",
   "tutorialWords": {}

@@ -11,7 +11,7 @@
   },
   "wordPool": {
     "ee": ["feet", "meet", "see", "tree", "free", "green", "queen", "sleep", "sweep", "cheese", "creep", "deed", "feed", "feel", "heel", "keen", "need", "peek", "reef", "seed", "seek", "steel", "teen", "week", "weed"],
-    "ea": ["beach", "reach", "teach", "clean", "dream", "cream", "lean", "mean", "please", "real", "seal", "steal", "treat", "each", "eat", "heat", "lead", "leaf", "meat", "near", "peas", "speak", "steam", "team"]
+    "ea": ["beach", "reach", "teach", "clean", "dream", "cream", "lean", "mean", "please", "real", "seal", "steal", "treat", "each", "eat", "heat", "fear", "leaf", "meat", "peak", "peas", "speak", "steam", "team"]
   },
   "patternHint": "EE and EA often make the long E sound!",
   "tutorialWords": {}
