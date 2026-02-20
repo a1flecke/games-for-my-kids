@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- user-scalable=no removed: violates WCAG 1.4.4; game provides its own font-size control -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Explorer — Phonics Matching Game</title>
+    <!-- Single font import here; @import removed from CSS to avoid render-blocking double load -->
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Home button -->
+    <a href="../" id="home-btn" aria-label="Home">🏠 Home</a>
+
+    <!-- Settings button -->
+    <button id="settings-btn" aria-label="Open settings" aria-haspopup="dialog" aria-expanded="false">⚙️</button>
+
+    <!-- Settings overlay (click to close) — no role, it's a presentational backdrop -->
+    <div id="settings-overlay"></div>
+
+    <!-- Settings panel: <div> used (not <aside>) to avoid conflict with explicit role="dialog" -->
+    <div id="settings-panel" role="dialog" aria-label="Settings" aria-modal="true" aria-hidden="true">
+        <!-- Close button is first focusable element so focus lands here when panel opens -->
+        <button id="settings-close" aria-label="Close settings">✕</button>
+        <h2>Settings</h2>
+
+        <div class="settings-row">
+            <label for="mute-speech">Mute word pronunciation</label>
+            <input type="checkbox" id="mute-speech">
+        </div>
+
+        <div class="settings-row">
+            <label for="mute-sfx">Mute sound effects</label>
+            <input type="checkbox" id="mute-sfx">
+        </div>
+
+        <div class="settings-row">
+            <!-- disabled + aria-disabled so AT users can still land on it and hear why it's unavailable -->
+            <label for="challenge-toggle">Challenge Mode</label>
+            <input type="checkbox" id="challenge-toggle" disabled aria-disabled="true">
+        </div>
+        <p class="settings-note">Challenge Mode (complete a lesson first to unlock)</p>
+
+        <div class="settings-row">
+            <label for="font-size-select">Text size</label>
+            <select id="font-size-select">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+
+        <button id="unlock-btn">🔓 Unlock all lessons</button>
+        <p class="settings-note">Requires PIN (for parents &amp; teachers)</p>
+    </div>
+
+    <!-- ================================================================
+         Screen: Lesson Select
+         ================================================================ -->
+    <main id="screen-select" class="screen active">
+        <header class="select-header">
+            <img src="assets/lena.svg" alt="Lena the Word Explorer" width="64" height="64">
+            <h1>Word Explorer</h1>
+        </header>
+        <p class="select-subtitle">Tap a lesson to begin!</p>
+
+        <!-- Grade filter tabs -->
+        <nav class="grade-filter" aria-label="Filter by grade">
+            <button class="grade-tab active" data-grade="all">ALL</button>
+            <button class="grade-tab" data-grade="1">Grade 1</button>
+            <button class="grade-tab" data-grade="2">Grade 2</button>
+            <button class="grade-tab" data-grade="3">Grade 3</button>
+            <button class="grade-tab" data-grade="4">Grade 4</button>
+            <button class="grade-tab" data-grade="5">Grade 5</button>
+        </nav>
+
+        <!-- Lesson grid — populated by game.js -->
+        <div id="lesson-grid" role="list" aria-label="Lessons"></div>
+    </main>
+
+    <!-- ================================================================
+         Screen: Game Board (placeholder — built in Session 5)
+         ================================================================ -->
+    <div id="screen-board" class="screen" role="region" aria-label="Game board">
+        <p class="placeholder-msg">Game board — coming in Session 5</p>
+    </div>
+
+    <!-- ================================================================
+         Screen: Sort Mode (placeholder — built in Session 9)
+         ================================================================ -->
+    <div id="screen-sort" class="screen" role="region" aria-label="Sort mode">
+        <p class="placeholder-msg">Sort Mode — coming in Session 9</p>
+    </div>
+
+    <!-- ================================================================
+         Screen: Post-Lesson Summary (placeholder — built in Session 7)
+         ================================================================ -->
+    <div id="screen-summary" class="screen" role="region" aria-label="Lesson summary">
+        <p class="placeholder-msg">Summary — coming in Session 7</p>
+    </div>
+
+    <!-- Live region for accessibility announcements -->
+    <div id="aria-live" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
+
+    <!-- Scripts — load order matters (dependencies declared first) -->
+    <script src="js/save.js" defer></script>
+    <script src="js/data.js" defer></script>
+    <script src="js/speech.js" defer></script>
+    <script src="js/audio.js" defer></script>
+    <script src="js/board.js" defer></script>
+    <script src="js/match.js" defer></script>
+    <script src="js/score.js" defer></script>
+    <script src="js/tutorial.js" defer></script>
+    <script src="js/feedback.js" defer></script>
+    <script src="js/sort.js" defer></script>
+    <script src="js/narrative.js" defer></script>
+    <script src="js/game.js" defer></script>
+</body>
+</html>

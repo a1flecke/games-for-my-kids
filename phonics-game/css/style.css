@@ -1,0 +1,498 @@
+/* =====================================================================
+   Phonics Matching Game — Word Explorer
+   CSS Design System
+   ===================================================================== */
+
+/* @import removed — font loaded via <link> in index.html to avoid render-blocking double load */
+
+:root {
+    --bg: #F5F0E8;
+    --text: #2C2416;
+    --accent: #E8A020;       /* gold — correct / selected */
+    --correct: #27ae60;      /* green — matched */
+    --wrong: #e74c3c;        /* red — wrong tap */
+    --glow: #3498db;         /* blue — pattern glow */
+    --grade-1: #27ae60;
+    --grade-2: #2980b9;
+    --grade-3: #8e44ad;
+    --grade-4: #e67e22;
+    --grade-5: #c0392b;
+    --font-tile: 'OpenDyslexic', 'Comic Sans MS', cursive;
+    --font-ui: 'OpenDyslexic', 'Comic Sans MS', cursive;
+}
+
+/* ---- Font size overrides: set directly on html for reliable cascade ---- */
+html             { font-size: 16px; }
+html.font-small  { font-size: 14px; }
+html.font-large  { font-size: 20px; }
+/* font-medium is the default 16px above — no separate rule needed */
+
+/* =====================================================================
+   Reset & Base
+   ===================================================================== */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-ui);
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* =====================================================================
+   Home Button
+   ===================================================================== */
+
+#home-btn {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    background: var(--accent);
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 8px 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.1s, box-shadow 0.1s;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#home-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+#home-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* =====================================================================
+   Settings Button & Panel
+   ===================================================================== */
+
+#settings-btn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 100;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+
+#settings-btn:hover {
+    transform: rotate(30deg);
+}
+
+#settings-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 200;
+}
+
+#settings-overlay.open {
+    display: block;
+}
+
+#settings-panel {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    z-index: 300;
+    padding: 16px 24px 24px;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    font-family: var(--font-ui);
+}
+
+#settings-panel.open {
+    right: 0;
+}
+
+/* Settings close button — top-right of the panel, first focusable element */
+#settings-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+#settings-close:hover {
+    background: #f0ebe3;
+}
+
+#settings-close:focus-visible {
+    outline: 3px solid var(--glow);
+    outline-offset: 2px;
+}
+
+#settings-panel h2 {
+    font-size: 1.2rem;
+    margin: 12px 0 16px;
+    color: var(--text);
+    border-bottom: 2px solid var(--bg);
+    padding-bottom: 12px;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+    gap: 12px;
+}
+
+.settings-row label {
+    flex: 1;
+    cursor: pointer;
+}
+
+.settings-row input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.settings-row select {
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    padding: 6px 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    min-height: 44px;
+}
+
+#unlock-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    background: var(--bg);
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text);
+    min-height: 44px;
+    transition: background 0.15s;
+}
+
+#unlock-btn:hover {
+    background: #e0dbd0;
+}
+
+/* Secondary text: #595143 achieves ≥4.5:1 on #F5F0E8 (WCAG AA) */
+.settings-note {
+    font-size: 0.8rem;
+    color: #595143;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+/* =====================================================================
+   Screens — show/hide
+   ===================================================================== */
+
+.screen {
+    display: none;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* =====================================================================
+   Lesson Select Screen
+   ===================================================================== */
+
+#screen-select {
+    padding: 70px 16px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Header */
+.select-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.select-header h1 {
+    font-size: 2rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+}
+
+.select-header img {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+}
+
+/* #595143 on #F5F0E8 = ~5.1:1 contrast (WCAG AA ✓) */
+.select-subtitle {
+    font-size: 1rem;
+    color: #595143;
+    margin-bottom: 20px;
+}
+
+/* Grade filter tabs */
+.grade-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.grade-filter::-webkit-scrollbar {
+    display: none;
+}
+
+.grade-tab {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 2px solid #ddd;
+    background: white;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--text);
+    min-height: 44px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.grade-tab:hover {
+    border-color: #aaa;
+}
+
+.grade-tab:focus-visible {
+    outline: 3px solid var(--glow);
+    outline-offset: 2px;
+}
+
+.grade-tab.active[data-grade="all"] { background: var(--text); border-color: var(--text); color: white; }
+.grade-tab.active[data-grade="1"]   { background: var(--grade-1); border-color: var(--grade-1); color: white; }
+.grade-tab.active[data-grade="2"]   { background: var(--grade-2); border-color: var(--grade-2); color: white; }
+.grade-tab.active[data-grade="3"]   { background: var(--grade-3); border-color: var(--grade-3); color: white; }
+.grade-tab.active[data-grade="4"]   { background: var(--grade-4); border-color: var(--grade-4); color: white; }
+.grade-tab.active[data-grade="5"]   { background: var(--grade-5); border-color: var(--grade-5); color: white; }
+
+/* Lesson grid */
+#lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+@media (min-width: 600px) {
+    #lesson-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    #lesson-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Lesson card */
+.lesson-card {
+    position: relative;
+    background: white;
+    border: 2px solid #e0dbd0;
+    border-radius: 12px;
+    padding: 14px 10px 12px;
+    min-height: 120px;
+    min-width: 100px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    text-align: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.lesson-card:hover:not(.locked) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.14);
+    border-color: var(--accent);
+}
+
+.lesson-card:active:not(.locked) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.lesson-card:focus-visible {
+    outline: 3px solid var(--glow);
+    outline-offset: 2px;
+}
+
+.lesson-card.locked {
+    opacity: 0.65;
+    cursor: default;
+}
+
+.lesson-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--text);
+    line-height: 1;
+}
+
+/* #555 on #F5F0E8 = ~4.6:1 (WCAG AA ✓) */
+.lesson-title {
+    font-size: 0.75rem;
+    color: #555;
+    line-height: 1.3;
+}
+
+.grade-badge {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: white;
+}
+
+.grade-badge.grade-1 { background: var(--grade-1); }
+.grade-badge.grade-2 { background: var(--grade-2); }
+.grade-badge.grade-3 { background: var(--grade-3); }
+.grade-badge.grade-4 { background: var(--grade-4); }
+.grade-badge.grade-5 { background: var(--grade-5); }
+
+.star-row {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
+    font-size: 1rem;
+    color: #ccc;
+}
+
+.star.earned {
+    color: var(--accent);
+}
+
+.preview-badge {
+    font-size: 0.65rem;
+    background: var(--glow);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.lock-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    background: rgba(245,240,232,0.55);
+    pointer-events: none;
+}
+
+/* =====================================================================
+   Placeholder Screens (Sessions 5+)
+   ===================================================================== */
+
+#screen-board,
+#screen-sort,
+#screen-summary {
+    padding: 80px 24px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.placeholder-msg {
+    font-size: 1.2rem;
+    color: #595143;
+    text-align: center;
+}
+
+/* =====================================================================
+   Responsive adjustments
+   ===================================================================== */
+
+@media (max-width: 400px) {
+    .select-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .lesson-number {
+        font-size: 1.4rem;
+    }
+
+    .lesson-title {
+        font-size: 0.7rem;
+    }
+}
