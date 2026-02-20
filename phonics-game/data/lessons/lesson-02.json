@@ -1,0 +1,20 @@
+{
+  "id": 2,
+  "title": "Short Vowels — More CVC",
+  "gradeLevel": 1,
+  "gridSize": 4,
+  "explorer": true,
+  "patterns": ["short_e", "short_u", "short_a_review"],
+  "patternLabels": {
+    "short_e": "Short E",
+    "short_u": "Short U",
+    "short_a_review": "Short A (Review)"
+  },
+  "wordPool": {
+    "short_e": ["bed", "red", "led", "fed", "hen", "ten", "men", "pen", "set", "let", "wet", "pet", "bet", "met", "net"],
+    "short_u": ["cup", "pup", "bug", "hug", "mug", "run", "fun", "sun", "bun", "cut", "but", "gut", "hut", "mud", "bud"],
+    "short_a_review": ["cat", "hat", "can", "map", "sad", "ran", "bat", "cap", "mad", "had", "pan", "fan", "man", "tan", "van"]
+  },
+  "patternHint": "Say each word. What vowel sound do you hear in the middle?",
+  "tutorialWords": {}
+}

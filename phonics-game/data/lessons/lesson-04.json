@@ -1,0 +1,18 @@
+{
+  "id": 4,
+  "title": "L-Blends and S-Blends",
+  "gradeLevel": 1,
+  "gridSize": 4,
+  "explorer": true,
+  "patterns": ["l_blend", "s_blend"],
+  "patternLabels": {
+    "l_blend": "L-Blend",
+    "s_blend": "S-Blend"
+  },
+  "wordPool": {
+    "l_blend": ["black", "blow", "blue", "clap", "clay", "clue", "flag", "flat", "flip", "glad", "glow", "plan", "play", "sled", "slip", "slow", "sly"],
+    "s_blend": ["skin", "skip", "sky", "slam", "sled", "slim", "snail", "snap", "snow", "span", "spin", "star", "step", "swim", "sweet"]
+  },
+  "patternHint": "Two consonants working together at the beginning of the word!",
+  "tutorialWords": {}
+}

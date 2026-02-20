@@ -1,0 +1,22 @@
+{
+  "id": 6,
+  "title": "Long Vowels — Silent E",
+  "gradeLevel": 1,
+  "gridSize": 4,
+  "explorer": true,
+  "patterns": ["a_e", "i_e", "o_e", "u_e"],
+  "patternLabels": {
+    "a_e": "A_E (Long A)",
+    "i_e": "I_E (Long I)",
+    "o_e": "O_E (Long O)",
+    "u_e": "U_E (Long U)"
+  },
+  "wordPool": {
+    "a_e": ["bake", "cake", "lake", "make", "rake", "take", "wake", "came", "game", "name", "same", "tame", "face", "lace", "pace", "race", "cage", "page", "sage", "wave", "gave", "cave", "save", "tale", "sale", "pale", "male"],
+    "i_e": ["bike", "hike", "like", "mike", "pine", "vine", "wine", "fine", "line", "mine", "nine", "wide", "hide", "ride", "side", "tide", "site", "kite", "bite", "fire", "hire", "wire", "tile", "mile", "file", "pile"],
+    "o_e": ["bone", "cone", "home", "phone", "stone", "tone", "zone", "hope", "mole", "hole", "role", "pole", "note", "vote", "quote", "globe", "robe", "code", "mode", "rode", "woke", "poke", "joke", "smoke"],
+    "u_e": ["cube", "cute", "huge", "mule", "rule", "tube", "tune", "use", "fuse", "dune", "lure", "cure", "pure"]
+  },
+  "patternHint": "The E at the end is silent but makes the vowel say its name!",
+  "tutorialWords": {}
+}

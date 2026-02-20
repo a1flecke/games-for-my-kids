@@ -1,0 +1,22 @@
+{
+  "id": 3,
+  "title": "Consonant Digraphs",
+  "gradeLevel": 1,
+  "gridSize": 4,
+  "explorer": true,
+  "patterns": ["sh", "ch", "th", "wh"],
+  "patternLabels": {
+    "sh": "SH",
+    "ch": "CH",
+    "th": "TH",
+    "wh": "WH"
+  },
+  "wordPool": {
+    "sh": ["ship", "shop", "shed", "shelf", "shell", "shin", "shout", "share", "shape", "shut", "shift", "shall", "show"],
+    "ch": ["chip", "chin", "chop", "chest", "chain", "chair", "chase", "cheap", "check", "cheese", "child", "change"],
+    "th": ["thin", "thick", "them", "that", "then", "this", "with", "math", "bath", "path", "cloth", "tooth", "smooth"],
+    "wh": ["when", "what", "where", "which", "while", "wheat", "wheel", "whine", "whale", "whiff", "whip"]
+  },
+  "patternHint": "Two letters working together to make one sound!",
+  "tutorialWords": {}
+}

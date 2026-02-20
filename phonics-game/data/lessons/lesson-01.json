@@ -1,0 +1,23 @@
+{
+  "id": 1,
+  "title": "Short Vowels — CVC Words",
+  "gradeLevel": 1,
+  "gridSize": 4,
+  "explorer": true,
+  "patterns": ["short_a", "short_i", "short_o"],
+  "patternLabels": {
+    "short_a": "Short A",
+    "short_i": "Short I",
+    "short_o": "Short O"
+  },
+  "wordPool": {
+    "short_a": ["cat", "hat", "bat", "mat", "ran", "tan", "can", "map", "cap", "lap", "sad", "bad", "mad", "dad", "had"],
+    "short_i": ["sit", "bit", "hit", "fit", "pin", "tin", "win", "big", "pig", "fig", "did", "hid", "kid", "lid", "rid"],
+    "short_o": ["hop", "top", "pop", "mop", "dot", "got", "not", "cod", "rod", "nod", "fog", "hog", "log", "jog", "cob"]
+  },
+  "patternHint": "Listen for the vowel sound in the middle of the word.",
+  "tutorialWords": {
+    "short_a": ["cat", "hat", "mat"],
+    "short_i": ["sit", "bit", "hit"]
+  }
+}
