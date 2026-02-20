@@ -10,7 +10,7 @@
     "s_blend": "S-Blend"
   },
   "wordPool": {
-    "l_blend": ["black", "blow", "blue", "clap", "clay", "clue", "flag", "flat", "flip", "glad", "glow", "plan", "play", "slip", "slow", "sly"],
+    "l_blend": ["black", "blow", "blue", "clap", "clay", "clue", "flag", "flat", "flip", "glad", "glow", "plan", "play", "slip", "slow", "clip"],
     "s_blend": ["skin", "skip", "sky", "slam", "sled", "slim", "snail", "snap", "snow", "span", "spin", "star", "step", "swim", "sweet"]
   },
   "patternHint": "Two consonants working together at the beginning of the word!",

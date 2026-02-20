@@ -15,6 +15,6 @@
     "wr": ["write", "wrong", "wrap", "wren", "wreck", "wrestle", "wrist", "wrote", "written", "wrench"],
     "gn": ["gnome", "gnaw", "gnat", "gnu", "sign", "design", "assign", "align", "reign", "benign"]
   },
-  "patternHint": "Sometimes letters at the beginning of words are silent — sneaky!",
+  "patternHint": "GN can be silent at the start of words (gnat, gnome) AND at the end (sign, reign) — sneaky silent letters!",
   "tutorialWords": {}
 }

@@ -15,7 +15,7 @@
     "root_port": ["transport", "import", "export", "airport", "report", "support", "portable", "porter", "portfolio", "deportment"],
     "root_dict": ["dictate", "dictionary", "predict", "verdict", "contradict", "dictator", "diction", "edict", "indict", "jurisdiction"],
     "root_rupt": ["erupt", "interrupt", "disrupt", "rupture", "abrupt", "corrupt", "bankrupt", "irrupt", "eruption", "disruption"],
-    "root_struct": ["construct", "structure", "instruct", "destruct", "restructure", "infrastructure", "obstruct", "reconstruct", "constrict", "destruction"]
+    "root_struct": ["construct", "structure", "instruct", "destruct", "restructure", "infrastructure", "obstruct", "reconstruct", "construction", "destruction"]
   },
   "patternHint": "Latin roots tell you the core meaning of a word!",
   "tutorialWords": {}

@@ -12,8 +12,8 @@
     "root_scope": "SCOPE (look)"
   },
   "wordPool": {
-    "root_log": ["biology", "geology", "ecology", "mythology", "technology", "psychology", "sociology", "monologue", "dialogue", "epilogue", "catalog", "analogy", "trilogy", "anthology", "chronology"],
-    "root_micro": ["microscope", "microphone", "microchip", "microwave", "microbe", "microbiology", "microfilm", "microorganism", "microclimate", "microcosm"],
+    "root_log": ["zoology", "theology", "ecology", "mythology", "technology", "psychology", "sociology", "monologue", "dialogue", "epilogue", "catalog", "analogy", "trilogy", "anthology", "chronology"],
+    "root_micro": ["micrometer", "microphone", "microchip", "microwave", "microbe", "microbiology", "microfilm", "microorganism", "microclimate", "microcosm"],
     "root_astro": ["astronomy", "astronaut", "asteroid", "astrophysics", "astronomer", "astrology", "astrodome", "astrophotography", "astrological", "astrobiology"],
     "root_scope": ["telescope", "microscope", "kaleidoscope", "periscope", "stethoscope", "endoscope", "horoscope", "gyroscope", "oscilloscope", "spectroscope"]
   },

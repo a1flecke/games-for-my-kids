@@ -15,7 +15,7 @@
     "a_e": ["bake", "cake", "lake", "make", "rake", "take", "wake", "came", "game", "name", "same", "tame", "face", "lace", "pace", "race", "cage", "page", "sage", "wave", "gave", "cave", "save", "tale", "sale", "pale", "male"],
     "i_e": ["bike", "hike", "like", "mike", "pine", "vine", "wine", "fine", "line", "mine", "nine", "wide", "hide", "ride", "side", "tide", "site", "kite", "bite", "fire", "hire", "wire", "tile", "mile", "file", "pile"],
     "o_e": ["bone", "cone", "home", "phone", "stone", "tone", "zone", "hope", "mole", "hole", "role", "pole", "note", "vote", "quote", "globe", "robe", "code", "mode", "rode", "woke", "poke", "joke", "smoke"],
-    "u_e": ["cube", "cute", "huge", "mule", "rule", "tube", "tune", "use", "fuse", "dune", "lure", "cure", "pure"]
+    "u_e": ["cube", "cute", "huge", "mule", "rule", "tube", "tune", "use", "fuse", "dune", "rude", "prune", "flute"]
   },
   "patternHint": "The E at the end is silent but makes the vowel say its name!",
   "tutorialWords": {}

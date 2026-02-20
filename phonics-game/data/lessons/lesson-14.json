@@ -10,7 +10,7 @@
     "ow_diphthong": "OW (Diphthong)"
   },
   "wordPool": {
-    "ou": ["cloud", "loud", "proud", "found", "round", "sound", "ground", "bound", "mound", "house", "mouse", "blouse", "count", "mount", "shout", "out", "bout", "gout", "pout", "snout", "trout"],
+    "ou": ["cloud", "loud", "proud", "found", "round", "sound", "ground", "bound", "mound", "house", "mouse", "blouse", "count", "mount", "shout", "out", "bout", "scout", "pout", "snout", "trout"],
     "ow_diphthong": ["cow", "bow", "how", "now", "plow", "vow", "wow", "brow", "crowd", "drown", "frown", "gown", "owl", "power", "shower", "tower", "town", "brown", "clown", "crown", "down"]
   },
   "patternHint": "Watch out — OW can make two different sounds!",

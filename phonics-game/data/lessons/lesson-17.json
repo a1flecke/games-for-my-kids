@@ -11,7 +11,7 @@
   },
   "wordPool": {
     "soft_c": ["city", "cent", "cereal", "center", "cell", "circle", "cycle", "ceiling", "cinema", "pencil", "dance", "fence", "juice", "mice", "nice", "place", "race", "space", "price", "twice", "voice", "peace", "grace", "ice"],
-    "soft_g": ["gem", "giant", "giraffe", "general", "gentle", "gym", "germ", "page", "stage", "age", "cage", "change", "charge", "huge", "large", "orange", "range", "strange", "bridge", "fudge", "hedge", "judge", "ledge", "ridge", "dodge"]
+    "soft_g": ["gem", "giant", "giraffe", "general", "gentle", "gym", "germ", "page", "stage", "age", "cage", "change", "charge", "huge", "large", "orange", "range", "strange"]
   },
   "patternHint": "C and G make soft sounds when followed by E, I, or Y!",
   "tutorialWords": {}

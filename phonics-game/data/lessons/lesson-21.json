@@ -15,7 +15,7 @@
     "prefix_un": ["unlock", "unpack", "undo", "unfair", "unhappy", "unkind", "unsafe", "untie", "untrue", "unusual", "unclear", "uncover", "unload", "unplug"],
     "prefix_re": ["replay", "rebuild", "rewrite", "reopen", "return", "recall", "reclaim", "recount", "refill", "reheat", "remind", "rename", "repay", "reset", "restart"],
     "prefix_pre": ["predict", "preview", "preschool", "preheat", "preorder", "prepay", "pretest", "prevent", "prejudge", "prepaid", "prehistoric"],
-    "prefix_dis": ["discover", "disagree", "dislike", "displace", "display", "disturb", "distrust", "disorder", "disconnect", "disappear", "disapprove", "disrespect"]
+    "prefix_dis": ["discover", "disagree", "dislike", "displace", "disturb", "distrust", "disorder", "disconnect", "disappear", "disapprove", "disrespect", "discomfort"]
   },
   "patternHint": "A prefix at the beginning changes the word's meaning!",
   "tutorialWords": {}

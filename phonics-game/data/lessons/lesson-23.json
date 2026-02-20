@@ -14,7 +14,7 @@
   "wordPool": {
     "root_bio": ["biology", "biography", "biome", "biosphere", "antibiotic", "biodiversity", "biohazard", "biochemistry", "biofuel", "biomass"],
     "root_geo": ["geography", "geology", "geometry", "geothermal", "geocache", "geode", "geologist", "geopolitics", "geodesic", "geotagging"],
-    "root_graph": ["autograph", "photograph", "paragraph", "graphic", "telegraph", "seismograph", "biography", "videograph", "lithograph", "monograph"],
+    "root_graph": ["autograph", "photograph", "paragraph", "graphic", "telegraph", "seismograph", "choreography", "calligraphy", "lithograph", "monograph"],
     "root_phon": ["phone", "microphone", "phonics", "symphony", "earphone", "saxophone", "megaphone", "homophone", "phonograph", "xylophone"]
   },
   "patternHint": "Greek roots are like building blocks — they appear in many English words!",
