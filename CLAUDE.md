@@ -29,6 +29,15 @@ node .github/scripts/update-index.js
 
 **Deployment:** Pushing to `main` triggers `.github/workflows/update-index.yml` which regenerates `index.html` and deploys to GitHub Pages. The workflow auto-commits index changes with `[skip ci]`.
 
+## Verification Workflows
+
+Run these skills after editing the relevant files — before committing:
+
+| When | Skill | What it checks |
+|------|-------|----------------|
+| After editing any `catacombs-and-creeds/data/levels/levelN.json` | `/verify-maps` | BFS reachability of all NPCs, items, chests, enemies from player start |
+| After editing `math-coloring-2/index.html` themes | `/verify-math-geometry` | Every section overlaps nearest neighbor by ≥15px |
+
 ## Adding a New Game
 
 1. Create a directory with the game name (e.g., `my-game/`)
@@ -90,18 +99,26 @@ Use `/verify-maps` skill to BFS-check all level maps for reachability after edit
 
 Word Explorer — phonics matching game for grades 1–5. Multi-file modular JS.
 
+**Session workflow:** After each session: run a web engineer review agent → fix issues → delete the session file → commit + push.
+
 **Session tracking:** Sessions defined in `phonics-game/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md` (Haiku for data-entry sessions, Sonnet for implementation sessions).
 
 **Key files:**
 - `index.html` — game shell with 4 screens: `#screen-select`, `#screen-board`, `#screen-sort`, `#screen-summary`
-- `css/style.css` — design system (CSS vars, grade colors, responsive 3/4/5-col lesson grid)
-- `js/game.js` — Game class: lesson select rendering, grade filter, settings panel with focus trap
-- `js/save.js` — SaveManager (localStorage key: `phonics-progress`)
-- `data/lessons/lesson-{01-30}.json` — phonics lesson data (added in Sessions 2–4)
+- `css/style.css` — design system (CSS vars incl. `--text-secondary`, grade colors, responsive 3/4/5-col lesson grid)
+- `js/game.js` — Game class: lesson select rendering, grade filter, settings panel, PIN dialog (all with focus traps)
+- `js/save.js` — SaveManager (localStorage key: `phonics-progress`); `_defaults()` defines all required fields
+- `js/data.js` — DataManager: `loadLesson(id)` fetches JSON; `getLessonMeta()` returns all 30 lessons (field: `gradeLevel`)
+- `data/lessons/lesson-{01-30}.json` — phonics lesson data (Sessions 2–4); schema uses `gradeLevel` field
 
 **Grid sizes by grade:** Grade 1: 4×4 (16 tiles), Grade 2–3: 5×5 (25), Grade 4–5: 6×6 (36). See `plan.md § 2.5`.
 
 **Target platform:** iPad Safari (primary), desktop Chrome/Firefox. DOM + CSS Grid (not Canvas).
+
+**Key phonics data rules (Sessions 2–4):**
+- Words must phonetically exemplify their pattern — check for exceptions (e.g. "word" sounds like "ur" not "or"; "smooth" has silent TH)
+- Avoid homonyms with two pronunciations on the same board (e.g. "read", "wind", "wound")
+- No word in both patterns of the same lesson (e.g. "sled" is an sl-blend, not both l-blend and s-blend)
 
 ## HTML/JS Coding Standards
 

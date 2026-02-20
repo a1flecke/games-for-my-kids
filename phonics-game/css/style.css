@@ -8,6 +8,7 @@
 :root {
     --bg: #F5F0E8;
     --text: #2C2416;
+    --text-secondary: #595143; /* ≥4.5:1 on #F5F0E8 (WCAG AA) */
     --accent: #E8A020;       /* gold — correct / selected */
     --correct: #27ae60;      /* green — matched */
     --wrong: #e74c3c;        /* red — wrong tap */
@@ -21,11 +22,8 @@
     --font-ui: 'OpenDyslexic', 'Comic Sans MS', cursive;
 }
 
-/* ---- Font size overrides: set directly on html for reliable cascade ---- */
-html             { font-size: 16px; }
-html.font-small  { font-size: 14px; }
-html.font-large  { font-size: 20px; }
-/* font-medium is the default 16px above — no separate rule needed */
+/* ---- Base font size: game.js overrides via documentElement.style.fontSize ---- */
+html { font-size: 16px; }
 
 /* =====================================================================
    Reset & Base
@@ -229,10 +227,9 @@ body {
     background: #e0dbd0;
 }
 
-/* Secondary text: #595143 achieves ≥4.5:1 on #F5F0E8 (WCAG AA) */
 .settings-note {
     font-size: 0.8rem;
-    color: #595143;
+    color: var(--text-secondary);
     margin-top: 6px;
     line-height: 1.4;
 }
@@ -281,10 +278,9 @@ body {
     flex-shrink: 0;
 }
 
-/* #595143 on #F5F0E8 = ~5.1:1 contrast (WCAG AA ✓) */
 .select-subtitle {
     font-size: 1rem;
-    color: #595143;
+    color: var(--text-secondary);
     margin-bottom: 20px;
 }
 
@@ -402,10 +398,9 @@ body {
     line-height: 1;
 }
 
-/* #555 on #F5F0E8 = ~4.6:1 (WCAG AA ✓) */
 .lesson-title {
     font-size: 0.75rem;
-    color: #555;
+    color: var(--text-secondary);
     line-height: 1.3;
 }
 
@@ -475,9 +470,123 @@ body {
 
 .placeholder-msg {
     font-size: 1.2rem;
-    color: #595143;
+    color: var(--text-secondary);
     text-align: center;
 }
+
+/* =====================================================================
+   PIN Dialog (unlock-all lessons)
+   ===================================================================== */
+
+#pin-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 400;
+}
+
+#pin-overlay.open {
+    display: block;
+}
+
+#pin-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 500;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: min(300px, 90vw);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    font-family: var(--font-ui);
+}
+
+#pin-dialog.open {
+    display: block;
+}
+
+#pin-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+#pin-close:hover { background: #f0ebe3; }
+#pin-close:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+
+#pin-dialog h3 {
+    font-size: 1.1rem;
+    margin: 0 32px 8px 0;
+    color: var(--text);
+}
+
+#pin-dialog p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+#pin-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--font-ui);
+    font-size: 1.3rem;
+    letter-spacing: 0.2em;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    margin-bottom: 6px;
+    min-height: 44px;
+}
+
+#pin-input:focus {
+    outline: 3px solid var(--glow);
+    outline-offset: 1px;
+    border-color: var(--glow);
+}
+
+#pin-error {
+    font-size: 0.85rem;
+    color: var(--wrong);
+    min-height: 1.3em;
+    margin-bottom: 12px;
+}
+
+#pin-submit {
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: bold;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text);
+    min-height: 44px;
+    transition: background 0.15s;
+}
+
+#pin-submit:hover { background: #d4911a; }
+#pin-submit:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
 
 /* =====================================================================
    Responsive adjustments

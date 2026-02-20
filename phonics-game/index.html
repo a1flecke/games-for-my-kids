@@ -101,6 +101,17 @@
         <p class="placeholder-msg">Summary — coming in Session 7</p>
     </div>
 
+    <!-- PIN dialog — unlock all lessons (parent/teacher gated) -->
+    <div id="pin-overlay"></div>
+    <div id="pin-dialog" role="dialog" aria-modal="true" aria-label="Enter PIN to unlock lessons" aria-hidden="true">
+        <button id="pin-close" aria-label="Cancel">✕</button>
+        <h3>Enter PIN</h3>
+        <p>Enter the parent or teacher PIN to unlock all lessons.</p>
+        <input type="password" id="pin-input" aria-label="PIN" maxlength="10" autocomplete="off">
+        <p id="pin-error" aria-live="polite"></p>
+        <button id="pin-submit">Unlock</button>
+    </div>
+
     <!-- Live region for accessibility announcements -->
     <div id="aria-live" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
 

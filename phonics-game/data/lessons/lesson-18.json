@@ -11,7 +11,7 @@
   },
   "wordPool": {
     "closed_syllable": ["nap", "bet", "sit", "hot", "sun", "bat", "clip", "frost", "grab", "jump", "lost", "shelf", "test", "track"],
-    "open_syllable": ["no", "go", "be", "me", "he", "she", "we", "so", "by", "cry", "fly", "my", "sky", "try", "why", "hero", "paper", "label", "tiger", "open", "robot"]
+    "open_syllable": ["no", "go", "be", "me", "he", "she", "we", "so", "by", "cry", "fly", "my", "sky", "try", "why", "hero", "baby", "lazy", "tiger", "open", "robot"]
   },
   "patternHint": "Closed syllables end in a consonant — short vowel! Open syllables end in a vowel — long vowel!",
   "tutorialWords": {}

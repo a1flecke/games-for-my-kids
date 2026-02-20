@@ -14,7 +14,7 @@
   "wordPool": {
     "sh": ["ship", "shop", "shed", "shelf", "shell", "shin", "shout", "share", "shape", "shut", "shift", "shall", "show"],
     "ch": ["chip", "chin", "chop", "chest", "chain", "chair", "chase", "cheap", "check", "cheese", "child", "change"],
-    "th": ["thin", "thick", "them", "that", "then", "this", "with", "math", "bath", "path", "cloth", "tooth", "smooth"],
+    "th": ["thin", "thick", "them", "that", "then", "this", "with", "math", "bath", "path", "cloth", "tooth"],
     "wh": ["when", "what", "where", "which", "while", "wheat", "wheel", "whine", "whale", "whiff", "whip"]
   },
   "patternHint": "Two letters working together to make one sound!",

@@ -10,8 +10,8 @@
     "end_blend": "End Blend"
   },
   "wordPool": {
-    "r_blend": ["brain", "brick", "bring", "brown", "crack", "craft", "crawl", "crop", "draw", "dream", "dress", "drive", "frog", "from", "grab", "grin", "grow", "press", "print", "track", "trap", "trick", "trip", "truck", "trim"],
-    "end_blend": ["and", "band", "find", "hand", "land", "pond", "send", "wind", "bent", "dent", "hint", "mint", "rent", "tent", "best", "fist", "list", "mist", "rest", "test", "camp", "damp", "jump", "lamp", "ramp", "stamp"]
+    "r_blend": ["brain", "brick", "bring", "brown", "crack", "craft", "crawl", "crop", "draw", "dream", "dress", "drive", "frog", "fresh", "grab", "grin", "grow", "press", "print", "track", "trap", "trick", "trip", "truck", "trim"],
+    "end_blend": ["and", "band", "find", "hand", "land", "pond", "send", "kind", "bent", "dent", "hint", "mint", "rent", "tent", "best", "fist", "list", "mist", "rest", "test", "camp", "damp", "jump", "lamp", "ramp", "stamp"]
   },
   "patternHint": "Listen for two consonants together at the END of the word!",
   "tutorialWords": {}

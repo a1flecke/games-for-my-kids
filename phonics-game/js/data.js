@@ -5,7 +5,8 @@ class DataManager {
         return response.json();
     }
 
-    // Hardcoded metadata for lesson select screen (no fetch needed)
+    // Hardcoded metadata for lesson select screen (no fetch needed).
+    // Field is `gradeLevel` to match the lesson JSON schema.
     static getLessonMeta() {
         return [
             { id: 1,  title: 'Short Vowels — CVC Words',          gradeLevel: 1 },
@@ -28,7 +29,16 @@ class DataManager {
             { id: 18, title: 'Syllable Types — Closed and Open',   gradeLevel: 3 },
             { id: 19, title: 'VCE and Vowel Team Syllables',       gradeLevel: 3 },
             { id: 20, title: 'Common Suffixes',                    gradeLevel: 3 },
-            // Session 4 will fill in lessons 21-30
+            { id: 21, title: 'Prefixes — Basic',                   gradeLevel: 4 },
+            { id: 22, title: 'Suffixes — -tion, -sion, -ness',    gradeLevel: 4 },
+            { id: 23, title: 'Greek Roots I',                      gradeLevel: 4 },
+            { id: 24, title: 'Latin Roots I',                      gradeLevel: 4 },
+            { id: 25, title: 'Compound Words & Homophones',        gradeLevel: 4 },
+            { id: 26, title: 'Advanced Prefixes',                  gradeLevel: 5 },
+            { id: 27, title: 'Advanced Suffixes',                  gradeLevel: 5 },
+            { id: 28, title: 'Latin Roots II',                     gradeLevel: 5 },
+            { id: 29, title: 'Greek Roots II',                     gradeLevel: 5 },
+            { id: 30, title: 'Academic Vocabulary',                gradeLevel: 5 },
         ];
     }
 }

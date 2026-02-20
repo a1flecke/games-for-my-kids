@@ -1,38 +1,3 @@
-// Placeholder lesson metadata for Session 1 UI.
-// Real lesson data loaded from JSON files starting in Session 2.
-const LESSON_META = [
-    { id: 1,  grade: 1, title: 'Short Vowels — CVC Words' },
-    { id: 2,  grade: 1, title: 'Short Vowels — More CVC' },
-    { id: 3,  grade: 1, title: 'Consonant Digraphs' },
-    { id: 4,  grade: 1, title: 'L-Blends & S-Blends' },
-    { id: 5,  grade: 1, title: 'R-Blends & End Blends' },
-    { id: 6,  grade: 1, title: 'Long Vowels — Silent E' },
-    { id: 7,  grade: 2, title: 'Long-A Vowel Teams' },
-    { id: 8,  grade: 2, title: 'Long-E Vowel Teams' },
-    { id: 9,  grade: 2, title: 'Long-O Vowel Teams' },
-    { id: 10, grade: 2, title: 'Long-I & Long-U Teams' },
-    { id: 11, grade: 2, title: 'R-Controlled — ar, or' },
-    { id: 12, grade: 2, title: 'R-Controlled — er, ir, ur' },
-    { id: 13, grade: 2, title: 'Diphthongs — oi, oy' },
-    { id: 14, grade: 2, title: 'Diphthongs — ou, ow' },
-    { id: 15, grade: 3, title: 'Silent Letters — kn, wr, gn' },
-    { id: 16, grade: 3, title: 'Silent GH Patterns' },
-    { id: 17, grade: 3, title: 'Soft C and Soft G' },
-    { id: 18, grade: 3, title: 'Syllable Types' },
-    { id: 19, grade: 3, title: 'VCE & Vowel Team Syllables' },
-    { id: 20, grade: 3, title: 'Common Suffixes' },
-    { id: 21, grade: 4, title: 'Prefixes — Basic' },
-    { id: 22, grade: 4, title: 'Suffixes — -tion, -sion, -ness' },
-    { id: 23, grade: 4, title: 'Greek Roots I' },
-    { id: 24, grade: 4, title: 'Latin Roots I' },
-    { id: 25, grade: 4, title: 'Compound Words & Homophones' },
-    { id: 26, grade: 5, title: 'Advanced Prefixes' },
-    { id: 27, grade: 5, title: 'Advanced Suffixes' },
-    { id: 28, grade: 5, title: 'Latin Roots II' },
-    { id: 29, grade: 5, title: 'Greek Roots II' },
-    { id: 30, grade: 5, title: 'Academic Vocabulary' },
-];
-
 // Escape user-facing strings interpolated into innerHTML to prevent XSS.
 function escHtml(str) {
     return String(str)
@@ -47,8 +12,10 @@ class Game {
         this.progress = null;
         this.activeGradeFilter = 'all';
         this.settingsOpen = false;
+        this.pinOpen = false;
         this.fontSizeLevel = 'medium'; // small | medium | large
         this._focusTrapHandler = null;
+        this._pinFocusTrapHandler = null;
     }
 
     init() {
@@ -61,6 +28,7 @@ class Game {
         this.renderLessonSelect();
         this._bindSettingsPanel();
         this._bindGradeFilter();
+        this._bindPinDialog();
         this._syncSettings();
     }
 
@@ -68,22 +36,21 @@ class Game {
         const grid = document.getElementById('lesson-grid');
         grid.innerHTML = '';
 
-        LESSON_META.forEach(lesson => {
-            const lessonData = this.progress.lessons?.[lesson.id];
+        DataManager.getLessonMeta().forEach(lesson => {
+            // Use String key to match how localStorage serialises object keys
+            const lessonData = this.progress.lessons?.[String(lesson.id)];
             const stars = lessonData?.stars || 0;
             const completed = lessonData?.completed || false;
             const previewed = lessonData?.previewed || false;
             // Lesson 1 always unlocked; subsequent lessons unlock when previous is completed
             const isUnlocked = lesson.id === 1
                 || this.progress.allUnlocked
-                || Boolean(this.progress.lessons?.[lesson.id - 1]?.completed);
-            // Any lesson can be started in preview mode even if locked
+                || Boolean(this.progress.lessons?.[String(lesson.id - 1)]?.completed);
             const isPreview = !isUnlocked;
 
             const card = document.createElement('div');
             card.className = 'lesson-card';
-            // Explicit string conversion ensures grade filter comparison works correctly
-            card.dataset.grade = String(lesson.grade);
+            card.dataset.grade = String(lesson.gradeLevel);
             card.dataset.id = String(lesson.id);
 
             if (isPreview) {
@@ -92,11 +59,12 @@ class Game {
                 card.setAttribute('aria-disabled', 'true');
             } else {
                 card.setAttribute('tabindex', '0');
+                card.setAttribute('aria-disabled', 'false');
             }
 
             card.setAttribute('role', 'button');
             card.setAttribute('aria-label',
-                `Lesson ${lesson.id}: ${lesson.title}, Grade ${lesson.grade}` +
+                `Lesson ${lesson.id}: ${lesson.title}, Grade ${lesson.gradeLevel}` +
                 (isPreview ? ', preview only' : '') +
                 (stars > 0 ? `, ${stars} of 3 stars` : '')
             );
@@ -104,7 +72,7 @@ class Game {
             card.innerHTML = `
                 <div class="lesson-number">${escHtml(lesson.id)}</div>
                 <div class="lesson-title">${escHtml(lesson.title)}</div>
-                <div class="grade-badge grade-${escHtml(lesson.grade)}">Grade ${escHtml(lesson.grade)}</div>
+                <div class="grade-badge grade-${escHtml(lesson.gradeLevel)}">Grade ${escHtml(lesson.gradeLevel)}</div>
                 <div class="star-row" aria-hidden="true">
                     ${[1,2,3].map(n => `<span class="star${stars >= n ? ' earned' : ''}">${stars >= n ? '★' : '☆'}</span>`).join('')}
                 </div>
@@ -144,6 +112,10 @@ class Game {
     }
 
     _applyGradeFilter(grade) {
+        const grid = document.getElementById('lesson-grid');
+        const label = grade === 'all' ? 'Lessons' : `Grade ${grade} Lessons`;
+        grid.setAttribute('aria-label', label);
+
         document.querySelectorAll('.lesson-card').forEach(card => {
             const visible = grade === 'all' || card.dataset.grade === grade;
             card.style.display = visible ? '' : 'none';
@@ -182,20 +154,10 @@ class Game {
             SaveManager.save(data);
         });
 
-        // Unlock all (PIN-gated — PIN specified in design doc as "1234")
+        // Unlock all — opens the accessible PIN dialog
         document.getElementById('unlock-btn').addEventListener('click', () => {
-            const pin = prompt('Enter PIN to unlock all lessons:');
-            if (pin === '1234') {
-                const data = SaveManager.load();
-                data.allUnlocked = true;
-                SaveManager.save(data);
-                this.progress = data;
-                this.renderLessonSelect();
-                this._toggleSettings();
-                alert('All lessons unlocked!');
-            } else if (pin !== null) {
-                alert('Incorrect PIN.');
-            }
+            this._toggleSettings();
+            this._openPinDialog();
         });
     }
 
@@ -213,15 +175,11 @@ class Game {
         gearBtn.setAttribute('aria-expanded', String(this.settingsOpen));
 
         if (this.settingsOpen) {
-            // Move focus to close button (first focusable element in panel)
             document.getElementById('settings-close').focus();
-            // Activate focus trap
             this._focusTrapHandler = this._handleFocusTrap.bind(this);
             document.addEventListener('keydown', this._focusTrapHandler);
         } else {
-            // Return focus to gear button
             gearBtn.focus();
-            // Remove focus trap
             if (this._focusTrapHandler) {
                 document.removeEventListener('keydown', this._focusTrapHandler);
                 this._focusTrapHandler = null;
@@ -244,18 +202,91 @@ class Game {
         }
         if (e.key === 'Tab') {
             if (e.shiftKey) {
-                if (document.activeElement === first) {
-                    e.preventDefault();
-                    last.focus();
-                }
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
             } else {
-                if (document.activeElement === last) {
-                    e.preventDefault();
-                    first.focus();
-                }
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
             }
         }
     }
+
+    // ---- PIN dialog ----
+
+    _bindPinDialog() {
+        document.getElementById('pin-close').addEventListener('click', () => this._closePinDialog());
+        document.getElementById('pin-overlay').addEventListener('click', () => this._closePinDialog());
+        document.getElementById('pin-submit').addEventListener('click', () => this._submitPin());
+        document.getElementById('pin-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') this._submitPin();
+            if (e.key === 'Escape') this._closePinDialog();
+        });
+    }
+
+    _openPinDialog() {
+        this.pinOpen = true;
+        const dialog = document.getElementById('pin-dialog');
+        const overlay = document.getElementById('pin-overlay');
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-error').textContent = '';
+        dialog.classList.add('open');
+        overlay.classList.add('open');
+        dialog.setAttribute('aria-hidden', 'false');
+        document.getElementById('pin-input').focus();
+        this._pinFocusTrapHandler = this._handlePinFocusTrap.bind(this);
+        document.addEventListener('keydown', this._pinFocusTrapHandler);
+    }
+
+    _closePinDialog() {
+        this.pinOpen = false;
+        const dialog = document.getElementById('pin-dialog');
+        const overlay = document.getElementById('pin-overlay');
+        dialog.classList.remove('open');
+        overlay.classList.remove('open');
+        dialog.setAttribute('aria-hidden', 'true');
+        if (this._pinFocusTrapHandler) {
+            document.removeEventListener('keydown', this._pinFocusTrapHandler);
+            this._pinFocusTrapHandler = null;
+        }
+        // Return focus to the unlock button
+        document.getElementById('unlock-btn').focus();
+    }
+
+    _handlePinFocusTrap(e) {
+        const dialog = document.getElementById('pin-dialog');
+        const focusable = Array.from(
+            dialog.querySelectorAll('button, input')
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.key === 'Escape') { this._closePinDialog(); return; }
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        }
+    }
+
+    _submitPin() {
+        const pin = document.getElementById('pin-input').value;
+        const errorEl = document.getElementById('pin-error');
+        if (pin === '1234') {
+            const data = SaveManager.load();
+            data.allUnlocked = true;
+            SaveManager.save(data);
+            this.progress = data;
+            this.renderLessonSelect();
+            this._closePinDialog();
+        } else {
+            errorEl.textContent = 'Incorrect PIN. Please try again.';
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-input').focus();
+        }
+    }
+
+    // ---- Settings sync ----
 
     _syncSettings() {
         const data = SaveManager.load();
@@ -263,19 +294,20 @@ class Game {
         if (data.muteSfx) document.getElementById('mute-sfx').checked = true;
         if (data.fontSize) {
             document.getElementById('font-size-select').value = data.fontSize;
-            // _applyFontSize already called in init() with the persisted value
         }
     }
 
     _applyFontSize(level) {
-        // Set font-size directly on <html> — more reliable than CSS custom property re-declaration
-        const sizes = { small: '14px', medium: '16px', large: '20px' };
-        document.documentElement.style.fontSize = sizes[level] || '16px';
+        // Set font-size directly on <html> — more reliable than a CSS class approach
+        // Minimums: small ≥ 16px, medium 18px, large 22px (per plan.md accessibility floor)
+        const sizes = { small: '16px', medium: '18px', large: '22px' };
+        document.documentElement.style.fontSize = sizes[level] || '18px';
         this.fontSizeLevel = level;
     }
 }
 
+// Assign to window immediately so other modules can reference window.game if needed.
+window.game = new Game();
 window.addEventListener('load', () => {
-    window.game = new Game();
     window.game.init();
 });

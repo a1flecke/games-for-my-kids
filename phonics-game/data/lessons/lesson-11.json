@@ -11,7 +11,7 @@
   },
   "wordPool": {
     "ar": ["car", "far", "bar", "jar", "star", "yard", "bark", "dark", "farm", "hard", "harm", "large", "mark", "park", "part", "scar", "shark", "sharp", "start", "yarn"],
-    "or": ["corn", "born", "fork", "horn", "horse", "more", "north", "porch", "port", "score", "shore", "short", "sort", "sport", "store", "storm", "torn", "torch", "word", "worn"]
+    "or": ["corn", "born", "fork", "horn", "horse", "more", "north", "porch", "port", "score", "shore", "short", "sort", "sport", "store", "storm", "torn", "torch", "worn"]
   },
   "patternHint": "R changes the vowel sound when it follows a vowel!",
   "tutorialWords": {}
