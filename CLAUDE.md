@@ -89,12 +89,65 @@ Use `/verify-maps` skill to BFS-check all level maps for reachability after edit
 - Fractions-of-quantities (`1/4 of 32`) are Grade 4+, not appropriate for a 2nd grade game.
 - Telling-time problems: "minute hand at 6 = 30 minutes past" — answer must be 30, not 6.
 
-## Accessibility Requirements (catacombs-and-creeds)
+### phonics-game (active development)
 
-These are non-negotiable for the target audience:
-- **Font:** OpenDyslexic via CDN with Comic Sans MS fallback (Comic Sans is pre-installed on iPads), minimum 16pt, 1.5-2x line height
-- **Colors:** Cream background (#F5F0E8), dark text (#2C2416), WCAG AA contrast (4.5:1)
-- **Text:** Maximum 15 words per dialogue box, no time pressure, typewriter effect skippable
-- **ADHD:** Auto-save every 2 minutes, always-visible objectives, 9-18 min per level
-- **Touch targets:** 44x44px minimum
+Word Explorer — phonics matching game for grades 1–5. Multi-file modular JS.
+
+**Session tracking:** Sessions defined in `phonics-game/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md` (Haiku for data-entry sessions, Sonnet for implementation sessions).
+
+**Key files:**
+- `index.html` — game shell with 4 screens: `#screen-select`, `#screen-board`, `#screen-sort`, `#screen-summary`
+- `css/style.css` — design system (CSS vars, grade colors, responsive 3/4/5-col lesson grid)
+- `js/game.js` — Game class: lesson select rendering, grade filter, settings panel with focus trap
+- `js/save.js` — SaveManager (localStorage key: `phonics-progress`)
+- `data/lessons/lesson-{01-30}.json` — phonics lesson data (added in Sessions 2–4)
+
+**Grid sizes by grade:** Grade 1: 4×4 (16 tiles), Grade 2–3: 5×5 (25), Grade 4–5: 6×6 (36). See `plan.md § 2.5`.
+
+**Target platform:** iPad Safari (primary), desktop Chrome/Firefox. DOM + CSS Grid (not Canvas).
+
+## HTML/JS Coding Standards
+
+Rules that apply to ALL games in this repo. These prevent common bugs:
+
+**Font loading:** Load OpenDyslexic via `<link rel="stylesheet">` in HTML only. Never also `@import` in CSS — causes a double HTTP request and render-blocking delay.
+
+**Viewport:** Never use `user-scalable=no` — violates WCAG 1.4.4 (Resize Text). Users with dyslexia rely on browser zoom.
+
+**Modal dialogs:**
+- Use `<div role="dialog" aria-modal="true" aria-label="...">` — not `<aside>` (conflicting implicit landmark role)
+- First focusable element in the modal must be a close (✕) button
+- Implement a keyboard focus trap: Tab/Shift-Tab cycle within the modal; Escape closes it
+- On open: move focus to the close button. On close: return focus to the trigger element
+- Toggle `aria-hidden="true"/"false"` on the panel so AT ignores it when closed
+- Toggle `aria-expanded` on the trigger button
+
+**innerHTML safety:** Never interpolate external data into `innerHTML` without HTML-escaping. Use:
+```js
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+```
+
+**Locked/disabled interactive elements:** Set `tabindex="-1"` AND `aria-disabled="true"` — a visual `.locked` class alone is not enough.
+
+**Filtered lists:** When hiding items with `display:none`, also set `aria-hidden="true"` so AT list counts stay accurate.
+
+**Font size scaling:** Apply font-size directly via `document.documentElement.style.fontSize = '20px'` rather than re-declaring a CSS custom property on `:root` from a class (fragile source-order dependency).
+
+**Form inputs:** Don't add `aria-label` to an `<input>` that already has a `<label for="...">` pointing to it — the label is already the accessible name.
+
+**`window.game` init pattern:** Assign before calling init: `window.game = new Game(); window.game.init();` (not `game.init()` which relies on implicit global).
+
+## Accessibility Requirements (All Games)
+
+These are non-negotiable for the target audience (dyslexia + ADHD accommodations):
+- **Font:** OpenDyslexic via CDN with Comic Sans MS fallback (Comic Sans is pre-installed on iPads), minimum 16pt, 1.5–2× line height
+- **Colors:** Cream background (#F5F0E8), dark text (#2C2416), WCAG AA contrast (4.5:1 minimum). Secondary/muted text: use #595143 or darker on cream — never #666, #888, #999 (all fail WCAG AA on cream)
+- **Touch targets:** 44×44px minimum on all interactive elements
 - **No flashing/strobing effects**
+- **No countdown timers visible by default** (anxiety-inducing for ADHD learners)
+
+**catacombs-and-creeds specific:**
+- **Text:** Maximum 15 words per dialogue box, no time pressure, typewriter effect skippable
+- **ADHD:** Auto-save every 2 minutes, always-visible objectives, 9–18 min per level
