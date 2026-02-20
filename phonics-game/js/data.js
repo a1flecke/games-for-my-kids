@@ -30,7 +30,7 @@ class DataManager {
             { id: 19, title: 'VCE and Vowel Team Syllables',       gradeLevel: 3 },
             { id: 20, title: 'Common Suffixes',                    gradeLevel: 3 },
             { id: 21, title: 'Prefixes — Basic',                   gradeLevel: 4 },
-            { id: 22, title: 'Suffixes — -tion, -sion, -ness',    gradeLevel: 4 },
+            { id: 22, title: 'Suffixes — -tion, -sion, -ness, -ment', gradeLevel: 4 },
             { id: 23, title: 'Greek Roots I',                      gradeLevel: 4 },
             { id: 24, title: 'Latin Roots I',                      gradeLevel: 4 },
             { id: 25, title: 'Compound Words & Homophones',        gradeLevel: 4 },
@@ -38,7 +38,7 @@ class DataManager {
             { id: 27, title: 'Advanced Suffixes',                  gradeLevel: 5 },
             { id: 28, title: 'Latin Roots II',                     gradeLevel: 5 },
             { id: 29, title: 'Greek Roots II',                     gradeLevel: 5 },
-            { id: 30, title: 'Academic Vocabulary',                gradeLevel: 5 },
+            { id: 30, title: 'Academic Vocabulary — Multisyllabic', gradeLevel: 5 },
         ];
     }
 }

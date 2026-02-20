@@ -1,0 +1,18 @@
+{
+  "id": 25,
+  "title": "Compound Words and Homophones",
+  "gradeLevel": 4,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["compound", "homophone"],
+  "patternLabels": {
+    "compound": "Compound Word",
+    "homophone": "Homophone"
+  },
+  "wordPool": {
+    "compound": ["playground", "notebook", "sunflower", "birthday", "raincoat", "bookshelf", "doorbell", "fireplace", "football", "goldfish", "haircut", "homework", "laptop", "moonlight", "newspaper", "popcorn", "rainbow", "sailboat", "snowball", "starfish", "sunlight", "thunderstorm", "waterfall", "weekend", "windmill"],
+    "homophone": ["there", "their", "your", "two", "too", "hear", "here", "know", "knew", "write", "right", "sea", "see", "buy", "by", "flower", "flour", "sail", "sale", "mail", "male", "tale", "tail", "plane", "plain", "main", "mane"]
+  },
+  "patternHint": "Compound words join two words together. Homophones sound the same but are spelled differently!",
+  "tutorialWords": {}
+}

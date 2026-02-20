@@ -1,0 +1,18 @@
+{
+  "id": 30,
+  "title": "Academic Vocabulary: Multisyllabic",
+  "gradeLevel": 5,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["academic_prefix_suffix", "academic_root_combo"],
+  "patternLabels": {
+    "academic_prefix_suffix": "Prefix + Suffix",
+    "academic_root_combo": "Root Combination"
+  },
+  "wordPool": {
+    "academic_prefix_suffix": ["unexpected", "uncomfortable", "unremarkable", "irresponsible", "predetermined", "independence", "irreversible", "misunderstanding", "overconfident", "underestimate", "disadvantage", "unconditional", "unprecedented", "interconnected", "overcommunicate"],
+    "academic_root_combo": ["extraordinary", "circumstances", "environment", "representative", "transformation", "transportation", "communication", "organization", "electricity", "geography", "investigation", "microorganism", "international", "biodiversity", "infrastructure"]
+  },
+  "patternHint": "Break long words into parts — each part has a meaning!",
+  "tutorialWords": {}
+}

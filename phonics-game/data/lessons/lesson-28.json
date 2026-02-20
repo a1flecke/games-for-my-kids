@@ -1,0 +1,22 @@
+{
+  "id": 28,
+  "title": "Latin Roots II",
+  "gradeLevel": 5,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["root_scrib", "root_vis", "root_aud", "root_man"],
+  "patternLabels": {
+    "root_scrib": "SCRIB/SCRIPT (write)",
+    "root_vis": "VIS (see)",
+    "root_aud": "AUD (hear)",
+    "root_man": "MAN (hand)"
+  },
+  "wordPool": {
+    "root_scrib": ["describe", "prescription", "manuscript", "subscribe", "inscription", "scribe", "scripture", "transcribe", "circumscribe", "conscript"],
+    "root_vis": ["visible", "vision", "visit", "visual", "television", "invisible", "preview", "review", "revise", "supervise"],
+    "root_aud": ["audio", "audience", "auditorium", "audible", "audiobook", "inaudible", "audition", "auditory", "audiovisual", "audit"],
+    "root_man": ["manual", "manufacture", "manage", "command", "demand", "manuscript", "manipulate", "maneuver", "mandate", "manner"]
+  },
+  "patternHint": "Latin roots tell you the core meaning of a word!",
+  "tutorialWords": {}
+}

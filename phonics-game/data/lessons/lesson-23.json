@@ -1,0 +1,22 @@
+{
+  "id": 23,
+  "title": "Greek Roots I",
+  "gradeLevel": 4,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["root_bio", "root_geo", "root_graph", "root_phon"],
+  "patternLabels": {
+    "root_bio": "BIO (life)",
+    "root_geo": "GEO (earth)",
+    "root_graph": "GRAPH (write)",
+    "root_phon": "PHON (sound)"
+  },
+  "wordPool": {
+    "root_bio": ["biology", "biography", "biome", "biosphere", "antibiotic", "biodiversity", "biohazard", "biochemistry", "biofuel", "biomass"],
+    "root_geo": ["geography", "geology", "geometry", "geothermal", "geocache", "geode", "geologist", "geopolitics", "geodesic", "geotagging"],
+    "root_graph": ["autograph", "photograph", "paragraph", "graphic", "telegraph", "seismograph", "biography", "videograph", "lithograph", "monograph"],
+    "root_phon": ["phone", "microphone", "phonics", "symphony", "earphone", "saxophone", "megaphone", "homophone", "phonograph", "xylophone"]
+  },
+  "patternHint": "Greek roots are like building blocks — they appear in many English words!",
+  "tutorialWords": {}
+}

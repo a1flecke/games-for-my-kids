@@ -1,0 +1,22 @@
+{
+  "id": 21,
+  "title": "Prefixes: Basic",
+  "gradeLevel": 4,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["prefix_un", "prefix_re", "prefix_pre", "prefix_dis"],
+  "patternLabels": {
+    "prefix_un": "UN-",
+    "prefix_re": "RE-",
+    "prefix_pre": "PRE-",
+    "prefix_dis": "DIS-"
+  },
+  "wordPool": {
+    "prefix_un": ["unlock", "unpack", "undo", "unfair", "unhappy", "unkind", "unsafe", "untie", "untrue", "unusual", "unclear", "uncover", "unload", "unplug"],
+    "prefix_re": ["replay", "rebuild", "rewrite", "reopen", "return", "recall", "reclaim", "recount", "refill", "reheat", "remind", "rename", "repay", "reset", "restart"],
+    "prefix_pre": ["predict", "preview", "preschool", "preheat", "preorder", "prepay", "pretest", "prevent", "prejudge", "prepaid", "prehistoric"],
+    "prefix_dis": ["discover", "disagree", "dislike", "displace", "display", "disturb", "distrust", "disorder", "disconnect", "disappear", "disapprove", "disrespect"]
+  },
+  "patternHint": "A prefix at the beginning changes the word's meaning!",
+  "tutorialWords": {}
+}

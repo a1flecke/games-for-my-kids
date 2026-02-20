@@ -1,0 +1,22 @@
+{
+  "id": 26,
+  "title": "Advanced Prefixes",
+  "gradeLevel": 5,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["prefix_inter", "prefix_sub", "prefix_trans", "prefix_over"],
+  "patternLabels": {
+    "prefix_inter": "INTER-",
+    "prefix_sub": "SUB-",
+    "prefix_trans": "TRANS-",
+    "prefix_over": "OVER-"
+  },
+  "wordPool": {
+    "prefix_inter": ["international", "internet", "interview", "interact", "intermediate", "intercept", "interject", "interrupt", "interval", "intersect"],
+    "prefix_sub": ["submarine", "subway", "subtract", "substitute", "submerge", "subtitle", "suburb", "subscription", "substandard", "subzero"],
+    "prefix_trans": ["transport", "transfer", "transform", "translate", "transmission", "transparent", "transaction", "transcript", "transplant", "transatlantic"],
+    "prefix_over": ["overlook", "overcome", "overdue", "overflow", "overpass", "overhear", "overload", "overpower", "overthrow", "overtime"]
+  },
+  "patternHint": "These prefixes tell you where, how, or to what degree!",
+  "tutorialWords": {}
+}

@@ -1,0 +1,22 @@
+{
+  "id": 27,
+  "title": "Advanced Suffixes",
+  "gradeLevel": 5,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["suffix_ible", "suffix_able", "suffix_ous", "suffix_al"],
+  "patternLabels": {
+    "suffix_ible": "-ible",
+    "suffix_able": "-able",
+    "suffix_ous": "-ous",
+    "suffix_al": "-al"
+  },
+  "wordPool": {
+    "suffix_ible": ["flexible", "possible", "visible", "terrible", "horrible", "sensible", "responsible", "incredible", "accessible", "compatible", "convertible", "digestible", "eligible", "feasible", "invincible"],
+    "suffix_able": ["capable", "comfortable", "remarkable", "adorable", "acceptable", "achievable", "affordable", "agreeable", "available", "believable", "charitable", "enjoyable", "favorable", "manageable", "valuable"],
+    "suffix_ous": ["famous", "dangerous", "adventurous", "gorgeous", "humorous", "joyous", "marvelous", "mysterious", "nervous", "numerous", "obvious", "poisonous", "serious", "various", "vigorous"],
+    "suffix_al": ["musical", "magical", "chemical", "historical", "physical", "electrical", "financial", "general", "horizontal", "identical", "logical", "natural", "optical", "political", "tropical"]
+  },
+  "patternHint": "These suffixes turn root words into adjectives!",
+  "tutorialWords": {}
+}

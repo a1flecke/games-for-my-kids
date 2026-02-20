@@ -1,0 +1,22 @@
+{
+  "id": 22,
+  "title": "Suffixes: -tion, -sion, -ness, -ment",
+  "gradeLevel": 4,
+  "gridSize": 6,
+  "explorer": true,
+  "patterns": ["suffix_tion", "suffix_sion", "suffix_ness", "suffix_ment"],
+  "patternLabels": {
+    "suffix_tion": "-tion",
+    "suffix_sion": "-sion",
+    "suffix_ness": "-ness",
+    "suffix_ment": "-ment"
+  },
+  "wordPool": {
+    "suffix_tion": ["nation", "station", "action", "fiction", "section", "mention", "attention", "direction", "election", "location", "motion", "notion", "option", "portion", "question", "tradition", "vacation"],
+    "suffix_sion": ["vision", "mission", "passion", "tension", "version", "mansion", "extension", "explosion", "invasion", "confusion", "permission", "profession", "revision", "decision", "division"],
+    "suffix_ness": ["kindness", "darkness", "sadness", "weakness", "sickness", "hardness", "boldness", "coldness", "freshness", "greatness", "goodness", "happiness", "illness", "loneliness", "madness"],
+    "suffix_ment": ["movement", "payment", "treatment", "statement", "agreement", "argument", "enjoyment", "government", "improvement", "judgment", "moment", "pavement", "punishment", "replacement", "requirement"]
+  },
+  "patternHint": "These suffixes change VERBS and ADJECTIVES into NOUNS!",
+  "tutorialWords": {}
+}
