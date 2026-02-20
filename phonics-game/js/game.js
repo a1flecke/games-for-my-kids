@@ -29,6 +29,7 @@ class Game {
         this._bindSettingsPanel();
         this._bindGradeFilter();
         this._bindPinDialog();
+        this._bindBoardScreen();
         this._syncSettings();
     }
 
@@ -95,9 +96,41 @@ class Game {
     }
 
     // isPreview=true means lesson is locked (no prior completion) — opens in preview mode
-    startLesson(id, isPreview = false) {
-        console.log('Starting lesson', id, isPreview ? '(preview)' : '(full)');
-        // Full implementation in Session 5
+    async startLesson(id, isPreview = false) {
+        try {
+            const lesson = await DataManager.loadLesson(id);
+            document.getElementById('screen-select').classList.remove('active');
+            document.getElementById('screen-board').classList.add('active');
+            document.getElementById('board-lesson-title').textContent = lesson.title;
+            document.getElementById('board-progress').textContent =
+                `0 / ${lesson.gridSize * lesson.gridSize} matched`;
+            window.boardManager = new BoardManager();
+            window.boardManager.init(lesson);
+        } catch (err) {
+            console.error('Failed to load lesson', id, err);
+        }
+    }
+
+    showLessonSelect() {
+        document.getElementById('screen-board').classList.remove('active');
+        document.getElementById('screen-select').classList.add('active');
+    }
+
+    onTileTap(tile) {
+        SpeechManager.speakIfUnmuted(tile.word);
+        // Basic select/deselect stub — full match logic implemented in Session 6.
+        if (tile.state === 'normal' || tile.state === 'glow') {
+            window.boardManager.setTileState(tile, 'selected');
+        } else if (tile.state === 'selected') {
+            window.boardManager.setTileState(tile, 'normal');
+            window.boardManager.resetAllStates();
+        }
+    }
+
+    _bindBoardScreen() {
+        document.getElementById('board-back-btn').addEventListener('click', () => {
+            this.showLessonSelect();
+        });
     }
 
     _bindGradeFilter() {

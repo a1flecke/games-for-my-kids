@@ -81,10 +81,19 @@
     </main>
 
     <!-- ================================================================
-         Screen: Game Board (placeholder — built in Session 5)
+         Screen: Game Board
          ================================================================ -->
     <div id="screen-board" class="screen" role="region" aria-label="Game board">
-        <p class="placeholder-msg">Game board — coming in Session 5</p>
+        <div id="board-header">
+            <button id="board-back-btn" aria-label="Back to lesson select">← Back</button>
+            <h2 id="board-lesson-title">Lesson Title</h2>
+            <div id="board-progress" aria-live="polite">0 / 0 matched</div>
+        </div>
+        <div id="board-grid" class="board-grid" aria-label="Word tiles" role="grid"></div>
+        <div id="board-hint" class="board-hint">
+            Tap a word, then find more words with the same sound!
+        </div>
+        <div id="board-pattern-feedback" class="pattern-feedback" aria-live="polite"></div>
     </div>
 
     <!-- ================================================================
