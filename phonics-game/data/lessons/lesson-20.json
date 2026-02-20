@@ -1,0 +1,22 @@
+{
+  "id": 20,
+  "title": "Common Suffixes",
+  "gradeLevel": 3,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["suffix_ing", "suffix_ed", "suffix_ly", "suffix_ful"],
+  "patternLabels": {
+    "suffix_ing": "-ing",
+    "suffix_ed": "-ed",
+    "suffix_ly": "-ly",
+    "suffix_ful": "-ful"
+  },
+  "wordPool": {
+    "suffix_ing": ["jumping", "running", "playing", "reading", "walking", "talking", "thinking", "helping", "cooking", "eating", "laughing", "smiling", "singing", "dancing", "writing"],
+    "suffix_ed": ["jumped", "walked", "talked", "played", "helped", "cooked", "laughed", "smiled", "needed", "wanted", "started", "ended", "melted", "painted", "rested"],
+    "suffix_ly": ["quickly", "slowly", "softly", "loudly", "kindly", "gently", "sadly", "gladly", "safely", "simply", "deeply", "freely", "nearly", "really", "clearly"],
+    "suffix_ful": ["helpful", "careful", "thankful", "hopeful", "cheerful", "fearful", "painful", "playful", "skillful", "joyful", "peaceful", "powerful", "colorful", "wonderful", "beautiful"]
+  },
+  "patternHint": "Adding a suffix changes what the word DOES or how it DESCRIBES something!",
+  "tutorialWords": {}
+}

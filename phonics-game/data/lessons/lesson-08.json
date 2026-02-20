@@ -1,0 +1,18 @@
+{
+  "id": 8,
+  "title": "Long-E Vowel Teams",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["ee", "ea"],
+  "patternLabels": {
+    "ee": "EE",
+    "ea": "EA"
+  },
+  "wordPool": {
+    "ee": ["feet", "meet", "see", "tree", "free", "green", "queen", "sleep", "sweep", "cheese", "creep", "deed", "feed", "feel", "heel", "keen", "need", "peek", "reef", "seed", "seek", "steel", "teen", "week", "weed"],
+    "ea": ["read", "beach", "reach", "teach", "clean", "dream", "cream", "lean", "mean", "please", "real", "seal", "steal", "treat", "each", "eat", "heat", "lead", "leaf", "meat", "near", "peas", "speak", "steam", "team"]
+  },
+  "patternHint": "EE and EA often make the long E sound!",
+  "tutorialWords": {}
+}

@@ -1,0 +1,18 @@
+{
+  "id": 7,
+  "title": "Long-A Vowel Teams",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["ai", "ay"],
+  "patternLabels": {
+    "ai": "AI",
+    "ay": "AY"
+  },
+  "wordPool": {
+    "ai": ["rain", "train", "brain", "chain", "grain", "main", "pain", "plain", "sprain", "trail", "snail", "tail", "sail", "mail", "hail", "fail", "rail", "bail"],
+    "ay": ["play", "stay", "day", "pay", "ray", "say", "way", "bay", "clay", "gray", "hay", "jay", "lay", "may", "pray", "spray", "sway", "tray"]
+  },
+  "patternHint": "When two vowels go walking, the first one does the talking!",
+  "tutorialWords": {}
+}

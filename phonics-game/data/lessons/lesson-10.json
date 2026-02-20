@@ -1,0 +1,22 @@
+{
+  "id": 10,
+  "title": "Long-I and Long-U Teams",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["igh", "ie", "ue", "ui"],
+  "patternLabels": {
+    "igh": "IGH",
+    "ie": "IE",
+    "ue": "UE",
+    "ui": "UI"
+  },
+  "wordPool": {
+    "igh": ["night", "light", "right", "might", "sight", "tight", "bright", "fight", "flight", "fright", "plight", "slight", "tonight"],
+    "ie": ["pie", "lie", "tie", "die", "cried", "dried", "fried", "tried", "tied", "flies", "lies", "ties", "spies"],
+    "ue": ["blue", "clue", "glue", "true", "due", "sue", "hue", "rue", "cue", "flue"],
+    "ui": ["fruit", "juice", "suit", "bruise", "cruise", "recruit", "pursuit", "sluice", "fluid", "ruin"]
+  },
+  "patternHint": "Different spelling teams that all make the long vowel sound!",
+  "tutorialWords": {}
+}

@@ -1,0 +1,18 @@
+{
+  "id": 9,
+  "title": "Long-O Vowel Teams",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["oa", "ow_long"],
+  "patternLabels": {
+    "oa": "OA",
+    "ow_long": "OW (Long O)"
+  },
+  "wordPool": {
+    "oa": ["boat", "coat", "goat", "load", "road", "soap", "toad", "coast", "float", "groan", "loaf", "moan", "oat", "roast", "soak", "throat", "toast"],
+    "ow_long": ["snow", "slow", "blow", "flow", "glow", "grow", "show", "know", "own", "low", "bow", "crow", "mow", "row", "sow", "tow"]
+  },
+  "patternHint": "OA usually makes long O. OW can make long O too — especially at the end of words!",
+  "tutorialWords": {}
+}

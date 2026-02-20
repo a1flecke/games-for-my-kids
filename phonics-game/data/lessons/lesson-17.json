@@ -1,0 +1,18 @@
+{
+  "id": 17,
+  "title": "Soft C and Soft G",
+  "gradeLevel": 3,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["soft_c", "soft_g"],
+  "patternLabels": {
+    "soft_c": "Soft C",
+    "soft_g": "Soft G"
+  },
+  "wordPool": {
+    "soft_c": ["city", "cent", "cereal", "center", "cell", "circle", "cycle", "ceiling", "cinema", "pencil", "dance", "fence", "juice", "mice", "nice", "place", "race", "space", "price", "twice", "voice", "peace", "grace", "ice"],
+    "soft_g": ["gem", "giant", "giraffe", "general", "gentle", "gym", "germ", "page", "stage", "age", "cage", "change", "charge", "huge", "large", "orange", "range", "strange", "bridge", "fudge", "hedge", "judge", "ledge", "ridge", "dodge"]
+  },
+  "patternHint": "C and G make soft sounds when followed by E, I, or Y!",
+  "tutorialWords": {}
+}

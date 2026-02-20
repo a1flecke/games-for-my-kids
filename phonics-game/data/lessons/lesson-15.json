@@ -1,0 +1,20 @@
+{
+  "id": 15,
+  "title": "Silent Letters — kn, wr, gn",
+  "gradeLevel": 3,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["kn", "wr", "gn"],
+  "patternLabels": {
+    "kn": "KN",
+    "wr": "WR",
+    "gn": "GN"
+  },
+  "wordPool": {
+    "kn": ["knot", "kneel", "knew", "knife", "knight", "knit", "knock", "knowledge", "knob", "knack"],
+    "wr": ["write", "wrong", "wrap", "wren", "wreck", "wrestle", "wrist", "wrote", "written", "wrench"],
+    "gn": ["gnome", "gnaw", "gnat", "gnu", "gnarled", "gnarly", "gnash", "gnarl", "sign", "design"]
+  },
+  "patternHint": "Sometimes letters at the beginning of words are silent — sneaky!",
+  "tutorialWords": {}
+}

@@ -1,0 +1,20 @@
+{
+  "id": 12,
+  "title": "R-Controlled — er, ir, ur",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["er", "ir", "ur"],
+  "patternLabels": {
+    "er": "ER",
+    "ir": "IR",
+    "ur": "UR"
+  },
+  "wordPool": {
+    "er": ["her", "fern", "germ", "herb", "nerve", "perch", "person", "serve", "stern", "term", "verb", "verse"],
+    "ir": ["bird", "dirt", "firm", "first", "girl", "shirt", "sir", "skirt", "stir", "swirl", "third", "thirst", "twirl"],
+    "ur": ["burn", "burst", "curb", "curl", "fur", "hurt", "nurse", "purr", "surf", "turn", "turf", "turtle", "church", "curve", "murk", "purple", "turkey"]
+  },
+  "patternHint": "ER, IR, and UR all make the same sound — they are all R-controlled!",
+  "tutorialWords": {}
+}

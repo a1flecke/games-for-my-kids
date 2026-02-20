@@ -1,0 +1,18 @@
+{
+  "id": 13,
+  "title": "Diphthongs — oi, oy",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["oi", "oy"],
+  "patternLabels": {
+    "oi": "OI",
+    "oy": "OY"
+  },
+  "wordPool": {
+    "oi": ["coin", "boil", "coil", "foil", "join", "moist", "noise", "oil", "point", "poison", "soil", "spoil", "toil", "void", "choice", "voice", "joint", "hoist"],
+    "oy": ["boy", "joy", "toy", "coy", "annoy", "destroy", "employ", "enjoy", "loyal", "royal", "ploy", "soy", "convoy"]
+  },
+  "patternHint": "OI and OY make the same sound — OI is usually in the middle, OY at the end!",
+  "tutorialWords": {}
+}

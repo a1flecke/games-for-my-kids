@@ -1,0 +1,22 @@
+{
+  "id": 16,
+  "title": "Silent GH Patterns",
+  "gradeLevel": 3,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["ight", "aught", "ought", "ough_f"],
+  "patternLabels": {
+    "ight": "IGHT",
+    "aught": "AUGHT",
+    "ought": "OUGHT",
+    "ough_f": "OUGH (F sound)"
+  },
+  "wordPool": {
+    "ight": ["night", "light", "right", "bright", "fight", "flight", "might", "sight", "tight", "tonight", "fright", "knight", "plight", "slight", "blight", "delight"],
+    "aught": ["caught", "taught", "daughter", "slaughter", "naughty", "haughty", "fraught", "distraught", "onslaught", "naught"],
+    "ought": ["bought", "thought", "brought", "fought", "sought", "ought", "wrought", "nought", "afterthought", "forethought"],
+    "ough_f": ["rough", "tough", "enough", "cough", "laugh", "trough", "roughly", "toughly", "roughen", "toughen"]
+  },
+  "patternHint": "GH is often silent, but sometimes it says F!",
+  "tutorialWords": {}
+}

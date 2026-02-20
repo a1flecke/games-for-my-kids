@@ -1,0 +1,18 @@
+{
+  "id": 19,
+  "title": "VCE and Vowel Team Syllables",
+  "gradeLevel": 3,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["vce_syllable", "vowel_team_syllable"],
+  "patternLabels": {
+    "vce_syllable": "VCE Syllable",
+    "vowel_team_syllable": "Vowel Team Syllable"
+  },
+  "wordPool": {
+    "vce_syllable": ["pancake", "sunshine", "inside", "outside", "bedtime", "birthday", "everyone", "somewhere", "sometime", "homepage", "handmade", "lifelike", "moonshine", "namespace"],
+    "vowel_team_syllable": ["rainbow", "raindrop", "footprint", "classroom", "afternoon", "seashore", "playground", "oatmeal", "sailboat", "teapot", "mailbox", "daydream"]
+  },
+  "patternHint": "Many words are made of two syllables — each one has its own vowel sound!",
+  "tutorialWords": {}
+}

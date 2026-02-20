@@ -1,0 +1,18 @@
+{
+  "id": 14,
+  "title": "Diphthongs — ou, ow",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["ou", "ow_diphthong"],
+  "patternLabels": {
+    "ou": "OU",
+    "ow_diphthong": "OW (Diphthong)"
+  },
+  "wordPool": {
+    "ou": ["cloud", "loud", "proud", "found", "round", "sound", "ground", "bound", "mound", "wound", "house", "mouse", "blouse", "count", "mount", "shout", "out", "bout", "gout", "pout", "snout", "trout"],
+    "ow_diphthong": ["cow", "bow", "how", "now", "plow", "vow", "wow", "brow", "crowd", "drown", "frown", "gown", "owl", "power", "shower", "tower", "town", "brown", "clown", "crown", "down"]
+  },
+  "patternHint": "Watch out — OW can make two different sounds!",
+  "tutorialWords": {}
+}

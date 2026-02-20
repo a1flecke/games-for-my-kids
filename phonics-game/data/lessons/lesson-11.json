@@ -1,0 +1,18 @@
+{
+  "id": 11,
+  "title": "R-Controlled — ar, or",
+  "gradeLevel": 2,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["ar", "or"],
+  "patternLabels": {
+    "ar": "AR",
+    "or": "OR"
+  },
+  "wordPool": {
+    "ar": ["car", "far", "bar", "jar", "star", "yard", "bark", "dark", "farm", "hard", "harm", "large", "mark", "park", "part", "scar", "shark", "sharp", "start", "yarn"],
+    "or": ["corn", "born", "fork", "horn", "horse", "more", "north", "porch", "port", "score", "shore", "short", "sort", "sport", "store", "storm", "torn", "torch", "word", "worn"]
+  },
+  "patternHint": "R changes the vowel sound when it follows a vowel!",
+  "tutorialWords": {}
+}

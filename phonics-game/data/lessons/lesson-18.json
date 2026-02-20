@@ -1,0 +1,18 @@
+{
+  "id": 18,
+  "title": "Syllable Types — Closed and Open",
+  "gradeLevel": 3,
+  "gridSize": 5,
+  "explorer": true,
+  "patterns": ["closed_syllable", "open_syllable"],
+  "patternLabels": {
+    "closed_syllable": "Closed Syllable",
+    "open_syllable": "Open Syllable"
+  },
+  "wordPool": {
+    "closed_syllable": ["nap", "bet", "sit", "hot", "sun", "bat", "clip", "frost", "grab", "jump", "lost", "shelf", "test", "track"],
+    "open_syllable": ["no", "go", "be", "me", "he", "she", "we", "so", "by", "cry", "fly", "my", "sky", "try", "why", "hero", "paper", "label", "tiger", "open", "robot"]
+  },
+  "patternHint": "Closed syllables end in a consonant — short vowel! Open syllables end in a vowel — long vowel!",
+  "tutorialWords": {}
+}
