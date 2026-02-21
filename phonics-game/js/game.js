@@ -102,30 +102,37 @@ class Game {
             document.getElementById('screen-select').classList.remove('active');
             document.getElementById('screen-board').classList.add('active');
             document.getElementById('board-lesson-title').textContent = lesson.title;
-            const gridSize = lesson.gridSize || 4;
-            document.getElementById('board-progress').textContent =
-                `0 / ${gridSize * gridSize} matched`;
             window.boardManager = new BoardManager();
             window.boardManager.init(lesson);
+            // matchManager.init() sets the progress counter, so no manual textContent needed.
+            window.matchManager = new MatchManager(window.boardManager, null);
+            window.matchManager.init(lesson);
         } catch (err) {
             console.error('Failed to load lesson', id, err);
         }
     }
 
     showLessonSelect() {
+        // Cancel any pending match/refill/win timers before leaving the board screen.
+        if (window.matchManager) {
+            window.matchManager.cancel();
+            window.matchManager = null;
+        }
+        window.boardManager = null;
         document.getElementById('screen-board').classList.remove('active');
         document.getElementById('screen-select').classList.add('active');
     }
 
     onTileTap(tile) {
         SpeechManager.speakIfUnmuted(tile.word);
-        // Basic select/deselect stub — full match logic implemented in Session 6.
-        if (tile.state === 'normal' || tile.state === 'glow') {
-            window.boardManager.setTileState(tile, 'selected');
-        } else if (tile.state === 'selected') {
-            window.boardManager.setTileState(tile, 'normal');
-            window.boardManager.resetAllStates();
+        if (window.matchManager) {
+            window.matchManager.onTileTap(tile);
         }
+    }
+
+    onLessonComplete() {
+        // Full summary screen implemented in Session 7 — placeholder for now.
+        alert('Lesson complete! \uD83C\uDF89');
     }
 
     _bindBoardScreen() {
