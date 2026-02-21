@@ -14,7 +14,7 @@
   "wordPool": {
     "root_log": ["zoology", "theology", "ecology", "mythology", "technology", "psychology", "sociology", "monologue", "dialogue", "epilogue", "catalog", "analogy", "trilogy", "anthology", "chronology"],
     "root_micro": ["micrometer", "microphone", "microchip", "microwave", "microbe", "microbiology", "microfilm", "microorganism", "microclimate", "microcosm"],
-    "root_astro": ["astronomy", "astronaut", "asteroid", "astrophysics", "astronomer", "astrology", "astrodome", "astrophotography", "astrological", "astrobiology"],
+    "root_astro": ["astronomy", "astronaut", "asteroid", "astrophysics", "astronomer", "astrology", "astrodynamics", "astrophotography", "astral", "astrobiology"],
     "root_scope": ["telescope", "microscope", "kaleidoscope", "periscope", "stethoscope", "endoscope", "horoscope", "gyroscope", "oscilloscope", "spectroscope"]
   },
   "patternHint": "LOG means 'word or study,' MICRO means 'small,' ASTRO means 'star,' SCOPE means 'to look'!",

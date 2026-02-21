@@ -15,7 +15,7 @@
     "root_scrib": ["describe", "prescription", "manuscript", "subscribe", "inscription", "scribe", "scripture", "transcribe", "circumscribe", "conscript"],
     "root_vis": ["visible", "vision", "visit", "visual", "television", "invisible", "preview", "review", "revise", "supervise"],
     "root_aud": ["audio", "audience", "auditorium", "audible", "audiobook", "inaudible", "audition", "auditory", "audiovisual", "audit"],
-    "root_man": ["manual", "manufacture", "manage", "command", "demand", "manacle", "manipulate", "maneuver", "mandate", "manicure"]
+    "root_man": ["manual", "manufacture", "manpower", "manhandle", "emancipate", "manacle", "manipulate", "maneuver", "mandate", "manicure"]
   },
   "patternHint": "Latin roots tell you the core meaning of a word!",
   "tutorialWords": {}

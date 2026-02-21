@@ -13,8 +13,8 @@
   },
   "wordPool": {
     "ight": ["night", "light", "right", "bright", "fight", "flight", "might", "sight", "tight", "tonight", "fright", "knight", "plight", "slight", "blight", "delight"],
-    "aught": ["caught", "taught", "daughter", "slaughter", "naughty", "haughty", "fraught", "distraught", "draught", "naught"],
-    "ought": ["bought", "thought", "brought", "fought", "sought", "ought", "wrought", "nought", "afterthought", "forethought"],
+    "aught": ["caught", "taught", "daughter", "slaughter", "naughty", "haughty", "fraught", "distraught", "naught"],
+    "ought": ["bought", "thought", "brought", "fought", "sought", "ought", "wrought", "rethought", "afterthought", "forethought"],
     "ough_f": ["rough", "tough", "enough", "cough", "laugh", "trough", "roughly", "toughly", "roughen", "toughen"]
   },
   "patternHint": "GH is often silent, but sometimes it says F!",
