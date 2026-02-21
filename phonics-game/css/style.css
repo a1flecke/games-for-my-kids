@@ -1362,3 +1362,216 @@ body {
         font-size: 0.7rem;
     }
 }
+
+/* =====================================================================
+   Lena's Library — progress widget on lesson select
+   ===================================================================== */
+
+.lena-corner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #fff;
+    border-radius: 12px;
+    border: 2px solid #dfe6e9;
+}
+
+.lena-img { width: 52px; height: 52px; }
+
+.lena-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lena-name {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text);
+}
+
+#lena-progress-text {
+    font-family: var(--font-ui);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.lena-progress-bar {
+    width: 110px;
+    height: 8px;
+    background: #dfe6e9;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 3px;
+}
+
+.lena-progress-bar-fill {
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* =====================================================================
+   Celebration overlay (after lesson complete)
+   ===================================================================== */
+
+.celebration-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    align-items: center;
+    justify-content: center;
+    z-index: 900;
+}
+
+.celebration-overlay.open {
+    display: flex;
+}
+
+.celebration-card {
+    background: var(--bg);
+    border-radius: 24px;
+    padding: 32px 24px 24px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.celebration-lena {
+    width: 90px;
+    height: 90px;
+    animation: celebrationBounce 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes celebrationBounce {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-14px); }
+}
+
+.celebration-title {
+    font-family: var(--font-ui);
+    font-size: 1.8rem;
+    color: var(--text);
+    margin: 12px 0 4px;
+}
+
+.celebration-subtitle {
+    font-family: var(--font-ui);
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0 0 16px;
+}
+
+.celebration-dismiss-btn {
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    background: var(--accent);
+    color: var(--text);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    min-height: 44px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+.celebration-dismiss-btn:focus-visible {
+    outline: 3px solid var(--glow);
+    outline-offset: 2px;
+}
+
+/* Confetti — CSS only, no JS animation loop */
+.confetti-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: confettiFall 2s ease-in infinite;
+}
+
+@keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(340px) rotate(360deg); opacity: 0; }
+}
+
+/* 12 staggered confetti pieces */
+.confetti-piece:nth-child(1)  { left: 8%;  background: #e74c3c; animation-delay: 0s; }
+.confetti-piece:nth-child(2)  { left: 18%; background: #3498db; animation-delay: 0.15s; }
+.confetti-piece:nth-child(3)  { left: 28%; background: #f1c40f; animation-delay: 0.3s; }
+.confetti-piece:nth-child(4)  { left: 38%; background: #27ae60; animation-delay: 0.05s; }
+.confetti-piece:nth-child(5)  { left: 48%; background: #9b59b6; animation-delay: 0.2s; }
+.confetti-piece:nth-child(6)  { left: 58%; background: #e67e22; animation-delay: 0.1s; }
+.confetti-piece:nth-child(7)  { left: 68%; background: #e74c3c; animation-delay: 0.35s; }
+.confetti-piece:nth-child(8)  { left: 78%; background: #3498db; animation-delay: 0.25s; }
+.confetti-piece:nth-child(9)  { left: 13%; background: #f1c40f; animation-delay: 0.4s; }
+.confetti-piece:nth-child(10) { left: 43%; background: #27ae60; animation-delay: 0.08s; }
+.confetti-piece:nth-child(11) { left: 63%; background: #9b59b6; animation-delay: 0.18s; }
+.confetti-piece:nth-child(12) { left: 83%; background: #e67e22; animation-delay: 0.28s; }
+
+/* =====================================================================
+   Narrative overlay (room unlock — auto-dismissing toast)
+   ===================================================================== */
+
+.narrative-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 850;
+    cursor: pointer;
+}
+
+.narrative-overlay.open {
+    display: flex;
+}
+
+.narrative-overlay.fading {
+    animation: narrativeFadeOut 0.6s ease forwards;
+}
+
+@keyframes narrativeFadeOut {
+    to { opacity: 0; }
+}
+
+.narrative-lena {
+    width: 80px;
+    height: 80px;
+    animation: celebrationBounce 0.7s ease-in-out infinite alternate;
+}
+
+.narrative-msg {
+    font-family: var(--font-ui);
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    max-width: 320px;
+    padding: 0 24px;
+}
+
+.narrative-tap-hint {
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+}

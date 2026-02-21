@@ -32,6 +32,13 @@ class Game {
         if (this.progress.hintMode !== undefined) {
             this.hintMode = this.progress.hintMode;
         }
+        // Initialize singleton managers before renderLessonSelect() so
+        // narrativeManager.updateLenaOnSelect() is available on first render.
+        // Never lazy-init in startLesson() — reuses stale state on second play.
+        window.audioManager = new AudioManager();
+        window.narrativeManager = new NarrativeManager();
+        window.tutorialManager = new TutorialManager();
+        window.sortManager = new SortManager();
         this.renderLessonSelect();
         this._bindSettingsPanel();
         this._bindGradeFilter();
@@ -40,11 +47,6 @@ class Game {
         this._bindSummaryScreen();
         this._bindSortScreen();
         this._syncSettings();
-        // Initialize singleton managers after DOM is ready.
-        // Never lazy-init in startLesson() — reuses stale state on second play.
-        window.audioManager = new AudioManager();
-        window.tutorialManager = new TutorialManager();
-        window.sortManager = new SortManager();
     }
 
     renderLessonSelect() {
@@ -143,6 +145,7 @@ class Game {
         });
 
         this._applyGradeFilter(this.activeGradeFilter);
+        window.narrativeManager?.updateLenaOnSelect(this.progress);
     }
 
     // isPreview=true means lesson is locked (no prior completion) — opens in preview mode
@@ -186,6 +189,7 @@ class Game {
         window.scoreManager = null;
         if (window.tutorialManager) window.tutorialManager.cancel();
         if (window.sortManager) window.sortManager.cancel();
+        if (window.narrativeManager) window.narrativeManager.cancel();
         if (window.audioManager) window.audioManager.cancel();
         this._dismissSummaryFocusTrap();
         this._dismissSortFocusTrap();
@@ -207,8 +211,21 @@ class Game {
     onLessonComplete() {
         window.audioManager?.playLessonComplete();
         const summary = window.scoreManager.getSummary();
+        // Capture whether this lesson was already completed BEFORE saving,
+        // so we can show the room-unlock only on a player's first completion.
+        const wasCompleted = SaveManager.load().lessons?.[String(this.currentLessonId)]?.completed === true;
         SaveManager.saveLessonResult(this.currentLessonId, summary);
-        this.showSummary(summary);
+
+        // Celebration (1.8s auto-dismiss) → first-time room unlock → summary
+        window.narrativeManager.showCelebration(summary.stars, () => {
+            if (!wasCompleted) {
+                window.narrativeManager.showRoomUnlock(this.currentLessonId, () => {
+                    this.showSummary(summary);
+                });
+            } else {
+                this.showSummary(summary);
+            }
+        });
     }
 
     showSummary(summary) {

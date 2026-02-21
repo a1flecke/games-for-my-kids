@@ -67,7 +67,18 @@
          ================================================================ -->
     <main id="screen-select" class="screen active">
         <header class="select-header">
-            <img src="assets/lena.svg" alt="Lena the Word Explorer" width="64" height="64">
+            <div id="lena-corner" class="lena-corner">
+                <img src="assets/lena.svg" alt="Lena the Word Explorer" class="lena-img">
+                <div class="lena-info">
+                    <div class="lena-name">Lena's Library</div>
+                    <div id="lena-progress-text">0/30 rooms explored</div>
+                    <div id="lena-progress-bar" class="lena-progress-bar"
+                         role="progressbar" aria-valuemin="0" aria-valuemax="30"
+                         aria-valuenow="0" aria-label="Rooms explored">
+                        <div id="lena-progress-bar-fill" class="lena-progress-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
             <h1>Word Explorer</h1>
         </header>
         <p class="select-subtitle">Tap a lesson to begin!</p>
@@ -175,6 +186,25 @@
                 <button id="tut-next-btn" class="tut-btn tut-btn-primary">Next →</button>
             </div>
         </div>
+    </div>
+
+    <!-- Celebration overlay (after lesson complete — auto-dismissing, tappable) -->
+    <div id="celebration-overlay" class="celebration-overlay"
+         role="dialog" aria-modal="true" aria-label="Lesson complete celebration" aria-hidden="true">
+        <div class="celebration-card">
+            <img src="assets/lena.svg" alt="" class="celebration-lena" aria-hidden="true">
+            <h2 id="celebration-title" class="celebration-title"></h2>
+            <p id="celebration-subtitle" class="celebration-subtitle"></p>
+            <div id="celebration-confetti" class="confetti-container"></div>
+            <button id="celebration-dismiss-btn" class="celebration-dismiss-btn">Continue →</button>
+        </div>
+    </div>
+
+    <!-- Narrative overlay (room unlock — auto-dismissing visual; text announced via #aria-live) -->
+    <div id="narrative-overlay" class="narrative-overlay" aria-hidden="true">
+        <img src="assets/lena.svg" alt="" class="narrative-lena" aria-hidden="true">
+        <p id="narrative-msg" class="narrative-msg"></p>
+        <p class="narrative-tap-hint">Tap to continue</p>
     </div>
 
     <!-- PIN dialog — unlock all lessons (parent/teacher gated) -->
