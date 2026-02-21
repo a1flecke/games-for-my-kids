@@ -42,6 +42,7 @@ class Game {
         this._syncSettings();
         // Initialize singleton managers after DOM is ready.
         // Never lazy-init in startLesson() — reuses stale state on second play.
+        window.audioManager = new AudioManager();
         window.tutorialManager = new TutorialManager();
         window.sortManager = new SortManager();
     }
@@ -148,6 +149,7 @@ class Game {
     async startLesson(id, isPreview = false) {
         try {
             const lesson = await DataManager.loadLesson(id);
+            if (isPreview) SaveManager.markPreviewed(id);
             this.currentLessonId = id;
             // Remove active from all screens before showing board
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -184,6 +186,7 @@ class Game {
         window.scoreManager = null;
         if (window.tutorialManager) window.tutorialManager.cancel();
         if (window.sortManager) window.sortManager.cancel();
+        if (window.audioManager) window.audioManager.cancel();
         this._dismissSummaryFocusTrap();
         this._dismissSortFocusTrap();
         // Remove active from all screens (handles navigating from board or summary)
@@ -202,6 +205,7 @@ class Game {
     }
 
     onLessonComplete() {
+        window.audioManager?.playLessonComplete();
         const summary = window.scoreManager.getSummary();
         SaveManager.saveLessonResult(this.currentLessonId, summary);
         this.showSummary(summary);

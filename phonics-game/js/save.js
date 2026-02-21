@@ -28,6 +28,14 @@ class SaveManager {
         }
     }
 
+    static markPreviewed(lessonId) {
+        const key = String(lessonId);
+        const data = this.load();
+        data.lessons[key] = data.lessons[key] || { stars: 0, bestAccuracy: 0, completed: false };
+        data.lessons[key].previewed = true;
+        this.save(data);
+    }
+
     static saveLessonResult(lessonId, summary) {
         const key = String(lessonId);
         const nextKey = String(Number(lessonId) + 1);

@@ -136,6 +136,7 @@ class SortManager {
         document.getElementById('sort-progress').textContent =
             `Word ${this.wordIndex} of ${this.wordQueue.length}`;
 
+        window.audioManager?.playNextWord();
         SpeechManager.speakIfUnmuted(this.currentWord.word);
     }
 
@@ -156,6 +157,7 @@ class SortManager {
                 if (bucketEl.isConnected) bucketEl.classList.remove('sort-bucket-correct');
             }, 500);
 
+            window.audioManager?.playMatch();
             this.results.correct.push(this.currentWord.word);
             this.buckets[pattern]++;
             const count = this.buckets[pattern];

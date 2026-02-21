@@ -8,6 +8,7 @@ class MatchManager {
         // Stored timer IDs so back-navigation can cancel pending callbacks.
         this._matchTimer = null;
         this._winTimer = null;
+        this._wrongTimer = null; // cosmetic shake removal (400ms)
     }
 
     init(lesson) {
@@ -21,8 +22,10 @@ class MatchManager {
     cancel() {
         clearTimeout(this._matchTimer);
         clearTimeout(this._winTimer);
+        clearTimeout(this._wrongTimer);
         this._matchTimer = null;
         this._winTimer = null;
+        this._wrongTimer = null;
         if (this.board) this.board.cancel();
     }
 
@@ -54,6 +57,7 @@ class MatchManager {
     selectFirst(tile) {
         this.board.setTileState(tile, 'selected');
         this.selected = [tile];
+        window.audioManager?.playSelect();
         const hintMode = window.game ? window.game.hintMode : 'one';
         if (hintMode === 'none') return;
         // hintMode === 'one': glow exactly 1 random same-pattern tile.
@@ -61,6 +65,7 @@ class MatchManager {
         if (candidates.length === 0) return;
         const pick = candidates[Math.floor(Math.random() * candidates.length)];
         this.board.setTileState(pick, 'glow');
+        window.audioManager?.playGlow();
     }
 
     deselectTile(tile) {
@@ -70,7 +75,9 @@ class MatchManager {
 
     wrongTap(tile) {
         this.board.setTileState(tile, 'wrong');
-        setTimeout(() => {
+        window.audioManager?.playWrong();
+        this._wrongTimer = setTimeout(() => {
+            this._wrongTimer = null;
             // Only reset if still in 'wrong' — user may have triggered something else.
             if (tile.state === 'wrong') this.board.setTileState(tile, 'normal');
         }, 400);
@@ -99,6 +106,7 @@ class MatchManager {
         for (const tile of this.selected) {
             this.board.setTileState(tile, 'matched');
         }
+        window.audioManager?.playMatch();
 
         // Reset any still-glowing tiles (same-pattern tiles not selected).
         for (const tile of this.board.tiles) {
