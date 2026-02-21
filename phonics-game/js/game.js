@@ -19,6 +19,7 @@ class Game {
         this._focusTrapHandler = null;
         this._pinFocusTrapHandler = null;
         this._summaryFocusTrapHandler = null;
+        this._sortFocusTrapHandler = null;
     }
 
     init() {
@@ -37,10 +38,12 @@ class Game {
         this._bindPinDialog();
         this._bindBoardScreen();
         this._bindSummaryScreen();
+        this._bindSortScreen();
         this._syncSettings();
         // Initialize singleton managers after DOM is ready.
         // Never lazy-init in startLesson() — reuses stale state on second play.
         window.tutorialManager = new TutorialManager();
+        window.sortManager = new SortManager();
     }
 
     renderLessonSelect() {
@@ -53,6 +56,7 @@ class Game {
             const stars = lessonData?.stars || 0;
             const completed = lessonData?.completed || false;
             const previewed = lessonData?.previewed || false;
+            const sortPracticed = !!this.progress.sortPracticed?.[String(lesson.id)];
             // Lesson 1 always unlocked; subsequent lessons unlock when previous is completed
             const isUnlocked = lesson.id === 1
                 || this.progress.allUnlocked
@@ -88,8 +92,43 @@ class Game {
                     ${[1,2,3].map(n => `<span class="star${stars >= n ? ' earned' : ''}">${stars >= n ? '★' : '☆'}</span>`).join('')}
                 </div>
                 ${previewed && !completed ? '<div class="preview-badge">Tried</div>' : ''}
+                ${sortPracticed ? '<div class="sort-practiced-badge">Sort ✓</div>' : ''}
                 ${isPreview ? '<div class="lock-overlay" aria-hidden="true">🔒</div>' : ''}
             `;
+
+            // Action buttons — built with createElement (no onclick= attrs)
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'lesson-card-actions';
+
+            const playBtn = document.createElement('button');
+            playBtn.className = 'lesson-play-btn';
+            playBtn.textContent = 'Play ▶';
+            playBtn.setAttribute('aria-label', `Play Lesson ${lesson.id}: ${lesson.title}`);
+            playBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                this.startLesson(lesson.id, isPreview);
+            });
+
+            const sortBtn = document.createElement('button');
+            sortBtn.className = 'lesson-sort-btn';
+            sortBtn.textContent = 'Sort 🗂';
+            sortBtn.setAttribute('aria-label', `Sort Mode for Lesson ${lesson.id}: ${lesson.title}`);
+            sortBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                this.startSortMode(lesson.id);
+            });
+
+            // Disable action buttons on locked cards — card click still opens preview mode
+            if (isPreview) {
+                playBtn.disabled = true;
+                playBtn.setAttribute('aria-disabled', 'true');
+                sortBtn.disabled = true;
+                sortBtn.setAttribute('aria-disabled', 'true');
+            }
+
+            actionsDiv.appendChild(playBtn);
+            actionsDiv.appendChild(sortBtn);
+            card.appendChild(actionsDiv);
 
             card.addEventListener('click', () => this.startLesson(lesson.id, isPreview));
             card.addEventListener('keydown', e => {
@@ -144,7 +183,9 @@ class Game {
         window.boardManager = null;
         window.scoreManager = null;
         if (window.tutorialManager) window.tutorialManager.cancel();
+        if (window.sortManager) window.sortManager.cancel();
         this._dismissSummaryFocusTrap();
+        this._dismissSortFocusTrap();
         // Remove active from all screens (handles navigating from board or summary)
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-select').classList.add('active');
@@ -275,6 +316,62 @@ class Game {
         document.getElementById('summary-all-lessons').addEventListener('click', () => this.showLessonSelect());
     }
 
+    async startSortMode(id) {
+        this.currentLessonId = id;
+        this._dismissSortFocusTrap();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-sort').classList.add('active');
+        document.getElementById('sort-back-btn').focus();
+        // Set title immediately from metadata — loadLesson is async and takes time
+        const meta = DataManager.getLessonMeta().find(l => l.id === id);
+        if (meta) document.getElementById('sort-lesson-title').textContent = meta.title;
+        // Focus trap — keeps Tab within the sort screen
+        this._sortFocusTrapHandler = this._handleSortFocusTrap.bind(this);
+        document.addEventListener('keydown', this._sortFocusTrapHandler);
+        await window.sortManager.start(id);
+    }
+
+    _handleSortFocusTrap(e) {
+        const screen = document.getElementById('screen-sort');
+        const focusable = Array.from(
+            screen.querySelectorAll('button:not([disabled]), [tabindex="0"]')
+        ).filter(el => !el.closest('.hidden'));
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.key === 'Escape') { this.showLessonSelect(); return; }
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        }
+    }
+
+    _dismissSortFocusTrap() {
+        if (this._sortFocusTrapHandler) {
+            document.removeEventListener('keydown', this._sortFocusTrapHandler);
+            this._sortFocusTrapHandler = null;
+        }
+    }
+
+    _bindSortScreen() {
+        document.getElementById('sort-back-btn').addEventListener('click', () => {
+            this.showLessonSelect();
+        });
+        document.getElementById('sort-again-btn').addEventListener('click', () => {
+            window.sortManager.start(this.currentLessonId);
+        });
+        document.getElementById('sort-play-board-btn').addEventListener('click', () => {
+            this._dismissSortFocusTrap();
+            this.startLesson(this.currentLessonId);
+        });
+        document.getElementById('sort-all-lessons-btn').addEventListener('click', () => {
+            this.showLessonSelect();
+        });
+    }
+
     _bindBoardScreen() {
         document.getElementById('board-back-btn').addEventListener('click', () => {
             this.showLessonSelect();
@@ -299,7 +396,7 @@ class Game {
 
         document.querySelectorAll('.lesson-card').forEach(card => {
             const visible = grade === 'all' || card.dataset.grade === grade;
-            card.style.display = visible ? '' : 'none';
+            card.classList.toggle('grade-hidden', !visible);
             // Keep hidden cards out of the AT list count
             card.setAttribute('aria-hidden', visible ? 'false' : 'true');
         });

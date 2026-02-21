@@ -103,10 +103,36 @@
     </div>
 
     <!-- ================================================================
-         Screen: Sort Mode (placeholder — built in Session 9)
+         Screen: Sort Mode
          ================================================================ -->
     <div id="screen-sort" class="screen" role="region" aria-label="Sort mode">
-        <p class="placeholder-msg">Sort Mode — coming in Session 9</p>
+        <div id="sort-header">
+            <button id="sort-back-btn" aria-label="Back to lesson select">← Back</button>
+            <h2 id="sort-lesson-title">Sort Mode</h2>
+            <div id="sort-progress" aria-live="polite">Word 0 of 0</div>
+        </div>
+
+        <div id="sort-word-section">
+            <p class="sort-instruction">Which bucket does this word belong in?</p>
+            <div id="sort-word-container">
+                <!-- aria-live announces each new word to screen readers automatically -->
+                <div id="sort-word-card" class="sort-word-card" aria-live="polite"></div>
+                <button id="sort-speaker-btn" class="sort-speaker-btn" aria-label="Hear word">🔊 Hear it</button>
+            </div>
+            <div id="sort-feedback" class="sort-feedback" aria-live="polite"></div>
+            <div id="sort-buckets" class="sort-buckets" role="group" aria-label="Pattern buckets"></div>
+        </div>
+
+        <div id="sort-complete-section" class="hidden">
+            <div class="sort-complete-card">
+                <p id="sort-complete-msg" class="sort-complete-msg"></p>
+                <div class="sort-complete-buttons">
+                    <button id="sort-again-btn" class="sort-btn">🔄 Sort Again</button>
+                    <button id="sort-play-board-btn" class="sort-btn sort-btn-primary">🎮 Play the Board</button>
+                    <button id="sort-all-lessons-btn" class="sort-btn">📚 All Lessons</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ================================================================

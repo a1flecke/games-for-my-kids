@@ -8,6 +8,7 @@ class SaveManager {
             muteSfx: false,
             allUnlocked: false,
             totalWordsMatched: 0,
+            sortPracticed: {},
         };
     }
 
