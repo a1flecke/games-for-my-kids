@@ -47,10 +47,9 @@ class SomeManager {
     }
 
     complete() {
-        this.cancel();  // ← cancel() FIRST, before anything else
-        // ... save state, call callback ...
-        const cb = this.onComplete;
-        this.onComplete = null;
+        const cb = this.onComplete;  // ← save callback FIRST, before cancel() nulls it
+        this.cancel();               // cleanup: clears timers, overlay, and onComplete
+        // ... save state ...
         if (cb) cb();
     }
 
@@ -94,7 +93,7 @@ start(lesson, progress, onComplete) {
 }
 ```
 
-This applies to: `TutorialManager.start()`, future `CelebrationManager.show()`, etc.
+This applies to any manager that opens an overlay — `TutorialManager`, and any future managers — wherever `start()` / `open()` / `show()` can be called more than once.
 
 ---
 

@@ -13,7 +13,7 @@ Review the changed files for the following, reporting each issue as CRITICAL / W
 2. **Timer/async safety** — Check the full timer lifecycle for every manager:
    - Are ALL timer IDs declared in the constructor (initialized to `null`)?
    - Does `cancel()` clear EVERY stored timer (including short cosmetic timers like shake-removal)?
-   - Does `complete()` / `skip()` / `close()` call `cancel()` as its FIRST line?
+   - Does `complete()` / `skip()` (and any other public exit method) save `this.onComplete` to a local variable BEFORE calling `cancel()`? (`cancel()` nulls `onComplete` — save it first or the callback never fires)
    - Does `start()` / `open()` call `cancel()` as its FIRST line (defensive re-initialization)?
    - Can any timer callback fire after the overlay/manager is dismissed (race condition)?
    - Are `setTimeout` callbacks guarded with `el.isConnected` when they touch DOM elements?

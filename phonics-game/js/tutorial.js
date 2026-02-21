@@ -309,17 +309,8 @@ class TutorialManager {
     }
 
     complete() {
-        // Cancel timers first — prevents showStep3() from firing after the overlay closes.
-        if (this._autoAdvanceTimer) {
-            clearTimeout(this._autoAdvanceTimer);
-            this._autoAdvanceTimer = null;
-        }
-        if (this._wrongShakeTimer) {
-            clearTimeout(this._wrongShakeTimer);
-            this._wrongShakeTimer = null;
-        }
-
-        this._close();
+        const cb = this.onComplete;  // save before cancel() nulls it
+        this.cancel();               // clears timers, overlay, onComplete
 
         // Mark all patterns in this lesson as seen.
         const progress = SaveManager.load();
@@ -329,8 +320,6 @@ class TutorialManager {
         }
         SaveManager.save(progress);
 
-        const cb = this.onComplete;
-        this.onComplete = null;
         if (cb) cb();
 
         // Return focus to the board after matchManager.init() has populated tiles.

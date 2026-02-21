@@ -163,7 +163,12 @@ class SomeManager {
         this._close();            // if manager controls an overlay
         this.onComplete = null;   // prevent stale callbacks
     }
-    complete() { this.cancel(); /* ... then save/callback */ }  // cancel() FIRST
+    complete() {
+        const cb = this.onComplete;  // save BEFORE cancel() nulls it
+        this.cancel();               // cleanup: timers, overlay, onComplete
+        // ... save state ...
+        if (cb) cb();
+    }
     skip()     { this.complete(); }          // delegate — never duplicate cancel logic
     start(...) { this.cancel(); /* ... then init */ }  // defensive reset on re-entry
 }
@@ -172,15 +177,13 @@ Detached-element callbacks: use `if (el.isConnected) el.classList.remove(...)` i
 
 **Visibility toggles:** Never use `style.display` to show/hide any element. Use a CSS class for every case: `.active` (screens), `.open` (overlays/panels), `.hidden` (internal elements). `container.innerHTML = ''` to clear is fine — that's not a visibility toggle.
 
-**aria-pressed on role=button:** Every `role="button"` created with `createElement` needs `aria-pressed="false"` at creation — including stateless trigger buttons (e.g., speak-word chips). Update to `"true"` when pressed/selected.
-
 **Dynamic aria-label:** Static `aria-label` in HTML is fixed — VoiceOver reads the attribute, not `textContent`. Whenever `textContent` changes on a labelled element, also update `setAttribute('aria-label', ...)` to match.
 
 **CSS ID specificity:** ID selectors (`#foo`) always beat class selectors (`.bar`) regardless of source order. Never put `display:` in a base ID rule when a class like `.screen` controls visibility — the ID rule will silently override `display:none`. Instead: put `display:flex` only in `#foo.active { display: flex; }`.
 
 **Web Speech API (iOS Safari):** `cancel()` silences an immediately-following `speak()` call on iOS. Always delay: `speechSynthesis.cancel(); setTimeout(() => speechSynthesis.speak(utterance), 50)`. Also feature-detect: `if (!('speechSynthesis' in window)) return`.
 
-**Toggle/selection buttons:** Any `role="button"` with a selected/active state must have `aria-pressed="true/false"`. Set `aria-pressed="false"` on creation and update on state change. A visual `.selected` class alone is invisible to assistive technology.
+**Toggle/selection buttons:** Any `role="button"` created with `createElement` needs `aria-pressed="false"` at creation — including stateless trigger buttons (e.g., speak-word chips). Update to `"true"` when pressed/selected. A visual `.selected` class alone is invisible to assistive technology.
 
 **Modal focus-return:** On close, return focus to the element that opened the dialog (e.g., the settings button) — not to a button inside the now-hidden panel.
 
