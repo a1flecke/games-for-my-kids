@@ -18,6 +18,7 @@ Session specs often contain code samples that violate CLAUDE.md rules. Before us
 | `color: #636e72` | `color: var(--text-secondary)` |
 | `localStorage.getItem / .setItem` | `SaveManager.load()` / `SaveManager.save()` |
 | `window.x = window.x \|\| new X()` | `window.x = new X()` in `game.init()` — always fresh |
+| `new AudioContext()` in constructor | Create lazily on first `_getCtx()` call; `ctx.resume().then(() => schedule())` |
 | `document.getElementById('tut-next-btn').onclick = ...` | Same button, multiple steps → single listener that dispatches on `this.step` |
 
 The ⚠️ Watch Out section in each session file lists spec-specific violations. **Read it before writing a single line of code.**
@@ -71,6 +72,15 @@ class SomeManager {
 - Use `el.isConnected` guard inside stored shake timers: `if (el.isConnected) el.classList.remove(...)`
 - `cancel()` is the single source of truth for cleanup — never inline `clearTimeout` elsewhere
 - `showLessonSelect()` must call `managerInstance.cancel()` for every manager
+
+**Sequence timers** (arpeggio notes, multi-step animations): use an array instead of a single ID:
+```js
+constructor() { this._pendingTimers = []; }
+cancel()      { this._pendingTimers.forEach(clearTimeout); this._pendingTimers = []; }
+// In play method:
+const id = setTimeout(() => this._playTone(...), i * 20);
+this._pendingTimers.push(id);
+```
 
 ---
 
@@ -150,7 +160,7 @@ This applies to any manager that opens an overlay — `TutorialManager`, and any
 ## iOS Safari
 
 - Web Speech API: 50ms delay between `speechSynthesis.cancel()` and `speak()`.
-- Web Audio: call `ctx.resume()` before playing; create `AudioContext` after first user gesture (not in constructor).
+- Web Audio: Create `AudioContext` lazily on first user gesture — never in a constructor. `ctx.resume()` is **async** — chain oscillator scheduling inside `.then()`, never immediately after calling it: `ctx.resume().then(() => scheduleOscillator())`.
 
 ---
 
@@ -172,9 +182,15 @@ This applies to any manager that opens an overlay — `TutorialManager`, and any
 
 ## aria-pressed
 
-- **Every `role="button"` element created with `createElement`** → set `aria-pressed="false"` at creation, even for stateless trigger buttons (e.g., "Hear word" chips).
-- Update to `aria-pressed="true"` when the button enters a selected/pressed state.
-- Matched tiles in the mini board: set `tabindex="-1"` + `aria-disabled="true"` (not aria-pressed) after selection.
+Use `aria-pressed` **only** on buttons with a persistent binary state. Do NOT add it to pure action triggers.
+
+| Button type | aria-pressed? | Example |
+|---|---|---|
+| Toggle / selected state | ✅ yes | selected tile, grade-filter tab, settings checkbox |
+| Action trigger | ❌ no | "Hear word" chip, sort bucket, navigation button |
+
+- Set `aria-pressed="false"` on creation for toggle buttons; update to `"true"` when active.
+- Matched tiles: set `tabindex="-1"` + `aria-disabled="true"` (not aria-pressed).
 - Native `<button>` elements don't need `aria-pressed` unless they toggle state.
 
 ---

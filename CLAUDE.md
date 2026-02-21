@@ -141,7 +141,7 @@ Rules that apply to ALL games in this repo. These prevent recurring bugs:
 
 **innerHTML safety:** HTML-escape any interpolated values: `String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')`. Use an `escHtml()` helper.
 
-**Locked interactive elements:** Set `tabindex="-1"` AND `aria-disabled="true"` — a visual `.locked` class alone is invisible to assistive technology.
+**Locked interactive elements:** For native `<button>` elements use the `disabled` attribute — it removes the element from tab order and announces correctly to AT automatically. For `role="button"` divs/spans, set `tabindex="-1"` AND `aria-disabled="true"`. A visual `.locked` class alone is insufficient in both cases.
 
 **Filtered lists:** When hiding items with `display:none`, also set `aria-hidden="true"` so AT list counts stay accurate.
 
@@ -183,7 +183,11 @@ Detached-element callbacks: use `if (el.isConnected) el.classList.remove(...)` i
 
 **Web Speech API (iOS Safari):** `cancel()` silences an immediately-following `speak()` call on iOS. Always delay: `speechSynthesis.cancel(); setTimeout(() => speechSynthesis.speak(utterance), 50)`. Also feature-detect: `if (!('speechSynthesis' in window)) return`.
 
-**Toggle/selection buttons:** Any `role="button"` created with `createElement` needs `aria-pressed="false"` at creation — including stateless trigger buttons (e.g., speak-word chips). Update to `"true"` when pressed/selected. A visual `.selected` class alone is invisible to assistive technology.
+**Web Audio API (iOS Safari):** `AudioContext` must be created lazily inside a user-gesture handler — never in a constructor. `ctx.resume()` returns a Promise; never schedule oscillator nodes immediately after calling it. Chain scheduling inside `.then()`: `ctx.resume().then(() => scheduleOscillator())`.
+
+**Toggle/selection buttons:** `aria-pressed` is for buttons with a **persistent binary state** — tile selection, grade filter tabs, settings toggles. Set `aria-pressed="false"` on creation and update to `"true"` when active. Pure action triggers (navigate, speak-word, sort-into-bucket) do NOT use `aria-pressed`. A visual `.selected` class alone is invisible to assistive technology.
+
+**`aria-live` + `aria-label` conflict:** Never put both on the same element. VoiceOver announces both — an `aria-label` overrides `textContent` for AT, so a live region with an `aria-label` will either double-announce or announce the wrong text. Use `aria-live` alone; changing `textContent` drives the announcement.
 
 **Modal focus-return:** On close, return focus to the element that opened the dialog (e.g., the settings button) — not to a button inside the now-hidden panel.
 
