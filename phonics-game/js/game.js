@@ -16,10 +16,14 @@ class Game {
         this.pinOpen = false;
         this.fontSizeLevel = 'medium'; // small | medium | large
         this.hintMode = 'one'; // 'one' | 'none'
+        this.mode = 'explorer';   // 'explorer' | 'challenge'
+        this.challengeTimer = null;
+        this._pendingBoardPlay = null;
         this._focusTrapHandler = null;
         this._pinFocusTrapHandler = null;
         this._summaryFocusTrapHandler = null;
         this._sortFocusTrapHandler = null;
+        this._modeSelectFocusTrapHandler = null;
     }
 
     init() {
@@ -44,6 +48,7 @@ class Game {
         this._bindGradeFilter();
         this._bindPinDialog();
         this._bindBoardScreen();
+        this._bindModeSelect();
         this._bindSummaryScreen();
         this._bindSortScreen();
         this._syncSettings();
@@ -150,6 +155,9 @@ class Game {
 
     // isPreview=true means lesson is locked (no prior completion) — opens in preview mode
     async startLesson(id, isPreview = false) {
+        // Defensive cleanup — stop any running timer and dismiss any open mode select.
+        this.stopChallengeTimer();
+        this._dismissModeSelect();
         try {
             const lesson = await DataManager.loadLesson(id);
             if (isPreview) SaveManager.markPreviewed(id);
@@ -158,25 +166,36 @@ class Game {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-board').classList.add('active');
             document.getElementById('board-lesson-title').textContent = lesson.title;
+            // Reset mode indicator to Explorer defaults while mode select is pending.
+            const modeLabel = document.getElementById('board-mode-label');
+            modeLabel.textContent = 'Explorer Mode \uD83D\uDDFA\uFE0F';
+            modeLabel.setAttribute('aria-label', 'Explorer Mode');
+            document.getElementById('energy-bar-container').classList.remove('open');
             window.scoreManager = new ScoreManager();
             window.boardManager = new BoardManager();
             window.boardManager.init(lesson);
 
             const progress = SaveManager.load();
-            const startMatch = () => {
+            // startBoardPlay creates MatchManager and begins play after mode is selected.
+            const startBoardPlay = () => {
                 window.matchManager = new MatchManager(window.boardManager, window.scoreManager);
                 window.matchManager.init(lesson);
-                // Return focus to board after tutorial closes (or immediately on no-tutorial start).
+                // Return focus to board after overlays close.
                 // Never leave focus on now-hidden overlay or in a void.
                 const firstTile = document.querySelector('#board-grid .tile');
                 if (firstTile) firstTile.focus();
             };
 
+            // After tutorial (or if no tutorial), always show mode select before board play.
+            const afterTutorial = () => {
+                this._openModeSelect(lesson, progress, startBoardPlay);
+            };
+
             if (window.tutorialManager.shouldShow(lesson, progress)) {
-                // Tutorial overlay sits above the rendered board; matchManager starts on complete.
-                window.tutorialManager.start(lesson, progress, startMatch);
+                // Tutorial overlay sits above the rendered board; mode select shows on complete.
+                window.tutorialManager.start(lesson, progress, afterTutorial);
             } else {
-                startMatch();
+                afterTutorial();
             }
         } catch (err) {
             console.error('Failed to load lesson', id, err);
@@ -184,6 +203,9 @@ class Game {
     }
 
     showLessonSelect() {
+        // Stop challenge timer and close mode select before any other cleanup.
+        this.stopChallengeTimer();
+        this._dismissModeSelect();
         // Cancel any pending match/refill/win timers before leaving the board screen.
         if (window.matchManager) {
             window.matchManager.cancel();
@@ -213,6 +235,8 @@ class Game {
     }
 
     onLessonComplete() {
+        // Stop challenge timer if board cleared before energy ran out.
+        this.stopChallengeTimer();
         window.audioManager?.playLessonComplete();
         const summary = window.scoreManager.getSummary();
         // Capture whether this lesson was already completed BEFORE saving,
@@ -232,9 +256,22 @@ class Game {
         });
     }
 
-    showSummary(summary) {
+    showSummary(summary, options) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-summary').classList.add('active');
+
+        // Title and optional challenge-mode message — built with textContent (no innerHTML).
+        const titleEl = document.getElementById('summary-title');
+        const challengeMsg = document.getElementById('summary-challenge-msg');
+        if (options?.timeUp) {
+            titleEl.textContent = '\u26A1 Time Up!';
+            challengeMsg.textContent = 'Your energy ran out \u2014 here\u2019s how you did!';
+            challengeMsg.classList.remove('hidden');
+        } else {
+            titleEl.textContent = 'Lesson Complete!';
+            challengeMsg.textContent = '';
+            challengeMsg.classList.add('hidden');
+        }
 
         // Stars display — update aria-label dynamically so VoiceOver announces the count
         const stars = summary.stars;
@@ -423,6 +460,147 @@ class Game {
             }
             if (next) { e.preventDefault(); next.element.focus(); }
         });
+    }
+
+    // ---- Mode Select ----
+
+    _bindModeSelect() {
+        // Bound once in init(); selectMode() uses this._pendingBoardPlay set by _openModeSelect().
+        document.getElementById('mode-select-close').addEventListener('click', () => this.selectMode('explorer'));
+        document.getElementById('mode-explorer-btn').addEventListener('click', () => this.selectMode('explorer'));
+        document.getElementById('mode-challenge-btn').addEventListener('click', () => this.selectMode('challenge'));
+    }
+
+    _openModeSelect(lesson, progress, startBoardPlay) {
+        this._pendingBoardPlay = startBoardPlay;
+
+        // Enable/disable Challenge Mode button based on prior lesson completion.
+        const completed = progress.lessons?.[String(lesson.id)]?.completed || false;
+        const challengeBtn = document.getElementById('mode-challenge-btn');
+        const modeDesc = challengeBtn.querySelector('.mode-desc');
+        if (completed) {
+            challengeBtn.disabled = false;
+            modeDesc.textContent = 'Match as many as you can before energy runs out!';
+        } else {
+            challengeBtn.disabled = true;
+            modeDesc.textContent = 'Complete Explorer Mode first to unlock!';
+        }
+
+        // Show overlay — use .open class (no style.display per CLAUDE.md).
+        const overlay = document.getElementById('mode-select-overlay');
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        // Focus close button (first focusable element per CLAUDE.md modal rule).
+        document.getElementById('mode-select-close').focus();
+
+        // Focus trap: Tab stays within overlay; Escape defaults to Explorer Mode (Watch Out #3).
+        this._modeSelectFocusTrapHandler = (e) => {
+            if (e.key === 'Escape') {
+                // Guard: only act if overlay is still open (prevents stale handler firing).
+                const ov2 = document.getElementById('mode-select-overlay');
+                if (ov2.classList.contains('open')) this.selectMode('explorer');
+                return;
+            }
+            if (e.key !== 'Tab') return;
+            const ov = document.getElementById('mode-select-overlay');
+            const focusable = Array.from(ov.querySelectorAll('button:not([disabled])'));
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        };
+        document.addEventListener('keydown', this._modeSelectFocusTrapHandler);
+    }
+
+    _dismissModeSelect() {
+        const overlay = document.getElementById('mode-select-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        if (this._modeSelectFocusTrapHandler) {
+            document.removeEventListener('keydown', this._modeSelectFocusTrapHandler);
+            this._modeSelectFocusTrapHandler = null;
+        }
+        this._pendingBoardPlay = null;
+    }
+
+    selectMode(mode) {
+        // Save callback before _dismissModeSelect() nulls _pendingBoardPlay.
+        const boardPlay = this._pendingBoardPlay;
+        this.mode = mode;
+        this._dismissModeSelect();
+
+        const modeLabel = document.getElementById('board-mode-label');
+        const energyContainer = document.getElementById('energy-bar-container');
+        if (mode === 'explorer') {
+            modeLabel.textContent = 'Explorer Mode \uD83D\uDDFA\uFE0F';
+            modeLabel.setAttribute('aria-label', 'Explorer Mode');
+            energyContainer.classList.remove('open');
+        } else {
+            modeLabel.textContent = 'Challenge Mode \u26A1';
+            modeLabel.setAttribute('aria-label', 'Challenge Mode');
+            energyContainer.classList.add('open');
+            this.startChallengeTimer();
+        }
+
+        if (boardPlay) boardPlay();
+    }
+
+    // ---- Challenge Timer ----
+
+    startChallengeTimer() {
+        const DURATION = 180;  // seconds
+        let remaining = DURATION;
+        const fill = document.getElementById('energy-bar-fill');
+        // Reset color classes FIRST, then set width — prevents a stale color flash on replay.
+        fill.classList.remove('energy-mid', 'energy-low');
+        fill.style.width = '100%';
+
+        this.challengeTimer = setInterval(() => {
+            remaining--;
+            const pct = (remaining / DURATION) * 100;
+            fill.style.width = `${pct}%`;
+
+            // Update color class — no direct backgroundColor (Watch Out #2).
+            fill.classList.remove('energy-mid', 'energy-low');
+            if (pct <= 30) {
+                fill.classList.add('energy-low');
+            } else if (pct <= 60) {
+                fill.classList.add('energy-mid');
+            }
+
+            if (remaining <= 0) {
+                clearInterval(this.challengeTimer);
+                this.challengeTimer = null;
+                this.onChallengeTimeUp();
+            }
+        }, 1000);
+    }
+
+    stopChallengeTimer() {
+        if (this.challengeTimer) {
+            clearInterval(this.challengeTimer);
+            this.challengeTimer = null;
+        }
+    }
+
+    onChallengeTimeUp() {
+        // Guard: scoreManager may be null if back-navigation raced the timer tick.
+        if (!window.scoreManager) return;
+        // Cancel match timers so they can't fire after the summary screen is shown.
+        if (window.matchManager) {
+            window.matchManager.cancel();
+            window.matchManager = null;
+        }
+        window.audioManager?.playLessonComplete();
+        const summary = window.scoreManager.getSummary();
+        SaveManager.saveLessonResult(this.currentLessonId, summary);
+        this.showSummary(summary, { timeUp: true });
     }
 
     _bindGradeFilter() {

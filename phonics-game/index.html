@@ -105,6 +105,13 @@
             <button id="board-back-btn" aria-label="Back to lesson select">← Back</button>
             <h2 id="board-lesson-title">Lesson Title</h2>
             <div id="board-progress" aria-live="polite">0 / 0 matched</div>
+            <div id="board-mode-indicator" class="mode-indicator">
+                <span id="board-mode-label">Explorer Mode 🗺️</span>
+                <div id="energy-bar-container" class="energy-bar-container">
+                    <div id="energy-bar-fill" class="energy-bar-fill"></div>
+                    <span class="energy-icon" aria-hidden="true">⚡</span>
+                </div>
+            </div>
         </div>
         <div id="board-grid" class="board-grid" role="group" aria-label="Word tiles"></div>
         <div id="board-hint" class="board-hint">
@@ -152,6 +159,7 @@
     <div id="screen-summary" class="screen" role="region" aria-label="Lesson summary">
         <div class="summary-card">
             <h2 id="summary-title">Lesson Complete!</h2>
+            <p id="summary-challenge-msg" class="summary-stat hidden"></p>
             <div id="summary-stars" class="summary-stars" aria-label="Stars earned"></div>
             <div id="summary-accuracy" class="summary-stat"></div>
             <div id="summary-streak" class="summary-stat"></div>
@@ -171,6 +179,26 @@
                 <button class="summary-btn summary-btn-primary" id="summary-next-lesson">Next Lesson →</button>
                 <button class="summary-btn" id="summary-all-lessons">📚 All Lessons</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Mode Select overlay — shown after tutorial (or directly) before each lesson play -->
+    <div id="mode-select-overlay" class="mode-select-overlay" role="dialog"
+         aria-modal="true" aria-labelledby="mode-select-title" aria-hidden="true">
+        <div class="mode-select-card">
+            <!-- Close button is first focusable element; defaults to Explorer Mode (CLAUDE.md modal rule) -->
+            <button id="mode-select-close" class="mode-select-close-btn" aria-label="Close, use Explorer Mode">✕</button>
+            <h2 id="mode-select-title" class="mode-select-title">How do you want to play?</h2>
+            <button id="mode-explorer-btn" class="mode-btn mode-explorer">
+                <div class="mode-icon" aria-hidden="true">🗺️</div>
+                <div class="mode-name">Explorer Mode</div>
+                <div class="mode-desc">No time pressure. Take your time!</div>
+            </button>
+            <button id="mode-challenge-btn" class="mode-btn mode-challenge">
+                <div class="mode-icon" aria-hidden="true">⚡</div>
+                <div class="mode-name">Challenge Mode</div>
+                <div class="mode-desc">Match as many as you can before energy runs out!</div>
+            </button>
         </div>
     </div>
 

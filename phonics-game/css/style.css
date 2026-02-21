@@ -647,6 +647,63 @@ body {
     font-weight: bold;
 }
 
+/* Mode indicator — shows current mode label and energy bar in board header */
+.mode-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+#board-mode-label {
+    font-size: 14px;
+    font-family: var(--font-ui);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Energy bar — hidden by default; shown in Challenge Mode via .open class */
+#energy-bar-container {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    width: 160px;
+    height: 16px;
+    background: #dfe6e9;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+#energy-bar-container.open {
+    display: flex;
+}
+
+.energy-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--correct);  /* green at full energy */
+    border-radius: 8px;
+    transition: width 1s linear, background-color 0.5s;
+}
+
+.energy-bar-fill.energy-mid {
+    background: var(--accent);   /* gold/orange at mid energy (30–60%) */
+}
+
+.energy-bar-fill.energy-low {
+    background: var(--wrong);    /* red at low energy (<30%) */
+}
+
+.energy-icon {
+    position: absolute;
+    right: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1;
+    line-height: 16px;
+}
+
 /* =====================================================================
    Board Grid + Tile Styles
    ===================================================================== */
@@ -832,6 +889,111 @@ body {
 @media (min-width: 768px) {
     .tile { min-height: 100px; }
     .tile-word { font-size: 24px; }
+}
+
+/* =====================================================================
+   Mode Select Overlay
+   ===================================================================== */
+
+.mode-select-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+    z-index: 700;
+    overscroll-behavior: none;
+}
+
+.mode-select-overlay.open {
+    display: flex;
+}
+
+.mode-select-card {
+    position: relative;  /* needed for absolute-positioned close button */
+    background: var(--bg);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    font-family: var(--font-ui);
+}
+
+/* Close button — first focusable element per CLAUDE.md modal rule; selects Explorer Mode */
+.mode-select-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+.mode-select-close-btn:hover { background: #f0ebe3; }
+.mode-select-close-btn:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+
+.mode-select-title {
+    font-size: 22px;
+    margin: 0 0 20px;
+    color: var(--text);
+}
+
+.mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 16px;
+    margin: 10px 0;
+    border: 3px solid #dfe6e9;
+    border-radius: 14px;
+    background: white;
+    cursor: pointer;
+    touch-action: manipulation;
+    min-height: 100px;
+    transition: border-color 0.15s, transform 0.1s;
+    font-family: var(--font-ui);
+}
+
+.mode-btn:active { transform: scale(0.97); }
+.mode-btn:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+
+.mode-explorer { border-color: var(--glow); }
+.mode-challenge { border-color: var(--accent); }
+
+.mode-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mode-icon {
+    font-size: 32px;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.mode-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text);
+}
+
+.mode-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
 }
 
 /* =====================================================================

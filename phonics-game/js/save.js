@@ -4,6 +4,7 @@ class SaveManager {
             lessons: {},
             tutorialSeen: {},
             fontSize: 'medium',
+            hintMode: 'one',
             muteSpeech: false,
             muteSfx: false,
             allUnlocked: false,
