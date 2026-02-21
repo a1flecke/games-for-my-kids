@@ -149,6 +149,33 @@ Rules that apply to ALL games in this repo. These prevent recurring bugs:
 
 **`window.game` init pattern:** `window.game = new Game(); window.game.init();` — never `game.init()` (relies on implicit global before assignment completes). With `defer`, call directly — never wrap in `window.addEventListener('load', ...)` which delays rendering.
 
+**Timer lifecycle pattern (managers with setTimeout/setInterval):** Every manager that uses timers must follow this pattern exactly — missing any part is a bug:
+```js
+class SomeManager {
+    constructor() {
+        this._mainTimer = null;   // declare ALL timer IDs as null
+        this._shakeTimer = null;  // even short cosmetic timers — they fire on detached DOM
+        this.onComplete = null;
+    }
+    cancel() {                    // single source of truth for cleanup
+        clearTimeout(this._mainTimer);  this._mainTimer = null;
+        clearTimeout(this._shakeTimer); this._shakeTimer = null;
+        this._close();            // if manager controls an overlay
+        this.onComplete = null;   // prevent stale callbacks
+    }
+    complete() { this.cancel(); /* ... then save/callback */ }  // cancel() FIRST
+    skip()     { this.complete(); }          // delegate — never duplicate cancel logic
+    start(...) { this.cancel(); /* ... then init */ }  // defensive reset on re-entry
+}
+```
+Detached-element callbacks: use `if (el.isConnected) el.classList.remove(...)` inside stored shake timers. `showLessonSelect()` must call `.cancel()` on every active manager.
+
+**Visibility toggles:** Never use `style.display` to show/hide any element. Use a CSS class for every case: `.active` (screens), `.open` (overlays/panels), `.hidden` (internal elements). `container.innerHTML = ''` to clear is fine — that's not a visibility toggle.
+
+**aria-pressed on role=button:** Every `role="button"` created with `createElement` needs `aria-pressed="false"` at creation — including stateless trigger buttons (e.g., speak-word chips). Update to `"true"` when pressed/selected.
+
+**Dynamic aria-label:** Static `aria-label` in HTML is fixed — VoiceOver reads the attribute, not `textContent`. Whenever `textContent` changes on a labelled element, also update `setAttribute('aria-label', ...)` to match.
+
 **CSS ID specificity:** ID selectors (`#foo`) always beat class selectors (`.bar`) regardless of source order. Never put `display:` in a base ID rule when a class like `.screen` controls visibility — the ID rule will silently override `display:none`. Instead: put `display:flex` only in `#foo.active { display: flex; }`.
 
 **Web Speech API (iOS Safari):** `cancel()` silences an immediately-following `speak()` call on iOS. Always delay: `speechSynthesis.cancel(); setTimeout(() => speechSynthesis.speak(utterance), 50)`. Also feature-detect: `if (!('speechSynthesis' in window)) return`.
