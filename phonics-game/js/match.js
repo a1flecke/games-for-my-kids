@@ -8,7 +8,9 @@ class MatchManager {
         // Stored timer IDs so back-navigation can cancel pending callbacks.
         this._matchTimer = null;
         this._winTimer = null;
-        this._wrongTimer = null; // cosmetic shake removal (400ms)
+        this._wrongTimer = null;   // cosmetic shake removal (400ms)
+        this._feedbackTimer = null; // pattern feedback fade-out (1800ms)
+        this._feedbackSeq = 0;     // generation counter — invalidates in-flight rAF on cancel()
     }
 
     init(lesson) {
@@ -23,9 +25,12 @@ class MatchManager {
         clearTimeout(this._matchTimer);
         clearTimeout(this._winTimer);
         clearTimeout(this._wrongTimer);
+        clearTimeout(this._feedbackTimer);
         this._matchTimer = null;
         this._winTimer = null;
         this._wrongTimer = null;
+        this._feedbackTimer = null;
+        this._feedbackSeq++;  // invalidate any in-flight requestAnimationFrame callback
         if (this.board) this.board.cancel();
     }
 
@@ -142,13 +147,22 @@ class MatchManager {
 
     showPatternFeedback(patternLabel, words) {
         const el = document.getElementById('board-pattern-feedback');
+        // Cancel any pending fade-out before starting fresh.
+        clearTimeout(this._feedbackTimer);
+        this._feedbackTimer = null;
         // Clear first so aria-live fires even when the same pattern is matched consecutively.
+        el.classList.remove('visible');
         el.textContent = '';
-        el.style.opacity = '0';
+        // Capture generation — if cancel() fires before the rAF runs, seq will mismatch.
+        const seq = ++this._feedbackSeq;
         requestAnimationFrame(() => {
+            if (this._feedbackSeq !== seq) return; // navigated away — don't write to live region
             el.textContent = `\u2713 ${patternLabel}! (${words.join(', ')})`;
-            el.style.opacity = '1';
-            setTimeout(() => { el.style.opacity = '0'; }, 1800);
+            el.classList.add('visible');
+            this._feedbackTimer = setTimeout(() => {
+                this._feedbackTimer = null;
+                el.classList.remove('visible');
+            }, 1800);
         });
     }
 

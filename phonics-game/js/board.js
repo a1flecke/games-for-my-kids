@@ -4,6 +4,7 @@ class BoardManager {
         this.gridSize = 4;  // set from lesson data
         this.lesson = null;
         this._noMovesTimer = null;
+        this._swirlTimers = []; // one per non-matched tile — must be stored to cancel on back-nav
     }
 
     init(lesson) {
@@ -13,10 +14,12 @@ class BoardManager {
         this.render();
     }
 
-    // Cancel pending no-moves injection timer (called from MatchManager.cancel()).
+    // Cancel pending timers (called from MatchManager.cancel()).
     cancel() {
         clearTimeout(this._noMovesTimer);
         this._noMovesTimer = null;
+        this._swirlTimers.forEach(clearTimeout);
+        this._swirlTimers = [];
     }
 
     generateTiles() {
@@ -75,6 +78,11 @@ class BoardManager {
             el.setAttribute('aria-label', tile.word);
             el.setAttribute('aria-pressed', 'false');
 
+            // Pattern badge — visible only when tile is in 'glow' state (color + text indicator)
+            const badge = document.createElement('span');
+            badge.className = 'tile-pattern-badge hidden';
+            badge.setAttribute('aria-hidden', 'true');
+
             const wordSpan = document.createElement('span');
             wordSpan.className = 'tile-word';
             wordSpan.textContent = tile.word;
@@ -89,6 +97,7 @@ class BoardManager {
                 SpeechManager.speakIfUnmuted(tile.word);
             });
 
+            el.appendChild(badge);
             el.appendChild(wordSpan);
             el.appendChild(speakerBtn);
 
@@ -103,6 +112,13 @@ class BoardManager {
             tile.element = el;
             grid.appendChild(el);
         }
+
+    }
+
+    // Return the tile at (row, col), or null if out of bounds.
+    getTile(row, col) {
+        if (row < 0 || col < 0 || row >= this.gridSize || col >= this.gridSize) return null;
+        return this.tiles.find(t => t.row === row && t.col === col) || null;
     }
 
     setTileState(tile, state) {
@@ -119,6 +135,17 @@ class BoardManager {
         } else {
             el.setAttribute('tabindex', '0');
             el.removeAttribute('aria-disabled');
+        }
+        // Pattern badge: visible in glow state only — color + text indicator (not color alone).
+        const badge = el.querySelector('.tile-pattern-badge');
+        if (badge) {
+            if (state === 'glow') {
+                badge.textContent = this.lesson.patternLabels?.[tile.pattern] || tile.pattern;
+                badge.classList.remove('hidden');
+            } else {
+                badge.textContent = '';
+                badge.classList.add('hidden');
+            }
         }
     }
 
@@ -186,6 +213,9 @@ class BoardManager {
             tile.element.removeAttribute('aria-disabled');
             tile.element.dataset.pattern = tile.pattern;
             tile.element.querySelector('.tile-speaker').setAttribute('aria-label', `Hear ${tile.word}`);
+            // Reset pattern badge — new tile starts in normal state with no badge.
+            const badge = tile.element.querySelector('.tile-pattern-badge');
+            if (badge) { badge.textContent = ''; badge.classList.add('hidden'); }
 
             // Fade-in animation; only reset class to 'tile' if state is still normal.
             tile.element.className = 'tile tile-fadein';
@@ -212,12 +242,19 @@ class BoardManager {
         const live = document.getElementById('aria-live');
         if (live) live.textContent = 'No matches left — reshuffling the board!';
 
+        // Store every swirl timer so cancel() can clear them on back-navigation.
+        this._swirlTimers.forEach(clearTimeout);
+        this._swirlTimers = [];
         for (const tile of this.tiles.filter(t => t.state !== 'matched')) {
             tile.element.classList.add('tile-swirl');
-            setTimeout(() => tile.element.classList.remove('tile-swirl'), 800);
+            const id = setTimeout(() => {
+                if (tile.element.isConnected) tile.element.classList.remove('tile-swirl');
+            }, 800);
+            this._swirlTimers.push(id);
         }
         this._noMovesTimer = setTimeout(() => {
             this._noMovesTimer = null;
+            this._swirlTimers = []; // all swirl timers already fired
             this.injectValidMoves();
         }, 1000);
     }

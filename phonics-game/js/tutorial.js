@@ -116,7 +116,7 @@ class TutorialManager {
             wordEl.className = 'tut-word';
             wordEl.setAttribute('role', 'button');
             wordEl.setAttribute('tabindex', '0');
-            wordEl.setAttribute('aria-pressed', 'false');
+            // No aria-pressed — these are action triggers (hear word), not toggle buttons.
             wordEl.setAttribute('aria-label', `Hear word: ${word}`);
             const textNode = document.createTextNode(`${word} `);
             const speakerSpan = document.createElement('span');

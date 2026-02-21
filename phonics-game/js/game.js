@@ -166,6 +166,10 @@ class Game {
             const startMatch = () => {
                 window.matchManager = new MatchManager(window.boardManager, window.scoreManager);
                 window.matchManager.init(lesson);
+                // Return focus to board after tutorial closes (or immediately on no-tutorial start).
+                // Never leave focus on now-hidden overlay or in a void.
+                const firstTile = document.querySelector('#board-grid .tile');
+                if (firstTile) firstTile.focus();
             };
 
             if (window.tutorialManager.shouldShow(lesson, progress)) {
@@ -303,7 +307,7 @@ class Game {
         chip.className = 'summary-word-chip';
         chip.setAttribute('role', 'button');
         chip.setAttribute('tabindex', '0');
-        chip.setAttribute('aria-pressed', 'false');
+        // No aria-pressed — chips are action triggers (hear word), not toggle buttons.
         chip.setAttribute('aria-label', `Hear word: ${word}`);
         chip.textContent = `${word} \uD83D\uDD0A`;
         chip.addEventListener('click', () => SpeechManager.speakIfUnmuted(word));
@@ -397,13 +401,41 @@ class Game {
         document.getElementById('board-back-btn').addEventListener('click', () => {
             this.showLessonSelect();
         });
+
+        // Arrow key grid navigation — bound once here (not in BoardManager.render()) so
+        // it doesn't stack up with each lesson play. Uses .closest('.tile') so arrow keys
+        // also work when the speaker button inside a tile has focus.
+        document.getElementById('board-grid').addEventListener('keydown', e => {
+            if (!window.boardManager) return;
+            const activeTileEl = document.activeElement.closest?.('.tile') ??
+                (document.activeElement.classList?.contains('tile') ? document.activeElement : null);
+            const tile = window.boardManager.tiles.find(t => t.element === activeTileEl);
+            if (!tile) return;
+            const { row, col } = tile;
+            let next = null;
+            if (e.key === 'ArrowRight') next = window.boardManager.getTile(row, col + 1);
+            if (e.key === 'ArrowLeft')  next = window.boardManager.getTile(row, col - 1);
+            if (e.key === 'ArrowDown')  next = window.boardManager.getTile(row + 1, col);
+            if (e.key === 'ArrowUp')    next = window.boardManager.getTile(row - 1, col);
+            if (e.key === 'Escape') {
+                if (window.matchManager) window.matchManager.resetSelection();
+                return;
+            }
+            if (next) { e.preventDefault(); next.element.focus(); }
+        });
     }
 
     _bindGradeFilter() {
         document.querySelectorAll('.grade-tab').forEach(tab => {
+            // Initialize aria-pressed from the initial .active class state.
+            tab.setAttribute('aria-pressed', tab.classList.contains('active') ? 'true' : 'false');
             tab.addEventListener('click', () => {
-                document.querySelectorAll('.grade-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.grade-tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-pressed', 'false');
+                });
                 tab.classList.add('active');
+                tab.setAttribute('aria-pressed', 'true');
                 this.activeGradeFilter = tab.dataset.grade;
                 this._applyGradeFilter(this.activeGradeFilter);
             });
@@ -418,8 +450,12 @@ class Game {
         document.querySelectorAll('.lesson-card').forEach(card => {
             const visible = grade === 'all' || card.dataset.grade === grade;
             card.classList.toggle('grade-hidden', !visible);
-            // Keep hidden cards out of the AT list count
-            card.setAttribute('aria-hidden', visible ? 'false' : 'true');
+            // Keep hidden cards out of AT list count; remove attr (not set to "false") for visible
+            if (visible) {
+                card.removeAttribute('aria-hidden');
+            } else {
+                card.setAttribute('aria-hidden', 'true');
+            }
         });
     }
 
@@ -444,10 +480,9 @@ class Game {
             SaveManager.save(data);
         });
 
-        // Hint tile toggle
+        // Hint tile toggle — native checkbox; checked state is its own ARIA state carrier
         document.getElementById('hint-toggle').addEventListener('change', e => {
             this.hintMode = e.target.checked ? 'one' : 'none';
-            e.target.setAttribute('aria-pressed', String(e.target.checked));
             const data = SaveManager.load();
             data.hintMode = this.hintMode;
             SaveManager.save(data);
@@ -604,10 +639,7 @@ class Game {
             document.getElementById('font-size-select').value = data.fontSize;
         }
         if (data.hintMode !== undefined) {
-            const checked = data.hintMode !== 'none';
-            const el = document.getElementById('hint-toggle');
-            el.checked = checked;
-            el.setAttribute('aria-pressed', String(checked));
+            document.getElementById('hint-toggle').checked = data.hintMode !== 'none';
         }
     }
 
