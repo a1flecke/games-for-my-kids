@@ -38,6 +38,9 @@ class Game {
         this._bindBoardScreen();
         this._bindSummaryScreen();
         this._syncSettings();
+        // Initialize singleton managers after DOM is ready.
+        // Never lazy-init in startLesson() — reuses stale state on second play.
+        window.tutorialManager = new TutorialManager();
     }
 
     renderLessonSelect() {
@@ -114,9 +117,19 @@ class Game {
             window.scoreManager = new ScoreManager();
             window.boardManager = new BoardManager();
             window.boardManager.init(lesson);
-            // matchManager.init() sets the progress counter, so no manual textContent needed.
-            window.matchManager = new MatchManager(window.boardManager, window.scoreManager);
-            window.matchManager.init(lesson);
+
+            const progress = SaveManager.load();
+            const startMatch = () => {
+                window.matchManager = new MatchManager(window.boardManager, window.scoreManager);
+                window.matchManager.init(lesson);
+            };
+
+            if (window.tutorialManager.shouldShow(lesson, progress)) {
+                // Tutorial overlay sits above the rendered board; matchManager starts on complete.
+                window.tutorialManager.start(lesson, progress, startMatch);
+            } else {
+                startMatch();
+            }
         } catch (err) {
             console.error('Failed to load lesson', id, err);
         }
@@ -130,6 +143,7 @@ class Game {
         }
         window.boardManager = null;
         window.scoreManager = null;
+        if (window.tutorialManager) window.tutorialManager.cancel();
         this._dismissSummaryFocusTrap();
         // Remove active from all screens (handles navigating from board or summary)
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));

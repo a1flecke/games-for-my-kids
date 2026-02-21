@@ -137,6 +137,20 @@
         </div>
     </div>
 
+    <!-- Tutorial overlay — 3-step first-play walkthrough for each new phonics pattern -->
+    <div id="tutorial-overlay" class="tutorial-overlay" role="dialog" aria-modal="true"
+         aria-labelledby="tut-title" aria-hidden="true">
+        <div class="tutorial-card">
+            <div id="tut-step" class="tut-step">Step 1 of 3</div>
+            <h2 id="tut-title" class="tut-title"></h2>
+            <div id="tut-body" class="tut-body"></div>
+            <div class="tut-buttons">
+                <button id="tut-skip-btn" class="tut-btn tut-btn-secondary">Skip Tutorial</button>
+                <button id="tut-next-btn" class="tut-btn tut-btn-primary">Next →</button>
+            </div>
+        </div>
+    </div>
+
     <!-- PIN dialog — unlock all lessons (parent/teacher gated) -->
     <div id="pin-overlay"></div>
     <div id="pin-dialog" role="dialog" aria-modal="true" aria-label="Enter PIN to unlock lessons" aria-hidden="true">
