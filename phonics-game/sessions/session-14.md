@@ -271,3 +271,13 @@ Landscape layout addition:
 - [ ] Progress saves and restores correctly across page refreshes
 - [ ] Home button navigates to `../` correctly on GitHub Pages
 - [ ] Game works in landscape orientation on iPad
+
+---
+
+## ⚠️ Watch Out — Known Spec Issues
+
+1. **CRITICAL — `user-scalable=no`**: the spec adds `maximum-scale=1.0, user-scalable=no` to the viewport meta. **DO NOT DO THIS** — it violates WCAG 1.4.4. The existing `index.html` has a comment explicitly explaining this. The game provides its own font-size control via the settings panel.
+
+2. **`refill()` requestAnimationFrame**: the spec wraps DOM writes in `requestAnimationFrame`. This is already implemented in Session 06. Do not double-wrap.
+
+3. **Loading overlay `style` attribute**: spec has `style="display:none; ... display:flex;"` — two conflicting `display` values. Use a CSS class for the overlay's flex layout; only toggle visibility with `display:none` vs `display:flex`.

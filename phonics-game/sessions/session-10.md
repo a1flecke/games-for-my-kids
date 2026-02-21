@@ -315,3 +315,17 @@ unlockAllLessons() {
 - [ ] Teacher unlock (PIN 1234) unlocks all lessons persistently
 - [ ] Mute settings persist across page reloads (LocalStorage)
 - [ ] No audio errors on iOS Safari (context resumption handled)
+
+---
+
+## ⚠️ Watch Out — Known Spec Issues
+
+1. **Settings panel already exists** — `#settings-panel` with full `_bindSettingsPanel()` was built in Session 01. Do NOT add the new settings HTML from this spec. Only ADD the missing "Sound Effects" toggle row and hook up AudioManager's mute state in `_bindSettingsPanel()`.
+
+2. **PIN dialog already exists** — `#pin-dialog` with `_openPinDialog()` was built in Session 01. Do NOT implement `prompt()`/`alert()` unlock flow. Reuse the existing dialog.
+
+3. **AudioManager mute key**: `isMuted()` must read `SaveManager.load().muteSfx` (NOT `localStorage.getItem('phonics-mute-sfx')`). All settings live under `'phonics-progress'`.
+
+4. **AudioContext iOS**: do not create `AudioContext` in the constructor — iOS Safari requires it to be created (or resumed) inside a user-gesture event handler. Create it lazily on first sound play: `this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)()`.
+
+5. **Settings toggles**: use `addEventListener` in `_bindSettingsPanel()` — not `onchange=` HTML attributes.

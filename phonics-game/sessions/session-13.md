@@ -274,3 +274,15 @@ if (options && options.timeUp) {
 - [ ] Clearing board before time up stops timer and shows normal summary
 - [ ] No countdown number visible anywhere
 - [ ] Timer stops when navigating away (back button)
+
+---
+
+## ⚠️ Watch Out — Known Spec Issues
+
+1. **Timer leak**: `this.challengeTimer` must be cleared in `showLessonSelect()`. Add `this.stopChallengeTimer()` alongside `matchManager.cancel()`.
+
+2. **Energy bar color via CSS classes**: spec uses direct style manipulation `fill.style.backgroundColor = '#27ae60'`. Use CSS classes instead (e.g., `fill.className = 'energy-bar-fill energy-high'`) so color is defined in CSS, not JS.
+
+3. **Mode select dialog**: add Escape key handler to dismiss (defaults to explorer mode).
+
+4. **`insertAdjacentHTML` with template literal**: `summary-title.insertAdjacentHTML('afterend', \`<p>...\`)` — use `createElement` + `textContent` instead.

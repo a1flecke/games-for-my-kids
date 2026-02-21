@@ -332,3 +332,21 @@ nextLesson() {
 - [ ] Results saved to LocalStorage; lesson select shows updated stars on return
 - [ ] Accuracy calculation correct: correct / (correct + wrong)
 - [ ] 3 stars requires ≥90% accuracy AND streak of 5+
+
+---
+
+## ⚠️ Watch Out — Known Spec Issues
+
+1. **Screen show/hide**: spec uses `style.display = 'none'/'block'`. Use `.active` class instead — `screen-summary` is a `.screen` element. Remove `style="display:none;"` from HTML; add `screen-summary` as a `.screen` div.
+
+2. **Button event listeners**: spec has `onclick="game.playAgain()"` in HTML. Use `addEventListener` in `showSummary()` instead.
+
+3. **Word chips (innerHTML + onclick)**: spec uses `summary.matchedWords.map(w => \`<span ... onclick="SpeechManager.speakIfUnmuted('${w}')">\`)`. Use `createElement` + `textContent` + `addEventListener` for each chip.
+
+4. **SaveManager**: spec replaces the whole class. Do NOT replace `load()`/`save()` — only ADD `saveLessonResult()` as a new static method to the existing class.
+
+5. **`lessonId + 1` coercion**: lessonId may be a number or string — use `Number(lessonId) + 1`.
+
+6. **`summary-stat` color `#636e72`**: fails WCAG AA on white. Use `var(--text-secondary)` (#595143) instead.
+
+7. **`this.currentLessonId`**: ensure `startLesson()` sets `this.currentLessonId = id` (session 08 needs it too).

@@ -389,3 +389,19 @@ async startSortMode(id) {
 - [ ] "Play the Board" button transitions to main game mode
 - [ ] No timer shown anywhere in Sort Mode
 - [ ] Sort practiced state saved to LocalStorage (shows badge on lesson card)
+
+---
+
+## ⚠️ Watch Out — Known Spec Issues
+
+1. **Lesson card "Sort" button**: spec puts button in `el.innerHTML` with `onclick="event.stopPropagation(); game.startSortMode(${lesson.id})"`. Use `createElement` + `addEventListener` for both Play and Sort buttons — do not use innerHTML for the card body since it breaks the existing rendering pattern in `renderLessonSelect()`.
+
+2. **`buildWordQueue` shuffle**: `queue.sort(() => Math.random() - 0.5)` appears twice — use Fisher-Yates both times.
+
+3. **Sort speaker button DOM read**: spec reads word from DOM `document.getElementById('sort-word-card').textContent`. Use `this.currentWord.word` instead (already tracked in state).
+
+4. **`window.sortManager` init**: create in `game.init()`, not in `startSortMode()`. Avoids stale state on second play.
+
+5. **`renderBuckets` innerHTML**: wraps `${label}` and `${example}` in template literal — use `escHtml()` on both values.
+
+6. **Sort buckets keyboard**: add `role="button"`, `tabindex="0"`, and `keydown` (Enter/Space) handler in `renderBuckets()`.

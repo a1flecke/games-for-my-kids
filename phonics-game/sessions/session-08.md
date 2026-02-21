@@ -379,3 +379,21 @@ async startLesson(id) {
 - [ ] Tutorial state saved to LocalStorage; second play of same lesson skips tutorial
 - [ ] Tutorial is fully keyboard navigable (Tab/Enter)
 - [ ] `aria-modal` and `role="dialog"` set correctly for screen readers
+
+---
+
+## ⚠️ Watch Out — Known Spec Issues
+
+1. **`window.tutorialManager` init**: add `window.tutorialManager = new TutorialManager()` to `game.init()` — do not create lazily in `startLesson()`.
+
+2. **Screen show/hide**: spec uses `style.display = 'block'`. Use `.active` class instead.
+
+3. **`tut-next-btn.onclick = ...`**: use `addEventListener` — remove old listener before adding new to avoid stacking. Pattern: store handler ref and `removeEventListener`, or use a single `click` handler that reads `this.step`.
+
+4. **`onclick` HTML attrs**: `onclick="window.tutorialManager.skip()"` on buttons — use `addEventListener` in `TutorialManager` constructor or `start()`.
+
+5. **`buildMiniBoard` shuffle**: `allTiles.sort(() => Math.random() - 0.5)` is biased — use Fisher-Yates.
+
+6. **Focus management**: `showStep1()` must call `document.getElementById('tut-skip-btn').focus()` on open. Add Escape key handler and focus trap (same pattern as settings panel / PIN dialog).
+
+7. **Tutorial overlay show/hide**: use CSS class `.open` toggled on `#tutorial-overlay` (consistent with other overlays), not `style.display`.
