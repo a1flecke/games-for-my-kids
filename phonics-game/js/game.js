@@ -14,6 +14,7 @@ class Game {
         this.settingsOpen = false;
         this.pinOpen = false;
         this.fontSizeLevel = 'medium'; // small | medium | large
+        this.hintMode = 'one'; // 'one' | 'none'
         this._focusTrapHandler = null;
         this._pinFocusTrapHandler = null;
     }
@@ -25,6 +26,9 @@ class Game {
             this.fontSizeLevel = this.progress.fontSize;
         }
         this._applyFontSize(this.fontSizeLevel);
+        if (this.progress.hintMode !== undefined) {
+            this.hintMode = this.progress.hintMode;
+        }
         this.renderLessonSelect();
         this._bindSettingsPanel();
         this._bindGradeFilter();
@@ -186,6 +190,15 @@ class Game {
             SaveManager.save(data);
         });
 
+        // Hint tile toggle
+        document.getElementById('hint-toggle').addEventListener('change', e => {
+            this.hintMode = e.target.checked ? 'one' : 'none';
+            e.target.setAttribute('aria-pressed', String(e.target.checked));
+            const data = SaveManager.load();
+            data.hintMode = this.hintMode;
+            SaveManager.save(data);
+        });
+
         // Font size
         document.getElementById('font-size-select').addEventListener('change', e => {
             this.fontSizeLevel = e.target.value;
@@ -335,6 +348,12 @@ class Game {
         if (data.muteSfx) document.getElementById('mute-sfx').checked = true;
         if (data.fontSize) {
             document.getElementById('font-size-select').value = data.fontSize;
+        }
+        if (data.hintMode !== undefined) {
+            const checked = data.hintMode !== 'none';
+            const el = document.getElementById('hint-toggle');
+            el.checked = checked;
+            el.setAttribute('aria-pressed', String(checked));
         }
     }
 

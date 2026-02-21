@@ -315,6 +315,8 @@ unlockAllLessons() {
 - [ ] Teacher unlock (PIN 1234) unlocks all lessons persistently
 - [ ] Mute settings persist across page reloads (LocalStorage)
 - [ ] No audio errors on iOS Safari (context resumption handled)
+- [ ] "Show hint tile" toggle shows/hides one hint tile correctly
+- [ ] Hint setting persists across page reloads
 
 ---
 
@@ -329,3 +331,5 @@ unlockAllLessons() {
 4. **AudioContext iOS**: do not create `AudioContext` in the constructor — iOS Safari requires it to be created (or resumed) inside a user-gesture event handler. Create it lazily on first sound play: `this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)()`.
 
 5. **Settings toggles**: use `addEventListener` in `_bindSettingsPanel()` — not `onchange=` HTML attributes.
+
+6. **Hint tile toggle already implemented** — `#hint-toggle` with `game.hintMode` ('one'|'none') was built in session 06b. The hint toggle, `_syncSettings()`, and `selectFirst()` in match.js are already wired up. Do NOT re-implement. Only verify the "Show hint tile" row is present in the settings panel HTML.

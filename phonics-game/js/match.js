@@ -54,10 +54,13 @@ class MatchManager {
     selectFirst(tile) {
         this.board.setTileState(tile, 'selected');
         this.selected = [tile];
-        // Glow all other non-matched tiles sharing this pattern.
-        for (const t of this.board.getTilesByPattern(tile.pattern)) {
-            if (t !== tile) this.board.setTileState(t, 'glow');
-        }
+        const hintMode = window.game ? window.game.hintMode : 'one';
+        if (hintMode === 'none') return;
+        // hintMode === 'one': glow exactly 1 random same-pattern tile.
+        const candidates = this.board.getTilesByPattern(tile.pattern).filter(t => t !== tile);
+        if (candidates.length === 0) return;
+        const pick = candidates[Math.floor(Math.random() * candidates.length)];
+        this.board.setTileState(pick, 'glow');
     }
 
     deselectTile(tile) {
