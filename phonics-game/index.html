@@ -110,10 +110,31 @@
     </div>
 
     <!-- ================================================================
-         Screen: Post-Lesson Summary (placeholder — built in Session 7)
+         Screen: Post-Lesson Summary
          ================================================================ -->
     <div id="screen-summary" class="screen" role="region" aria-label="Lesson summary">
-        <p class="placeholder-msg">Summary — coming in Session 7</p>
+        <div class="summary-card">
+            <h2 id="summary-title">Lesson Complete!</h2>
+            <div id="summary-stars" class="summary-stars" aria-label="Stars earned"></div>
+            <div id="summary-accuracy" class="summary-stat"></div>
+            <div id="summary-streak" class="summary-stat"></div>
+
+            <div class="summary-words-section">
+                <h3>Words You Matched ✓</h3>
+                <div id="summary-matched-words" class="summary-word-list"></div>
+            </div>
+
+            <div class="summary-words-section" id="summary-review-section">
+                <h3>Words to Practice 🔁</h3>
+                <div id="summary-wrong-words" class="summary-word-list"></div>
+            </div>
+
+            <div class="summary-buttons">
+                <button class="summary-btn" id="summary-play-again">🔄 Play Again</button>
+                <button class="summary-btn summary-btn-primary" id="summary-next-lesson">Next Lesson →</button>
+                <button class="summary-btn" id="summary-all-lessons">📚 All Lessons</button>
+            </div>
+        </div>
     </div>
 
     <!-- PIN dialog — unlock all lessons (parent/teacher gated) -->

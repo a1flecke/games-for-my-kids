@@ -1,7 +1,7 @@
 class MatchManager {
     constructor(boardManager, scoreManager) {
         this.board = boardManager;
-        this.score = scoreManager;  // null until Session 8 implements ScoreManager
+        this.score = scoreManager;  // ScoreManager instance (or null in tests)
         this.selected = [];
         this.matchedCount = 0;
         this.totalTiles = 0;
@@ -74,7 +74,7 @@ class MatchManager {
             // Only reset if still in 'wrong' — user may have triggered something else.
             if (tile.state === 'wrong') this.board.setTileState(tile, 'normal');
         }, 400);
-        if (this.score) this.score.recordWrong();
+        if (this.score) this.score.recordWrong(tile.word);
         this.resetSelection();
     }
 
@@ -107,7 +107,12 @@ class MatchManager {
 
         this.showPatternFeedback(patternLabel, matchedWords);
         this.matchedCount += this.selected.length;
-        if (this.score) this.score.recordMatch(this.selected.length, matchedPattern);
+        if (this.score) {
+            this.score.recordMatch(this.selected.length, matchedPattern);
+            for (const word of matchedWords) {
+                this.score.recordMatchedWord(word);
+            }
+        }
         this.selected = [];
 
         // After fade-out animation (400ms), refill and check game state.

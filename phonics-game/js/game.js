@@ -10,6 +10,7 @@ function escHtml(str) {
 class Game {
     constructor() {
         this.progress = null;
+        this.currentLessonId = null;
         this.activeGradeFilter = 'all';
         this.settingsOpen = false;
         this.pinOpen = false;
@@ -17,6 +18,7 @@ class Game {
         this.hintMode = 'one'; // 'one' | 'none'
         this._focusTrapHandler = null;
         this._pinFocusTrapHandler = null;
+        this._summaryFocusTrapHandler = null;
     }
 
     init() {
@@ -34,6 +36,7 @@ class Game {
         this._bindGradeFilter();
         this._bindPinDialog();
         this._bindBoardScreen();
+        this._bindSummaryScreen();
         this._syncSettings();
     }
 
@@ -103,13 +106,16 @@ class Game {
     async startLesson(id, isPreview = false) {
         try {
             const lesson = await DataManager.loadLesson(id);
-            document.getElementById('screen-select').classList.remove('active');
+            this.currentLessonId = id;
+            // Remove active from all screens before showing board
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-board').classList.add('active');
             document.getElementById('board-lesson-title').textContent = lesson.title;
+            window.scoreManager = new ScoreManager();
             window.boardManager = new BoardManager();
             window.boardManager.init(lesson);
             // matchManager.init() sets the progress counter, so no manual textContent needed.
-            window.matchManager = new MatchManager(window.boardManager, null);
+            window.matchManager = new MatchManager(window.boardManager, window.scoreManager);
             window.matchManager.init(lesson);
         } catch (err) {
             console.error('Failed to load lesson', id, err);
@@ -123,8 +129,14 @@ class Game {
             window.matchManager = null;
         }
         window.boardManager = null;
-        document.getElementById('screen-board').classList.remove('active');
+        window.scoreManager = null;
+        this._dismissSummaryFocusTrap();
+        // Remove active from all screens (handles navigating from board or summary)
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-select').classList.add('active');
+        // Reload progress so updated stars are shown after lesson completion
+        this.progress = SaveManager.load();
+        this.renderLessonSelect();
     }
 
     onTileTap(tile) {
@@ -135,8 +147,118 @@ class Game {
     }
 
     onLessonComplete() {
-        // Full summary screen implemented in Session 7 — placeholder for now.
-        alert('Lesson complete! \uD83C\uDF89');
+        const summary = window.scoreManager.getSummary();
+        SaveManager.saveLessonResult(this.currentLessonId, summary);
+        this.showSummary(summary);
+    }
+
+    showSummary(summary) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-summary').classList.add('active');
+
+        // Stars display — update aria-label dynamically so VoiceOver announces the count
+        const stars = summary.stars;
+        const starsEl = document.getElementById('summary-stars');
+        starsEl.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+        starsEl.setAttribute('aria-label', `${stars} of 3 stars earned`);
+
+        // Stats
+        document.getElementById('summary-accuracy').textContent =
+            `Accuracy: ${Math.round(summary.accuracy * 100)}%`;
+        const streakEl = document.getElementById('summary-streak');
+        streakEl.textContent = summary.maxStreak >= 5
+            ? `\uD83D\uDD25 Best streak: ${summary.maxStreak} in a row!`
+            : '';
+
+        // Matched words — tappable chips built with createElement (no innerHTML interpolation)
+        const matchedDiv = document.getElementById('summary-matched-words');
+        matchedDiv.innerHTML = '';
+        for (const word of summary.matchedWords) {
+            matchedDiv.appendChild(this._makeWordChip(word));
+        }
+
+        // Wrong words — use class (not style.display) to avoid inline-style specificity issues
+        const reviewSection = document.getElementById('summary-review-section');
+        const wrongDiv = document.getElementById('summary-wrong-words');
+        wrongDiv.innerHTML = '';
+        if (summary.wrongWords.length === 0) {
+            reviewSection.classList.add('hidden');
+        } else {
+            reviewSection.classList.remove('hidden');
+            for (const word of summary.wrongWords) {
+                wrongDiv.appendChild(this._makeWordChip(word));
+            }
+        }
+
+        // Focus trap — keep keyboard/AT users within the summary screen
+        this._summaryFocusTrapHandler = this._handleSummaryFocusTrap.bind(this);
+        document.addEventListener('keydown', this._summaryFocusTrapHandler);
+
+        // Focus the primary button for keyboard/AT users
+        document.getElementById('summary-next-lesson').focus();
+    }
+
+    _handleSummaryFocusTrap(e) {
+        const screen = document.getElementById('screen-summary');
+        const focusable = Array.from(
+            screen.querySelectorAll('button, [tabindex="0"]')
+        ).filter(el => !el.closest('.hidden'));
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        }
+    }
+
+    _dismissSummaryFocusTrap() {
+        if (this._summaryFocusTrapHandler) {
+            document.removeEventListener('keydown', this._summaryFocusTrapHandler);
+            this._summaryFocusTrapHandler = null;
+        }
+    }
+
+    _makeWordChip(word) {
+        const chip = document.createElement('span');
+        chip.className = 'summary-word-chip';
+        chip.setAttribute('role', 'button');
+        chip.setAttribute('tabindex', '0');
+        chip.setAttribute('aria-pressed', 'false');
+        chip.setAttribute('aria-label', `Hear word: ${word}`);
+        chip.textContent = `${word} \uD83D\uDD0A`;
+        chip.addEventListener('click', () => SpeechManager.speakIfUnmuted(word));
+        chip.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                SpeechManager.speakIfUnmuted(word);
+            }
+        });
+        return chip;
+    }
+
+    playAgain() {
+        this._dismissSummaryFocusTrap();
+        this.startLesson(this.currentLessonId);
+    }
+
+    nextLesson() {
+        this._dismissSummaryFocusTrap();
+        const nextId = Number(this.currentLessonId) + 1;
+        if (nextId <= 30) {
+            this.startLesson(nextId);
+        } else {
+            this.showLessonSelect();
+        }
+    }
+
+    _bindSummaryScreen() {
+        document.getElementById('summary-play-again').addEventListener('click', () => this.playAgain());
+        document.getElementById('summary-next-lesson').addEventListener('click', () => this.nextLesson());
+        document.getElementById('summary-all-lessons').addEventListener('click', () => this.showLessonSelect());
     }
 
     _bindBoardScreen() {

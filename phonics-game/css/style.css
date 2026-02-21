@@ -457,16 +457,14 @@ body {
    Placeholder Screens (Sessions 9+)
    ===================================================================== */
 
-#screen-sort,
-#screen-summary {
+#screen-sort {
     /* No display:flex here — ID specificity would override .screen{display:none}.
        Flex layout applied only when .active via the rules below. */
     padding: 80px 24px 32px;
     gap: 16px;
 }
 
-#screen-sort.active,
-#screen-summary.active {
+#screen-sort.active {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -478,6 +476,127 @@ body {
     color: var(--text-secondary);
     text-align: center;
 }
+
+/* =====================================================================
+   Utility
+   ===================================================================== */
+
+.hidden { display: none; }
+
+/* =====================================================================
+   Post-Lesson Summary Screen
+   ===================================================================== */
+
+#screen-summary {
+    /* No display:flex here — ID specificity would override .screen{display:none}.
+       Flex layout applied only when .active via the rule below. */
+    padding: 80px 16px 32px;
+    overflow-y: auto;
+}
+
+#screen-summary.active {
+    display: block;
+}
+
+.summary-card {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    text-align: center;
+    font-family: var(--font-ui);
+}
+
+.summary-card h2 {
+    font-size: 1.4rem;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.summary-stars {
+    font-size: 48px;
+    margin: 16px 0;
+    letter-spacing: 8px;
+}
+
+.summary-stat {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin: 4px 0;
+    min-height: 1.4em;
+}
+
+.summary-words-section {
+    text-align: left;
+    margin: 16px 0;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.summary-words-section h3 {
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    color: var(--text);
+}
+
+.summary-word-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.summary-word-chip {
+    background: white;
+    border: 2px solid #dfe6e9;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-family: var(--font-tile);
+    font-size: 16px;
+    cursor: pointer;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    touch-action: manipulation;
+}
+
+.summary-word-chip:active { background: #e8f4fd; }
+
+.summary-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.summary-btn {
+    padding: 12px 20px;
+    border: 2px solid #dfe6e9;
+    border-radius: 10px;
+    background: white;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    cursor: pointer;
+    min-height: 44px;
+    touch-action: manipulation;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+.summary-btn:hover { background: var(--bg); }
+.summary-btn:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+
+.summary-btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--text);
+    font-weight: bold;
+}
+
+.summary-btn-primary:hover { background: #d4911a; border-color: #d4911a; }
 
 /* =====================================================================
    Game Board Screen
