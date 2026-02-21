@@ -37,6 +37,9 @@ Run these skills after editing the relevant files — before committing:
 |------|-------|----------------|
 | After editing any `catacombs-and-creeds/data/levels/levelN.json` | `/verify-maps` | BFS reachability of all NPCs, items, chests, enemies from player start |
 | After editing `math-coloring-2/index.html` themes | `/verify-math-geometry` | Every section overlaps nearest neighbor by ≥15px |
+| After editing any `phonics-game/data/lessons/*.json` | `/validate-lessons` | Word count ≥8, no cross-pattern duplicates, no homographs, no British spellings |
+
+A PostToolUse hook also runs the lesson validator automatically after each lesson file edit.
 
 ## Adding a New Game
 
@@ -115,10 +118,16 @@ Word Explorer — phonics matching game for grades 1–5. Multi-file modular JS.
 
 **Target platform:** iPad Safari (primary), desktop Chrome/Firefox. DOM + CSS Grid (not Canvas).
 
-**Key phonics data rules (Sessions 2–4):**
+**Phonics data rules (all lesson JSON edits):**
 - Words must phonetically exemplify their pattern — check for exceptions (e.g. "word" sounds like "ur" not "or"; "smooth" has silent TH)
-- Avoid homonyms with two pronunciations on the same board (e.g. "read", "wind", "wound")
-- No word in both patterns of the same lesson (e.g. "sled" is an sl-blend, not both l-blend and s-blend)
+- **Homographs:** avoid words with two pronunciations (e.g. "read", "wind", "wound", "bow", "use"). The HOMOGRAPHS set in `validate-lessons.js` is the source of truth.
+- **No cross-pattern duplicates** within the same lesson — a word that belongs to pattern A must not appear in pattern B of the same file.
+- **Blend classification:** verify which blend family a word belongs to. "sly" is an SL-blend (s-blend), not an L-blend.
+- **VCE (silent-E) patterns:** r-controlled vowels are NOT long vowels. "cure", "lure", "pure" are /ɜː/, not long-U — exclude from `u_e` pattern.
+- **Root transparency:** the root must be clearly visible and productive in the word. "constrict" has STRICT/STRING root, not STRUCT. "manuscript" serves both SCRIB and MAN — pick one lesson.
+- **British spellings:** "draught", "nought", "colour", etc. are unrecognizable to American students — use American equivalents.
+- **Grade-appropriate vocabulary:** avoid adult medical terms (e.g. "gout"), archaic words, and proper nouns at early grade levels.
+- Run `/validate-lessons` after every lesson file edit (also runs automatically via hook).
 
 ## HTML/JS Coding Standards
 
@@ -138,7 +147,15 @@ Rules that apply to ALL games in this repo. These prevent recurring bugs:
 
 **Font size scaling:** Apply via `document.documentElement.style.fontSize = '20px'` rather than re-declaring a CSS custom property on `:root` from a class (fragile source-order dependency).
 
-**`window.game` init pattern:** `window.game = new Game(); window.game.init();` — never `game.init()` (relies on implicit global before assignment completes).
+**`window.game` init pattern:** `window.game = new Game(); window.game.init();` — never `game.init()` (relies on implicit global before assignment completes). With `defer`, call directly — never wrap in `window.addEventListener('load', ...)` which delays rendering.
+
+**CSS ID specificity:** ID selectors (`#foo`) always beat class selectors (`.bar`) regardless of source order. Never put `display:` in a base ID rule when a class like `.screen` controls visibility — the ID rule will silently override `display:none`. Instead: put `display:flex` only in `#foo.active { display: flex; }`.
+
+**Web Speech API (iOS Safari):** `cancel()` silences an immediately-following `speak()` call on iOS. Always delay: `speechSynthesis.cancel(); setTimeout(() => speechSynthesis.speak(utterance), 50)`. Also feature-detect: `if (!('speechSynthesis' in window)) return`.
+
+**Toggle/selection buttons:** Any `role="button"` with a selected/active state must have `aria-pressed="true/false"`. Set `aria-pressed="false"` on creation and update on state change. A visual `.selected` class alone is invisible to assistive technology.
+
+**Modal focus-return:** On close, return focus to the element that opened the dialog (e.g., the settings button) — not to a button inside the now-hidden panel.
 
 ## Accessibility Requirements (All Games)
 
