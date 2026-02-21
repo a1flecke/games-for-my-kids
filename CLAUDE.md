@@ -137,7 +137,7 @@ Rules that apply to ALL games in this repo. These prevent recurring bugs:
 
 **Viewport:** Never use `user-scalable=no` — violates WCAG 1.4.4. Users with dyslexia rely on browser zoom.
 
-**Modal dialogs:** Use `<div role="dialog" aria-modal="true" aria-label="...">` (not `<aside>` — conflicting landmark). First focusable element must be a close (✕) button. Implement Tab/Shift-Tab focus trap + Escape to close. On open: focus close button, set `aria-hidden="false"` on panel, set `aria-expanded="true"` on trigger. On close: reverse all three.
+**Modal dialogs:** Use `<div role="dialog" aria-modal="true" aria-label="...">` (not `<aside>` — conflicting landmark). First focusable element must be a close (✕) button. Implement Tab/Shift-Tab focus trap + Escape to close. On open: focus close button, `setAttribute('aria-hidden', 'false')` on overlay, set `aria-expanded="true"` on trigger. On close: `setAttribute('aria-hidden', 'true')` on overlay, reverse aria-expanded. Note: `removeAttribute('aria-hidden')` is correct for *filtered list items* (lesson cards) but overlays always use explicit `'false'`/`'true'` — never remove the attribute.
 
 **innerHTML safety:** HTML-escape any interpolated values: `String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')`. Use an `escHtml()` helper.
 
@@ -190,6 +190,12 @@ Detached-element callbacks: use `if (el.isConnected) el.classList.remove(...)` i
 **`aria-live` + `aria-label` conflict:** Never put both on the same element. VoiceOver announces both — an `aria-label` overrides `textContent` for AT, so a live region with an `aria-label` will either double-announce or announce the wrong text. Use `aria-live` alone; changing `textContent` drives the announcement.
 
 **Modal focus-return:** On close, return focus to the element that opened the dialog (e.g., the settings button) — not to a button inside the now-hidden panel.
+
+**Focus trap Escape guard:** Focus trap keydown handlers must guard against firing after the overlay is already closed. Always check `el.classList.contains('open')` before acting on Escape: `if (e.key === 'Escape') { if (overlay.classList.contains('open')) doClose(); return; }`. Without this guard, a stale handler registered before `_dismissX()` could fire on the next Escape keypress and corrupt state.
+
+**Timer race with async navigation:** `setInterval`/`setTimeout` callbacks that call into game state (e.g. `onChallengeTimeUp()`) must guard against `null` state at the top: `if (!window.scoreManager) return;`. `clearInterval` prevents *future* firings but cannot cancel a callback already in the JS call stack — so a tick that fires in the same event loop turn as `showLessonSelect()` (which nulls managers) will still execute. Always null-guard before accessing `window.scoreManager`, `window.matchManager`, etc.
+
+**SaveManager `_defaults()` completeness:** Every key that `game.js` reads from progress must exist in `SaveManager._defaults()`. If `game.init()` checks `if (data.someKey !== undefined)`, `_defaults()` must include `someKey` with its default value — otherwise fresh installs behave correctly but the key is never included in saved data until the user explicitly changes that setting.
 
 ## Accessibility Requirements (All Games)
 
