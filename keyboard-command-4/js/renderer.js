@@ -90,6 +90,8 @@ class ParticlePool {
 // Renderer
 // ============================================================
 class Renderer {
+    get canvas() { return this._canvas; }
+
     constructor(canvas) {
         this._canvas = canvas;
         this._ctx = canvas.getContext('2d');
@@ -564,7 +566,11 @@ class Renderer {
     drawMonster(monster, time) {
         const ctx = this._ctx;
         const { type, depth, state } = monster;
-        const cacheKey = `${type}_${state === 'dying' ? 'hit' : state === 'moving' ? 'idle' : state}`;
+        const cacheKey = `${type}_${
+            (state === 'dying' || state === 'hit') ? 'hit' :
+            (state === 'advancing' || state === 'spawning') ? 'idle' :
+            state
+        }`;
         const sprite = this._spriteCache[cacheKey];
         if (!sprite) return;
 
@@ -813,6 +819,13 @@ class Renderer {
     spawnImpact(x, y, weaponId) {
         const weapon = this._getWeaponDesign(weaponId);
         this.particles.emit(x, y, 8, weapon.muzzleColor, 3, 3);
+    }
+
+    spawnMiss() {
+        // Red scatter particles at a random location to indicate a miss
+        const x = this._width * (0.2 + Math.random() * 0.6);
+        const y = this._height * (0.2 + Math.random() * 0.4);
+        this.particles.emit(x, y, 5, '#E74C3C', 2, 2);
     }
 
     spawnDeathEffect(x, y, monsterType) {

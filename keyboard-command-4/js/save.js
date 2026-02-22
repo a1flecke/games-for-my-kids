@@ -12,7 +12,10 @@ class SaveManager {
             highestLevel: 1,
             totalScore: 0,
             levels: {},
-            shortcuts: {},
+            shortcuts: {
+                learned: {},
+                stats: {}
+            },
             weaponsUnlocked: [1],
             selectedWeapon: 1,
             settings: {
@@ -35,7 +38,13 @@ class SaveManager {
                 return {
                     ...defaults,
                     ...data,
-                    settings: { ...defaults.settings, ...(data.settings || {}) }
+                    settings: { ...defaults.settings, ...(data.settings || {}) },
+                    shortcuts: {
+                        ...defaults.shortcuts,
+                        ...(data.shortcuts || {}),
+                        learned: { ...(defaults.shortcuts.learned), ...((data.shortcuts && data.shortcuts.learned) || {}) },
+                        stats: { ...(defaults.shortcuts.stats), ...((data.shortcuts && data.shortcuts.stats) || {}) }
+                    }
                 };
             }
         } catch {
