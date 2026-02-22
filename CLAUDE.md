@@ -7,7 +7,7 @@ Collection of educational browser games for grades 2–6 (ages 7–12), some des
 ## Tech Stack
 
 - **Vanilla JavaScript (ES6+)**, HTML5, CSS3 — no frameworks, no bundlers, no npm
-- **HTML5 Canvas** for game rendering (catacombs-and-creeds)
+- **HTML5 Canvas** for game rendering (catacombs-and-creeds, keyboard-command-4)
 - **LocalStorage** for save data
 - Games run directly in-browser with no build step
 
@@ -40,6 +40,8 @@ Run these skills after editing the relevant files — before committing:
 | After editing any `phonics-game/data/lessons/*.json` | `/validate-lessons` | Word count ≥8, no cross-pattern duplicates, no homographs, no British spellings |
 
 A PostToolUse hook also runs the lesson validator automatically after each lesson file edit.
+
+A PostToolUse hook also runs JS pattern checks on `keyboard-command-4/` files (same hook as phonics-game).
 
 ## Adding a New Game
 
@@ -128,6 +130,39 @@ Word Explorer — phonics matching game for grades 1–5. Multi-file modular JS.
 - **British spellings:** "draught", "nought", "colour", etc. are unrecognizable to American students — use American equivalents.
 - **Grade-appropriate vocabulary:** avoid adult medical terms (e.g. "gout"), archaic words, and proper nouns at early grade levels.
 - Run `/validate-lessons` after every lesson file edit (also runs automatically via hook).
+
+### keyboard-command-4 (active development)
+
+First-person shooting gallery / typing game hybrid — teaches ~60 iPadOS keyboard shortcuts through Doom-inspired gameplay. Key docs:
+- `plan.md` — full design spec: levels, monsters, weapons, shortcuts, accessibility
+
+**Session workflow:** Sessions defined in `keyboard-command-4/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md`. Run `/kc4-checklist` before each session. Run kc4-web-review agent after each session.
+
+**Key source files:**
+- `js/game.js` — state machine (TITLE, LEVEL_SELECT, GAMEPLAY, PAUSED, RESULTS), screen management, overlays
+- `js/save.js` — SaveManager (localStorage key: `keyboard-command-4-save`); `_defaults()` defines all required fields
+- `css/style.css` — design system (CSS vars, screen/overlay visibility, level grid)
+- `data/levels/level{1-10}.json` — level data (rooms, waves, boss configs) [future sessions]
+- `data/shortcuts.json` — shortcut database [future sessions]
+
+**Target platform:** iPad Safari with Bluetooth Windows keyboard. Must maintain 60fps on iPad.
+
+**Canvas rendering rules:**
+- Offscreen cache room backgrounds and monster sprites — never draw from primitives each frame
+- HUD text: dirty-flag pattern, only re-render on value change
+- Particle pool: max 50, pre-allocated and reused
+- `image-rendering: pixelated` on the canvas element
+- No DOM manipulation during the RAF game loop
+
+**Input system rules:**
+- `e.metaKey || e.altKey || e.ctrlKey` → route as shortcut attempt
+- Bare number keys (no modifiers) → weapon select
+- `Tab`/`Shift+Tab` → target cycling (must `preventDefault()`)
+- 700ms input lock after weapon fire (store timer, clear in `cancel()`)
+- Non-interceptable shortcuts (Cmd+H, Cmd+Space) → Knowledge Monster (Enter to acknowledge)
+- Only `preventDefault()` keys you actually handle — never blanket-prevent all keys
+
+**Monster depth system:** 0.0 = back of room (small), 1.0 = front (large, attack range). Render back-to-front. Scale: `0.3 + depth * 0.7`.
 
 ## HTML/JS Coding Standards
 

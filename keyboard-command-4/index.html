@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Command 4: The Digital Realm</title>
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Title Screen -->
+    <div id="screen-title" class="screen active">
+        <div class="title-content">
+            <h1 class="glitch-text" aria-label="Keyboard Command 4: The Digital Realm">
+                <span class="glitch-line">Keyboard Command 4</span>
+                <span class="glitch-subtitle">The Digital Realm</span>
+            </h1>
+            <p class="press-key" aria-live="polite">PRESS ANY KEY TO START</p>
+        </div>
+    </div>
+
+    <!-- Level Select Screen -->
+    <div id="screen-select" class="screen">
+        <div class="select-content">
+            <h2 class="select-title">Select Mission</h2>
+            <div id="level-grid" class="level-grid" role="group" aria-label="Level selection"></div>
+            <p class="nav-hint">Arrow keys to navigate, Enter to select, Escape to go back</p>
+        </div>
+    </div>
+
+    <!-- Gameplay Screen -->
+    <div id="screen-gameplay" class="screen">
+        <canvas id="game-canvas" width="800" height="600" aria-label="Game view"></canvas>
+        <div id="hud" class="hud">
+            <div class="hud-top">
+                <div class="hud-health">
+                    <span class="hud-label">HP</span>
+                    <div class="health-bar-bg">
+                        <div id="health-bar" class="health-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Health: 100"></div>
+                    </div>
+                    <span id="health-text" class="health-text">100</span>
+                </div>
+                <div class="hud-level">
+                    <span id="level-name">Level 1</span>
+                    <span id="room-progress" class="room-dots"></span>
+                </div>
+                <div class="hud-score">
+                    <span id="score-text">0</span>
+                    <div id="respawn-shields" class="respawn-shields" aria-label="3 respawns remaining">
+                        <span class="shield active" aria-hidden="true"></span>
+                        <span class="shield active" aria-hidden="true"></span>
+                        <span class="shield active" aria-hidden="true"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="hud-bottom">
+                <div class="hud-weapon">
+                    <span id="weapon-name">Pixel Pistol</span>
+                </div>
+                <div class="hud-hint">
+                    <span>H: Journal</span>
+                </div>
+            </div>
+            <div id="hud-status" class="sr-only" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="screen-results" class="screen">
+        <div class="results-content">
+            <h2 class="results-title">Mission Complete</h2>
+            <div id="results-stats" class="results-stats"></div>
+            <div class="results-stars" id="results-stars" aria-label="Star rating"></div>
+            <div class="results-actions">
+                <button id="results-next" class="btn btn-primary" aria-label="Next level">Next Level</button>
+                <button id="results-replay" class="btn" aria-label="Replay level">Replay</button>
+                <button id="results-menu" class="btn" aria-label="Return to level select">Level Select</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Overlay -->
+    <div id="pause-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Pause menu" aria-hidden="true">
+        <div class="overlay-panel">
+            <button id="pause-close" class="overlay-close" aria-label="Close pause menu">&times;</button>
+            <h2>Paused</h2>
+            <div class="pause-menu">
+                <button id="pause-resume" class="btn btn-primary">Resume</button>
+                <button id="pause-settings" class="btn">Settings</button>
+                <button id="pause-quit" class="btn">Quit to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Overlay -->
+    <div id="settings-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Settings" aria-hidden="true">
+        <div class="overlay-panel settings-panel">
+            <button id="settings-close" class="overlay-close" aria-label="Close settings">&times;</button>
+            <h2>Settings</h2>
+
+            <div class="setting-row">
+                <label id="font-size-label">Font Size</label>
+                <div class="setting-options" role="radiogroup" aria-labelledby="font-size-label">
+                    <button class="setting-btn font-size-btn" data-size="small" role="radio" aria-checked="false">Small</button>
+                    <button class="setting-btn font-size-btn" data-size="medium" role="radio" aria-checked="true">Medium</button>
+                    <button class="setting-btn font-size-btn" data-size="large" role="radio" aria-checked="false">Large</button>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <label for="show-physical-keys">Show Physical Key Names</label>
+                <button id="show-physical-keys" class="toggle-btn" role="switch" aria-checked="true">
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                </button>
+            </div>
+
+            <div class="setting-row">
+                <label for="volume-slider">Volume</label>
+                <input id="volume-slider" type="range" min="0" max="100" value="70" aria-label="Volume">
+            </div>
+
+            <div class="setting-row">
+                <label id="monster-speed-label">Monster Speed</label>
+                <div class="setting-options" role="radiogroup" aria-labelledby="monster-speed-label">
+                    <button class="setting-btn speed-btn" data-speed="normal" role="radio" aria-checked="true">Normal</button>
+                    <button class="setting-btn speed-btn" data-speed="slow" role="radio" aria-checked="false">Slow</button>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <label id="hints-label">Hints</label>
+                <div class="setting-options" role="radiogroup" aria-labelledby="hints-label">
+                    <button class="setting-btn hints-btn" data-hints="always" role="radio" aria-checked="false">Always</button>
+                    <button class="setting-btn hints-btn" data-hints="after3" role="radio" aria-checked="true">After 3</button>
+                    <button class="setting-btn hints-btn" data-hints="never" role="radio" aria-checked="false">Never</button>
+                </div>
+            </div>
+
+            <div class="setting-row setting-danger">
+                <button id="reset-progress" class="btn btn-danger">Reset All Progress</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Overlay -->
+    <div id="reset-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Confirm reset" aria-hidden="true">
+        <div class="overlay-panel reset-panel">
+            <button id="reset-close" class="overlay-close" aria-label="Cancel reset">&times;</button>
+            <h2>Reset Progress</h2>
+            <p>Type <strong>RESET</strong> to confirm:</p>
+            <input id="reset-input" type="text" autocomplete="off" aria-label="Type RESET to confirm">
+            <div class="reset-actions">
+                <button id="reset-confirm" class="btn btn-danger" disabled>Confirm Reset</button>
+                <button id="reset-cancel" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script defer src="js/save.js"></script>
+    <script defer src="js/renderer.js"></script>
+    <script defer src="js/game.js"></script>
+    <!-- Future scripts: input.js, monsters.js, weapons.js, hud.js, audio.js, levels.js, shortcuts.js, tutorial.js -->
+</body>
+</html>

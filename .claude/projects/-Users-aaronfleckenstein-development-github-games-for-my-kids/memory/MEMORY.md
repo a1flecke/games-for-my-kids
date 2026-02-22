@@ -42,3 +42,18 @@ BFS reachability: use solid set {1,3,5,6,9,10,12,14}; all 5 levels verified reac
 - 44×44px minimum touch targets
 - Max 15 words per dialogue box
 - No flashing effects
+
+## keyboard-command-4: status
+- Session 1 complete (foundation: HTML shell, CSS, game.js state machine, save.js).
+- 12 sessions remaining (2–13). See `sessions/MODEL-ASSIGNMENTS.md` for model assignments.
+- Save key: `keyboard-command-4-save`
+- Run `/kc4-checklist` before each session. Run kc4-web-review agent after.
+- `kc4-web-review` agent is at `.claude/agents/kc4-web-review/agent.md` but must be invoked via `general-purpose` subagent type (custom agent types not recognized by Task tool).
+
+## keyboard-command-4: key gotchas
+- Only `preventDefault()` keys you actually handle in gameplay — never blanket-prevent all keys (breaks accessibility, browser controls).
+- Pause overlay Escape: global `_handleKeyDown` needs a PAUSED branch as fallback if focus escapes the overlay.
+- "Quit to Menu" from pause: close overlay directly without setting state to GAMEPLAY first (avoids momentary wrong state).
+- Locked level cards: don't use `opacity: 0.5` (fails WCAG AA) — use darker background + `var(--text-secondary)` instead.
+- Title screen "press any key": filter CapsLock, Fn, Dead, NumLock, ScrollLock in addition to Shift/Control/Alt/Meta.
+- `aria-live` goes on a small dedicated `#hud-status` element, not the entire HUD (too verbose).

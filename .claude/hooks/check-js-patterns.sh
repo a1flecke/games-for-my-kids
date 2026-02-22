@@ -1,5 +1,5 @@
 #!/bin/bash
-# PostToolUse hook: scan phonics-game JS/HTML files for common coding standard violations.
+# PostToolUse hook: scan game JS/HTML files for common coding standard violations.
 # Exits 2 (blocking with feedback to Claude) when violations are found.
 # Runs after every Edit or Write tool use on a matching file.
 
@@ -14,9 +14,18 @@ except Exception:
     print('')
 " 2>/dev/null <<< "$input")
 
-# Only run on phonics-game JS or HTML files
-if [[ "$fp" != *"phonics-game/"* ]]; then exit 0; fi
+# Only run on phonics-game or keyboard-command-4 JS/HTML files
+if [[ "$fp" != *"phonics-game/"* && "$fp" != *"keyboard-command-4/"* ]]; then exit 0; fi
 if [[ "$fp" != *.js && "$fp" != *.html ]]; then exit 0; fi
+
+# Determine game name for error messages and save key
+if [[ "$fp" == *"phonics-game/"* ]]; then
+    game_name="phonics-game"
+    save_key="phonics-progress"
+elif [[ "$fp" == *"keyboard-command-4/"* ]]; then
+    game_name="keyboard-command-4"
+    save_key="keyboard-command-4-save"
+fi
 
 errors=()
 
@@ -29,7 +38,7 @@ fi
 if grep -Eq 'localStorage\.(getItem|setItem|removeItem)' "$fp" 2>/dev/null; then
     # Allow inside save.js itself
     if [[ "$fp" != *"save.js" ]]; then
-        errors+=("VIOLATION: Direct localStorage access detected. Use SaveManager.load() / SaveManager.save() — one key: 'phonics-progress'.")
+        errors+=("VIOLATION: Direct localStorage access detected. Use SaveManager — one key: '$save_key'.")
     fi
 fi
 
@@ -62,18 +71,35 @@ fi
 # 7. style.display assignment (warn on non-test JS files — common mistake)
 if [[ "$fp" == *.js ]]; then
     if grep -Eq '\.style\.display\s*=' "$fp" 2>/dev/null; then
-        errors+=("VIOLATION: style.display assignment detected. Use CSS classes instead: .active (screens), .open (overlays), .hidden (internal elements). Exception: display:none on non-toggle elements like loading spinners is OK — verify this is intentional.")
+        errors+=("VIOLATION: style.display assignment detected. Use CSS classes instead: .active (screens), .open (overlays), .hidden (internal elements).")
+    fi
+fi
+
+# 8. new AudioContext() in constructor (keyboard-command-4 — must be lazy on iOS)
+if [[ "$game_name" == "keyboard-command-4" && "$fp" == *.js ]]; then
+    if grep -Eq 'new AudioContext\(\)' "$fp" 2>/dev/null; then
+        # Allow if it's inside a method (lazy creation) but flag if in constructor
+        if grep -B5 'new AudioContext()' "$fp" 2>/dev/null | grep -Eq 'constructor\s*\('; then
+            errors+=("VIOLATION: new AudioContext() in constructor. Create lazily on first user gesture — never in constructor. Use ctx.resume().then(() => schedule()).")
+        fi
+    fi
+fi
+
+# 9. user-scalable=no in viewport meta (WCAG violation)
+if [[ "$fp" == *.html ]]; then
+    if grep -Eq 'user-scalable\s*=\s*no' "$fp" 2>/dev/null; then
+        errors+=("VIOLATION: user-scalable=no in viewport meta — violates WCAG 1.4.4. Remove it.")
     fi
 fi
 
 if [ ${#errors[@]} -gt 0 ]; then
     echo ""
-    echo "=== phonics-game coding standard violations in $fp ==="
+    echo "=== $game_name coding standard violations in $fp ==="
     for err in "${errors[@]}"; do
         echo "  • $err"
     done
     echo ""
-    echo "Fix the violation(s) above before proceeding. See CLAUDE.md and phonics-checklist for correct patterns."
+    echo "Fix the violation(s) above before proceeding. See CLAUDE.md for correct patterns."
     exit 2
 fi
 
