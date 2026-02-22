@@ -398,6 +398,7 @@ body {
 .lesson-card.locked {
     opacity: 0.65;
     cursor: default;
+    pointer-events: none;
 }
 
 .lesson-number {

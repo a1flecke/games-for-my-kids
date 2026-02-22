@@ -501,6 +501,7 @@
         let selectedColor = null;
         let coloredSections = new Set();
         let currentLesson = 0;
+        let answerMap = {};  // original answer → shuffled answer (randomised each round)
 
         const canvas = document.getElementById('coloringCanvas');
         const ctx = canvas.getContext('2d');
@@ -945,6 +946,29 @@
             document.getElementById('lessonDescription').textContent = lesson.description;
         }
 
+        // Fisher-Yates shuffle (in-place)
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Build a random bijection from original answer values → shuffled answer values.
+        // Preserves section groupings (sections that shared an answer still share one),
+        // but which answer value each group gets changes every round.
+        function shuffleAnswers() {
+            const originals = [...new Set(themes[currentLevel].map(s => s.answer))];
+            const shuffled = shuffleArray([...originals]);
+            answerMap = {};
+            originals.forEach((orig, i) => { answerMap[orig] = shuffled[i]; });
+        }
+
+        function getMappedAnswer(section) {
+            return answerMap[section.answer] ?? section.answer;
+        }
+
         // Bug 2 fix: generate a simple addition fact as fallback instead of showing bare number
         function getRandomProblem(answer) {
             const lesson = lessons[currentLesson];
@@ -959,7 +983,7 @@
             const palette = document.getElementById('colorPalette');
             palette.innerHTML = '';
 
-            const answers = [...new Set(themes[currentLevel].map(s => s.answer))].sort((a, b) => a - b);
+            const answers = [...new Set(themes[currentLevel].map(s => getMappedAnswer(s)))].sort((a, b) => a - b);
 
             answers.forEach((answer, index) => {
                 const option = document.createElement('div');
@@ -990,7 +1014,7 @@
         // Bug 3 fix: two-pass rendering so outlines never get covered by later fills
         function fillSection(section) {
             ctx.fillStyle = coloredSections.has(section)
-                ? (colors[section.answer] || '#FFB6C1')
+                ? (colors[getMappedAnswer(section)] || '#FFB6C1')
                 : 'white';
             if (section.type === 'circle') {
                 ctx.beginPath();
@@ -1029,7 +1053,7 @@
                 ctx.font = 'bold 24px Fredoka';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(section.answer, section.x, section.y);
+                ctx.fillText(getMappedAnswer(section), section.x, section.y);
             }
         }
 
@@ -1108,7 +1132,7 @@
             for (let i = sections.length - 1; i >= 0; i--) {
                 const section = sections[i];
                 if (isPointInSection(x, y, section)) {
-                    if (section.answer === selectedColor) {
+                    if (getMappedAnswer(section) === selectedColor) {
                         coloredSections.add(section);
                         drawCanvas();
                         if (coloredSections.size === themes[currentLevel].length) {
@@ -1162,6 +1186,7 @@
         function selectLevel(level, btn) {
             currentLevel = level;
             coloredSections.clear();
+            shuffleAnswers();
             document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderColorPalette();
@@ -1170,6 +1195,8 @@
 
         function resetCanvas() {
             coloredSections.clear();
+            shuffleAnswers();
+            renderColorPalette();
             drawCanvas();
         }
 
@@ -1182,6 +1209,7 @@
             } while (newLevel === currentLevel && levels.length > 1);
             currentLevel = newLevel;
             coloredSections.clear();
+            shuffleAnswers();
             document.querySelectorAll('.level-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.level === newLevel);
             });
@@ -1192,6 +1220,7 @@
         function nextLesson() {
             currentLesson = (currentLesson + 1) % lessons.length;
             coloredSections.clear();
+            shuffleAnswers();
             updateLessonInfo();
             renderColorPalette();
             drawCanvas();
@@ -1201,6 +1230,7 @@
         canvas.addEventListener('touchstart', handleTouch);
 
         updateLessonInfo();
+        shuffleAnswers();
         renderColorPalette();
         drawCanvas();
     </script>
