@@ -197,6 +197,10 @@ Detached-element callbacks: use `if (el.isConnected) el.classList.remove(...)` i
 
 **SaveManager `_defaults()` completeness:** Every key that `game.js` reads from progress must exist in `SaveManager._defaults()`. If `game.init()` checks `if (data.someKey !== undefined)`, `_defaults()` must include `someKey` with its default value — otherwise fresh installs behave correctly but the key is never included in saved data until the user explicitly changes that setting.
 
+**`try/catch` async overlay timing:** When an overlay is shown before an `async` operation, hiding it in `finally` keeps it visible for all synchronous code that runs *after* the `await` inside the `try` block — including screen transitions and overlay launches. Instead, call `classList.remove('open')` immediately after the `await` (before screen transitions), and repeat in `catch` for the error path: `const lesson = await DataManager.loadLesson(id); loadingOverlay.classList.remove('open'); // hide before screen switch`. A `finally`-only approach is wrong when the overlay has a high z-index that would cover subsequent overlays (e.g., mode-select, tutorial).
+
+**Re-entry guard for functions reachable from multiple timer paths:** Any function that can be called from two independent timer paths (e.g., `onLessonComplete()` reachable from both match.js `_winTimer` and board.js `_noMovesTimer`) must set a boolean guard flag immediately on entry: `if (this._lessonComplete) return; this._lessonComplete = true;`. Reset the flag at the start of each new play (in `startLesson()`). The guarded function must also cancel all related timers/managers on entry to prevent in-flight timers from calling it a second time: cancel `matchManager` at the top of `onLessonComplete()`, not only inside `showLessonSelect()`.
+
 ## Accessibility Requirements (All Games)
 
 These are non-negotiable for the target audience (dyslexia + ADHD accommodations):
