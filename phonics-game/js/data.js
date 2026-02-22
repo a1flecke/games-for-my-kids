@@ -1,8 +1,23 @@
 class DataManager {
     static async loadLesson(id) {
-        const response = await fetch(`./data/lessons/lesson-${String(id).padStart(2, '0')}.json`);
-        if (!response.ok) throw new Error(`Lesson ${id} not found`);
-        return response.json();
+        try {
+            const response = await fetch(`./data/lessons/lesson-${String(id).padStart(2, '0')}.json`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        } catch (err) {
+            console.error(`Failed to load lesson ${id}:`, err);
+            // Return minimal fallback so game doesn't crash on fetch failure
+            return {
+                id,
+                title: `Lesson ${id}`,
+                gradeLevel: Math.ceil(id / 6),
+                gridSize: 4,
+                patterns: ['short_a'],
+                patternLabels: { short_a: 'Short A' },
+                wordPool: { short_a: ['cat', 'hat', 'bat', 'mat', 'cap', 'map', 'ran', 'tan', 'can', 'lap'] },
+                patternHint: 'Loading error — using fallback words.'
+            };
+        }
     }
 
     // Hardcoded metadata for lesson select screen (no fetch needed).

@@ -36,7 +36,7 @@ function extractGameMetadata(gamePath) {
 // Define game order by category
 const gameCategories = {
   history: ['ancient-greece-rpg', 'roman-quiz', 'roman-emperors-quiz'],
-  language: ['grammar-quiz'],
+  language: ['grammar-quiz', 'phonics-game'],
   math: ['math-coloring'],
   skills: ['keyboard-quest', 'keyboard-quest-2']
 };
@@ -77,6 +77,11 @@ const manualGameConfig = {
     icon: '⌨️✨🚀',
     title: 'Keyboard Quest 2',
     description: 'The adventure continues! Master more advanced keyboard shortcuts as you explore the Digital Dimension. Dyslexia-friendly design included!'
+  },
+  'phonics-game': {
+    icon: '🔤🗺️',
+    title: 'Word Explorer',
+    description: 'Phonics matching game for grades 1–5. Match words by sound patterns to unlock Lena\'s magical library!'
   }
 };
 

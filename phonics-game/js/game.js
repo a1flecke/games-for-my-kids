@@ -18,6 +18,7 @@ class Game {
         this.hintMode = 'one'; // 'one' | 'none'
         this.mode = 'explorer';   // 'explorer' | 'challenge'
         this.challengeTimer = null;
+        this._lessonComplete = false; // guard against double-fire of onLessonComplete()
         this._pendingBoardPlay = null;
         this._focusTrapHandler = null;
         this._pinFocusTrapHandler = null;
@@ -158,8 +159,14 @@ class Game {
         // Defensive cleanup — stop any running timer and dismiss any open mode select.
         this.stopChallengeTimer();
         this._dismissModeSelect();
+        this._lessonComplete = false; // reset before each lesson play
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.classList.add('open');
         try {
             const lesson = await DataManager.loadLesson(id);
+            // Hide loading overlay immediately after fetch — before screen transition —
+            // so it does not cover the mode-select (z-index 700) or tutorial (z-index 1000).
+            loadingOverlay.classList.remove('open');
             if (isPreview) SaveManager.markPreviewed(id);
             this.currentLessonId = id;
             // Remove active from all screens before showing board
@@ -199,6 +206,7 @@ class Game {
             }
         } catch (err) {
             console.error('Failed to load lesson', id, err);
+            loadingOverlay.classList.remove('open');
         }
     }
 
@@ -235,8 +243,16 @@ class Game {
     }
 
     onLessonComplete() {
-        // Stop challenge timer if board cleared before energy ran out.
+        // Guard against double-fire: injectValidMoves() and match.js can both reach here.
+        if (this._lessonComplete) return;
+        this._lessonComplete = true;
+        // Stop challenge timer and cancel match timers before any async work.
+        // Cancelling matchManager here prevents any pending _winTimer from calling us again.
         this.stopChallengeTimer();
+        if (window.matchManager) {
+            window.matchManager.cancel();
+            window.matchManager = null;
+        }
         window.audioManager?.playLessonComplete();
         const summary = window.scoreManager.getSummary();
         // Capture whether this lesson was already completed BEFORE saving,
@@ -718,7 +734,10 @@ class Game {
         const last = focusable[focusable.length - 1];
 
         if (e.key === 'Escape') {
-            this._toggleSettings();
+            // Guard: only act if panel is still open (prevents stale handler firing after close).
+            if (document.getElementById('settings-panel').classList.contains('open')) {
+                this._toggleSettings();
+            }
             return;
         }
         if (e.key === 'Tab') {

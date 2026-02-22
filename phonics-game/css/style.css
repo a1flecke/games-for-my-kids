@@ -685,6 +685,7 @@ body {
     background: var(--correct);  /* green at full energy */
     border-radius: 8px;
     transition: width 1s linear, background-color 0.5s;
+    will-change: width;
 }
 
 .energy-bar-fill.energy-mid {
@@ -715,6 +716,7 @@ body {
     max-width: 600px;
     width: 100%;
     margin: 0 auto;
+    transform: translateZ(0);  /* Promote board to GPU layer for compositing */
 }
 
 .tile {
@@ -738,6 +740,7 @@ body {
     position: relative;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    will-change: transform;
 }
 
 /* Don't scale-down when tile is already in selected/expanded state */
@@ -1777,4 +1780,40 @@ body {
     font-family: var(--font-ui);
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.75);
+}
+
+/* =====================================================================
+   Loading Overlay
+   ===================================================================== */
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(245, 240, 232, 0.9);
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    font-size: 1.5rem;
+    font-family: var(--font-ui);
+    color: var(--text);
+}
+
+.loading-overlay.open {
+    display: flex;
+}
+
+/* =====================================================================
+   Landscape orientation (short screens — iPad landscape, phone landscape)
+   ===================================================================== */
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .board-grid {
+        max-width: none;
+        max-height: calc(100vh - 80px);
+        aspect-ratio: auto;
+    }
+    .tile {
+        min-height: 60px;
+    }
 }

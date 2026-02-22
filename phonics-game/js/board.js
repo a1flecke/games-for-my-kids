@@ -5,6 +5,7 @@ class BoardManager {
         this.lesson = null;
         this._noMovesTimer = null;
         this._swirlTimers = []; // one per non-matched tile — must be stored to cancel on back-nav
+        this._refillTimers = []; // fade-in animation timers — must be cancelled on back-nav
     }
 
     init(lesson) {
@@ -20,6 +21,8 @@ class BoardManager {
         this._noMovesTimer = null;
         this._swirlTimers.forEach(clearTimeout);
         this._swirlTimers = [];
+        this._refillTimers.forEach(clearTimeout);
+        this._refillTimers = [];
     }
 
     generateTiles() {
@@ -217,11 +220,14 @@ class BoardManager {
             const badge = tile.element.querySelector('.tile-pattern-badge');
             if (badge) { badge.textContent = ''; badge.classList.add('hidden'); }
 
-            // Fade-in animation; only reset class to 'tile' if state is still normal.
+            // Fade-in animation; store timer so cancel() can clear it on back-navigation.
             tile.element.className = 'tile tile-fadein';
-            setTimeout(() => {
-                if (tile.state === 'normal') tile.element.className = 'tile';
+            const refillId = setTimeout(() => {
+                if (tile.element.isConnected && tile.state === 'normal') {
+                    tile.element.className = 'tile';
+                }
             }, 400);
+            this._refillTimers.push(refillId);
         }
     }
 
@@ -261,8 +267,11 @@ class BoardManager {
 
     // Force-replace 3 non-matched tiles with a guaranteed matching group.
     injectValidMoves() {
+        // Null-guard: back-nav race can null scoreManager before this timer fires.
+        if (!window.game || !window.scoreManager) return;
         const nonMatched = this.tiles.filter(t => t.state !== 'matched');
-        if (nonMatched.length < 3) return;
+        // If fewer than 3 tiles remain, the board is effectively complete.
+        if (nonMatched.length < 3) { window.game.onLessonComplete(); return; }
 
         const targetPattern = this.lesson.patterns[0];
         const words = this.lesson.wordPool[targetPattern];

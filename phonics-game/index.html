@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <!-- user-scalable=no removed: violates WCAG 1.4.4; game provides its own font-size control -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="description" content="Phonics matching game for grades 1–5. Match words by sound patterns to unlock Lena's magical library!">
     <title>Word Explorer — Phonics Matching Game</title>
     <!-- Single font import here; @import removed from CSS to avoid render-blocking double load -->
     <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic" crossorigin="anonymous">
@@ -93,8 +96,8 @@
             <button class="grade-tab" data-grade="5">Grade 5</button>
         </nav>
 
-        <!-- Lesson grid — populated by game.js -->
-        <div id="lesson-grid" role="list" aria-label="Lessons"></div>
+        <!-- Lesson grid — populated by game.js (role="group" since children are role="button") -->
+        <div id="lesson-grid" role="group" aria-label="Lessons"></div>
     </main>
 
     <!-- ================================================================
@@ -245,6 +248,9 @@
         <p id="pin-error" aria-live="polite"></p>
         <button id="pin-submit">Unlock</button>
     </div>
+
+    <!-- Loading overlay — shown while lesson JSON fetches; hidden via .open class (no style.display) -->
+    <div id="loading-overlay" class="loading-overlay" role="status">Loading...<span aria-hidden="true"> 📚</span></div>
 
     <!-- Live region for accessibility announcements -->
     <div id="aria-live" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>

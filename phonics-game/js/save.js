@@ -25,7 +25,12 @@ class SaveManager {
         try {
             localStorage.setItem('phonics-progress', JSON.stringify(data));
         } catch (e) {
-            console.warn('phonics-game: failed to save progress', e);
+            // Private browsing or storage full — progress will not persist this session.
+            // One-time console warning so repeated saves don't spam the console.
+            if (!window._phonicsSaveWarned) {
+                window._phonicsSaveWarned = true;
+                console.warn('phonics-game: progress could not be saved. Private browsing may be enabled.', e);
+            }
         }
     }
 
