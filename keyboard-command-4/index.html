@@ -64,6 +64,41 @@
             </div>
             <div id="hud-status" class="sr-only" aria-live="polite"></div>
         </div>
+
+        <!-- Shortcut Prompt Box -->
+        <div id="shortcut-prompt" class="shortcut-prompt" aria-hidden="true">
+            <div id="prompt-keys" class="prompt-keys"></div>
+            <div id="prompt-action" class="prompt-action"></div>
+            <div id="prompt-physical" class="prompt-physical hidden"></div>
+        </div>
+
+        <!-- Combo Counter -->
+        <div id="combo-counter" class="combo-counter" aria-hidden="true"></div>
+
+        <!-- Combo Milestone Text -->
+        <div id="combo-milestone" class="combo-milestone" aria-hidden="true"></div>
+
+        <!-- Damage Vignette -->
+        <div id="damage-vignette" class="vignette damage-vignette" aria-hidden="true"></div>
+
+        <!-- Heal Vignette -->
+        <div id="heal-vignette" class="vignette heal-vignette" aria-hidden="true"></div>
+
+        <!-- Low HP Pulse -->
+        <div id="low-hp-pulse" class="low-hp-pulse" aria-hidden="true"></div>
+
+        <!-- Boss Taunt -->
+        <div id="boss-taunt" class="boss-taunt" aria-hidden="true"></div>
+
+        <!-- Tutorial Dialogue (Commander Byte) -->
+        <div id="tutorial-dialogue" class="tutorial-dialogue" aria-hidden="true" role="status">
+            <div class="tutorial-portrait" aria-hidden="true"></div>
+            <div class="tutorial-content">
+                <span class="tutorial-name">Commander Byte</span>
+                <p id="tutorial-text" class="tutorial-text"></p>
+                <span class="tutorial-advance">Space to continue</span>
+            </div>
+        </div>
     </div>
 
     <!-- Results Screen -->
@@ -157,12 +192,25 @@
         </div>
     </div>
 
+    <!-- Journal Overlay -->
+    <div id="journal-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Shortcut Journal" aria-hidden="true">
+        <div class="overlay-panel journal-panel">
+            <button id="journal-close" class="overlay-close" aria-label="Close journal">&times;</button>
+            <h2>Shortcut Journal</h2>
+            <div id="journal-tabs" class="journal-tabs" role="group" aria-label="Category tabs"></div>
+            <div id="journal-entries" class="journal-entries"></div>
+        </div>
+    </div>
+
     <script defer src="js/save.js"></script>
     <script defer src="js/renderer.js"></script>
     <script defer src="js/shortcuts.js"></script>
     <script defer src="js/input.js"></script>
     <script defer src="js/monsters.js"></script>
     <script defer src="js/weapons.js"></script>
+    <script defer src="js/audio.js"></script>
+    <script defer src="js/hud.js"></script>
+    <script defer src="js/tutorial.js"></script>
     <script defer src="js/game.js"></script>
 </body>
 </html>

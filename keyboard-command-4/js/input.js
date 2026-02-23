@@ -124,6 +124,13 @@ class InputManager {
             return;
         }
 
+        // 4b. Bare ? (shift+/ on most keyboards) → scan/reveal targeted monster
+        if ((e.key === '?' || (e.key === '/' && e.shiftKey)) && !e.metaKey && !e.altKey && !e.ctrlKey) {
+            e.preventDefault();
+            if (this.onGameControl) this.onGameControl({ action: 'scan' });
+            return;
+        }
+
         // 5. Bare digit 1-0 (no meta/alt/ctrl) → weapon select
         if (!e.metaKey && !e.altKey && !e.ctrlKey && /^[0-9]$/.test(e.key)) {
             e.preventDefault();

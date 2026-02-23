@@ -23,6 +23,12 @@ class Game {
         this._inputManager = null;
         this._shortcutManager = null;
         this._weaponManager = null;
+        this._audioManager = null;
+        this._hudManager = null;
+        this._hintManager = null;
+        this._tutorialManager = null;
+        this._journalManager = null;
+        this._audioInitialized = false;
 
         // Bound handlers (for removal if needed)
         this._onKeyDown = this._handleKeyDown.bind(this);
@@ -124,6 +130,27 @@ class Game {
         // Initialize WeaponManager
         this._weaponManager = new WeaponManager();
 
+        // Initialize AudioManager (context created lazily on first user gesture)
+        this._audioManager = new AudioManager();
+
+        // Initialize HudManager
+        this._hudManager = new HudManager();
+        this._hudManager.init();
+
+        // Initialize HintManager
+        this._hintManager = new HintManager();
+
+        // Initialize TutorialManager
+        this._tutorialManager = new TutorialManager();
+        this._tutorialManager.init();
+
+        // Initialize JournalManager
+        this._journalManager = new JournalManager();
+        this._journalManager.init();
+
+        // Cache journal overlay reference
+        this._overlays.journal = document.getElementById('journal-overlay');
+
         // Load save data
         this._loadProgress();
 
@@ -166,6 +193,9 @@ class Game {
             this._inputManager.cancel();
         }
 
+        // Cancel audio ambience
+        if (this._audioManager) this._audioManager.cancel();
+
         this.state = 'TITLE';
         this._showScreen('title');
 
@@ -188,6 +218,14 @@ class Game {
             if (ignoredKeys.has(e.key)) return;
             document.removeEventListener('keydown', this._titleKeyHandler);
             this._titleKeyHandler = null;
+
+            // Initialize AudioContext on first user gesture
+            if (!this._audioInitialized && this._audioManager) {
+                this._audioManager.init();
+                this._audioManager.setVolume(this._settings.volume);
+                this._audioInitialized = true;
+            }
+
             this.showLevelSelect();
         };
         document.addEventListener('keydown', this._titleKeyHandler);
@@ -203,6 +241,13 @@ class Game {
             this._inputManager.disable();
             this._inputManager.cancel();
         }
+
+        // Cancel all session managers
+        if (this._audioManager) this._audioManager.cancel();
+        if (this._hudManager) this._hudManager.cancel();
+        if (this._tutorialManager) this._tutorialManager.cancel();
+        if (this._journalManager) this._journalManager.cancel();
+        if (this._hintManager) this._hintManager.clear();
 
         this.state = 'LEVEL_SELECT';
         this._showScreen('select');
@@ -256,6 +301,14 @@ class Game {
         this._boss = null;
         this._mageProjectiles = [];
 
+        // Reset hint tracking for new level
+        if (this._hintManager) this._hintManager.clear();
+
+        // Cancel HUD overlays from previous gameplay
+        if (this._hudManager) this._hudManager.cancel();
+        if (this._tutorialManager) this._tutorialManager.cancel();
+        if (this._journalManager) this._journalManager.cancel();
+
         // Generate test room data (real levels come in sessions 7-9)
         this._rooms = this._generateTestRooms(levelId);
         this._currentRoomIndex = 0;
@@ -271,6 +324,12 @@ class Game {
             this._inputManager.onShortcutAttempt = (data) => this._handleShortcutAttempt(data);
             this._inputManager.onGameControl = (data) => this._handleGameControl(data);
             this._inputManager.enable();
+        }
+
+        // Start audio ambience + level start sound
+        if (this._audioManager) {
+            this._audioManager.startAmbience();
+            this._audioManager.playLevelStart();
         }
 
         // Start game loop
@@ -600,6 +659,12 @@ class Game {
         if (alive.length === 0 && allWavesSpawned && this._mageProjectiles.length === 0) {
             this._roomCleared = true;
 
+            // Room clear sound
+            if (this._audioManager) this._audioManager.playRoomClear();
+
+            // Clear hint tracking for new room
+            if (this._hintManager) this._hintManager.clear();
+
             // Check for boss
             const room = this._rooms[this._currentRoomIndex];
             if (room && room.boss) {
@@ -675,6 +740,11 @@ class Game {
             this._shortcutManager.recordAttempt(targetShortcutId, true);
             this._shortcutManager.learnShortcut(targetShortcutId);
 
+            // Play weapon fire sound
+            if (this._audioManager) {
+                this._audioManager.playWeaponFire(this._weaponManager.currentWeapon);
+            }
+
             // Fire weapon
             const vpX = this._renderer._vpX;
             const vpY = this._renderer._vpY;
@@ -708,9 +778,18 @@ class Game {
                             this._playerHeal(5);
                         }
 
+                        // Monster death sound
+                        if (this._audioManager) this._audioManager.playMonsterDeath();
+
+                        // Reset hint tracking for killed monster
+                        if (this._hintManager) this._hintManager.resetForMonster(target);
+
                         // Death effect
                         const bounds = target.getBounds(vpX, vpY, canvasH);
                         this._renderer.spawnDeathEffect(bounds.centerX, bounds.centerY, target.type);
+
+                        // Combo milestone check
+                        this._checkComboMilestone();
 
                         // Auto-target next
                         this._autoTarget();
@@ -719,14 +798,20 @@ class Game {
                         const bounds = target.getBounds(vpX, vpY, canvasH);
                         this._renderer.particles.emit(bounds.centerX, bounds.centerY, 8, '#3498DB', 3, 3);
 
+                        if (this._audioManager) this._audioManager.playMonsterHit();
+
                         this._comboCount++;
                         this._score += 50;
                     } else {
                         // Hit but not killed (brute)
+                        if (this._audioManager) this._audioManager.playMonsterHit();
+
                         this._comboCount++;
                         this._score += 50;
                     }
 
+                    // Update combo DOM display
+                    this._updateComboDisplay();
                     this._updateHud();
                 },
                 () => {
@@ -741,6 +826,18 @@ class Game {
             const pressed = this._shortcutManager.findByCombo(combo);
             if (pressed) this._shortcutManager.recordAttempt(pressed.id, false);
 
+            // Track wrong attempts for hint system
+            if (this._hintManager) this._hintManager.recordWrong(target);
+
+            // Play wrong key sound
+            if (this._audioManager) {
+                this._audioManager.playWrongKey();
+                this._audioManager.playPlayerHit();
+            }
+
+            // Flash damage vignette
+            if (this._hudManager) this._hudManager.flashDamage();
+
             // Flinch
             this._weaponManager.flinch();
 
@@ -749,6 +846,7 @@ class Game {
 
             // Reset combo
             this._comboCount = 0;
+            this._updateComboDisplay();
 
             // Miss particles
             this._renderer.spawnMiss();
@@ -761,6 +859,8 @@ class Game {
                     : 'Unrecognized shortcut';
             }
 
+            // Update prompt with hint level
+            this._updateShortcutPrompt();
             this._updateHud();
         }
     }
@@ -773,6 +873,12 @@ class Game {
         this._playerHp = Math.max(0, this._playerHp - amount);
         this._updateHud();
 
+        // Damage vignette flash
+        if (this._hudManager) {
+            this._hudManager.flashDamage();
+            this._hudManager.setLowHp(this._playerHp > 0 && this._playerHp < 30);
+        }
+
         // Screen shake effect (brief)
         this._renderer.particles.emit(
             this._renderer._width / 2,
@@ -781,6 +887,7 @@ class Game {
         );
 
         if (this._playerHp <= 0) {
+            if (this._hudManager) this._hudManager.setLowHp(false);
             this._handlePlayerDeath();
         }
     }
@@ -788,6 +895,13 @@ class Game {
     _playerHeal(amount) {
         this._playerHp = Math.min(this._playerMaxHp, this._playerHp + amount);
         this._updateHud();
+
+        // Heal vignette flash + sound
+        if (this._hudManager) {
+            this._hudManager.flashHeal();
+            this._hudManager.setLowHp(this._playerHp < 30);
+        }
+        if (this._audioManager) this._audioManager.playHealthPickup();
 
         // Green flash particles
         this._renderer.particles.emit(
@@ -856,6 +970,11 @@ class Game {
         this._bossPauseTimer = 0;
         this._bossTaunt = bossData.phases[0] ? bossData.phases[0].taunt : null;
 
+        // Show boss taunt via DOM HUD
+        if (this._hudManager && this._bossTaunt) {
+            this._hudManager.showBossTaunt(this._bossTaunt);
+        }
+
         // Create a visual boss monster (large brute-like)
         const bossMonster = MonsterFactory.create('brute', 0.4, '', 'key', 0);
         bossMonster.hp = bossData.hp;
@@ -898,6 +1017,11 @@ class Game {
             this._shortcutManager.recordAttempt(phase.shortcutId, true);
             this._shortcutManager.learnShortcut(phase.shortcutId);
 
+            // Play weapon fire sound
+            if (this._audioManager) {
+                this._audioManager.playWeaponFire(this._weaponManager.currentWeapon);
+            }
+
             // Fire at boss
             const bossMonster = this._monsters[0];
             if (bossMonster) {
@@ -919,6 +1043,9 @@ class Game {
                         this._score += 200;
                         this._comboCount++;
 
+                        // Boss phase hit sound
+                        if (this._audioManager) this._audioManager.playBossPhaseHit();
+
                         const bounds = bossMonster.getBounds(vpX, vpY, canvasH);
                         this._renderer.particles.emit(bounds.centerX, bounds.centerY, 12, '#FFD700', 4, 4);
 
@@ -929,6 +1056,10 @@ class Game {
                             bossMonster.state = 'dying';
                             bossMonster.deathProgress = 0;
                             this._bossActive = false;
+
+                            // Boss death sound
+                            if (this._audioManager) this._audioManager.playBossDeath();
+                            if (this._hudManager) this._hudManager.hideBossTaunt();
 
                             // Level complete after death animation
                             clearTimeout(this._roomTimer);
@@ -941,9 +1072,11 @@ class Game {
                             // Next phase — pause for taunt
                             this._bossPauseTimer = 1.5;
                             this._bossTaunt = phases[this._bossPhaseIndex].taunt;
+                            if (this._hudManager) this._hudManager.showBossTaunt(this._bossTaunt);
                             this._updateShortcutPrompt();
                         }
 
+                        this._updateComboDisplay();
                         this._updateHud();
                     },
                     null
@@ -954,9 +1087,16 @@ class Game {
             const pressed = this._shortcutManager.findByCombo(combo);
             if (pressed) this._shortcutManager.recordAttempt(pressed.id, false);
 
+            if (this._audioManager) {
+                this._audioManager.playWrongKey();
+                this._audioManager.playPlayerHit();
+            }
+            if (this._hudManager) this._hudManager.flashDamage();
+
             this._weaponManager.flinch();
             this._playerTakeDamage(20);
             this._comboCount = 0;
+            this._updateComboDisplay();
             this._renderer.spawnMiss();
             this._updateHud();
         }
@@ -974,6 +1114,31 @@ class Game {
         if (this._comboCount >= 5) return 2;
         if (this._comboCount >= 3) return 1;
         return 0;
+    }
+
+    _checkComboMilestone() {
+        const milestones = {
+            3: 'NICE!',
+            5: 'BLAZING!',
+            8: 'DOMINATING!',
+            10: 'UNSTOPPABLE!',
+            15: 'GODLIKE!'
+        };
+        const text = milestones[this._comboCount];
+        if (text) {
+            const tier = this._getComboTier();
+            if (this._hudManager) this._hudManager.showComboMilestone(text);
+            if (this._audioManager) this._audioManager.playComboMilestone(tier);
+        }
+    }
+
+    _updateComboDisplay() {
+        if (!this._hudManager) return;
+        if (this._comboCount >= 3) {
+            this._hudManager.showCombo(this._comboCount, this._getComboTier());
+        } else {
+            this._hudManager.hideCombo();
+        }
     }
 
     // =========================================================
@@ -1077,21 +1242,48 @@ class Game {
 
     _updateShortcutPrompt() {
         const statusEl = document.getElementById('hud-status');
-        if (!statusEl) return;
 
         if (this._bossActive && this._boss) {
             const phase = this._boss.phases[this._bossPhaseIndex];
             if (phase) {
-                statusEl.textContent = `Boss phase: ${phase.instruction}`;
+                if (statusEl) statusEl.textContent = `Boss phase: ${phase.instruction}`;
+                const s = this._shortcutManager.getShortcut(phase.shortcutId);
+                if (this._hudManager && s) {
+                    this._hudManager.showPrompt(s, 'key', this._settings.showPhysicalKeys, 'full', null);
+                }
             }
             return;
         }
 
         const target = this._getTargetedMonster();
-        if (target) {
-            const shortcutId = target.getActiveShortcutId();
-            const s = this._shortcutManager.getShortcut(shortcutId);
-            if (s) {
+        if (!target) {
+            if (this._hudManager) this._hudManager.hidePrompt();
+            return;
+        }
+
+        const shortcutId = target.getActiveShortcutId();
+        const s = this._shortcutManager.getShortcut(shortcutId);
+        if (s) {
+            // Determine hint level from HintManager
+            const hintLevel = this._hintManager
+                ? this._hintManager.getHintLevel(target, this._settings.hints)
+                : 'full';
+            const partialText = this._hintManager
+                ? this._hintManager.getPartialHint(s)
+                : '???';
+
+            if (this._hudManager) {
+                this._hudManager.showPrompt(
+                    s,
+                    target.promptMode || 'key',
+                    this._settings.showPhysicalKeys,
+                    hintLevel,
+                    partialText
+                );
+            }
+
+            // Screen reader status text — always full info
+            if (statusEl) {
                 const text = target.promptMode === 'action'
                     ? s.action || s.description
                     : s.display || s.combo;
@@ -1137,30 +1329,8 @@ class Game {
         // Render
         this._renderer.render(gameState, time);
 
-        // Draw boss taunt text if in boss pause
-        if (this._bossActive && this._bossPauseTimer > 0 && this._bossTaunt) {
-            const ctx = this._renderer._ctx;
-            ctx.save();
-            ctx.font = 'bold 24px OpenDyslexic, "Comic Sans MS", cursive';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#FF4444';
-            ctx.globalAlpha = Math.min(1, this._bossPauseTimer / 0.3);
-            ctx.fillText(this._bossTaunt, this._renderer._width / 2, 120);
-            ctx.restore();
-        }
-
-        // Draw combo counter if active
-        if (this._comboCount >= 3) {
-            const ctx = this._renderer._ctx;
-            ctx.save();
-            const tier = this._getComboTier();
-            const colors = ['#FFD700', '#FF8C00', '#FF4500', '#FF00FF', '#00FFFF'];
-            ctx.font = `bold ${20 + tier * 4}px OpenDyslexic, "Comic Sans MS", cursive`;
-            ctx.textAlign = 'right';
-            ctx.fillStyle = colors[Math.min(tier, colors.length - 1)];
-            ctx.fillText(`${this._comboCount}x COMBO`, this._renderer._width - 20, 80);
-            ctx.restore();
-        }
+        // Boss taunt and combo counter are now DOM elements (HudManager)
+        // — no canvas drawing needed for these
 
         // Draw death overlay if dying
         if (this._deathActive) {
@@ -1201,6 +1371,8 @@ class Game {
         this._roomTimer = null;
 
         if (this._weaponManager) this._weaponManager.cancel();
+        if (this._hudManager) this._hudManager.cancel();
+        if (this._tutorialManager) this._tutorialManager.cancel();
     }
 
     // =========================================================
@@ -1210,6 +1382,11 @@ class Game {
     _handleGameControl(data) {
         switch (data.action) {
             case 'escape':
+                // If journal is open, close it first
+                if (this._journalManager && this._journalManager.isOpen) {
+                    this._journalManager.close();
+                    return;
+                }
                 this.togglePause();
                 break;
             case 'next-target':
@@ -1220,10 +1397,35 @@ class Game {
                 }
                 break;
             case 'journal':
-                // Future: open shortcut journal overlay (session 5)
+                if (this._journalManager) {
+                    if (this._journalManager.isOpen) {
+                        this._journalManager.close();
+                    } else {
+                        const entries = this._shortcutManager.getJournalEntries();
+                        const allShortcuts = this._shortcutManager._shortcuts || [];
+                        this._journalManager.open(
+                            document.activeElement,
+                            entries,
+                            allShortcuts
+                        );
+                    }
+                }
                 break;
             case 'space':
-                // Future: advance dialogue / acknowledge Knowledge Monster
+                // Advance tutorial dialogue if active
+                if (this._tutorialManager && this._tutorialManager.active) {
+                    this._tutorialManager.advance();
+                }
+                break;
+            case 'scan':
+                // ? key — instant reveal on targeted monster
+                if (this._hintManager) {
+                    const target = this._getTargetedMonster();
+                    if (target) {
+                        this._hintManager.handleScan(target);
+                        this._updateShortcutPrompt();
+                    }
+                }
                 break;
             default:
                 // weapon1-weapon0: weapon switching
@@ -1232,6 +1434,7 @@ class Game {
                     const weaponId = digit === '0' ? 10 : parseInt(digit, 10);
                     if (this._weaponManager && this._weaponManager.select(weaponId)) {
                         this._updateHud();
+                        if (this._audioManager) this._audioManager.playMenuSelect();
                         // Save weapon selection
                         const saveData = SaveManager.load();
                         saveData.selectedWeapon = weaponId;
@@ -1298,6 +1501,8 @@ class Game {
             card.setAttribute('data-level', String(i));
 
             const unlocked = i < this.highestLevel;
+
+            card.setAttribute('aria-pressed', 'false');
 
             if (!unlocked) {
                 card.classList.add('locked');
@@ -1372,10 +1577,14 @@ class Game {
         this.selectedLevel = index;
 
         // Remove previous selection
-        cards.forEach(c => c.classList.remove('selected'));
+        cards.forEach(c => {
+            c.classList.remove('selected');
+            c.setAttribute('aria-pressed', 'false');
+        });
 
         // Apply selection and focus
         cards[index].classList.add('selected');
+        cards[index].setAttribute('aria-pressed', 'true');
         cards[index].focus();
     }
 
@@ -1477,6 +1686,11 @@ class Game {
         const overlay = this._overlays.pause;
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
+
+        // Don't resume gameplay if journal is open
+        if (this._journalManager && this._journalManager.isOpen) {
+            return;
+        }
 
         this.state = 'GAMEPLAY';
 
@@ -1591,7 +1805,9 @@ class Game {
         // Volume slider
         const volumeSlider = document.getElementById('volume-slider');
         volumeSlider.addEventListener('input', () => {
-            this._saveSetting('volume', Number(volumeSlider.value) / 100);
+            const vol = Number(volumeSlider.value) / 100;
+            this._saveSetting('volume', vol);
+            if (this._audioManager) this._audioManager.setVolume(vol);
         });
 
         // Monster speed buttons
@@ -1802,6 +2018,11 @@ class Game {
         // Font size
         const sizeMap = { small: '16px', medium: '18px', large: '22px' };
         document.documentElement.style.fontSize = sizeMap[this._settings.fontSize] || '18px';
+
+        // Volume — apply to AudioManager if initialized
+        if (this._audioManager) {
+            this._audioManager.setVolume(this._settings.volume);
+        }
 
         // Update settings UI to match loaded state
         const fontBtns = document.querySelectorAll('.font-size-btn');
