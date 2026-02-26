@@ -139,7 +139,8 @@ First-person shooting gallery / typing game hybrid — teaches ~60 iPadOS keyboa
 **Session workflow:** Sessions defined in `keyboard-command-4/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md`. Run `/kc4-checklist` before each session. Run kc4-web-review agent after each session.
 
 **Key source files:**
-- `js/game.js` — state machine (TITLE, LEVEL_SELECT, GAMEPLAY, PAUSED, RESULTS), screen management, overlays
+- `js/game.js` — state machine (TITLE, LEVEL_SELECT, GAMEPLAY, TRANSITION, PAUSED, RESULTS), screen management, overlays
+- `js/levels.js` — LevelManager: level JSON loading, room progression, canvas corridor transitions (game-loop-driven, no own RAF)
 - `js/save.js` — SaveManager (localStorage key: `keyboard-command-4-save`); `_defaults()` defines all required fields
 - `css/style.css` — design system (CSS vars, screen/overlay visibility, level grid)
 - `data/levels/level{1-10}.json` — level data (rooms, waves, boss configs) [future sessions]
@@ -153,6 +154,7 @@ First-person shooting gallery / typing game hybrid — teaches ~60 iPadOS keyboa
 - Particle pool: max 50, pre-allocated and reused
 - `image-rendering: pixelated` on the canvas element
 - No DOM manipulation during the RAF game loop
+- **Single RAF chain:** Only `game.js` may call `requestAnimationFrame`. Managers that need per-frame updates expose `update(dt)` + `draw(ctx)` methods called BY the game loop — never start their own RAF chain. Two independent RAF chains on the same canvas cause flickering.
 
 **Input system rules:**
 - `e.metaKey || e.altKey || e.ctrlKey` → route as shortcut attempt
@@ -162,7 +164,11 @@ First-person shooting gallery / typing game hybrid — teaches ~60 iPadOS keyboa
 - Non-interceptable shortcuts (Cmd+H, Cmd+Space) → Knowledge Monster (Enter to acknowledge)
 - Only `preventDefault()` keys you actually handle — never blanket-prevent all keys
 
+**Timer callback state guards:** `setTimeout` callbacks that check game state must treat PAUSED as equivalent to GAMEPLAY — use `state !== 'GAMEPLAY' && state !== 'PAUSED'`. The user can pause at any moment, including during room-clear delays. Guarding only `!== 'GAMEPLAY'` causes permanent stalls.
+
 **Monster depth system:** 0.0 = back of room (small), 1.0 = front (large, attack range). Render back-to-front. Scale: `0.3 + depth * 0.7`.
+
+**Detailed architecture rules** are in `.claude/rules/kc4-architecture.md` (auto-loaded when editing KC4 files).
 
 ## HTML/JS Coding Standards
 

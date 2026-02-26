@@ -426,10 +426,67 @@ body {
     line-height: 2;
 }
 
+.results-stat-row {
+    opacity: 0;
+    animation: stat-fade-in 0.4s ease-out forwards;
+}
+
+@keyframes stat-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.results-weapon-unlock {
+    color: var(--accent-blue);
+    font-weight: bold;
+    border-top: 1px solid var(--card-border);
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+}
+
 .results-stars {
     font-size: 2rem;
     margin-bottom: 1.5rem;
     color: var(--accent-gold);
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.results-star {
+    display: inline-block;
+    font-size: 2.5rem;
+    opacity: 0.3;
+    transform: scale(0.5);
+    transition: none;
+}
+
+.results-star.earned {
+    opacity: 1;
+    animation: star-pop 0.5s ease-out forwards;
+}
+
+@keyframes star-pop {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.3);
+        text-shadow: 0 0 16px rgba(241, 196, 15, 0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow: 0 0 8px rgba(241, 196, 15, 0.4);
+    }
 }
 
 .results-actions {

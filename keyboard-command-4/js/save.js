@@ -23,7 +23,7 @@ class SaveManager {
                 showPhysicalKeys: true,
                 volume: 0.7,
                 monsterSpeed: 'normal',
-                hints: 'after3'
+                hints: 'always'
             }
         };
     }
@@ -67,5 +67,66 @@ class SaveManager {
         } catch {
             // Silently continue
         }
+    }
+
+    /**
+     * Save level result, keeping best scores.
+     * @param {number} levelId — 0-based level index
+     * @param {{ stars: number, score: number, bestCombo: number, timeTaken: number, newShortcuts: number }} stats
+     */
+    static saveLevelResult(levelId, stats) {
+        const data = SaveManager.load();
+        const key = String(levelId);
+        const existing = data.levels[key] || {};
+
+        data.levels[key] = {
+            stars: Math.max(stats.stars || 0, existing.stars || 0),
+            bestScore: Math.max(stats.score || 0, existing.bestScore || 0),
+            bestCombo: Math.max(stats.bestCombo || 0, existing.bestCombo || 0),
+            timeTaken: existing.timeTaken
+                ? Math.min(stats.timeTaken || Infinity, existing.timeTaken)
+                : (stats.timeTaken || 0),
+            newShortcuts: Math.max(stats.newShortcuts || 0, existing.newShortcuts || 0)
+        };
+
+        SaveManager.save(data);
+    }
+
+    /**
+     * Record a shortcut attempt.
+     * @param {string} shortcutId
+     * @param {boolean} correct
+     */
+    static saveShortcutStats(shortcutId, correct) {
+        const data = SaveManager.load();
+        if (!data.shortcuts.stats[shortcutId]) {
+            data.shortcuts.stats[shortcutId] = { attempts: 0, correct: 0 };
+        }
+        data.shortcuts.stats[shortcutId].attempts++;
+        if (correct) data.shortcuts.stats[shortcutId].correct++;
+        SaveManager.save(data);
+    }
+
+    /**
+     * Unlock a weapon if not already unlocked.
+     * @param {number} weaponId — 1-based weapon index
+     */
+    static unlockWeapon(weaponId) {
+        const data = SaveManager.load();
+        if (!data.weaponsUnlocked.includes(weaponId)) {
+            data.weaponsUnlocked.push(weaponId);
+            SaveManager.save(data);
+        }
+    }
+
+    /**
+     * Update a single setting.
+     * @param {string} key — setting key (fontSize, volume, etc.)
+     * @param {*} value — setting value
+     */
+    static updateSettings(key, value) {
+        const data = SaveManager.load();
+        data.settings[key] = value;
+        SaveManager.save(data);
     }
 }

@@ -155,7 +155,7 @@ After a correct shortcut fires the weapon:
 ## State Machine
 
 ```
-TITLE → LEVEL_SELECT → GAMEPLAY → ROOM_TRANSITION → GAMEPLAY → ...
+TITLE → LEVEL_SELECT → GAMEPLAY → TRANSITION → GAMEPLAY → ...
                                 → BOSS_FIGHT → LEVEL_COMPLETE → LEVEL_SELECT
                                 → PAUSE (overlay)
                                 → JOURNAL (overlay)
@@ -165,6 +165,76 @@ TITLE → LEVEL_SELECT → GAMEPLAY → ROOM_TRANSITION → GAMEPLAY → ...
 - State transitions must be clean — cancel all active timers, animations, and input locks
 - `showLevelSelect()` must call `cancel()` on every active manager
 - Guard timer callbacks with null-checks: `if (!window.someManager) return;`
+- **Timer callbacks must tolerate PAUSED state.** Use `state !== 'GAMEPLAY' && state !== 'PAUSED'` — NOT just `!== 'GAMEPLAY'`. The user can pause during any delay (room-clear, wave spawn). Guarding only `!== 'GAMEPLAY'` causes permanent stalls.
+- When adding a new state, document: which states enter/exit it, what the game loop does during it, what input is accepted/blocked
+
+---
+
+## Single RAF Chain — game.js Owns the Loop
+
+**IMPORTANT:** Only `game.js` may call `requestAnimationFrame`. No manager may start its own animation loop.
+
+Any class that renders to the game canvas must expose **passive methods** called by the game loop:
+- `update(dt)` or `updateX(now)` — advance internal state
+- `draw(ctx, w, h)` or `drawX(ctx, w, h, now)` — render to canvas
+
+```js
+// WRONG — manager owns its own RAF chain → flickering
+class SomeManager {
+    start() { this._raf = requestAnimationFrame(() => this._tick()); }
+}
+
+// CORRECT — game loop drives the manager
+if (this.state === 'TRANSITION') {
+    this._levelManager.updateTransition(now);
+    this._levelManager.drawTransition(ctx, w, h, now);
+}
+```
+
+---
+
+## Batch SaveManager Operations
+
+When updating 2+ save fields at once, do a single `load() → modify → save()`:
+
+```js
+// WRONG — 3x redundant JSON.parse + JSON.stringify
+SaveManager.saveLevelResult(levelId, stats);
+SaveManager.unlockWeapon(weaponId);
+SaveManager.updateSettings('hints', 'always');
+
+// CORRECT — single round trip
+const data = SaveManager.load();
+data.levels[String(levelId)] = { /* ... */ };
+if (!data.weaponsUnlocked.includes(weaponId)) data.weaponsUnlocked.push(weaponId);
+data.settings.hints = 'always';
+SaveManager.save(data);
+```
+
+---
+
+## Timing Constants Must Be Synchronized
+
+These durations are coupled across files. Changing one without the other is a bug:
+
+| Constant | Value | Files |
+|----------|-------|-------|
+| Input lock after fire | 700ms | `input.js`, `weapons.js` |
+| Monster death animation | 500ms | `monsters.js`, `renderer.js` |
+| Corridor transition | 500ms | `levels.js` |
+| Boss corridor | 800ms | `levels.js` |
+| Boss title card | 2000ms | `levels.js` |
+
+---
+
+## Session Spec Validation
+
+Before implementing any session plan, check these:
+
+1. **Default settings must have a rationale.** Every user-facing default (hints, volume, speed) needs justification. `hints: 'always'` = "new players can learn"; not just a value with no context.
+2. **Canvas rendering ownership must be stated.** If the plan says "render X to canvas", confirm it says game.js calls the render method — not "the new class renders to canvas" (which implies its own RAF).
+3. **New state machine states must document transitions.** Which states enter it, which states it exits to, game loop behavior, input handling.
+4. **Scan spec code samples against the pattern table above.** Specs routinely contain `style.display`, `.onclick`, independent RAF chains, `new AudioContext()` in constructors.
 
 ---
 

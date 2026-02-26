@@ -28,7 +28,12 @@ class Game {
         this._hintManager = null;
         this._tutorialManager = null;
         this._journalManager = null;
+        this._levelManager = null;
         this._audioInitialized = false;
+
+        // Level timing
+        this._levelStartTime = 0;
+        this._newShortcutsThisLevel = 0;
 
         // Bound handlers (for removal if needed)
         this._onKeyDown = this._handleKeyDown.bind(this);
@@ -95,6 +100,10 @@ class Game {
         // Room management
         this._rooms = [];
         this._currentRoomIndex = 0;
+
+        // Settings and level data (populated in _loadProgress)
+        this._settings = {};
+        this._levels = {};
     }
 
     async init() {
@@ -147,6 +156,9 @@ class Game {
         // Initialize JournalManager
         this._journalManager = new JournalManager();
         this._journalManager.init();
+
+        // Initialize LevelManager
+        this._levelManager = new LevelManager();
 
         // Cache journal overlay reference
         this._overlays.journal = document.getElementById('journal-overlay');
@@ -248,6 +260,7 @@ class Game {
         if (this._tutorialManager) this._tutorialManager.cancel();
         if (this._journalManager) this._journalManager.cancel();
         if (this._hintManager) this._hintManager.clear();
+        if (this._levelManager) this._levelManager.cancel();
 
         this.state = 'LEVEL_SELECT';
         this._showScreen('select');
@@ -262,7 +275,7 @@ class Game {
         this._selectLevelCard(0);
     }
 
-    showGameplay(levelId) {
+    async showGameplay(levelId) {
         this._cancelAllCombat();
 
         this.state = 'GAMEPLAY';
@@ -301,6 +314,10 @@ class Game {
         this._boss = null;
         this._mageProjectiles = [];
 
+        // Level timing
+        this._levelStartTime = performance.now();
+        this._newShortcutsThisLevel = 0;
+
         // Reset hint tracking for new level
         if (this._hintManager) this._hintManager.clear();
 
@@ -309,8 +326,9 @@ class Game {
         if (this._tutorialManager) this._tutorialManager.cancel();
         if (this._journalManager) this._journalManager.cancel();
 
-        // Generate test room data (real levels come in sessions 7-9)
-        this._rooms = this._generateTestRooms(levelId);
+        // Load level via LevelManager (falls back to generated rooms if no JSON)
+        this._levelManager.cancel();
+        this._rooms = await this._levelManager.loadLevel(levelId);
         this._currentRoomIndex = 0;
 
         // Start first room
@@ -321,8 +339,8 @@ class Game {
 
         // Enable input interception
         if (this._inputManager) {
-            this._inputManager.onShortcutAttempt = (data) => this._handleShortcutAttempt(data);
-            this._inputManager.onGameControl = (data) => this._handleGameControl(data);
+            this._inputManager.onShortcutAttempt = (d) => this._handleShortcutAttempt(d);
+            this._inputManager.onGameControl = (d) => this._handleGameControl(d);
             this._inputManager.enable();
         }
 
@@ -339,52 +357,6 @@ class Game {
     // =========================================================
     // Room & Wave Management
     // =========================================================
-
-    _generateTestRooms(levelId) {
-        // Hardcoded test data until real level JSON in sessions 7-9
-        const rooms = [];
-        const roomCount = 3 + Math.floor(levelId / 3);
-
-        for (let r = 0; r < roomCount; r++) {
-            const waves = [];
-            const waveCount = 2 + Math.floor(Math.random() * 2);
-
-            for (let w = 0; w < waveCount; w++) {
-                const monsterDefs = [];
-                const types = ['gremlin', 'gremlin', 'gremlin', 'brute', 'shifter', 'mage', 'knight'];
-                const count = 2 + Math.floor(Math.random() * 3);
-
-                for (let m = 0; m < count; m++) {
-                    const typeIdx = Math.min(
-                        Math.floor(Math.random() * Math.min(types.length, 3 + levelId)),
-                        types.length - 1
-                    );
-                    monsterDefs.push({
-                        type: types[typeIdx],
-                        depth: 0.15 + Math.random() * 0.4,
-                        offsetX: (m - (count - 1) / 2) * 80
-                    });
-                }
-
-                waves.push({
-                    monsters: monsterDefs,
-                    delay: w === 0 ? 0 : 1.0
-                });
-            }
-
-            rooms.push({ waves });
-        }
-
-        // Last room has a boss
-        const bossRoom = rooms[rooms.length - 1];
-        bossRoom.boss = {
-            name: 'Bug Lord',
-            hp: 3,
-            phases: this._generateBossPhases(levelId)
-        };
-
-        return rooms;
-    }
 
     _generateBossPhases(levelId) {
         const phases = [];
@@ -531,8 +503,8 @@ class Game {
         this._renderer.particles.clear();
 
         const loop = (timestamp) => {
-            // Guard: stop if no longer in gameplay or paused
-            if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED') {
+            // Guard: stop if no longer in gameplay, paused, or transitioning
+            if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED' && this.state !== 'TRANSITION') {
                 this._rafId = null;
                 return;
             }
@@ -542,13 +514,36 @@ class Game {
             const dt = Math.min((timestamp - this._lastTime) / 1000, 0.05);
             this._lastTime = timestamp;
 
-            // Only update when not paused
+            const now = performance.now();
+
+            // Only update combat when in active gameplay
             if (this.state === 'GAMEPLAY') {
                 this._updateGameplay(dt, timestamp / 1000);
             }
 
-            // Always render (keeps the canvas visible while paused)
-            this._buildAndRender(timestamp / 1000);
+            // During TRANSITION: advance the transition state machine + draw
+            if (this.state === 'TRANSITION' && this._levelManager) {
+                this._levelManager.updateTransition(now);
+                this._renderer.particles.update(dt);
+
+                const phase = this._levelManager._transitionPhase;
+
+                // During fade phases, render the room so the overlay composites on top
+                if (phase === 'fade-out' || phase === 'fade-in') {
+                    this._buildAndRender(timestamp / 1000);
+                }
+
+                // Draw the transition overlay/scene (single canvas, single RAF)
+                this._levelManager.drawTransition(
+                    this._renderer._ctx,
+                    this._renderer._width,
+                    this._renderer._height,
+                    now
+                );
+            } else {
+                // GAMEPLAY or PAUSED — render the room normally
+                this._buildAndRender(timestamp / 1000);
+            }
 
             this._rafId = requestAnimationFrame(loop);
         };
@@ -665,14 +660,18 @@ class Game {
             // Clear hint tracking for new room
             if (this._hintManager) this._hintManager.clear();
 
-            // Check for boss
-            const room = this._rooms[this._currentRoomIndex];
-            if (room && room.boss) {
-                // Start boss fight after a short delay
+            // Check if next room has a boss (look ahead)
+            const nextRoomIdx = this._currentRoomIndex + 1;
+            const nextRoom = this._rooms[nextRoomIdx];
+            const currentRoom = this._rooms[this._currentRoomIndex];
+
+            // If current room has a boss, start boss fight directly
+            if (currentRoom && currentRoom.boss) {
                 clearTimeout(this._roomTimer);
                 this._roomTimer = setTimeout(() => {
                     this._roomTimer = null;
-                    this._startBoss(room.boss);
+                    if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED') return;
+                    this._startBoss(currentRoom.boss);
                 }, 1000);
                 return;
             }
@@ -680,22 +679,79 @@ class Game {
             // Auto-save after room clear
             this._autoSave();
 
-            // Advance to next room or level complete
+            // Advance to next room with corridor transition, or level complete
             if (this._currentRoomIndex < this._rooms.length - 1) {
-                clearTimeout(this._roomTimer);
-                this._roomTimer = setTimeout(() => {
-                    this._roomTimer = null;
-                    this._currentRoomIndex++;
-                    this._startRoom(this._rooms[this._currentRoomIndex]);
-                    this._autoTarget();
+                const themeKey = THEME_ORDER[this.currentLevel] || 'ruins';
+                const theme = THEMES[themeKey] || THEMES.ruins;
 
-                    // Re-cache background for variety (session 6 will do proper transitions)
-                    const themeKey = THEME_ORDER[this.currentLevel] || 'ruins';
-                    this._renderer.cacheBackground(themeKey);
-                }, 1500);
+                // Use boss transition if next room is the boss room
+                if (nextRoom && nextRoom.boss) {
+                    clearTimeout(this._roomTimer);
+                    this._roomTimer = setTimeout(() => {
+                        this._roomTimer = null;
+                        if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED') return;
+                        this.state = 'TRANSITION';
+                        if (this._inputManager) this._inputManager.disable();
+
+                        this._levelManager.startBossTransition(
+                            theme,
+                            nextRoom.boss.name || 'BOSS',
+                            () => {
+                                this._currentRoomIndex++;
+                                this.state = 'GAMEPLAY';
+                                if (this._inputManager) this._inputManager.enable();
+                                this._renderer.cacheBackground(themeKey);
+                                this._startRoom(this._rooms[this._currentRoomIndex]);
+                                this._autoTarget();
+                                this._updateRoomProgress();
+                            }
+                        );
+                    }, 500);
+                } else {
+                    // Standard corridor transition
+                    clearTimeout(this._roomTimer);
+                    this._roomTimer = setTimeout(() => {
+                        this._roomTimer = null;
+                        if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED') return;
+                        this.state = 'TRANSITION';
+                        if (this._inputManager) this._inputManager.disable();
+
+                        this._levelManager.startTransition(
+                            this._currentRoomIndex,
+                            this._currentRoomIndex + 1,
+                            theme,
+                            (corridorItem) => {
+                                if (corridorItem) {
+                                    this._handleCorridorItem(corridorItem);
+                                }
+                                this._currentRoomIndex++;
+                            },
+                            () => {
+                                this.state = 'GAMEPLAY';
+                                if (this._inputManager) this._inputManager.enable();
+                                this._renderer.cacheBackground(themeKey);
+                                this._startRoom(this._rooms[this._currentRoomIndex]);
+                                this._autoTarget();
+                                this._updateRoomProgress();
+                            }
+                        );
+                    }, 500);
+                }
             } else {
                 // Level complete
                 this._levelComplete();
+            }
+        }
+    }
+
+    _handleCorridorItem(item) {
+        if (!item) return;
+        if (item.type === 'health') {
+            this._playerHeal(item.amount || 25);
+        } else if (item.type === 'weapon') {
+            if (this._weaponManager && item.weaponId) {
+                this._weaponManager.unlockedWeapons.push(item.weaponId);
+                SaveManager.unlockWeapon(item.weaponId);
             }
         }
     }
@@ -738,6 +794,10 @@ class Game {
         if (match.correct) {
             this._correctAttempts++;
             this._shortcutManager.recordAttempt(targetShortcutId, true);
+
+            // Track newly learned shortcuts
+            const learnedBefore = SaveManager.load().shortcuts.learned || {};
+            if (!learnedBefore[targetShortcutId]) this._newShortcutsThisLevel++;
             this._shortcutManager.learnShortcut(targetShortcutId);
 
             // Play weapon fire sound
@@ -928,6 +988,7 @@ class Game {
             clearTimeout(this._deathTimer);
             this._deathTimer = setTimeout(() => {
                 this._deathTimer = null;
+                if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED') return;
                 this._playerHp = 50;
                 this._deathActive = false;
                 this._comboCount = 0;
@@ -939,6 +1000,7 @@ class Game {
             clearTimeout(this._deathTimer);
             this._deathTimer = setTimeout(() => {
                 this._deathTimer = null;
+                if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED') return;
                 this._gameOver();
             }, 2000);
         }
@@ -965,6 +1027,12 @@ class Game {
 
     _startBoss(bossData) {
         this._bossActive = true;
+
+        // Generate phases if not provided (test rooms from LevelManager fallback)
+        if (!bossData.phases || bossData.phases.length === 0) {
+            bossData.phases = this._generateBossPhases(this.currentLevel);
+        }
+
         this._boss = bossData;
         this._bossPhaseIndex = 0;
         this._bossPauseTimer = 0;
@@ -1065,6 +1133,7 @@ class Game {
                             clearTimeout(this._roomTimer);
                             this._roomTimer = setTimeout(() => {
                                 this._roomTimer = null;
+                                if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED') return;
                                 this._autoSave();
                                 this._levelComplete();
                             }, 1500);
@@ -1154,16 +1223,24 @@ class Game {
         if (accuracy >= 0.7 && this._respawns >= 2) stars = 2;
         if (accuracy >= 0.9 && this._respawns >= 3) stars = 3;
 
-        // Save progress
+        // Calculate time taken
+        const timeTaken = Math.round((performance.now() - this._levelStartTime) / 1000);
+
+        // Single load → modify → save to avoid redundant JSON parses
         const data = SaveManager.load();
         const levelKey = String(this.currentLevel);
-        if (!data.levels[levelKey] || (data.levels[levelKey].stars || 0) < stars) {
-            data.levels[levelKey] = {
-                stars,
-                bestScore: Math.max(this._score, (data.levels[levelKey] && data.levels[levelKey].bestScore) || 0),
-                bestCombo: Math.max(this._bestCombo, (data.levels[levelKey] && data.levels[levelKey].bestCombo) || 0)
-            };
-        }
+        const existing = data.levels[levelKey] || {};
+
+        // Save level result (keep bests)
+        data.levels[levelKey] = {
+            stars: Math.max(stars, existing.stars || 0),
+            bestScore: Math.max(this._score, existing.bestScore || 0),
+            bestCombo: Math.max(this._bestCombo, existing.bestCombo || 0),
+            timeTaken: existing.timeTaken
+                ? Math.min(timeTaken, existing.timeTaken)
+                : timeTaken,
+            newShortcuts: Math.max(this._newShortcutsThisLevel, existing.newShortcuts || 0)
+        };
 
         // Unlock next level
         if (this.currentLevel + 2 > data.highestLevel) {
@@ -1188,7 +1265,10 @@ class Game {
             bestCombo: this._bestCombo,
             score: this._score,
             stars,
-            completed: true
+            completed: true,
+            timeTaken,
+            newShortcuts: this._newShortcutsThisLevel,
+            weaponUnlocked: nextWeapon <= 10 ? nextWeapon : null
         });
     }
 
@@ -1373,6 +1453,7 @@ class Game {
         if (this._weaponManager) this._weaponManager.cancel();
         if (this._hudManager) this._hudManager.cancel();
         if (this._tutorialManager) this._tutorialManager.cancel();
+        if (this._levelManager) this._levelManager.cancel();
     }
 
     // =========================================================
@@ -1449,41 +1530,97 @@ class Game {
         this._stopGameLoop();
         this._cancelAllCombat();
 
+        // Cancel LevelManager transitions
+        if (this._levelManager) this._levelManager.cancel();
+
         // Disable input interception
         if (this._inputManager) {
             this._inputManager.disable();
             this._inputManager.cancel();
         }
 
+        // Cancel audio ambience
+        if (this._audioManager) this._audioManager.cancel();
+
         this.state = 'RESULTS';
         this._showScreen('results');
 
         const statsEl = document.getElementById('results-stats');
         const starsEl = document.getElementById('results-stars');
+        const titleEl = document.querySelector('.results-title');
+
+        // Update title based on completion
+        if (titleEl) {
+            titleEl.textContent = stats && stats.completed ? 'Mission Complete' : 'Mission Failed';
+        }
 
         if (stats) {
+            // Build stat lines with staggered animation
             const lines = [
                 `Monsters defeated: ${stats.kills || 0}`,
                 `Accuracy: ${stats.accuracy || 0}%`,
                 `Best combo: ${stats.bestCombo || 0}`,
                 `Score: ${stats.score || 0}`
             ];
+
+            // Add time if available
+            if (stats.timeTaken != null) {
+                const mins = Math.floor(stats.timeTaken / 60);
+                const secs = stats.timeTaken % 60;
+                lines.push(`Time: ${mins}:${String(secs).padStart(2, '0')}`);
+            }
+
+            // Add new shortcuts learned
+            if (stats.newShortcuts > 0) {
+                lines.push(`New shortcuts learned: ${stats.newShortcuts}`);
+            }
+
             statsEl.textContent = '';
-            lines.forEach(line => {
+            lines.forEach((line, i) => {
                 const p = document.createElement('p');
+                p.className = 'results-stat-row';
+                p.style.animationDelay = `${i * 0.15}s`;
                 p.textContent = line;
                 statsEl.appendChild(p);
             });
 
+            // Weapon unlock notification
+            if (stats.weaponUnlocked && stats.completed) {
+                const unlockP = document.createElement('p');
+                unlockP.className = 'results-stat-row results-weapon-unlock';
+                unlockP.style.animationDelay = `${lines.length * 0.15}s`;
+                const weaponName = this._weaponManager
+                    ? this._weaponManager.getWeaponName(stats.weaponUnlocked)
+                    : `Weapon ${stats.weaponUnlocked}`;
+                unlockP.textContent = `Weapon unlocked: ${weaponName}`;
+                statsEl.appendChild(unlockP);
+            }
+
+            // Star animation — one-by-one with delay
             const starCount = stats.stars || 0;
-            const starText = '\u2605'.repeat(starCount) + '\u2606'.repeat(3 - starCount);
-            starsEl.textContent = starText;
+            starsEl.textContent = '';
             starsEl.setAttribute('aria-label', `${starCount} of 3 stars earned`);
+
+            for (let i = 0; i < 3; i++) {
+                const star = document.createElement('span');
+                star.className = 'results-star';
+                if (i < starCount) {
+                    star.classList.add('earned');
+                    star.style.animationDelay = `${0.5 + i * 0.3}s`;
+                }
+                star.textContent = i < starCount ? '\u2605' : '\u2606';
+                star.setAttribute('aria-hidden', 'true');
+                starsEl.appendChild(star);
+            }
         }
 
-        // Focus first button
+        // "Next Level" button disabled if level 10 or game over
         const nextBtn = document.getElementById('results-next');
-        if (nextBtn) nextBtn.focus();
+        if (nextBtn) {
+            const canAdvance = stats && stats.completed && this.currentLevel < 9;
+            nextBtn.disabled = !canAdvance;
+            nextBtn.focus();
+        }
     }
 
     // =========================================================
@@ -1593,6 +1730,9 @@ class Game {
     // =========================================================
 
     _handleKeyDown(e) {
+        // TRANSITION — ignore all input
+        if (this.state === 'TRANSITION') return;
+
         // LEVEL_SELECT navigation
         if (this.state === 'LEVEL_SELECT') {
             this._handleLevelSelectKeys(e);
