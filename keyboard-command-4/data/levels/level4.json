@@ -1,0 +1,136 @@
+{
+  "id": 4,
+  "name": "Navigation Nexus",
+  "theme": "nexus",
+  "shortcuts": ["cmd_left", "cmd_right", "cmd_up", "cmd_down", "option_left", "option_right", "option_delete"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.35, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 80 },
+            { "type": "mage",    "depth": 0.15, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.20, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": -40 },
+            { "type": "mage",    "depth": 0.15, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "brute",   "depth": 0.25, "offsetX": -80 },
+            { "type": "brute",   "depth": 0.20, "offsetX": 80 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "mage",    "depth": 0.15, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "The Cursor King",
+        "hp": 4,
+        "phases": [
+          {
+            "shortcutId": "cmd_left",
+            "instruction": "Beginning of Line",
+            "taunt": "You cannot navigate your way out of this!"
+          },
+          {
+            "shortcutId": "cmd_right",
+            "instruction": "End of Line",
+            "taunt": "Is that all you have?!"
+          },
+          {
+            "shortcutId": "option_left",
+            "instruction": "Previous Word",
+            "taunt": "Impressive, but futile!"
+          },
+          {
+            "shortcutId": "option_right",
+            "instruction": "Next Word",
+            "taunt": "This cannot be!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 1 },
+    { "type": "weapon", "weaponId": 5, "after_room": 2 },
+    { "type": "health", "amount": 25, "after_room": 3 }
+  ]
+}

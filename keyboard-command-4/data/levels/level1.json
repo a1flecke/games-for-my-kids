@@ -1,0 +1,114 @@
+{
+  "id": 1,
+  "name": "Home Screen Ruins",
+  "theme": "ruins",
+  "shortcuts": ["cmd_c", "cmd_v", "cmd_x", "cmd_z", "cmd_a", "cmd_s"],
+  "rooms": [
+    {
+      "id": 1,
+      "isTutorial": true,
+      "tutorialSteps": ["welcome", "firstKill"],
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "isTutorial": true,
+      "tutorialSteps": ["targetCycle"],
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": -60 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 0 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -60 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 60 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "Bug Lord",
+        "hp": 3,
+        "phases": [
+          {
+            "shortcutId": "cmd_z",
+            "instruction": "Undo",
+            "taunt": "You dare challenge me?!"
+          },
+          {
+            "shortcutId": "cmd_x",
+            "instruction": "Cut",
+            "taunt": "Is that all you have?!"
+          },
+          {
+            "shortcutId": "cmd_v",
+            "instruction": "Paste",
+            "taunt": "This cannot be!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 1 },
+    { "type": "weapon", "weaponId": 2, "after_room": 2 }
+  ]
+}

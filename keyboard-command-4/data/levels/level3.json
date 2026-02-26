@@ -1,0 +1,142 @@
+{
+  "id": 3,
+  "name": "Text Editor Tower",
+  "theme": "editor",
+  "shortcuts": ["cmd_b", "cmd_i", "cmd_u", "cmd_t", "cmd_l", "cmd_shift_t"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.20, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "brute",   "depth": 0.20, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": -100 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "isBonus": true,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": -80 },
+            { "type": "shifter", "depth": 0.20, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": -40 },
+            { "type": "shifter", "depth": 0.20, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "shifter", "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "Font Phantom",
+        "hp": 3,
+        "phases": [
+          {
+            "shortcutId": "cmd_b",
+            "instruction": "Bold",
+            "taunt": "Your words mean nothing to me!"
+          },
+          {
+            "shortcutId": "cmd_i",
+            "instruction": "Italic",
+            "taunt": "Is that all you have?!"
+          },
+          {
+            "shortcutId": "cmd_u",
+            "instruction": "Underline",
+            "taunt": "This cannot be!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 1 },
+    { "type": "weapon", "weaponId": 4, "after_room": 3 }
+  ]
+}
