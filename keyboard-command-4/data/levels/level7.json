@@ -13,7 +13,7 @@
             { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
             { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
             { "type": "gremlin", "depth": 0.20, "offsetX": 80 },
-            { "type": "shifter", "depth": 0.35, "offsetX": 0 }
+            { "type": "shifter", "depth": 0.35, "offsetX": -40 }
           ]
         }
       ]
@@ -102,8 +102,9 @@
         {
           "delay": 0,
           "monsters": [
-            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
-            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+            { "type": "gremlin",  "depth": 0.30, "offsetX": -80 },
+            { "type": "phantom",  "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin",  "depth": 0.20, "offsetX": 80 }
           ]
         }
       ],
@@ -134,15 +135,15 @@
           {
             "shortcutId": "cmd_bracket_right",
             "instruction": "Go Forward",
-            "taunt": "This cannot be!"
+            "taunt": "My web... unravels!"
           }
         ]
       }
     }
   ],
   "items": [
-    { "type": "health", "amount": 25, "after_room": 2 },
-    { "type": "weapon", "weaponId": 8, "after_room": 3 },
-    { "type": "health", "amount": 25, "after_room": 4 }
+    { "type": "health", "amount": 25, "after_room": 1 },
+    { "type": "weapon", "weaponId": 8, "after_room": 2 },
+    { "type": "health", "amount": 25, "after_room": 3 }
   ]
 }

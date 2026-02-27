@@ -104,6 +104,7 @@
           "delay": 0,
           "monsters": [
             { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "knight",  "depth": 0.20, "offsetX": 0 },
             { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
           ]
         }
@@ -120,7 +121,7 @@
           {
             "shortcutId": "cmd_space",
             "instruction": "Spotlight Search",
-            "taunt": "Is that all you have?!"
+            "taunt": "Search for weakness and find none!"
           },
           {
             "shortcutId": "cmd_period",
@@ -130,15 +131,15 @@
           {
             "shortcutId": "cmd_h",
             "instruction": "Home Screen",
-            "taunt": "This cannot be!"
+            "taunt": "The Taskmaster... falls?!"
           }
         ]
       }
     }
   ],
   "items": [
+    { "type": "health", "amount": 25, "after_room": 1 },
     { "type": "health", "amount": 25, "after_room": 2 },
-    { "type": "health", "amount": 25, "after_room": 3 },
-    { "type": "weapon", "weaponId": 7, "after_room": 4 }
+    { "type": "weapon", "weaponId": 7, "after_room": 3 }
   ]
 }

@@ -113,7 +113,7 @@
         }
       ],
       "boss": {
-        "name": "Font Phantom",
+        "name": "The Format Fiend",
         "hp": 3,
         "phases": [
           {
@@ -124,12 +124,12 @@
           {
             "shortcutId": "cmd_i",
             "instruction": "Italic",
-            "taunt": "Is that all you have?!"
+            "taunt": "Your style means nothing to me!"
           },
           {
             "shortcutId": "cmd_u",
             "instruction": "Underline",
-            "taunt": "This cannot be!"
+            "taunt": "Underline my defeat?! Never!"
           }
         ]
       }

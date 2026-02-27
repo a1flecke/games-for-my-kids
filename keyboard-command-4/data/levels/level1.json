@@ -96,7 +96,7 @@
           {
             "shortcutId": "cmd_x",
             "instruction": "Cut",
-            "taunt": "Is that all you have?!"
+            "taunt": "My bugs cannot be cut!"
           },
           {
             "shortcutId": "cmd_v",

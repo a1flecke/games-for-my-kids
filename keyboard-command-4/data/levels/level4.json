@@ -112,7 +112,7 @@
           {
             "shortcutId": "cmd_right",
             "instruction": "End of Line",
-            "taunt": "Is that all you have?!"
+            "taunt": "Reaching the end? So naive!"
           },
           {
             "shortcutId": "option_left",
@@ -122,7 +122,7 @@
           {
             "shortcutId": "option_right",
             "instruction": "Next Word",
-            "taunt": "This cannot be!"
+            "taunt": "The cursor bends to no one!"
           }
         ]
       }

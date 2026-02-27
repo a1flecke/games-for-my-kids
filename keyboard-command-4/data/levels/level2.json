@@ -97,12 +97,12 @@
           {
             "shortcutId": "cmd_c",
             "instruction": "Copy",
-            "taunt": "Is that all you have?!"
+            "taunt": "A copy won't save you!"
           },
           {
             "shortcutId": "cmd_n",
             "instruction": "New Document",
-            "taunt": "This cannot be!"
+            "taunt": "No new beginning for you!"
           }
         ]
       }
