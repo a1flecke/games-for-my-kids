@@ -1244,7 +1244,7 @@ class Game {
             if (this._hudManager) this._hudManager.flashDamage();
 
             this._weaponManager.flinch();
-            this._playerTakeDamage(20);
+            this._playerTakeDamage(15);
             this._comboCount = 0;
             this._updateComboDisplay();
             this._renderer.spawnMiss();
@@ -1313,7 +1313,7 @@ class Game {
             : 0;
         let stars = 1;
         if (accuracy >= 0.7 && this._respawns >= 2) stars = 2;
-        if (accuracy >= 0.9 && this._respawns >= 3) stars = 3;
+        if (accuracy >= 0.85 && this._respawns >= 2) stars = 3;
         this._announce(`Level complete! ${stars} star${stars !== 1 ? 's' : ''} earned.`);
 
         // Calculate time taken

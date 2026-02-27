@@ -196,7 +196,7 @@
     }
   ],
   "items": [
-    { "type": "health", "amount": 25, "after_room": 1 },
+    { "type": "health", "amount": 50, "after_room": 1 },
     { "type": "weapon", "weaponId": 10, "after_room": 2 }
   ]
 }

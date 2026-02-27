@@ -23,7 +23,7 @@ class SaveManager {
                 showPhysicalKeys: true,
                 volume: 0.7,
                 monsterSpeed: 'normal',
-                hints: 'always'
+                hints: 'after3'
             }
         };
     }
