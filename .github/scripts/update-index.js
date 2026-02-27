@@ -38,7 +38,7 @@ const gameCategories = {
   history: ['ancient-greece-rpg', 'roman-quiz', 'roman-emperors-quiz'],
   language: ['grammar-quiz', 'phonics-game'],
   math: ['math-coloring'],
-  skills: ['keyboard-quest', 'keyboard-quest-2']
+  skills: ['keyboard-quest', 'keyboard-quest-2', 'keyboard-command-4']
 };
 
 // Manual game configurations (used when auto-detection needs help)
@@ -77,6 +77,11 @@ const manualGameConfig = {
     icon: '⌨️✨🚀',
     title: 'Keyboard Quest 2',
     description: 'The adventure continues! Master more advanced keyboard shortcuts as you explore the Digital Dimension. Dyslexia-friendly design included!'
+  },
+  'keyboard-command-4': {
+    icon: '⌨️🔫💥',
+    title: 'Keyboard Command 4',
+    description: 'Battle the Corruption in this Doom-inspired shooting gallery! Master 60+ iPadOS keyboard shortcuts by firing the right commands at digital monsters.'
   },
   'phonics-game': {
     icon: '🔤🗺️',

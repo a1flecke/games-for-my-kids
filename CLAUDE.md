@@ -63,6 +63,33 @@ Game-specific architecture notes are in path-scoped rules files (auto-loaded whe
 - **phonics-game** — Word Explorer, phonics matching for grades 1–5. See `.claude/rules/phonics.md`.
 - **keyboard-command-4** — Shortcut-teaching shooter, multi-file Canvas. See `.claude/rules/kc4-architecture.md`.
 
+### keyboard-command-4
+
+Doom-inspired shooting gallery teaching iPadOS keyboard shortcuts (Cmd, Option, Shift, Control). Canvas 2D rendering + Web Audio synthesis. Target: iPad Safari with Bluetooth Windows keyboard, 60fps minimum.
+
+**Key source files:**
+- `js/game.js` — main state machine, game loop, combat, health, combos, HUD management
+- `js/renderer.js` — Canvas 2D shooting gallery renderer, room backgrounds, sprites, particles
+- `js/input.js` — keyboard interception, modifier detection, shortcut matching, fire lock
+- `js/monsters.js` — 7 monster types (gremlin, brute, swarm, knight, phantom, shifter, mage) with AI behaviors
+- `js/weapons.js` — 10 weapon types with fire animations and damage calculations
+- `js/hud.js` — HUD overlay (health bar, score, prompt, combo counter, target indicator)
+- `js/audio.js` — Web Audio synthesizer for all sound effects (attack, hit, miss, level complete)
+- `js/levels.js` — LevelManager, corridor transitions, wave spawning, room state
+- `js/shortcuts.js` — shortcut database manager, journal system, prompt generation
+- `js/tutorial.js` — tutorial system, hints system (after3/always modes), Commander Byte dialogue
+- `js/save.js` — LocalStorage save system (key: `keyboard-command-4-save`)
+- `data/shortcuts.json` — 60 iPadOS keyboard shortcuts with metadata (action, description, difficulty, level)
+- `data/levels/level{1-10}.json` — room layouts, wave configs, boss phases, item drops
+
+**Architecture highlights:**
+- Single RAF chain (game.js owns the loop; no independent RAF in managers or renderer)
+- State machine: TITLE → LEVEL_SELECT → GAMEPLAY → TRANSITION → PAUSED → RESULTS
+- Timer callbacks tolerate PAUSED state (don't stall on room delays during pause)
+- LevelManager transitions use phase clock (no independent timers)
+- 10 levels, 3 bosses in level 10 (7-phase final boss)
+- LocalStorage saves level stars, scores, learned shortcuts, weapons unlocked, settings
+
 ## HTML/JS Coding Standards
 
 Rules that apply to ALL games in this repo. These prevent recurring bugs:
