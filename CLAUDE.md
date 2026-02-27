@@ -38,10 +38,13 @@ Run these skills after editing the relevant files — before committing:
 | After editing any `catacombs-and-creeds/data/levels/levelN.json` | `/verify-maps` | BFS reachability of all NPCs, items, chests, enemies from player start |
 | After editing `math-coloring-2/index.html` themes | `/verify-math-geometry` | Every section overlaps nearest neighbor by ≥15px |
 | After editing any `phonics-game/data/lessons/*.json` | `/validate-lessons` | Word count ≥8, no cross-pattern duplicates, no homographs, no British spellings |
+| After editing any `keyboard-command-4/data/levels/levelN.json` | `/verify-kc4-levels` | Item safety, shortcut ID validity, hp/phases consistency, offsetX collisions, mage depths, instruction accuracy, taunt uniqueness |
 
 A PostToolUse hook also runs the lesson validator automatically after each lesson file edit.
 
 A PostToolUse hook also runs JS pattern checks on `keyboard-command-4/` files (same hook as phonics-game).
+
+A PostToolUse hook does NOT automatically run for KC4 level JSON edits — run `/verify-kc4-levels` manually after editing any level file.
 
 ## Adding a New Game
 
@@ -167,6 +170,17 @@ First-person shooting gallery / typing game hybrid — teaches ~60 iPadOS keyboa
 **Timer callback state guards:** `setTimeout` callbacks that check game state must treat PAUSED as equivalent to GAMEPLAY — use `state !== 'GAMEPLAY' && state !== 'PAUSED'`. The user can pause at any moment, including during room-clear delays. Guarding only `!== 'GAMEPLAY'` causes permanent stalls.
 
 **Monster depth system:** 0.0 = back of room (small), 1.0 = front (large, attack range). Render back-to-front. Scale: `0.3 + depth * 0.7`.
+
+**Level JSON authoring constraints** (verified against engine — do NOT trust spec code samples blindly):
+
+- **Valid item types:** `"health"` (requires `amount: number`) and `"weapon"` (requires `weaponId: number`) only. `"Full Restore"` and similar types are not engine-supported — use `{ "type": "health", "amount": 50 }`.
+- **Valid monster fields:** `type`, `depth`, `offsetX` only. The engine does NOT read `mode`, `combo`, or array `shortcut` fields — combo monsters are not implemented.
+- **Boss phase shortcutId:** must be a fixed string ID from `shortcuts.json`. The engine has no support for random/category-based phase selection (e.g., `shortcutCategory`, `shortcutLevelRange` — not implemented).
+- **Boss phase instruction:** must exactly match the `action` field for that shortcutId in `shortcuts.json`.
+- **Boss hp == phases.length:** always.
+- **Item after_room safety:** items whose corridor feeds directly into a boss transition are silently dropped. Safe max = `first_boss_room_id - 2` (or `- 3` if the preceding room has `isBonus: true`). Run `/verify-kc4-levels` to check.
+- **No offsetX collisions** within the same wave. Mage depth ≤ 0.15. All depths in 0.0–0.8.
+- **Before writing JSON for a new session:** read existing level files AND grep the JS engine (game.js, levels.js, monsters.js) to confirm any spec-described mechanics are actually implemented.
 
 **Detailed architecture rules** are in `.claude/rules/kc4-architecture.md` (auto-loaded when editing KC4 files).
 

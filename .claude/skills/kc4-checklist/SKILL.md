@@ -19,6 +19,45 @@ Session specs often contain code samples that violate CLAUDE.md rules. Before us
 | `localStorage.getItem / .setItem` | `SaveManager.load()` / `SaveManager.save()` with key `keyboard-command-4-save` |
 | `window.x = window.x \|\| new X()` | `window.x = new X()` in `game.init()` — always fresh |
 | `new AudioContext()` in constructor | Create lazily on first `_getCtx()` call; `ctx.resume().then(() => schedule())` |
+| `{ "type": "Full Restore", ... }` item | Use `{ "type": "health", "amount": 50 }` — only `health` and `weapon` are engine-supported item types |
+| `{ ..., "combo": true }` on a monster | Remove — combo monsters are NOT implemented in the engine |
+| `{ ..., "mode": "key" }` on a monster | Remove — `mode` field is not read by the engine; display mode is set by monster type |
+| `"shortcut": ["cmd_a", "cmd_c"]` on a monster | Array shortcut fields are NOT implemented — use a single `shortcutId` per boss phase only |
+| Boss phase with `shortcutCategory` or `shortcutLevelRange` | Not supported — every boss phase needs a fixed `shortcutId` that exists in shortcuts.json |
+
+---
+
+## Level JSON Authoring Rules
+
+**Before writing any level JSON, verify these constraints against the engine:**
+
+### Supported fields
+- **Items:** `type` is `"health"` (+ `amount: number`) or `"weapon"` (+ `weaponId: number`). Nothing else.
+- **Monsters:** only `type`, `depth`, `offsetX`. No `mode`, `combo`, `shortcut` array.
+- **Boss phases:** `shortcutId` (fixed, must exist in shortcuts.json), `instruction` (must match that shortcut's `action` field exactly), `taunt` (unique across all levels).
+
+### Item after_room safety — items near boss corridors are silently dropped
+Find the first room with a `boss` field (`first_boss_id`). Then:
+- If room `first_boss_id - 1` has `isBonus: true` → **safe max = first_boss_id - 3**
+- Otherwise → **safe max = first_boss_id - 2**
+
+Items with `after_room > safe_max` are swallowed by `startBossTransition` and never delivered.
+
+| Level structure example | Safe max |
+|---|---|
+| 5 rooms, boss at r5, no bonus | 5-2 = **3** |
+| 6 rooms, boss at r6, no bonus | 6-2 = **4** |
+| 6 rooms, bonus at r5, boss at r6 | 6-3 = **3** |
+| 7 rooms, bonus at r6, boss at r7 | 7-3 = **4** |
+| 6 rooms, first boss at r4 (multi-boss) | 4-2 = **2** |
+
+### Other invariants
+- Boss `hp` must equal `phases.length` (hp is display metadata but must match)
+- No two monsters in the same wave may share `offsetX`
+- Mage `depth` must be ≤ 0.15 (mages are stationary/ranged)
+- All monster depths in range 0.0–0.8
+
+### Run `/verify-kc4-levels` after writing all level JSON files
 
 ---
 
