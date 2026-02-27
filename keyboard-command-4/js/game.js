@@ -90,6 +90,9 @@ class Game {
         // Shake DOM write dedup
         this._lastShakeTransform = '';
 
+        // Screen reader announcement debounce for kills
+        this._killAnnounceCount = 0;
+
         // Level data
         this._levelNames = [
             'Home Screen Ruins',
@@ -289,10 +292,10 @@ class Game {
         this.currentLevel = levelId;
         this._showScreen('gameplay');
 
-        // Cache room background for this level's theme
+        // Set up DPR-scaled canvas before caching (avoids double-cache)
         const themeKey = THEME_ORDER[levelId] || 'ruins';
-        this._renderer.cacheBackground(themeKey);
         this._renderer.resize();
+        this._renderer.cacheBackground(themeKey);
 
         // Apply speed from settings
         this._speedMultiplier = this._settings.monsterSpeed === 'slow' ? 0.6 : 1.0;
@@ -316,6 +319,7 @@ class Game {
         this._totalKills = 0;
         this._totalAttempts = 0;
         this._correctAttempts = 0;
+        this._killAnnounceCount = 0;
         this._deathActive = false;
         this._bossActive = false;
         this._boss = null;
@@ -523,15 +527,18 @@ class Game {
 
             const now = performance.now();
 
+            // Low-fps detection: dt > 33ms means below ~30fps
+            const lowFps = dt > 0.033;
+
             // Only update combat when in active gameplay
             if (this.state === 'GAMEPLAY') {
-                this._updateGameplay(dt, timestamp / 1000);
+                this._updateGameplay(dt, timestamp / 1000, lowFps);
             }
 
             // During TRANSITION: advance the transition state machine + draw
             if (this.state === 'TRANSITION' && this._levelManager) {
                 this._levelManager.updateTransition(now);
-                this._renderer.particles.update(dt);
+                this._renderer.particles.update(dt, lowFps);
 
                 const phase = this._levelManager._transitionPhase;
 
@@ -581,11 +588,11 @@ class Game {
         }
     }
 
-    _updateGameplay(dt, time) {
+    _updateGameplay(dt, time, lowFps) {
         if (this._deathActive) return;
 
-        // Update particles
-        this._renderer.particles.update(dt);
+        // Update particles (half-skip on low fps)
+        this._renderer.particles.update(dt, lowFps);
 
         // Boss mode
         if (this._bossActive) {
@@ -676,6 +683,7 @@ class Game {
 
         if (alive.length === 0 && allWavesSpawned && this._mageProjectiles.length === 0) {
             this._roomCleared = true;
+            this._announce('Room cleared!');
 
             // Room clear sound
             if (this._audioManager) this._audioManager.playRoomClear();
@@ -862,6 +870,12 @@ class Game {
                             this._playerHeal(5);
                         }
 
+                        // Debounced screen reader announcement (every 3rd kill)
+                        this._killAnnounceCount++;
+                        if (this._killAnnounceCount % 3 === 0) {
+                            this._announce(`Defeated. Score: ${this._score}`);
+                        }
+
                         // Monster death sound
                         if (this._audioManager) this._audioManager.playMonsterDeath();
 
@@ -964,13 +978,10 @@ class Game {
             // Miss particles
             this._renderer.spawnMiss();
 
-            // Update status for screen reader
-            const statusEl = document.getElementById('hud-status');
-            if (statusEl) {
-                statusEl.textContent = pressed
-                    ? `Wrong shortcut: ${pressed.action}. Try: ${match.shortcut ? match.shortcut.action : 'unknown'}`
-                    : 'Unrecognized shortcut';
-            }
+            // Screen reader announcement for wrong shortcut
+            this._announce(pressed
+                ? `Wrong shortcut: ${pressed.action}. Try: ${match.shortcut ? match.shortcut.action : 'unknown'}`
+                : 'Unrecognized shortcut');
 
             // Update prompt with hint level
             this._updateShortcutPrompt();
@@ -984,6 +995,7 @@ class Game {
 
     _playerTakeDamage(amount) {
         this._playerHp = Math.max(0, this._playerHp - amount);
+        this._announce(`Took ${amount} damage. Health: ${this._playerHp}`);
         this._updateHud();
 
         // Damage vignette flash
@@ -1014,6 +1026,7 @@ class Game {
 
     _playerHeal(amount) {
         this._playerHp = Math.min(this._playerMaxHp, this._playerHp + amount);
+        this._announce(`Healed ${amount}. Health: ${this._playerHp}`);
         this._updateHud();
 
         // Heal vignette flash + sound
@@ -1052,6 +1065,7 @@ class Game {
                 this._playerHp = 50;
                 this._deathActive = false;
                 this._comboCount = 0;
+                this._announce('Respawned. Health: 50');
                 this._updateHud();
             }, 1500);
         } else {
@@ -1068,6 +1082,7 @@ class Game {
 
     _gameOver() {
         this._deathActive = false;
+        this._announce('Game over.');
         // Show results with failure state
         this.showResults({
             kills: this._totalKills,
@@ -1087,6 +1102,7 @@ class Game {
 
     _startBoss(bossData) {
         this._bossActive = true;
+        this._announce(`Boss fight: ${bossData.name || 'Boss'}`);
 
         // Generate phases if not provided (test rooms from LevelManager fallback)
         if (!bossData.phases || bossData.phases.length === 0) {
@@ -1188,6 +1204,7 @@ class Game {
                             this._bossActive = false;
 
                             // Boss death sound
+                            this._announce('Boss defeated!');
                             if (this._audioManager) this._audioManager.playBossDeath();
                             if (this._hudManager) this._hudManager.hideBossTaunt();
 
@@ -1289,6 +1306,7 @@ class Game {
     // =========================================================
 
     _levelComplete() {
+        this._killAnnounceCount = 0;
         // Calculate stars
         const accuracy = this._totalAttempts > 0
             ? (this._correctAttempts / this._totalAttempts)
@@ -1296,6 +1314,7 @@ class Game {
         let stars = 1;
         if (accuracy >= 0.7 && this._respawns >= 2) stars = 2;
         if (accuracy >= 0.9 && this._respawns >= 3) stars = 3;
+        this._announce(`Level complete! ${stars} star${stars !== 1 ? 's' : ''} earned.`);
 
         // Calculate time taken
         const timeTaken = Math.round((performance.now() - this._levelStartTime) / 1000);
@@ -1362,6 +1381,18 @@ class Game {
         data.highestLevel = this.highestLevel;
         data.selectedWeapon = this._weaponManager.currentWeapon;
         SaveManager.save(data);
+    }
+
+    // =========================================================
+    // Screen Reader Announcements
+    // =========================================================
+
+    _announce(text) {
+        const el = document.getElementById('hud-announce');
+        if (!el) return;
+        // Clear first to force re-announce if same text repeated
+        el.textContent = '';
+        requestAnimationFrame(() => { el.textContent = text; });
     }
 
     // =========================================================
@@ -1850,9 +1881,15 @@ class Game {
                 card.appendChild(lock);
             }
 
-            const label = unlocked
-                ? `Level ${i + 1}: ${this._levelNames[i]}`
-                : `Level ${i + 1}: ${this._levelNames[i]} (locked)`;
+            let label;
+            if (!unlocked) {
+                label = `Level ${i + 1}: ${this._levelNames[i]} (locked)`;
+            } else {
+                const savedStars = this._getLevelStars(i);
+                label = savedStars > 0
+                    ? `Level ${i + 1}: ${this._levelNames[i]}, ${savedStars} of 3 stars`
+                    : `Level ${i + 1}: ${this._levelNames[i]}, not yet completed`;
+            }
             card.setAttribute('aria-label', label);
 
             // Click / Enter handler

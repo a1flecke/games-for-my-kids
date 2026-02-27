@@ -63,6 +63,7 @@
                 </div>
             </div>
             <div id="hud-status" class="sr-only" aria-live="polite"></div>
+            <div id="hud-announce" class="sr-only" aria-live="assertive"></div>
         </div>
 
         <!-- Shortcut Prompt Box -->
@@ -200,6 +201,11 @@
             <div id="journal-tabs" class="journal-tabs" role="group" aria-label="Category tabs"></div>
             <div id="journal-entries" class="journal-entries"></div>
         </div>
+    </div>
+
+    <!-- Portrait orientation notice (CSS-only, no JS) -->
+    <div id="orientation-notice" class="hidden">
+        <p>Please rotate your device to landscape mode for the best experience.</p>
     </div>
 
     <script defer src="js/save.js"></script>

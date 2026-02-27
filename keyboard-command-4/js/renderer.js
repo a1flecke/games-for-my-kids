@@ -54,13 +54,17 @@ class ParticlePool {
         }
     }
 
-    update(dt) {
+    update(dt, lowFps) {
         for (let i = 0; i < this._pool.length; i++) {
             const p = this._pool[i];
             if (!p.active) continue;
-            p.x += p.vx * dt * 60;
-            p.y += p.vy * dt * 60;
-            p.vy += 0.05 * dt * 60; // gravity
+            // On low-fps frames, skip position updates for odd particles
+            if (!(lowFps && (i & 1))) {
+                p.x += p.vx * dt * 60;
+                p.y += p.vy * dt * 60;
+                p.vy += 0.05 * dt * 60; // gravity
+            }
+            // Lifetime always ticks to prevent accumulation
             p.life -= dt / p.maxLife;
             if (p.life <= 0) {
                 p.active = false;
@@ -97,6 +101,7 @@ class Renderer {
         this._ctx = canvas.getContext('2d');
         this._width = 800;
         this._height = 600;
+        this._dpr = window.devicePixelRatio || 1;
 
         // Offscreen caches
         this._bgCache = null;
@@ -132,10 +137,12 @@ class Renderer {
         const theme = THEMES[themeKey] || THEMES.ruins;
         this._currentTheme = themeKey;
 
+        const dpr = this._dpr;
         const offscreen = document.createElement('canvas');
-        offscreen.width = this._width;
-        offscreen.height = this._height;
+        offscreen.width = this._width * dpr;
+        offscreen.height = this._height * dpr;
         const ctx = offscreen.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         this._drawRoomBackground(ctx, theme);
         this._bgCache = offscreen;
@@ -294,14 +301,16 @@ class Renderer {
         const states = ['idle', 'hit'];
         this._spriteCache = {};
 
+        const dpr = this._dpr;
         for (const type of types) {
             for (const state of states) {
                 const key = `${type}_${state}`;
-                const size = 64; // base sprite size
+                const size = 64; // base sprite size (logical)
                 const offscreen = document.createElement('canvas');
-                offscreen.width = size;
-                offscreen.height = size;
+                offscreen.width = size * dpr;
+                offscreen.height = size * dpr;
                 const ctx = offscreen.getContext('2d');
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
                 if (state === 'hit') {
                     // White flash overlay
@@ -317,6 +326,7 @@ class Renderer {
                 this._spriteCache[key] = offscreen;
             }
         }
+        this._spriteLogicalSize = 64;
     }
 
     _drawMonsterBase(ctx, type, size) {
@@ -596,8 +606,9 @@ class Renderer {
             bobY = Math.sin(time * 3 + depth * 5) * 3 * scale;
         }
 
-        const drawW = sprite.width * scale;
-        const drawH = sprite.height * scale;
+        const logicalSize = this._spriteLogicalSize || 64;
+        const drawW = logicalSize * scale;
+        const drawH = logicalSize * scale;
         const x = posX - drawW / 2;
         const y = posY - drawH + bobY;
 
@@ -1278,7 +1289,7 @@ class Renderer {
 
         // 2. Background
         if (this._bgCache) {
-            ctx.drawImage(this._bgCache, 0, 0);
+            ctx.drawImage(this._bgCache, 0, 0, this._width, this._height);
         }
 
         // 3. Sort monsters by depth (back to front) and draw
@@ -1399,10 +1410,28 @@ class Renderer {
     resize() {
         const parent = this._canvas.parentElement;
         if (!parent) return;
+
+        const dpr = window.devicePixelRatio || 1;
         const maxW = Math.min(parent.clientWidth, 800);
         const ratio = this._height / this._width;
+
+        // CSS display size
         this._canvas.style.width = maxW + 'px';
         this._canvas.style.height = (maxW * ratio) + 'px';
+
+        // HiDPI backing store — only resize if DPR changed
+        const newBufW = this._width * dpr;
+        const newBufH = this._height * dpr;
+        if (this._canvas.width !== newBufW || this._canvas.height !== newBufH) {
+            this._canvas.width = newBufW;
+            this._canvas.height = newBufH;
+            this._dpr = dpr;
+            // Scale context so all drawing uses logical 800x600 coordinates
+            this._ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            // Re-cache at new resolution
+            if (this._currentTheme) this.cacheBackground(this._currentTheme);
+            this.cacheMonsterSprites();
+        }
     }
 
     // ----------------------------------------------------------

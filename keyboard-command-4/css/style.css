@@ -1147,6 +1147,34 @@ input[type="range"]:focus {
     outline-offset: 2px;
 }
 
+/* --- Portrait Orientation Notice (CSS-only, shown via media query) --- */
+#orientation-notice {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-cream);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+#orientation-notice p {
+    font-size: 1.25rem;
+    color: var(--text-dark);
+    max-width: 300px;
+    line-height: 1.8;
+}
+
+@media (orientation: portrait) and (max-width: 600px) {
+    #orientation-notice {
+        display: flex;
+    }
+}
+
 /* --- Responsive --- */
 @media (max-width: 480px) {
     .glitch-line {
