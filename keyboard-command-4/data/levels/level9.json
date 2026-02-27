@@ -1,0 +1,155 @@
+{
+  "id": 9,
+  "name": "Combo Catacombs",
+  "theme": "catacombs",
+  "shortcuts": ["cmd_a", "cmd_c", "cmd_x", "cmd_tab", "cmd_v", "cmd_s", "cmd_w", "cmd_f", "cmd_g", "cmd_z"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.20, "offsetX": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "brute",   "depth": 0.20, "offsetX": -100 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -60 },
+            { "type": "shifter", "depth": 0.25, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": -80 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.25, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -100 },
+            { "type": "knight",  "depth": 0.20, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "phantom", "depth": 0.25, "offsetX": -60 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": -100 },
+            { "type": "knight",  "depth": 0.20, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -60 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "knight",  "depth": 0.20, "offsetX": 0 },
+            { "type": "phantom", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "The Combo Wraith",
+        "hp": 6,
+        "phases": [
+          {
+            "shortcutId": "cmd_a",
+            "instruction": "Select All",
+            "taunt": "A sequence begins... face your doom!"
+          },
+          {
+            "shortcutId": "cmd_c",
+            "instruction": "Copy",
+            "taunt": "Copy my power if you dare!"
+          },
+          {
+            "shortcutId": "cmd_tab",
+            "instruction": "Switch App",
+            "taunt": "Switch realities... foolish!"
+          },
+          {
+            "shortcutId": "cmd_v",
+            "instruction": "Paste",
+            "taunt": "Paste your DEFEAT!"
+          },
+          {
+            "shortcutId": "cmd_s",
+            "instruction": "Save",
+            "taunt": "Every save just delays the inevitable!"
+          },
+          {
+            "shortcutId": "cmd_w",
+            "instruction": "Close Tab",
+            "taunt": "The Combo Wraith... unraveled!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 2 },
+    { "type": "health", "amount": 25, "after_room": 3 }
+  ]
+}

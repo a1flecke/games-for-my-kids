@@ -1,0 +1,202 @@
+{
+  "id": 10,
+  "name": "Corruption Core",
+  "theme": "core",
+  "shortcuts": ["cmd_shift_a", "cmd_option_v", "cmd_c", "cmd_z", "cmd_b", "shift_right", "cmd_r", "cmd_shift_z", "cmd_shift_v", "cmd_tab", "cmd_bracket_left", "cmd_shift_n", "cmd_semicolon"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -100 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 40 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.35, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -100 },
+            { "type": "phantom", "depth": 0.20, "offsetX": 0 },
+            { "type": "knight",  "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.30, "offsetX": -60 },
+            { "type": "phantom", "depth": 0.25, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.30, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "swarm",   "depth": 0.25, "offsetX": -60 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 0 },
+            { "type": "brute",   "depth": 0.20, "offsetX": 60 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "brute",   "depth": 0.20, "offsetX": -80 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 0 },
+            { "type": "phantom", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -80 },
+            { "type": "phantom", "depth": 0.20, "offsetX": 0 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "Corruption Sentinel",
+        "hp": 3,
+        "phases": [
+          {
+            "shortcutId": "cmd_z",
+            "instruction": "Undo",
+            "taunt": "You cannot undo corruption itself!"
+          },
+          {
+            "shortcutId": "cmd_f",
+            "instruction": "Find",
+            "taunt": "Nothing to find here but despair!"
+          },
+          {
+            "shortcutId": "shift_left",
+            "instruction": "Select Left",
+            "taunt": "The Sentinel falls... but chaos remains!"
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -80 },
+            { "type": "brute",   "depth": 0.20, "offsetX": 0 },
+            { "type": "phantom", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "Corruption Herald",
+        "hp": 4,
+        "phases": [
+          {
+            "shortcutId": "cmd_tab",
+            "instruction": "Switch App",
+            "taunt": "Switch away from your fate?!"
+          },
+          {
+            "shortcutId": "cmd_bracket_left",
+            "instruction": "Go Back",
+            "taunt": "Go back while you still can!"
+          },
+          {
+            "shortcutId": "cmd_shift_n",
+            "instruction": "Private Window",
+            "taunt": "No private refuge from corruption!"
+          },
+          {
+            "shortcutId": "cmd_semicolon",
+            "instruction": "Check Spelling",
+            "taunt": "The Herald... defeated?!"
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -80 },
+            { "type": "phantom", "depth": 0.20, "offsetX": 0 },
+            { "type": "knight",  "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "The Corruption",
+        "hp": 7,
+        "phases": [
+          {
+            "shortcutId": "cmd_c",
+            "instruction": "Copy",
+            "taunt": "You think you know your shortcuts? HA!"
+          },
+          {
+            "shortcutId": "cmd_b",
+            "instruction": "Bold",
+            "taunt": "I AM every key you've forgotten!"
+          },
+          {
+            "shortcutId": "shift_right",
+            "instruction": "Select Right",
+            "taunt": "This realm belongs to CHAOS now!"
+          },
+          {
+            "shortcutId": "cmd_r",
+            "instruction": "Reload Page",
+            "taunt": "You can't undo ME!"
+          },
+          {
+            "shortcutId": "cmd_shift_z",
+            "instruction": "Redo",
+            "taunt": "My corruption is PERMANENT!"
+          },
+          {
+            "shortcutId": "cmd_shift_a",
+            "instruction": "Deselect All",
+            "taunt": "One more phase... you'll NEVER make it!"
+          },
+          {
+            "shortcutId": "cmd_option_v",
+            "instruction": "Move (Paste as Move)",
+            "taunt": "IMPOSSIBLE! NO ONE masters ALL the commands!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 1 },
+    { "type": "weapon", "weaponId": 10, "after_room": 2 }
+  ]
+}

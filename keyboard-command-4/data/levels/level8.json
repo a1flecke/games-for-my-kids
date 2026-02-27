@@ -1,0 +1,173 @@
+{
+  "id": 8,
+  "name": "Advanced Armory",
+  "theme": "armory",
+  "shortcuts": ["cmd_shift_z", "cmd_shift_v", "cmd_shift_3", "cmd_shift_4", "cmd_shift_n", "cmd_comma", "cmd_semicolon"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "shifter", "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -100 },
+            { "type": "knight",  "depth": 0.20, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "phantom", "depth": 0.25, "offsetX": -60 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "swarm", "depth": 0.25, "offsetX": 0 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "mage",    "depth": 0.12, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -100 },
+            { "type": "brute",   "depth": 0.20, "offsetX": 0 },
+            { "type": "knight",  "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.30, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "phantom", "depth": 0.25, "offsetX": -100 },
+            { "type": "shifter", "depth": 0.20, "offsetX": 0 },
+            { "type": "phantom", "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "mage",    "depth": 0.12, "offsetX": -60 },
+            { "type": "shifter", "depth": 0.25, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "isBonus": true,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -100 },
+            { "type": "phantom", "depth": 0.20, "offsetX": 0 },
+            { "type": "knight",  "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.30, "offsetX": -60 },
+            { "type": "brute",   "depth": 0.20, "offsetX": 0 },
+            { "type": "phantom", "depth": 0.25, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -80 },
+            { "type": "phantom", "depth": 0.20, "offsetX": 0 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "The Cipher",
+        "hp": 4,
+        "phases": [
+          {
+            "shortcutId": "cmd_shift_3",
+            "instruction": "Screenshot",
+            "taunt": "You cannot capture what you cannot control!"
+          },
+          {
+            "shortcutId": "cmd_shift_z",
+            "instruction": "Redo",
+            "taunt": "REDO my doom?! I think NOT!"
+          },
+          {
+            "shortcutId": "cmd_shift_v",
+            "instruction": "Paste Plain",
+            "taunt": "Paste without formatting... clever!"
+          },
+          {
+            "shortcutId": "cmd_comma",
+            "instruction": "Preferences",
+            "taunt": "The Cipher... deciphered?!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 2 },
+    { "type": "weapon", "weaponId": 9, "after_room": 3 },
+    { "type": "health", "amount": 50, "after_room": 4 }
+  ]
+}
