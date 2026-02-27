@@ -81,6 +81,15 @@ class InputManager {
     }
 
     /**
+     * Immediately clear the input lock (call after target monster dies).
+     */
+    unlock() {
+        clearTimeout(this._lockTimer);
+        this._lockTimer = null;
+        this._inputLocked = false;
+    }
+
+    /**
      * Check if a combo string is non-interceptable.
      */
     isNonInterceptable(combo) {
@@ -138,9 +147,12 @@ class InputManager {
             return;
         }
 
-        // 6. Modifier key held → shortcut attempt
-        if (e.metaKey || e.altKey || e.ctrlKey) {
+        // 6. Modifier key held → shortcut attempt (includes Shift for shift+arrow shortcuts)
+        if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) {
             e.preventDefault();
+
+            // Skip modifier-only presses (kid holding Cmd/Shift before typing the full combo)
+            if (!this._resolveKey(e)) return;
 
             // Ignore if input is locked (fire animation in progress)
             if (this._inputLocked) return;

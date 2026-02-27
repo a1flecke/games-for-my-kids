@@ -853,6 +853,9 @@ class Game {
 
                         // Auto-target next
                         this._autoTarget();
+                        // Clear fire lock so player can immediately fire at new target
+                        this._weaponManager.cancel();
+                        this._inputManager.unlock();
                     } else if (result === 'shield-break') {
                         // Shield broken — visual feedback
                         const bounds = target.getBounds(vpX, vpY, canvasH);
@@ -862,6 +865,9 @@ class Game {
 
                         this._comboCount++;
                         this._score += 50;
+                        // Clear fire lock so player can immediately fire the unshielded knight
+                        this._weaponManager.cancel();
+                        this._inputManager.unlock();
                     } else {
                         // Hit but not killed (brute)
                         if (this._audioManager) this._audioManager.playMonsterHit();
@@ -1138,8 +1144,10 @@ class Game {
                                 this._levelComplete();
                             }, 1500);
                         } else {
-                            // Next phase — pause for taunt
+                            // Next phase — establish taunt pause first, then clear fire lock
                             this._bossPauseTimer = 1.5;
+                            this._weaponManager.cancel();
+                            this._inputManager.unlock();
                             this._bossTaunt = phases[this._bossPhaseIndex].taunt;
                             if (this._hudManager) this._hudManager.showBossTaunt(this._bossTaunt);
                             this._updateShortcutPrompt();

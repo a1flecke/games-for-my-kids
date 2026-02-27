@@ -114,7 +114,7 @@ These durations are coupled across files. Changing one without the other is a bu
 
 | Constant | Value | Files |
 |----------|-------|-------|
-| Input lock after fire | 700ms | `input.js` lock timer, `weapons.js` fire sequence |
+| Input lock after fire | 700ms initial, clears early on kill/shield-break | `input.js` lock + unlock, `weapons.js` fire state |
 | Monster death animation | 500ms | `monsters.js` deathDuration, `renderer.js` fade-out |
 | Corridor transition | 500ms | `levels.js` phase duration |
 | Boss corridor | 800ms | `levels.js` boss phase duration |
