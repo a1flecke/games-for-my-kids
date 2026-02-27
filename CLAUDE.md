@@ -40,11 +40,10 @@ Run these skills after editing the relevant files — before committing:
 | After editing any `phonics-game/data/lessons/*.json` | `/validate-lessons` | Word count ≥8, no cross-pattern duplicates, no homographs, no British spellings |
 | After editing any `keyboard-command-4/data/levels/levelN.json` | `/verify-kc4-levels` | Item safety, shortcut ID validity, hp/phases consistency, offsetX collisions, mage depths, instruction accuracy, taunt uniqueness |
 
-A PostToolUse hook also runs the lesson validator automatically after each lesson file edit.
-
-A PostToolUse hook also runs JS pattern checks on `keyboard-command-4/` files (same hook as phonics-game).
-
-A PostToolUse hook does NOT automatically run for KC4 level JSON edits — run `/verify-kc4-levels` manually after editing any level file.
+PostToolUse hooks run automatically after each Edit/Write:
+- Lesson validator (phonics lesson JSON files)
+- JS pattern checks (phonics-game and keyboard-command-4 JS/HTML files)
+- Level JSON validator (keyboard-command-4 level JSON files)
 
 ## Adding a New Game
 
@@ -57,132 +56,12 @@ A PostToolUse hook does NOT automatically run for KC4 level JSON edits — run `
 
 Each game is independent — no shared libraries or components between games. Games range from single-file (`index.html` with inline JS/CSS) to multi-file modular JS (e.g., `catacombs-and-creeds/` with separate renderer, dialogue, game logic).
 
-### catacombs-and-creeds (active development)
+Game-specific architecture notes are in path-scoped rules files (auto-loaded when editing that game's files):
 
-Educational dungeon crawler — the most complex game. Key docs:
-- `plan.md` — full design spec (1700 lines): levels, mechanics, accessibility requirements, content
-
-All 5 levels built with full content. Core systems complete: combat, inventory (580×560 panel), 3-slot save system, dialogue with pixel-art portraits, question bank (66 questions), NPC/enemy/item placement verified reachable across all maps.
-
-**Key source files:**
-- `js/game.js` — main engine/state machine
-- `js/tilemap.js` — map, tile types; interact() takes optional playerTile param
-- `js/render.js` — Canvas rendering
-- `js/dialogue.js` — dialogue system using portraits.js
-- `js/portraits.js` — pixel-art portraits for 7 characters
-- `js/save.js` — 3-slot save; autoSave() skips if currentSlot === null
-- `js/questions.js` — 66-question bank, Fisher-Yates shuffle, session-wide deduplication
-- `content/level1_dialogue.js` — guide NPC is "Priscilla" (not Peter)
-- `data/levels/level{1-5}.json` — level maps and entity placement
-
-**Tile type walkability** (critical for map editing — do not confuse):
-- Walkable: FLOOR=0, DOOR=2, ALTAR=4, STAIRS=7, HIDING=8, LATIN_TILE=11, MARBLE=13
-- Solid: WALL=1, CHEST=3, TORCH=5, WATER=6, BOOKSHELF=9, HIDDEN_WALL=10, BARRIER=12, PILLAR=14
-
-Use `/verify-maps` skill to BFS-check all level maps for reachability after editing.
-
-**Target platform:** iPad Safari with Bluetooth keyboard. Must maintain 60fps on iPad.
-
-### math-coloring-2 (complete — may add levels/lessons)
-
-2nd grade math coloring game. Single file: `math-coloring-2/index.html` (all JS/CSS/HTML inline).
-
-**Key data structures (all in the `<script>` block):**
-- `themes` — object with 7 keys (`puppies`, `kitties`, `unicorns`, `frogs`, `elephants`, `turtles`, `butterflies`). Each is an array of section objects: `{ x, y, r, answer, type:'circle' }` or `{ x, y, points:[[x,y],...], answer, type:'polygon'|'triangle' }`. The `x,y` field doubles as the number label position for polygons, so set it near the centroid.
-- `lessons` — array of 25 lesson objects (indices 0–24). Each: `{ title, description, problems: { [answerInt]: [string,...] } }`.
-- `colors` — maps answer integer → CSS hex. Every answer value used in any theme needs an entry; missing values fall back to `'#FFB6C1'`.
-
-**Critical rules when editing themes:**
-- **Section overlap**: Every section must visually overlap its nearest neighbor by ≥15px. For circles: `overlap = (r1 + r2) - dist(centers)`. For polygons: at least one vertex must land inside the adjacent circle (`vertex_dist < r`). Use `/verify-math-geometry` skill to check.
-- **Hit-test order**: Sections are tested in reverse array order (last = topmost). Small sections (eyes, nose) must be listed AFTER the large body/head circles they visually sit on top of.
-- **Rendering**: Two-pass draw — all fills before all strokes. Never revert to single-pass (causes visible outline gaps where circles overlap).
-- **Answer values**: All answer keys in a theme must exist in the `colors` map. Currently missing nothing; if you add a new answer value, add it to `colors` first.
-
-**Grade-level rules for lessons:**
-- Lessons 1–21 mix in `×` and `÷` notation (grandfathered). For new lessons (22+): **no `÷` or `×` symbols** — these are Grade 3 standards. Use addition/subtraction phrasing only (`'Half of 8 = ?'` not `'8 ÷ 2'`).
-- Fractions-of-quantities (`1/4 of 32`) are Grade 4+, not appropriate for a 2nd grade game.
-- Telling-time problems: "minute hand at 6 = 30 minutes past" — answer must be 30, not 6.
-
-### phonics-game (active development)
-
-Word Explorer — phonics matching game for grades 1–5. Multi-file modular JS.
-
-**Session workflow:** After each session: run a web engineer review agent → fix issues → delete the session file → commit + push.
-
-**Session tracking:** Sessions defined in `phonics-game/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md` (Haiku for data-entry sessions, Sonnet for implementation sessions).
-
-**Key files:**
-- `index.html` — game shell with 4 screens: `#screen-select`, `#screen-board`, `#screen-sort`, `#screen-summary`
-- `css/style.css` — design system (CSS vars incl. `--text-secondary`, grade colors, responsive 3/4/5-col lesson grid)
-- `js/game.js` — Game class: lesson select rendering, grade filter, settings panel, PIN dialog (all with focus traps)
-- `js/save.js` — SaveManager (localStorage key: `phonics-progress`); `_defaults()` defines all required fields
-- `js/data.js` — DataManager: `loadLesson(id)` fetches JSON; `getLessonMeta()` returns all 30 lessons (field: `gradeLevel`)
-- `data/lessons/lesson-{01-30}.json` — phonics lesson data (Sessions 2–4); schema uses `gradeLevel` field
-
-**Grid sizes by grade:** Grade 1: 4×4 (16 tiles), Grade 2–3: 5×5 (25), Grade 4–5: 6×6 (36). See `plan.md § 2.5`.
-
-**Target platform:** iPad Safari (primary), desktop Chrome/Firefox. DOM + CSS Grid (not Canvas).
-
-**Phonics data rules (all lesson JSON edits):**
-- Words must phonetically exemplify their pattern — check for exceptions (e.g. "word" sounds like "ur" not "or"; "smooth" has silent TH)
-- **Homographs:** avoid words with two pronunciations (e.g. "read", "wind", "wound", "bow", "use"). The HOMOGRAPHS set in `validate-lessons.js` is the source of truth.
-- **No cross-pattern duplicates** within the same lesson — a word that belongs to pattern A must not appear in pattern B of the same file.
-- **Blend classification:** verify which blend family a word belongs to. "sly" is an SL-blend (s-blend), not an L-blend.
-- **VCE (silent-E) patterns:** r-controlled vowels are NOT long vowels. "cure", "lure", "pure" are /ɜː/, not long-U — exclude from `u_e` pattern.
-- **Root transparency:** the root must be clearly visible and productive in the word. "constrict" has STRICT/STRING root, not STRUCT. "manuscript" serves both SCRIB and MAN — pick one lesson.
-- **British spellings:** "draught", "nought", "colour", etc. are unrecognizable to American students — use American equivalents.
-- **Grade-appropriate vocabulary:** avoid adult medical terms (e.g. "gout"), archaic words, and proper nouns at early grade levels.
-- Run `/validate-lessons` after every lesson file edit (also runs automatically via hook).
-
-### keyboard-command-4 (active development)
-
-First-person shooting gallery / typing game hybrid — teaches ~60 iPadOS keyboard shortcuts through Doom-inspired gameplay. Key docs:
-- `plan.md` — full design spec: levels, monsters, weapons, shortcuts, accessibility
-
-**Session workflow:** Sessions defined in `keyboard-command-4/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md`. Run `/kc4-checklist` before each session. Run kc4-web-review agent after each session.
-
-**Key source files:**
-- `js/game.js` — state machine (TITLE, LEVEL_SELECT, GAMEPLAY, TRANSITION, PAUSED, RESULTS), screen management, overlays
-- `js/levels.js` — LevelManager: level JSON loading, room progression, canvas corridor transitions (game-loop-driven, no own RAF)
-- `js/save.js` — SaveManager (localStorage key: `keyboard-command-4-save`); `_defaults()` defines all required fields
-- `css/style.css` — design system (CSS vars, screen/overlay visibility, level grid)
-- `data/levels/level{1-10}.json` — level data (rooms, waves, boss configs) [future sessions]
-- `data/shortcuts.json` — shortcut database [future sessions]
-
-**Target platform:** iPad Safari with Bluetooth Windows keyboard. Must maintain 60fps on iPad.
-
-**Canvas rendering rules:**
-- Offscreen cache room backgrounds and monster sprites — never draw from primitives each frame
-- HUD text: dirty-flag pattern, only re-render on value change
-- Particle pool: max 50, pre-allocated and reused
-- `image-rendering: pixelated` on the canvas element
-- No DOM manipulation during the RAF game loop
-- **Single RAF chain:** Only `game.js` may call `requestAnimationFrame`. Managers that need per-frame updates expose `update(dt)` + `draw(ctx)` methods called BY the game loop — never start their own RAF chain. Two independent RAF chains on the same canvas cause flickering.
-
-**Input system rules:**
-- `e.metaKey || e.altKey || e.ctrlKey` → route as shortcut attempt
-- Bare number keys (no modifiers) → weapon select
-- `Tab`/`Shift+Tab` → target cycling (must `preventDefault()`)
-- 700ms input lock after weapon fire (store timer, clear in `cancel()`)
-- Non-interceptable shortcuts (Cmd+H, Cmd+Space) → Knowledge Monster (Enter to acknowledge)
-- Only `preventDefault()` keys you actually handle — never blanket-prevent all keys
-
-**Timer callback state guards:** `setTimeout` callbacks that check game state must treat PAUSED as equivalent to GAMEPLAY — use `state !== 'GAMEPLAY' && state !== 'PAUSED'`. The user can pause at any moment, including during room-clear delays. Guarding only `!== 'GAMEPLAY'` causes permanent stalls.
-
-**Monster depth system:** 0.0 = back of room (small), 1.0 = front (large, attack range). Render back-to-front. Scale: `0.3 + depth * 0.7`.
-
-**Level JSON authoring constraints** (verified against engine — do NOT trust spec code samples blindly):
-
-- **Valid item types:** `"health"` (requires `amount: number`) and `"weapon"` (requires `weaponId: number`) only. `"Full Restore"` and similar types are not engine-supported — use `{ "type": "health", "amount": 50 }`.
-- **Valid monster fields:** `type`, `depth`, `offsetX` only. The engine does NOT read `mode`, `combo`, or array `shortcut` fields — combo monsters are not implemented.
-- **Boss phase shortcutId:** must be a fixed string ID from `shortcuts.json`. The engine has no support for random/category-based phase selection (e.g., `shortcutCategory`, `shortcutLevelRange` — not implemented).
-- **Boss phase instruction:** must exactly match the `action` field for that shortcutId in `shortcuts.json`.
-- **Boss hp == phases.length:** always.
-- **Item after_room safety:** items whose corridor feeds directly into a boss transition are silently dropped. Safe max = `first_boss_room_id - 2` (or `- 3` if the preceding room has `isBonus: true`). Run `/verify-kc4-levels` to check.
-- **No offsetX collisions** within the same wave. Mage depth ≤ 0.15. All depths in 0.0–0.8.
-- **Before writing JSON for a new session:** read existing level files AND grep the JS engine (game.js, levels.js, monsters.js) to confirm any spec-described mechanics are actually implemented.
-
-**Detailed architecture rules** are in `.claude/rules/kc4-architecture.md` (auto-loaded when editing KC4 files).
+- **catacombs-and-creeds** — Canvas dungeon crawler, 5 levels complete. See `.claude/rules/catacombs.md`.
+- **math-coloring-2** — 2nd grade math coloring game, single-file. See `.claude/rules/math-coloring.md`.
+- **phonics-game** — Word Explorer, phonics matching for grades 1–5. See `.claude/rules/phonics.md`.
+- **keyboard-command-4** — Shortcut-teaching shooter, multi-file Canvas. See `.claude/rules/kc4-architecture.md`.
 
 ## HTML/JS Coding Standards
 
@@ -265,6 +144,3 @@ These are non-negotiable for the target audience (dyslexia + ADHD accommodations
 - **No flashing/strobing effects**
 - **No countdown timers visible by default** (anxiety-inducing for ADHD learners)
 
-**catacombs-and-creeds specific:**
-- **Text:** Maximum 15 words per dialogue box, no time pressure, typewriter effect skippable
-- **ADHD:** Auto-save every 2 minutes, always-visible objectives, 9–18 min per level

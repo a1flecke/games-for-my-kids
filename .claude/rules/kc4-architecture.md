@@ -3,6 +3,25 @@ paths:
   - "keyboard-command-4/**"
 ---
 
+# Keyboard Command 4 — Architecture Notes
+
+First-person shooting gallery / typing game hybrid — teaches ~60 iPadOS keyboard shortcuts through Doom-inspired gameplay. Key docs:
+- `plan.md` — full design spec: levels, monsters, weapons, shortcuts, accessibility
+
+**Session workflow:** Sessions defined in `keyboard-command-4/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md`. Run `/kc4-checklist` before each session. Run kc4-web-review agent after each session.
+
+**Key source files:**
+- `js/game.js` — state machine (TITLE, LEVEL_SELECT, GAMEPLAY, TRANSITION, PAUSED, RESULTS), screen management, overlays
+- `js/levels.js` — LevelManager: level JSON loading, room progression, canvas corridor transitions (game-loop-driven, no own RAF)
+- `js/save.js` — SaveManager (localStorage key: `keyboard-command-4-save`); `_defaults()` defines all required fields
+- `css/style.css` — design system (CSS vars, screen/overlay visibility, level grid)
+- `data/levels/level{1-10}.json` — level data (rooms, waves, boss configs)
+- `data/shortcuts.json` — shortcut database (~60 shortcuts)
+
+**Target platform:** iPad Safari with Bluetooth Windows keyboard. Must maintain 60fps on iPad.
+
+---
+
 # KC4 Architecture Rules
 
 These rules prevent the bug classes that recur most often in KC4 sessions. Violating any of them is a HIGH-severity bug.
@@ -106,6 +125,20 @@ These durations are coupled across files. Changing one without the other is a bu
 - **Mage speed is always 0.** Mages stay idle and fire projectiles. Setting speed > 0 makes them charge the player, breaking ranged combat design.
 - **Force-target at depth >= 0.85.** When a charging monster reaches 85% depth, game.js force-targets it. Don't remove this — it's the "danger zone" mechanic that prevents unfair damage.
 - **Projectile `impactFired` flag.** Check before calling `onImpact()` to prevent double-damage from rapid fire animations.
+
+## Level JSON Authoring Constraints
+
+Verified against the engine — do NOT trust spec code samples blindly:
+
+- **Valid item types:** `"health"` (requires `amount: number`) and `"weapon"` (requires `weaponId: number`) only. `"Full Restore"` and similar types are not engine-supported.
+- **Valid monster fields:** `type`, `depth`, `offsetX` only. The engine does NOT read `mode`, `combo`, or array `shortcut` fields — combo monsters are not implemented.
+- **Boss phase shortcutId:** must be a fixed string ID from `shortcuts.json`. The engine has no support for random/category-based phase selection (`shortcutCategory`, `shortcutLevelRange` — not implemented).
+- **Boss phase instruction:** must exactly match the `action` field for that shortcutId in `shortcuts.json`.
+- **Boss hp == phases.length:** always.
+- **Item after_room safety:** items whose corridor feeds directly into a boss transition are silently dropped. Safe max = `first_boss_room_id - 2` (or `- 3` if the preceding room has `isBonus: true`). Multi-boss levels: use the FIRST boss room for the calculation.
+- **No offsetX collisions** within the same wave. Mage `depth` ≤ 0.15. All depths in range 0.0–0.8.
+- **Before writing JSON for a new session:** read existing level files AND grep the JS engine (game.js, levels.js, monsters.js) to confirm any spec-described mechanics are actually implemented.
+- Run `node keyboard-command-4/scripts/verify-levels.js` (or `/verify-kc4-levels` skill) after writing level JSON.
 
 ## Session Spec Requirements
 

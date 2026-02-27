@@ -11,6 +11,10 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/check-js-patterns.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/verify-kc4-levels-hook.sh"
           }
         ]
       }
