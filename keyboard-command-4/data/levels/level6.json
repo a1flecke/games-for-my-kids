@@ -1,0 +1,144 @@
+{
+  "id": 6,
+  "name": "App Switcher Arena",
+  "theme": "arena",
+  "shortcuts": ["cmd_tab", "cmd_shift_tab", "cmd_space", "cmd_h", "cmd_period", "cmd_option_d"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 },
+            { "type": "knight",  "depth": 0.20, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.30, "offsetX": -80 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.30, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.20, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "isBonus": true,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight", "depth": 0.25, "offsetX": -100 },
+            { "type": "mage",   "depth": 0.12, "offsetX": 0 },
+            { "type": "knight", "depth": 0.20, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "knight", "depth": 0.25, "offsetX": -40 },
+            { "type": "mage",   "depth": 0.12, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "The Taskmaster",
+        "hp": 4,
+        "phases": [
+          {
+            "shortcutId": "cmd_tab",
+            "instruction": "Switch App",
+            "taunt": "You dare interrupt my cycle?!"
+          },
+          {
+            "shortcutId": "cmd_space",
+            "instruction": "Spotlight Search",
+            "taunt": "Is that all you have?!"
+          },
+          {
+            "shortcutId": "cmd_period",
+            "instruction": "Cancel",
+            "taunt": "Impressive... but I'm not done!"
+          },
+          {
+            "shortcutId": "cmd_h",
+            "instruction": "Home Screen",
+            "taunt": "This cannot be!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 2 },
+    { "type": "health", "amount": 25, "after_room": 3 },
+    { "type": "weapon", "weaponId": 7, "after_room": 4 }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "id": 5,
+  "name": "Selection Stronghold",
+  "theme": "stronghold",
+  "shortcuts": ["shift_left", "shift_right", "shift_up", "shift_down", "cmd_shift_left", "cmd_shift_right", "option_shift_left", "option_shift_right"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.35, "offsetX": -100 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -60 },
+            { "type": "shifter", "depth": 0.25, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "swarm", "depth": 0.25, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "mage",    "depth": 0.12, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.35, "offsetX": 0 },
+            { "type": "mage",    "depth": 0.12, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.30, "offsetX": -100 },
+            { "type": "brute",   "depth": 0.20, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.30, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "Selection Serpent",
+        "hp": 5,
+        "phases": [
+          {
+            "shortcutId": "shift_right",
+            "instruction": "Select Right",
+            "taunt": "You cannot select your way to victory!"
+          },
+          {
+            "shortcutId": "shift_right",
+            "instruction": "Select Right — Again!",
+            "taunt": "Too slow! Select again!"
+          },
+          {
+            "shortcutId": "shift_right",
+            "instruction": "Select Right — One More!",
+            "taunt": "You dare keep selecting?!"
+          },
+          {
+            "shortcutId": "cmd_shift_left",
+            "instruction": "Select to Line Start",
+            "taunt": "Impressive... but it ends NOW!"
+          },
+          {
+            "shortcutId": "cmd_x",
+            "instruction": "Cut",
+            "taunt": "This cannot be!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 2 },
+    { "type": "weapon", "weaponId": 6, "after_room": 3 },
+    { "type": "health", "amount": 25, "after_room": 4 }
+  ]
+}

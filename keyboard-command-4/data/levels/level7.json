@@ -1,0 +1,148 @@
+{
+  "id": 7,
+  "name": "Safari Caverns",
+  "theme": "caverns",
+  "shortcuts": ["cmd_r", "cmd_d", "cmd_bracket_left", "cmd_bracket_right", "cmd_shift_r", "cmd_1to9"],
+  "rooms": [
+    {
+      "id": 1,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.20, "offsetX": 80 },
+            { "type": "shifter", "depth": 0.35, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "knight",  "depth": 0.20, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "mage", "depth": 0.12, "offsetX": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "phantom", "depth": 0.25, "offsetX": -60 },
+            { "type": "phantom", "depth": 0.20, "offsetX": 60 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.30, "offsetX": -100 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 0 },
+            { "type": "shifter", "depth": 0.30, "offsetX": 100 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "shifter", "depth": 0.25, "offsetX": -40 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "knight",  "depth": 0.25, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.30, "offsetX": 0 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        },
+        {
+          "delay": 1.0,
+          "monsters": [
+            { "type": "phantom", "depth": 0.20, "offsetX": -40 },
+            { "type": "brute",   "depth": 0.20, "offsetX": 40 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "waves": [
+        {
+          "delay": 0,
+          "monsters": [
+            { "type": "gremlin", "depth": 0.30, "offsetX": -80 },
+            { "type": "gremlin", "depth": 0.25, "offsetX": 80 }
+          ]
+        }
+      ],
+      "boss": {
+        "name": "The Web Weaver",
+        "hp": 5,
+        "phases": [
+          {
+            "shortcutId": "cmd_l",
+            "instruction": "Address Bar",
+            "taunt": "You dare navigate my web?!"
+          },
+          {
+            "shortcutId": "cmd_f",
+            "instruction": "Find",
+            "taunt": "You cannot find what you seek!"
+          },
+          {
+            "shortcutId": "cmd_r",
+            "instruction": "Reload Page",
+            "taunt": "The tide turns against you!"
+          },
+          {
+            "shortcutId": "cmd_bracket_left",
+            "instruction": "Go Back",
+            "taunt": "Backward you go!"
+          },
+          {
+            "shortcutId": "cmd_bracket_right",
+            "instruction": "Go Forward",
+            "taunt": "This cannot be!"
+          }
+        ]
+      }
+    }
+  ],
+  "items": [
+    { "type": "health", "amount": 25, "after_room": 2 },
+    { "type": "weapon", "weaponId": 8, "after_room": 3 },
+    { "type": "health", "amount": 25, "after_room": 4 }
+  ]
+}
