@@ -83,6 +83,13 @@ class Game {
         // Speed multiplier from settings
         this._speedMultiplier = 1.0;
 
+        // Victory sequence state
+        this._victoryStartTime = 0;
+        this._victoryPendingResults = null;
+
+        // Shake DOM write dedup
+        this._lastShakeTransform = '';
+
         // Level data
         this._levelNames = [
             'Home Screen Ruins',
@@ -503,8 +510,8 @@ class Game {
         this._renderer.particles.clear();
 
         const loop = (timestamp) => {
-            // Guard: stop if no longer in gameplay, paused, or transitioning
-            if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED' && this.state !== 'TRANSITION') {
+            // Guard: stop if no longer in gameplay, paused, transitioning, or victory
+            if (this.state !== 'GAMEPLAY' && this.state !== 'PAUSED' && this.state !== 'TRANSITION' && this.state !== 'VICTORY') {
                 this._rafId = null;
                 return;
             }
@@ -540,9 +547,25 @@ class Game {
                     this._renderer._height,
                     now
                 );
+            } else if (this.state === 'VICTORY') {
+                // Victory sequence — canvas-drawn for 3s
+                this._drawVictorySequence(this._renderer._ctx, this._renderer._width, this._renderer._height, now);
             } else {
                 // GAMEPLAY or PAUSED — render the room normally
                 this._buildAndRender(timestamp / 1000);
+            }
+
+            // Screen shake + floating texts — skip during VICTORY
+            if (this._renderer && this.state !== 'VICTORY') {
+                this._renderer.updateShake(dt);
+                this._renderer.updateFloatingTexts(dt);
+                const shakeTransform = this._renderer.getShakeTransform();
+                // Only write to DOM when value changes (avoid per-frame DOM writes)
+                if (this._lastShakeTransform !== shakeTransform) {
+                    this._lastShakeTransform = shakeTransform;
+                    const gpScreen = this._screens.gameplay;
+                    if (gpScreen) gpScreen.style.transform = shakeTransform || '';
+                }
             }
 
             this._rafId = requestAnimationFrame(loop);
@@ -831,7 +854,8 @@ class Game {
                         }
 
                         // Score: base 100 + combo bonus
-                        this._score += 100 + this._comboCount * 10;
+                        const killScore = 100 + this._comboCount * 10;
+                        this._score += killScore;
 
                         // Combo heal milestones
                         if (this._comboCount === 5 || this._comboCount === 10) {
@@ -844,9 +868,26 @@ class Game {
                         // Reset hint tracking for killed monster
                         if (this._hintManager) this._hintManager.resetForMonster(target);
 
-                        // Death effect
+                        // Death effect + screen shake + floating score
                         const bounds = target.getBounds(vpX, vpY, canvasH);
                         this._renderer.spawnDeathEffect(bounds.centerX, bounds.centerY, target.type);
+                        this._renderer.startShake(2, 80);
+                        this._renderer.addFloatingText(
+                            '+' + killScore,
+                            bounds.centerX, bounds.centerY - 10,
+                            '#FFD700', 18
+                        );
+
+                        // Combo bonus floating text
+                        if (this._comboCount >= 3) {
+                            const tier = this._getComboTier();
+                            const tierColors = ['', '#FFD700', '#FF8C00', '#FF4500', '#FF00FF', '#00FFFF'];
+                            this._renderer.addFloatingText(
+                                'x' + this._comboCount + ' COMBO',
+                                bounds.centerX, bounds.centerY - 30,
+                                tierColors[tier] || '#FFD700', 14
+                            );
+                        }
 
                         // Combo milestone check
                         this._checkComboMilestone();
@@ -860,6 +901,7 @@ class Game {
                         // Shield broken — visual feedback
                         const bounds = target.getBounds(vpX, vpY, canvasH);
                         this._renderer.particles.emit(bounds.centerX, bounds.centerY, 8, '#3498DB', 3, 3);
+                        this._renderer.addFloatingText('+50', bounds.centerX, bounds.centerY - 10, '#3498DB', 16);
 
                         if (this._audioManager) this._audioManager.playMonsterHit();
 
@@ -874,6 +916,10 @@ class Game {
 
                         this._comboCount++;
                         this._score += 50;
+
+                        // Floating damage text above monster
+                        const hitBounds = target.getBounds(vpX, vpY, canvasH);
+                        this._renderer.addFloatingText('-1 HP', hitBounds.centerX, hitBounds.centerY - 10, '#fff', 14);
                     }
 
                     // Update combo DOM display
@@ -904,8 +950,9 @@ class Game {
             // Flash damage vignette
             if (this._hudManager) this._hudManager.flashDamage();
 
-            // Flinch
+            // Flinch + screen shake for wrong answer
             this._weaponManager.flinch();
+            this._renderer.startShake(1, 50);
 
             // Player takes 5 damage
             this._playerTakeDamage(5);
@@ -945,11 +992,18 @@ class Game {
             this._hudManager.setLowHp(this._playerHp > 0 && this._playerHp < 30);
         }
 
-        // Screen shake effect (brief)
+        // Screen shake + damage particles + floating damage number
+        this._renderer.startShake(4, 100);
         this._renderer.particles.emit(
             this._renderer._width / 2,
             this._renderer._height / 2,
             3, '#FF0000', 1, 2
+        );
+        this._renderer.addFloatingText(
+            '-' + amount,
+            this._renderer._width / 2 + (Math.random() * 40 - 20),
+            50,
+            '#E74C3C', 20
         );
 
         if (this._playerHp <= 0) {
@@ -1117,11 +1171,13 @@ class Game {
                         this._score += 200;
                         this._comboCount++;
 
-                        // Boss phase hit sound
+                        // Boss phase hit sound + screen shake + floating score
                         if (this._audioManager) this._audioManager.playBossPhaseHit();
 
                         const bounds = bossMonster.getBounds(vpX, vpY, canvasH);
                         this._renderer.particles.emit(bounds.centerX, bounds.centerY, 12, '#FFD700', 4, 4);
+                        this._renderer.startShake(6, 150);
+                        this._renderer.addFloatingText('+200', bounds.centerX, bounds.centerY - 10, '#FFD700', 22);
 
                         this._bossPhaseIndex++;
 
@@ -1211,10 +1267,20 @@ class Game {
 
     _updateComboDisplay() {
         if (!this._hudManager) return;
+        const tier = this._getComboTier();
         if (this._comboCount >= 3) {
-            this._hudManager.showCombo(this._comboCount, this._getComboTier());
+            this._hudManager.showCombo(this._comboCount, tier);
         } else {
             this._hudManager.hideCombo();
+        }
+
+        // Combo glow on gameplay screen
+        const gpScreen = this._screens.gameplay;
+        if (gpScreen) {
+            gpScreen.classList.remove('combo-glow-1', 'combo-glow-2', 'combo-glow-3', 'combo-glow-4', 'combo-glow-5');
+            if (tier > 0) {
+                gpScreen.classList.add('combo-glow-' + tier);
+            }
         }
     }
 
@@ -1267,7 +1333,7 @@ class Game {
         // Sync local state so level select shows updated stars
         this._levels = data.levels;
 
-        this.showResults({
+        const results = {
             kills: this._totalKills,
             accuracy: Math.round(accuracy * 100),
             bestCombo: this._bestCombo,
@@ -1277,7 +1343,18 @@ class Game {
             timeTaken,
             newShortcuts: this._newShortcutsThisLevel,
             weaponUnlocked: nextWeapon <= 10 ? nextWeapon : null
-        });
+        };
+
+        // Level 10 victory: show special corruption-clearing sequence
+        if (this.currentLevel === 9) { // 0-indexed, level 10 = index 9
+            results.masterRank = true;
+            this._victoryPendingResults = results;
+            this._victoryStartTime = performance.now();
+            this.state = 'VICTORY';
+            if (this._inputManager) this._inputManager.disable();
+        } else {
+            this.showResults(results);
+        }
     }
 
     _autoSave() {
@@ -1414,6 +1491,11 @@ class Game {
             });
         }
 
+        // Weapon switch progress for renderer
+        gameState.switchProgress = this._weaponManager && this._weaponManager._switching
+            ? this._weaponManager._switchProgress
+            : -1;
+
         // Render
         this._renderer.render(gameState, time);
 
@@ -1435,6 +1517,68 @@ class Game {
                 ctx.fillText('RESPAWNING...', this._renderer._width / 2, this._renderer._height / 2);
             }
             ctx.restore();
+        }
+    }
+
+    // =========================================================
+    // Victory Sequence (Level 10 completion — canvas-drawn, 3 seconds)
+    // =========================================================
+
+    _drawVictorySequence(ctx, w, h, now) {
+        const elapsed = (now - this._victoryStartTime) / 1000;
+        const progress = Math.min(1, elapsed / 3);
+
+        // Dark base
+        ctx.fillStyle = '#0A0000';
+        ctx.fillRect(0, 0, w, h);
+
+        // Glitch rectangles that shrink and fade
+        if (progress < 0.6) {
+            const glitchAlpha = 0.8 * (1 - progress / 0.6);
+            ctx.globalAlpha = glitchAlpha;
+            const count = Math.floor(12 * (1 - progress / 0.6));
+            for (let i = 0; i < count; i++) {
+                // Use deterministic pseudo-random based on i + progress
+                const seed = i * 137.5 + progress * 20;
+                const rx = (Math.sin(seed) * 0.5 + 0.5) * w;
+                const ry = (Math.cos(seed * 1.3) * 0.5 + 0.5) * h;
+                const rw = 20 + Math.sin(seed * 2.1) * 30;
+                const rh = 5 + Math.cos(seed * 1.7) * 10;
+                const shrink = 1 - progress / 0.6;
+                const colors = ['#FF1744', '#E040FB', '#00E5FF', '#FFD700'];
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fillRect(rx - rw * shrink / 2, ry - rh * shrink / 2, rw * shrink, rh * shrink);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        // Colors restore — background shifts from dark to golden light
+        if (progress > 0.3) {
+            const restoreAlpha = Math.min(0.5, (progress - 0.3) / 0.7 * 0.5);
+            ctx.fillStyle = `rgba(255, 215, 0, ${restoreAlpha})`;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        // "THE DIGITAL REALM IS RESTORED!" fades in
+        if (progress > 0.4) {
+            const textAlpha = Math.min(1, (progress - 0.4) / 0.4);
+            ctx.save();
+            ctx.globalAlpha = textAlpha;
+            ctx.font = 'bold 28px OpenDyslexic, "Comic Sans MS", cursive';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#FFD700';
+            ctx.fillText('THE DIGITAL REALM', w / 2, h * 0.4);
+            ctx.fillText('IS RESTORED!', w / 2, h * 0.4 + 40);
+            ctx.restore();
+        }
+
+        // Transition to results after 3 seconds
+        if (elapsed >= 3 && this._victoryPendingResults) {
+            const results = this._victoryPendingResults;
+            this._victoryPendingResults = null;
+            this.showResults(results);
+            return; // showResults stops the game loop — don't schedule another frame
         }
     }
 
@@ -1462,6 +1606,17 @@ class Game {
         if (this._hudManager) this._hudManager.cancel();
         if (this._tutorialManager) this._tutorialManager.cancel();
         if (this._levelManager) this._levelManager.cancel();
+
+        // Reset victory state
+        this._victoryPendingResults = null;
+        this._victoryStartTime = 0;
+
+        // Remove combo glow + shake transform from gameplay screen
+        const gpScreen = this._screens.gameplay;
+        if (gpScreen) {
+            gpScreen.classList.remove('combo-glow-1', 'combo-glow-2', 'combo-glow-3', 'combo-glow-4', 'combo-glow-5');
+            gpScreen.style.transform = '';
+        }
     }
 
     // =========================================================
@@ -1559,7 +1714,11 @@ class Game {
 
         // Update title based on completion
         if (titleEl) {
-            titleEl.textContent = stats && stats.completed ? 'Mission Complete' : 'Mission Failed';
+            if (stats && stats.masterRank) {
+                titleEl.textContent = 'COMMAND KNIGHT \u2014 MASTER RANK';
+            } else {
+                titleEl.textContent = stats && stats.completed ? 'Mission Complete' : 'Mission Failed';
+            }
         }
 
         if (stats) {
@@ -1740,6 +1899,19 @@ class Game {
     _handleKeyDown(e) {
         // TRANSITION — ignore all input
         if (this.state === 'TRANSITION') return;
+
+        // VICTORY — allow skip with Escape/Enter/Space
+        if (this.state === 'VICTORY') {
+            if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (this._victoryPendingResults) {
+                    const results = this._victoryPendingResults;
+                    this._victoryPendingResults = null;
+                    this.showResults(results);
+                }
+            }
+            return;
+        }
 
         // LEVEL_SELECT navigation
         if (this.state === 'LEVEL_SELECT') {

@@ -44,6 +44,11 @@ class WeaponManager {
         // Active projectile (one at a time)
         this._projectile = null;
 
+        // Weapon switch animation (400ms total: 200ms down + 200ms up)
+        this._switching = false;
+        this._switchProgress = 0;
+        this._switchTarget = 0;    // weapon id to switch to
+
         // Callbacks
         this.onFireComplete = null;
         this.onImpact = null;      // called at progress ~0.43 (300ms)
@@ -61,6 +66,8 @@ class WeaponManager {
         this._fireProgress = 0;
         this._flinchProgress = 0;
         this._projectile = null;
+        this._switching = false;
+        this._switchProgress = 0;
         this.onFireComplete = null;
         this.onImpact = null;
     }
@@ -74,7 +81,13 @@ class WeaponManager {
         if (id < 1 || id > 10) return false;
         if (!this.unlockedWeapons.includes(id)) return false;
         if (this.state !== 'idle') return false;  // can't switch during fire/flinch
-        this.currentWeapon = id;
+        if (this._switching) return false;
+        if (id === this.currentWeapon) return true;
+
+        // Start switch animation
+        this._switching = true;
+        this._switchProgress = 0;
+        this._switchTarget = id;
         return true;
     }
 
@@ -109,7 +122,7 @@ class WeaponManager {
      * Check if weapon is currently in a locked state (firing or flinching).
      */
     isLocked() {
-        return this.state !== 'idle';
+        return this.state !== 'idle' || this._switching;
     }
 
     /**
@@ -189,6 +202,18 @@ class WeaponManager {
      */
     update(dt) {
         let impact = false;
+
+        // Weapon switch animation (400ms total)
+        if (this._switching) {
+            this._switchProgress += dt / 0.4;
+            if (this._switchProgress >= 0.5 && this.currentWeapon !== this._switchTarget) {
+                this.currentWeapon = this._switchTarget;
+            }
+            if (this._switchProgress >= 1) {
+                this._switching = false;
+                this._switchProgress = 0;
+            }
+        }
 
         if (this.state === 'firing') {
             this._fireProgress = Math.min(this._fireProgress + dt / 0.7, 1);

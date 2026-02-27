@@ -112,6 +112,16 @@ class Renderer {
 
         // Active projectiles for rendering
         this._projectiles = [];
+
+        // Screen shake state (driven by game loop, no independent timers)
+        this._shakeOffsetX = 0;
+        this._shakeOffsetY = 0;
+        this._shakeIntensity = 0;
+        this._shakeDuration = 0;
+        this._shakeElapsed = 0;
+
+        // Floating text system (max 8, recycle oldest)
+        this._floatingTexts = [];
     }
 
     // ----------------------------------------------------------
@@ -591,16 +601,10 @@ class Renderer {
         const x = posX - drawW / 2;
         const y = posY - drawH + bobY;
 
-        // Dying: fade out
+        // Dying: per-type death animation
         if (state === 'dying') {
-            const fade = monster.deathProgress || 0;
-            ctx.globalAlpha = 1 - fade;
-            // Scale up slightly as dying
-            const deathScale = 1 + fade * 0.3;
-            const dW = drawW * deathScale;
-            const dH = drawH * deathScale;
-            ctx.drawImage(sprite, posX - dW / 2, posY - dH + bobY, dW, dH);
-            ctx.globalAlpha = 1;
+            const dp = monster.deathProgress || 0;
+            this._drawDeathAnimation(ctx, type, dp, posX, posY, drawW, drawH, sprite, scale);
             return;
         }
 
@@ -620,10 +624,261 @@ class Renderer {
     }
 
     // ----------------------------------------------------------
+    // Per-Type Death Animations
+    // ----------------------------------------------------------
+
+    _drawDeathAnimation(ctx, type, dp, cx, cy, w, h, sprite, scale) {
+        ctx.save();
+        switch (type) {
+            case 'gremlin':
+                this._deathGremlin(ctx, dp, cx, cy, w, h, sprite);
+                break;
+            case 'brute':
+                this._deathBrute(ctx, dp, cx, cy, w, h, sprite);
+                break;
+            case 'shifter':
+                this._deathShifter(ctx, dp, cx, cy, w, h, sprite);
+                break;
+            case 'mage':
+                this._deathMage(ctx, dp, cx, cy, w, h, sprite, scale);
+                break;
+            case 'swarm':
+                this._deathSwarm(ctx, dp, cx, cy, w, h, sprite);
+                break;
+            case 'knight':
+                this._deathKnight(ctx, dp, cx, cy, w, h, sprite);
+                break;
+            case 'phantom':
+                this._deathPhantom(ctx, dp, cx, cy, w, h, sprite, scale);
+                break;
+            default: {
+                // Generic fallback fade
+                ctx.globalAlpha = 1 - dp;
+                const ds = 1 + dp * 0.3;
+                ctx.drawImage(sprite, cx - w * ds / 2, cy - h * ds, w * ds, h * ds);
+            }
+        }
+        ctx.restore();
+    }
+
+    // Gremlin: pixelates into 8x8 blocks that scatter outward
+    _deathGremlin(ctx, dp, cx, cy, w, h, sprite) {
+        const blockSize = 8;
+        const cols = Math.ceil(w / blockSize);
+        const rows = Math.ceil(h / blockSize);
+        const sx = cx - w / 2;
+        const sy = cy - h;
+
+        ctx.globalAlpha = 1 - dp;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const bx = sx + c * blockSize;
+                const by = sy + r * blockSize;
+                // Scatter outward from center
+                const dx = (bx + blockSize / 2 - cx) * dp * 2;
+                const dy = (by + blockSize / 2 - (cy - h / 2)) * dp * 2;
+                ctx.drawImage(sprite,
+                    c * blockSize * (sprite.width / w), r * blockSize * (sprite.height / h),
+                    blockSize * (sprite.width / w), blockSize * (sprite.height / h),
+                    bx + dx, by + dy, blockSize, blockSize
+                );
+            }
+        }
+    }
+
+    // Brute: crack lines, body splits into 3 pieces falling down
+    _deathBrute(ctx, dp, cx, cy, w, h, sprite) {
+        const sx = cx - w / 2;
+        const sy = cy - h;
+        const thirdW = w / 3;
+
+        // Draw crack lines first
+        if (dp < 0.5) {
+            ctx.globalAlpha = 1;
+            ctx.drawImage(sprite, sx, sy, w, h);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = dp * 2;
+            // Vertical cracks
+            ctx.beginPath();
+            ctx.moveTo(cx - thirdW / 2, sy);
+            ctx.lineTo(cx - thirdW / 2 + dp * 4, sy + h);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx + thirdW / 2, sy);
+            ctx.lineTo(cx + thirdW / 2 - dp * 4, sy + h);
+            ctx.stroke();
+        } else {
+            const fall = (dp - 0.5) * 2; // 0→1 in second half
+            ctx.globalAlpha = 1 - fall;
+            // Left piece — falls left + down
+            ctx.drawImage(sprite, 0, 0, sprite.width / 3, sprite.height,
+                sx - fall * 20, sy + fall * 40, thirdW, h);
+            // Center piece — falls straight down
+            ctx.drawImage(sprite, sprite.width / 3, 0, sprite.width / 3, sprite.height,
+                sx + thirdW, sy + fall * 60, thirdW, h);
+            // Right piece — falls right + down
+            ctx.drawImage(sprite, sprite.width * 2 / 3, 0, sprite.width / 3, sprite.height,
+                sx + thirdW * 2 + fall * 20, sy + fall * 40, thirdW, h);
+        }
+    }
+
+    // Shifter: dissolves into rising purple smoke
+    _deathShifter(ctx, dp, cx, cy, w, h, sprite) {
+        ctx.globalAlpha = 1 - dp;
+        ctx.drawImage(sprite, cx - w / 2, cy - h, w, h);
+        // Rising purple smoke particles
+        if (dp > 0.1) {
+            const smokeAlpha = Math.min(1, dp * 1.5) * (1 - dp);
+            ctx.globalAlpha = smokeAlpha;
+            ctx.fillStyle = '#8E44AD';
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2 + dp * 3;
+                const dist = dp * 30;
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy - h / 2 - dp * 40 + Math.sin(angle) * dist * 0.5;
+                const size = 4 + dp * 6;
+                ctx.beginPath();
+                ctx.arc(px, py, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    }
+
+    // Mage: implodes to center, energy burst ring expands
+    _deathMage(ctx, dp, cx, cy, w, h, sprite, scale) {
+        const centerY = cy - h / 2;
+        if (dp < 0.5) {
+            // Implode — scale down to center
+            const shrink = 1 - dp * 1.6;
+            const sw = w * shrink;
+            const sh = h * shrink;
+            ctx.globalAlpha = 1;
+            ctx.drawImage(sprite, cx - sw / 2, centerY - sh / 2, sw, sh);
+        } else {
+            // Energy burst ring
+            const ringProgress = (dp - 0.5) * 2;
+            ctx.globalAlpha = 1 - ringProgress;
+            ctx.strokeStyle = '#00E5FF';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(cx, centerY, ringProgress * 50 * scale, 0, Math.PI * 2);
+            ctx.stroke();
+            // Inner bright flash
+            ctx.fillStyle = '#00E5FF';
+            ctx.globalAlpha = (1 - ringProgress) * 0.5;
+            ctx.beginPath();
+            ctx.arc(cx, centerY, (1 - ringProgress) * 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Swarm: each worm pops staggered with small bursts
+    _deathSwarm(ctx, dp, cx, cy, w, h, sprite) {
+        const wormCount = 8;
+        for (let i = 0; i < wormCount; i++) {
+            const stagger = i / wormCount * 0.6;
+            const localDp = Math.max(0, Math.min(1, (dp - stagger) / 0.4));
+            if (localDp >= 1) continue; // fully dead
+
+            const angle = (i / wormCount) * Math.PI * 2;
+            const dist = 12;
+            const wx = cx + Math.cos(angle) * dist - w / 2;
+            const wy = cy - h / 2 + Math.sin(angle) * dist - h / 2;
+
+            if (localDp > 0) {
+                // Pop burst
+                ctx.globalAlpha = 1 - localDp;
+                ctx.fillStyle = '#3498DB';
+                const burstSize = 3 + localDp * 8;
+                ctx.beginPath();
+                ctx.arc(wx + w / 2, wy + h / 2, burstSize, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Still alive — draw from sprite section
+                ctx.globalAlpha = 1;
+                ctx.drawImage(sprite, cx - w / 2, cy - h, w, h);
+                break; // sprite has all worms, draw once
+            }
+        }
+    }
+
+    // Knight: 4 armor plates fly off in cardinal directions
+    _deathKnight(ctx, dp, cx, cy, w, h, sprite) {
+        const centerY = cy - h / 2;
+        if (dp < 0.3) {
+            // Brief shake (deterministic jitter)
+            ctx.globalAlpha = 1;
+            const jx = Math.sin(dp * 40) * 4 * (1 - dp / 0.3);
+            ctx.drawImage(sprite, cx - w / 2 + jx, cy - h, w, h);
+        } else {
+            const flyProgress = (dp - 0.3) / 0.7;
+            ctx.globalAlpha = 1 - flyProgress;
+            // Figure fades in center
+            ctx.drawImage(sprite, cx - w / 2, cy - h, w, h);
+            // 4 armor plate rectangles fly off
+            ctx.fillStyle = '#2C3E50';
+            const dist = flyProgress * 40;
+            const plateW = w * 0.3;
+            const plateH = h * 0.25;
+            // Up
+            ctx.fillRect(cx - plateW / 2, centerY - dist - plateH / 2, plateW, plateH);
+            // Down
+            ctx.fillRect(cx - plateW / 2, centerY + dist - plateH / 2, plateW, plateH);
+            // Left
+            ctx.fillRect(cx - dist - plateW / 2, centerY - plateH / 2, plateW, plateH);
+            // Right
+            ctx.fillRect(cx + dist - plateW / 2, centerY - plateH / 2, plateW, plateH);
+        }
+    }
+
+    // Phantom: skeleton briefly revealed, then dust particles
+    _deathPhantom(ctx, dp, cx, cy, w, h, sprite, scale) {
+        const centerY = cy - h / 2;
+        if (dp < 0.4) {
+            // Reveal skeleton (simple line drawing)
+            ctx.globalAlpha = 1 - dp * 0.5;
+            ctx.drawImage(sprite, cx - w / 2, cy - h, w, h);
+            ctx.globalAlpha = dp / 0.4;
+            ctx.strokeStyle = '#BDC3C7';
+            ctx.lineWidth = 1.5;
+            // Spine
+            ctx.beginPath();
+            ctx.moveTo(cx, centerY - h * 0.3);
+            ctx.lineTo(cx, centerY + h * 0.3);
+            ctx.stroke();
+            // Ribs
+            for (let i = 0; i < 3; i++) {
+                const ry = centerY - h * 0.1 + i * h * 0.12;
+                ctx.beginPath();
+                ctx.moveTo(cx - 8 * scale, ry);
+                ctx.lineTo(cx + 8 * scale, ry);
+                ctx.stroke();
+            }
+            // Skull circle
+            ctx.beginPath();
+            ctx.arc(cx, centerY - h * 0.35, 6 * scale, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            // Dust particles scatter
+            const dustProgress = (dp - 0.4) / 0.6;
+            ctx.globalAlpha = 1 - dustProgress;
+            ctx.fillStyle = '#D5F5E3';
+            for (let i = 0; i < 10; i++) {
+                const angle = (i / 10) * Math.PI * 2;
+                const dist = dustProgress * 35;
+                const px = cx + Math.cos(angle) * dist;
+                const py = centerY + Math.sin(angle) * dist;
+                ctx.fillRect(px - 2, py - 2, 4, 4);
+            }
+        }
+    }
+
+    // ----------------------------------------------------------
     // Weapon Sprite
     // ----------------------------------------------------------
 
-    drawWeapon(weaponId, state, time) {
+    drawWeapon(weaponId, state, time, switchProgress) {
         const ctx = this._ctx;
         const w = this._width;
         const h = this._height;
@@ -632,8 +887,62 @@ class Renderer {
         const baseX = w / 2;
         const baseY = h - 20;
 
-        // Bob animation — driven by time parameter for frame-rate independence
-        const bob = state === 'idle' ? Math.sin(time * 2) * 3 : 0;
+        // Weapon switch animation — slide down/up
+        let switchOffsetY = 0;
+        if (switchProgress !== undefined && switchProgress >= 0) {
+            if (switchProgress < 0.5) {
+                // First half: weapon drops down
+                switchOffsetY = switchProgress * 2 * 120;
+            } else {
+                // Second half: new weapon rises up
+                switchOffsetY = (1 - (switchProgress - 0.5) * 2) * 120;
+            }
+        }
+
+        // Per-weapon idle animation
+        let idleBobY = 0;
+        let idleBobX = 0;
+        let idleRotation = 0;
+        if (state === 'idle') {
+            switch (weaponId) {
+                case 1: // Pistol — left-right sway
+                    idleBobX = Math.sin(time * 1.5) * 3;
+                    idleBobY = Math.sin(time * 2) * 2;
+                    break;
+                case 2: // Blaster — slight barrel rotation
+                    idleBobY = Math.sin(time * 2) * 2;
+                    idleRotation = Math.sin(time) * 0.05;
+                    break;
+                case 3: // Rifle — steady with subtle bob
+                    idleBobY = Math.sin(time * 1.8) * 2;
+                    break;
+                case 4: // Cannon — heavy bob
+                    idleBobY = Math.sin(time * 1.5) * 4;
+                    break;
+                case 5: // Lightning — jittery
+                    idleBobY = Math.sin(time * 3) * 2;
+                    idleBobX = Math.cos(time * 4) * 1.5;
+                    break;
+                case 6: // Frost — smooth wave
+                    idleBobY = Math.sin(time * 1.8) * 3;
+                    break;
+                case 7: // Fire — flickering
+                    idleBobY = Math.sin(time * 2.5) * 2 + Math.sin(time * 5) * 1;
+                    break;
+                case 8: // Disruptor — slow wobble
+                    idleBobY = Math.sin(time * 1.5) * 3;
+                    idleRotation = Math.sin(time * 0.8) * 0.03;
+                    break;
+                case 9: // Gravity — floating feel
+                    idleBobY = Math.sin(time * 1.2) * 4;
+                    break;
+                case 10: // MEGA — pulsing
+                    idleBobY = Math.sin(time * 2) * 3;
+                    break;
+                default:
+                    idleBobY = Math.sin(time * 2) * 3;
+            }
+        }
 
         // Recoil
         let recoilY = 0;
@@ -645,13 +954,14 @@ class Renderer {
             recoilY = 5;
         }
 
-        const x = baseX + recoilX;
-        const y = baseY + bob + recoilY;
+        const x = baseX + recoilX + idleBobX;
+        const y = baseY + idleBobY + recoilY + switchOffsetY;
 
         const weapon = this._getWeaponDesign(weaponId);
 
         ctx.save();
         ctx.translate(x, y);
+        if (idleRotation) ctx.rotate(idleRotation);
 
         // Draw weapon body
         ctx.fillStyle = weapon.color;
@@ -665,17 +975,112 @@ class Renderer {
         ctx.fillStyle = weapon.accent;
         ctx.fillRect(-weapon.width / 2 + 2, -weapon.height + 4, weapon.width - 4, 4);
 
+        // Per-weapon idle effects at barrel tip
+        const barrelTipY = -weapon.height - weapon.barrelH;
+        if (state === 'idle') {
+            this._drawWeaponIdleEffect(ctx, weaponId, time, weapon, barrelTipY);
+        }
+
         // Muzzle flash during firing
         if (state === 'firing') {
             ctx.fillStyle = weapon.muzzleColor;
             ctx.globalAlpha = 0.8;
             ctx.beginPath();
-            ctx.arc(0, -weapon.height - weapon.barrelH, 8, 0, Math.PI * 2);
+            ctx.arc(0, barrelTipY, 8, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1;
         }
 
         ctx.restore();
+    }
+
+    _drawWeaponIdleEffect(ctx, weaponId, time, weapon, barrelTipY) {
+        switch (weaponId) {
+            case 3: { // Rifle — scope glint every 3s
+                const glintPhase = (time % 3) / 3;
+                if (glintPhase < 0.05) {
+                    ctx.fillStyle = '#fff';
+                    ctx.globalAlpha = 1 - glintPhase / 0.05;
+                    ctx.fillRect(-1, barrelTipY - 2, 2, 2);
+                    ctx.globalAlpha = 1;
+                }
+                break;
+            }
+            case 4: { // Cannon — glow pulse at muzzle
+                const glowAlpha = 0.2 + Math.sin(time * 2) * 0.15;
+                ctx.fillStyle = weapon.muzzleColor;
+                ctx.globalAlpha = glowAlpha;
+                ctx.beginPath();
+                ctx.arc(0, barrelTipY, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                break;
+            }
+            case 5: { // Lightning — occasional spark
+                if (Math.sin(time * 7) > 0.9) {
+                    ctx.strokeStyle = '#82B1FF';
+                    ctx.lineWidth = 1;
+                    ctx.globalAlpha = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(0, barrelTipY);
+                    ctx.lineTo((Math.random() - 0.5) * 10, barrelTipY - 5 - Math.random() * 5);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+                break;
+            }
+            case 6: { // Frost — small blue crystal that grows/shrinks
+                const crystalSize = 2 + Math.sin(time * 2) * 1.5;
+                ctx.fillStyle = '#80DEEA';
+                ctx.globalAlpha = 0.6;
+                ctx.fillRect(-crystalSize / 2, barrelTipY - crystalSize, crystalSize, crystalSize);
+                ctx.globalAlpha = 1;
+                break;
+            }
+            case 7: { // Fire — flame flicker at tip
+                ctx.fillStyle = '#FF6E40';
+                ctx.globalAlpha = 0.7;
+                const fx = (Math.sin(time * 8) * 2);
+                const fy = barrelTipY - 2 + Math.sin(time * 6) * 2;
+                ctx.beginPath();
+                ctx.arc(fx, fy, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                break;
+            }
+            case 8: { // Disruptor — thin purple arc that oscillates
+                ctx.strokeStyle = '#CE93D8';
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = 0.5 + Math.sin(time * 3) * 0.3;
+                ctx.beginPath();
+                ctx.arc(0, barrelTipY, 6, Math.sin(time * 2), Math.sin(time * 2) + Math.PI);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+                break;
+            }
+            case 9: { // Gravity — 2 orbiting debris squares
+                for (let i = 0; i < 2; i++) {
+                    const angle = time * 3 + i * Math.PI;
+                    const ox = Math.cos(angle) * 8;
+                    const oy = barrelTipY + Math.sin(angle) * 4;
+                    ctx.fillStyle = '#78909C';
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillRect(ox - 1.5, oy - 1.5, 3, 3);
+                }
+                ctx.globalAlpha = 1;
+                break;
+            }
+            case 10: { // MEGA — rainbow cycling glow
+                const hue = (time * 60) % 360;
+                ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+                ctx.globalAlpha = 0.4;
+                ctx.beginPath();
+                ctx.arc(0, barrelTipY, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                break;
+            }
+        }
     }
 
     _getWeaponDesign(id) {
@@ -701,6 +1106,23 @@ class Renderer {
     drawProjectile(weaponId, startX, startY, targetX, targetY, progress) {
         const ctx = this._ctx;
         const weapon = this._getWeaponDesign(weaponId);
+
+        // Draw trailing copies (3-4 fading copies at previous positions)
+        for (let i = 3; i >= 1; i--) {
+            const trailProgress = progress - i * 0.04;
+            if (trailProgress < 0.14) continue; // not yet traveling
+            const trailAlpha = 0.3 - i * 0.07;
+            if (trailAlpha <= 0) continue;
+            const tx = startX + (targetX - startX) * trailProgress;
+            const ty = startY + (targetY - startY) * trailProgress;
+            const ts = 1 - trailProgress * 0.5;
+            ctx.globalAlpha = trailAlpha;
+            ctx.fillStyle = weapon.muzzleColor;
+            ctx.beginPath();
+            ctx.arc(tx, ty, 4 * ts, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
 
         // Interpolate position
         const x = startX + (targetX - startX) * progress;
@@ -738,7 +1160,7 @@ class Renderer {
                 ctx.arc(x, y, 14 * scale, 0, Math.PI * 2);
                 ctx.fill();
                 break;
-            case 5: // Lightning Rod — jagged line
+            case 5: { // Lightning Rod — jagged line (deterministic jitter)
                 ctx.strokeStyle = '#82B1FF';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -746,12 +1168,14 @@ class Renderer {
                 const segments = 6;
                 for (let i = 1; i <= segments; i++) {
                     const t = i / segments * progress;
-                    const lx = startX + (targetX - startX) * t + (Math.random() - 0.5) * 20;
-                    const ly = startY + (targetY - startY) * t + (Math.random() - 0.5) * 10;
+                    const seed = i * 73.7;
+                    const lx = startX + (targetX - startX) * t + Math.sin(seed) * 15;
+                    const ly = startY + (targetY - startY) * t + Math.cos(seed * 1.3) * 8;
                     ctx.lineTo(lx, ly);
                 }
                 ctx.stroke();
                 break;
+            }
             case 6: // Frost Ray — ice beam
                 ctx.strokeStyle = '#80DEEA';
                 ctx.lineWidth = 4;
@@ -759,11 +1183,12 @@ class Renderer {
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(x, y);
                 ctx.stroke();
-                // Ice crystals
+                // Ice crystals (deterministic positions)
                 ctx.fillStyle = '#B2EBF2';
                 for (let i = 0; i < 3; i++) {
-                    const cx = x + (Math.random() - 0.5) * 12;
-                    const cy = y + (Math.random() - 0.5) * 12;
+                    const seed = i * 47.3 + progress * 10;
+                    const cx = x + Math.sin(seed) * 6;
+                    const cy = y + Math.cos(seed * 1.5) * 6;
                     ctx.fillRect(cx - 2, cy - 2, 4, 4);
                 }
                 break;
@@ -879,12 +1304,92 @@ class Renderer {
         // 5. Particles
         this.particles.draw(ctx);
 
+        // 5b. Floating texts
+        this.drawFloatingTexts(ctx);
+
         // 6. Weapon
         this.drawWeapon(
             gameState.weaponId || 1,
             gameState.weaponState || 'idle',
-            time
+            time,
+            gameState.switchProgress
         );
+    }
+
+    // ----------------------------------------------------------
+    // Screen Shake (game-loop-driven, no independent timers)
+    // ----------------------------------------------------------
+
+    startShake(intensity, durationMs) {
+        this._shakeIntensity = intensity;
+        this._shakeDuration = durationMs / 1000;
+        this._shakeElapsed = 0;
+    }
+
+    updateShake(dt) {
+        if (this._shakeIntensity <= 0) return;
+        this._shakeElapsed += dt;
+        if (this._shakeElapsed >= this._shakeDuration) {
+            this._shakeIntensity = 0;
+            this._shakeOffsetX = 0;
+            this._shakeOffsetY = 0;
+            return;
+        }
+        const remaining = 1 - this._shakeElapsed / this._shakeDuration;
+        const mag = this._shakeIntensity * remaining;
+        this._shakeOffsetX = (Math.random() * 2 - 1) * mag;
+        this._shakeOffsetY = (Math.random() * 2 - 1) * mag;
+    }
+
+    getShakeTransform() {
+        if (this._shakeIntensity <= 0) return '';
+        return `translate(${this._shakeOffsetX.toFixed(1)}px, ${this._shakeOffsetY.toFixed(1)}px)`;
+    }
+
+    // ----------------------------------------------------------
+    // Floating Text System
+    // ----------------------------------------------------------
+
+    addFloatingText(text, x, y, color, fontSize) {
+        if (this._floatingTexts.length >= 8) {
+            this._floatingTexts.shift(); // recycle oldest
+        }
+        const fs = fontSize || 18;
+        this._floatingTexts.push({
+            text, x, y, color,
+            fontSize: fs,
+            fontStr: `bold ${fs}px OpenDyslexic, "Comic Sans MS", cursive`,
+            life: 1.0,
+            maxLife: 0.8,
+            vy: -1.5
+        });
+    }
+
+    updateFloatingTexts(dt) {
+        for (let i = this._floatingTexts.length - 1; i >= 0; i--) {
+            const ft = this._floatingTexts[i];
+            ft.y += ft.vy * dt * 60;
+            ft.life -= dt / ft.maxLife;
+            if (ft.life <= 0) {
+                this._floatingTexts.splice(i, 1);
+            }
+        }
+    }
+
+    drawFloatingTexts(ctx) {
+        for (const ft of this._floatingTexts) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, ft.life);
+            ctx.font = ft.fontStr;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            // Shadow for readability
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillText(ft.text, ft.x + 1, ft.y + 1);
+            ctx.fillStyle = ft.color;
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore();
+        }
     }
 
     // ----------------------------------------------------------

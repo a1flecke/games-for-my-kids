@@ -178,11 +178,16 @@ class LevelManager {
         const elapsed = now - this._phaseStartTime;
         const progress = Math.min(1, elapsed / this._phaseDuration);
 
+        // Ease-in-out for smoother transitions
+        const eased = progress < 0.5
+            ? 2 * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
         switch (this._transitionPhase) {
             case 'fade-out': {
                 // Black overlay with increasing alpha — composites on room
                 ctx.save();
-                ctx.fillStyle = `rgba(0, 0, 0, ${progress})`;
+                ctx.fillStyle = `rgba(0, 0, 0, ${eased})`;
                 ctx.fillRect(0, 0, w, h);
                 ctx.restore();
                 return false;
@@ -198,7 +203,7 @@ class LevelManager {
             case 'fade-in': {
                 // Black overlay with decreasing alpha — composites on room
                 ctx.save();
-                ctx.fillStyle = `rgba(0, 0, 0, ${1 - progress})`;
+                ctx.fillStyle = `rgba(0, 0, 0, ${1 - eased})`;
                 ctx.fillRect(0, 0, w, h);
                 ctx.restore();
                 return false;
@@ -283,10 +288,11 @@ class LevelManager {
             ctx.stroke();
         }
 
-        // Wall torch accents (scrolling)
+        // Wall torch accents (scrolling with parallax — walls closer, move faster)
+        const wallPanOffset = panOffset * 1.4;
         ctx.fillStyle = theme.accent;
         for (let i = 0; i < 3; i++) {
-            const t = ((i / 3) + (panOffset / 400)) % 1;
+            const t = ((i / 3) + (wallPanOffset / 400)) % 1;
             const wallY = vpY + 20 + (floorTop - vpY - 40) * t;
             const torchScale = 0.5 + t * 0.5;
 
@@ -364,6 +370,19 @@ class LevelManager {
             ctx.closePath();
             ctx.fill();
         }
+
+        // Sparkle particles around item
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = '#FFD700';
+        for (let i = 0; i < 3; i++) {
+            const sparkAngle = itemProgress * Math.PI * 6 + i * 2.1;
+            const sparkDist = 18 + Math.sin(itemProgress * Math.PI * 4 + i) * 6;
+            const sx = Math.cos(sparkAngle) * sparkDist;
+            const sy = Math.sin(sparkAngle) * sparkDist;
+            const sparkSize = 1.5 + Math.sin(itemProgress * Math.PI * 8 + i * 1.5) * 1;
+            ctx.fillRect(sx - sparkSize / 2, sy - sparkSize / 2, sparkSize, sparkSize);
+        }
+        ctx.globalAlpha = 1;
 
         ctx.restore();
     }
