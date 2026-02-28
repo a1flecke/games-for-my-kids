@@ -489,6 +489,74 @@ body {
     50% { transform: translateY(10px); }
 }
 
+.gallery-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px 8px;
+    background: var(--panel-bg);
+    border: 3px solid var(--btn-secondary-bg);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: var(--font-family);
+    min-height: 120px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.gallery-card:active {
+    transform: scale(0.95);
+}
+
+.gallery-card:focus-visible {
+    border-color: var(--accent-pink);
+}
+
+.gallery-card-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+}
+
+.gallery-card-name {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    word-break: break-word;
+}
+
+.gallery-card-stage {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+/* ═══ NEEDS DISPLAY ═══ */
+
+.need-icon {
+    font-size: 1.25rem;
+    transition: opacity 0.3s ease;
+}
+
+.need-icon.need-low {
+    opacity: 0.4;
+}
+
+/* ═══ NAME PRESETS ═══ */
+
+.name-preset {
+    min-width: 100px;
+    padding: 10px 16px;
+}
+
+.name-preset[aria-selected="true"] {
+    background: var(--accent-pink);
+    color: var(--btn-primary-text);
+    border-color: var(--accent-pink);
+}
+
 /* ═══ WARDROBE SCREEN ═══ */
 
 #screen-wardrobe.active {

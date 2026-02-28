@@ -148,7 +148,7 @@ lizzies-petstore/
 ### Session 1 — Claude Tooling + Project Scaffold [COMPLETE]
 Opus | Rules, hooks, skills, agents, validation, skeleton files
 
-### Session 2 — Core Engine + Index Registration
+### Session 2 — Core Engine + Index Registration [COMPLETE]
 Opus | State machine, Canvas setup, save system, index registration
 
 ### Session 3 — Body Part Drawing Library
