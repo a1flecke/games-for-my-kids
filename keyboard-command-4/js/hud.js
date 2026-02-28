@@ -65,22 +65,18 @@ class HudManager {
         }
 
         let keysHtml = '';
-        let actionText = '';
+        let actionText = shortcut.action || shortcut.description || '';
 
         if (hintLevel === 'none') {
             keysHtml = '<span class="prompt-hidden">???</span>';
-            actionText = '';
         } else if (hintLevel === 'partial') {
             keysHtml = '<span class="prompt-partial">' + escHtml(partialText || '???') + ' + ???</span>';
-            actionText = '';
         } else {
             // Full — show keys or action based on mode
             if (mode === 'action') {
                 keysHtml = '';
-                actionText = shortcut.action || shortcut.description || '';
             } else {
                 keysHtml = this._formatKeys(shortcut.display || shortcut.combo || '');
-                actionText = shortcut.action || '';
             }
         }
 

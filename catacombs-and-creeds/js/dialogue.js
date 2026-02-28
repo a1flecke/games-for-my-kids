@@ -31,6 +31,7 @@ class DialogueSystem {
 
         // Choice state
         this.selectedChoice = 0;
+        this._activeChoices = null;  // Shuffled copy of node.choices for display
 
         // Quest flags (persisted via Game save/load)
         this.questFlags = {};
@@ -111,6 +112,7 @@ class DialogueSystem {
         this.active = false;
         this.nodes = [];
         this.nodeIndex = 0;
+        this._activeChoices = null;
 
         if (this.onComplete) {
             const cb = this.onComplete;
@@ -185,7 +187,7 @@ class DialogueSystem {
         }
 
         // Text is fully revealed — handle choices or advance
-        if (node.choices && node.choices.length > 0) {
+        if (this._activeChoices && this._activeChoices.length > 0) {
             this._updateChoices(input, node);
         } else {
             // SPACE or Enter advances to next node
@@ -216,8 +218,8 @@ class DialogueSystem {
 
         // If we have choices and text is complete, make the box taller
         let choiceAreaHeight = 0;
-        if (node.choices && node.choices.length > 0 && this.typewriterComplete) {
-            choiceAreaHeight = node.choices.length * 32 + 16;
+        if (this._activeChoices && this._activeChoices.length > 0 && this.typewriterComplete) {
+            choiceAreaHeight = this._activeChoices.length * 32 + 16;
         }
         const totalBoxH = boxH + choiceAreaHeight;
         const totalBoxY = canvas.height - totalBoxH - this.BOX_MARGIN_BOTTOM;
@@ -258,7 +260,7 @@ class DialogueSystem {
         this._drawWrappedText(ctx, displayText, textX, textY, textMaxW, a);
 
         // Continue indicator (blinking down arrow) when typewriter is complete and no choices
-        if (this.typewriterComplete && (!node.choices || node.choices.length === 0)) {
+        if (this.typewriterComplete && (!this._activeChoices || this._activeChoices.length === 0)) {
             const blinkVisible = Math.sin(this.blinkTimer * 4) > 0;
             if (blinkVisible) {
                 ctx.fillStyle = a.textColor;
@@ -270,8 +272,8 @@ class DialogueSystem {
         }
 
         // Choices
-        if (node.choices && node.choices.length > 0 && this.typewriterComplete) {
-            this._drawChoices(ctx, node.choices, boxX, totalBoxY + boxH, boxW, a);
+        if (this._activeChoices && this._activeChoices.length > 0 && this.typewriterComplete) {
+            this._drawChoices(ctx, this._activeChoices, boxX, totalBoxY + boxH, boxW, a);
         }
 
         // TTS indicator
@@ -410,6 +412,18 @@ class DialogueSystem {
             this.setFlag(node.setFlag);
         }
 
+        // Shuffle choices if they exist (Fisher-Yates shuffle on a copy)
+        if (node.choices && node.choices.length > 1) {
+            const shuffled = [...node.choices];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            this._activeChoices = shuffled;
+        } else {
+            this._activeChoices = node.choices || [];
+        }
+
         // TTS
         if (this.ttsEnabled) {
             this._speakText(node.text);
@@ -449,7 +463,7 @@ class DialogueSystem {
      * Handle choice navigation and selection.
      */
     _updateChoices(input, node) {
-        const numChoices = node.choices.length;
+        const numChoices = this._activeChoices.length;
 
         // UP/DOWN navigation
         if (input.wasPressed('ArrowUp') || input.wasPressed('w') || input.wasPressed('W')) {
@@ -478,7 +492,7 @@ class DialogueSystem {
      * Execute the selected choice.
      */
     _selectChoice(node) {
-        const choice = node.choices[this.selectedChoice];
+        const choice = this._activeChoices[this.selectedChoice];
         if (!choice) return;
 
         if (this.audio) this.audio.playSFX('menu_select');
