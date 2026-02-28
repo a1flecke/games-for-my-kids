@@ -1,0 +1,80 @@
+[
+  {
+    "id": "milestone-2-creatures",
+    "name": "Two's Company",
+    "description": "Created 2 creatures",
+    "condition": { "type": "creatures_created", "count": 2 },
+    "rewards": [
+      { "type": "part", "id": "head-fox" },
+      { "type": "theme", "id": "theme-galaxy" }
+    ]
+  },
+  {
+    "id": "milestone-5-fed",
+    "name": "Master Chef",
+    "description": "Fed a creature 5 times",
+    "condition": { "type": "care_actions", "count": 5 },
+    "rewards": [
+      { "type": "accessory", "id": "acc-chef-hat" }
+    ]
+  },
+  {
+    "id": "milestone-park-visit",
+    "name": "Explorer",
+    "description": "Visited the pet park",
+    "condition": { "type": "park_visits", "count": 1 },
+    "rewards": [
+      { "type": "theme", "id": "theme-adventure" },
+      { "type": "accessory", "id": "acc-explorer-hat" }
+    ]
+  },
+  {
+    "id": "milestone-mythical",
+    "name": "Mythical Discovery",
+    "description": "Cared for 3 creatures",
+    "condition": { "type": "creatures_created", "count": 3 },
+    "rewards": [
+      { "type": "part", "id": "head-dragon" },
+      { "type": "part", "id": "wings-dragon" },
+      { "type": "part", "id": "tail-phoenix" }
+    ]
+  },
+  {
+    "id": "milestone-kid-stage",
+    "name": "Growing Up",
+    "description": "Grew a creature to Kid stage",
+    "condition": { "type": "growth_stage", "stage": "kid" },
+    "rewards": [
+      { "type": "accessory", "id": "acc-tiara" },
+      { "type": "accessory", "id": "acc-tutu" }
+    ]
+  },
+  {
+    "id": "milestone-adult-stage",
+    "name": "All Grown Up",
+    "description": "Grew a creature to Adult stage",
+    "condition": { "type": "growth_stage", "stage": "adult" },
+    "rewards": [
+      { "type": "theme", "id": "theme-space" }
+    ]
+  },
+  {
+    "id": "milestone-5-creatures",
+    "name": "Pet Collector",
+    "description": "Created 5 creatures",
+    "condition": { "type": "creatures_created", "count": 5 },
+    "rewards": [
+      { "type": "theme", "id": "theme-underwater" },
+      { "type": "theme", "id": "theme-rainbow" }
+    ]
+  },
+  {
+    "id": "milestone-5-park-visits",
+    "name": "Park Regular",
+    "description": "Visited the park 5 times",
+    "condition": { "type": "park_visits", "count": 5 },
+    "rewards": [
+      { "type": "accessory", "id": "acc-park-badge" }
+    ]
+  }
+]

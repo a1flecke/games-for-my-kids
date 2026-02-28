@@ -38,7 +38,8 @@ const gameCategories = {
   history: ['ancient-greece-rpg', 'roman-quiz', 'roman-emperors-quiz'],
   language: ['grammar-quiz', 'phonics-game'],
   math: ['math-coloring'],
-  skills: ['keyboard-quest', 'keyboard-quest-2', 'keyboard-command-4']
+  skills: ['keyboard-quest', 'keyboard-quest-2', 'keyboard-command-4'],
+  creativity: ['lizzies-petstore']
 };
 
 // Manual game configurations (used when auto-detection needs help)
@@ -87,6 +88,11 @@ const manualGameConfig = {
     icon: '🔤🗺️',
     title: 'Word Explorer',
     description: 'Phonics matching game for grades 1–5. Match words by sound patterns to unlock Lena\'s magical library!'
+  },
+  'lizzies-petstore': {
+    icon: '🦄🐾✨',
+    title: "Lizzie's Petstore",
+    description: 'Design magical creatures from mix-and-match parts, dress them up, and care for your imaginary pets!'
   }
 };
 

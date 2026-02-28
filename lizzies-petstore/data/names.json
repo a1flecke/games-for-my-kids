@@ -1,0 +1,44 @@
+{
+  "categories": [
+    {
+      "vibe": "cute",
+      "names": [
+        "Sparklehorn", "Buttercup", "Snuggles", "Cupcake", "Marshmallow",
+        "Honey Bee", "Petal", "Nibbles", "Pudding", "Cookie",
+        "Sugar Plum", "Rosie", "Bubbles"
+      ]
+    },
+    {
+      "vibe": "silly",
+      "names": [
+        "Wigglebottom", "Sir Fluffington", "Noodle", "Pickle", "Boing Boing",
+        "Wobble", "Giggles", "Snickerdoodle", "Bumble", "Zigzag",
+        "Squish", "Doodle", "Waffles"
+      ]
+    },
+    {
+      "vibe": "magical",
+      "names": [
+        "Stardust", "Moonbeam", "Shimmer", "Aurora", "Glitter",
+        "Crystal", "Mystic", "Twilight", "Enchant", "Prism",
+        "Celestia", "Luna", "Nova"
+      ]
+    },
+    {
+      "vibe": "nature",
+      "names": [
+        "Clover", "Willow", "Fern", "Blossom", "Coral",
+        "Maple", "Daisy", "River", "Sunny", "Breeze",
+        "Ivy", "Hazel", "Meadow"
+      ]
+    },
+    {
+      "vibe": "space",
+      "names": [
+        "Comet", "Nebula", "Galaxy", "Orbit", "Cosmo",
+        "Astro", "Solaris", "Rocket", "Star", "Eclipse",
+        "Zenith", "Quasar"
+      ]
+    }
+  ]
+}

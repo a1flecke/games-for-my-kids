@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lizzie's Petstore</title>
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ═══ TITLE SCREEN ═══ -->
+    <div id="screen-title" class="screen active" role="main" aria-label="Lizzie's Petstore">
+        <div class="title-logo">
+            <h1>Lizzie's Petstore</h1>
+            <p class="title-subtitle">Create magical creatures!</p>
+        </div>
+        <div class="title-buttons">
+            <button id="btn-new-creature" class="btn btn-primary" aria-label="Create a Creature">
+                <span class="btn-icon">✨</span>
+                <span class="btn-text">Create a Creature!</span>
+            </button>
+            <button id="btn-my-pets" class="btn btn-secondary" aria-label="My Pets">
+                <span class="btn-icon">🐾</span>
+                <span class="btn-text">My Pets</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ CREATOR SCREEN ═══ -->
+    <div id="screen-creator" class="screen" aria-label="Creature Creator">
+        <div class="creator-top-bar">
+            <button id="btn-creator-back" class="btn btn-icon-only" aria-label="Back to gallery">
+                <span class="btn-icon">←</span>
+            </button>
+            <div class="creator-actions">
+                <button id="btn-undo" class="btn btn-icon-only" aria-label="Undo" disabled>
+                    <span class="btn-icon">↩</span>
+                </button>
+                <button id="btn-redo" class="btn btn-icon-only" aria-label="Redo" disabled>
+                    <span class="btn-icon">↪</span>
+                </button>
+            </div>
+            <button id="btn-name-finish" class="btn btn-primary hidden" aria-label="Name and finish creature">
+                <span class="btn-icon">✓</span>
+                <span class="btn-text">Done!</span>
+            </button>
+        </div>
+        <canvas id="creator-canvas" aria-label="Creature workspace"></canvas>
+        <div id="style-panel" class="panel" aria-label="Style panel">
+            <!-- Populated dynamically by creator.js -->
+        </div>
+        <div id="part-strip" class="part-strip" role="listbox" aria-label="Available parts">
+            <!-- Populated dynamically by creator.js -->
+        </div>
+        <div id="creator-tabs" class="tab-bar" role="tablist" aria-label="Part categories">
+            <button class="tab" role="tab" data-category="head" aria-label="Heads" aria-selected="true">
+                <span class="tab-icon">😺</span>
+            </button>
+            <button class="tab" role="tab" data-category="torso" aria-label="Bodies" aria-selected="false">
+                <span class="tab-icon">🫶</span>
+            </button>
+            <button class="tab" role="tab" data-category="legs" aria-label="Legs" aria-selected="false">
+                <span class="tab-icon">🦶</span>
+            </button>
+            <button class="tab" role="tab" data-category="tail" aria-label="Tails" aria-selected="false">
+                <span class="tab-icon">🐈</span>
+            </button>
+            <button class="tab" role="tab" data-category="wings" aria-label="Wings" aria-selected="false">
+                <span class="tab-icon">🦋</span>
+            </button>
+            <button class="tab" role="tab" data-category="extras" aria-label="Extras" aria-selected="false">
+                <span class="tab-icon">⭐</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ NAMING SCREEN ═══ -->
+    <div id="screen-naming" class="screen" aria-label="Name your creature">
+        <h2>Name Your Creature!</h2>
+        <canvas id="naming-preview" aria-label="Creature preview"></canvas>
+        <div id="name-presets" class="name-grid" role="listbox" aria-label="Name suggestions">
+            <!-- Populated dynamically -->
+        </div>
+        <div class="name-custom">
+            <label for="name-input" class="sr-only">Custom name</label>
+            <input id="name-input" type="text" maxlength="20" placeholder="Or type a name..." aria-label="Custom creature name">
+        </div>
+        <p id="species-name" class="species-label" aria-live="polite"></p>
+        <button id="btn-birth" class="btn btn-primary" aria-label="Welcome your creature!">
+            <span class="btn-icon">🎉</span>
+            <span class="btn-text">Welcome!</span>
+        </button>
+    </div>
+
+    <!-- ═══ BIRTH ANIMATION SCREEN ═══ -->
+    <div id="screen-birth" class="screen" aria-label="Your creature is born!">
+        <canvas id="birth-canvas" aria-label="Birth celebration"></canvas>
+    </div>
+
+    <!-- ═══ CARE SCREEN ═══ -->
+    <div id="screen-care" class="screen" aria-label="Care for your creature">
+        <div class="care-top-bar">
+            <div id="needs-display" class="needs-bar" aria-label="Creature needs">
+                <!-- Populated dynamically by care.js -->
+            </div>
+            <button id="btn-care-gallery" class="btn btn-icon-only" aria-label="My Pets">
+                <span class="btn-icon">📋</span>
+            </button>
+        </div>
+        <canvas id="care-canvas" aria-label="Creature room"></canvas>
+        <div class="care-actions">
+            <button id="btn-feed" class="btn btn-action" aria-label="Feed">
+                <span class="btn-icon">🍽️</span>
+            </button>
+            <button id="btn-bathe" class="btn btn-action" aria-label="Bathe">
+                <span class="btn-icon">🛁</span>
+            </button>
+            <button id="btn-pet" class="btn btn-action" aria-label="Pet">
+                <span class="btn-icon">💕</span>
+            </button>
+            <button id="btn-play" class="btn btn-action" aria-label="Play">
+                <span class="btn-icon">⚽</span>
+            </button>
+            <button id="btn-sleep" class="btn btn-action" aria-label="Sleep">
+                <span class="btn-icon">💤</span>
+            </button>
+        </div>
+        <div class="care-nav">
+            <button id="btn-wardrobe" class="btn btn-nav" aria-label="Wardrobe">
+                <span class="btn-icon">👗</span>
+            </button>
+            <button id="btn-room-edit" class="btn btn-nav" aria-label="Decorate room">
+                <span class="btn-icon">🏠</span>
+            </button>
+            <button id="btn-park" class="btn btn-nav" aria-label="Pet Park">
+                <span class="btn-icon">🌳</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ GALLERY SCREEN ═══ -->
+    <div id="screen-gallery" class="screen" aria-label="Pet gallery">
+        <div class="gallery-top-bar">
+            <button id="btn-gallery-back" class="btn btn-icon-only" aria-label="Back">
+                <span class="btn-icon">←</span>
+            </button>
+            <h2>My Pets</h2>
+            <button id="btn-gallery-new" class="btn btn-primary" aria-label="Create new creature">
+                <span class="btn-icon">✨</span>
+                <span class="btn-text">New!</span>
+            </button>
+        </div>
+        <div id="gallery-grid" class="gallery-grid" role="list" aria-label="Your creatures">
+            <!-- Populated dynamically by save.js -->
+        </div>
+        <div id="gallery-empty" class="gallery-empty hidden" aria-live="polite">
+            <p>Your petstore is empty!</p>
+            <p>Create your first creature!</p>
+            <span class="bounce-arrow">↓</span>
+        </div>
+    </div>
+
+    <!-- ═══ WARDROBE SCREEN ═══ -->
+    <div id="screen-wardrobe" class="screen" aria-label="Wardrobe">
+        <div class="wardrobe-top-bar">
+            <button id="btn-wardrobe-back" class="btn btn-icon-only" aria-label="Back to care">
+                <span class="btn-icon">←</span>
+            </button>
+            <h2>Wardrobe</h2>
+        </div>
+        <canvas id="wardrobe-canvas" aria-label="Creature preview"></canvas>
+        <div id="wardrobe-panel" class="panel" aria-label="Accessories">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- ═══ ROOM EDIT SCREEN ═══ -->
+    <div id="screen-room-edit" class="screen" aria-label="Room decoration">
+        <div class="room-top-bar">
+            <button id="btn-room-back" class="btn btn-icon-only" aria-label="Back to care">
+                <span class="btn-icon">←</span>
+            </button>
+            <h2>Decorate!</h2>
+            <button id="btn-room-done" class="btn btn-primary" aria-label="Done decorating">
+                <span class="btn-icon">✓</span>
+                <span class="btn-text">Done!</span>
+            </button>
+        </div>
+        <canvas id="room-canvas" aria-label="Room workspace"></canvas>
+        <div id="room-items-strip" class="part-strip" role="listbox" aria-label="Room items">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- ═══ PARK SCREEN ═══ -->
+    <div id="screen-park" class="screen" aria-label="Pet Park">
+        <div class="park-top-bar">
+            <button id="btn-park-home" class="btn btn-icon-only" aria-label="Go home">
+                <span class="btn-icon">🏠</span>
+            </button>
+            <h2 id="park-name">Sunny Park</h2>
+        </div>
+        <canvas id="park-canvas" aria-label="Pet park"></canvas>
+    </div>
+
+    <!-- ═══ OVERLAYS ═══ -->
+
+    <!-- Unsaved changes confirmation -->
+    <div id="overlay-confirm" class="overlay" role="dialog" aria-modal="true" aria-label="Unsaved changes" aria-hidden="true">
+        <div class="overlay-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <p id="confirm-message">You have unsaved changes. Leave anyway?</p>
+            <div class="overlay-buttons">
+                <button id="btn-confirm-yes" class="btn btn-primary" aria-label="Yes, leave">
+                    <span class="btn-icon">👋</span>
+                    <span class="btn-text">Leave</span>
+                </button>
+                <button id="btn-confirm-no" class="btn btn-secondary" aria-label="No, stay">
+                    <span class="btn-icon">✏️</span>
+                    <span class="btn-text">Keep Working</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete creature confirmation -->
+    <div id="overlay-delete" class="overlay" role="dialog" aria-modal="true" aria-label="Say goodbye" aria-hidden="true">
+        <div class="overlay-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <canvas id="delete-preview" aria-label="Creature waving goodbye"></canvas>
+            <p id="delete-message">is going on a big adventure! Wave goodbye?</p>
+            <div class="overlay-buttons">
+                <button id="btn-delete-yes" class="btn btn-secondary" aria-label="Wave goodbye">
+                    <span class="btn-icon">👋</span>
+                    <span class="btn-text">Bye bye!</span>
+                </button>
+                <button id="btn-delete-no" class="btn btn-primary" aria-label="Keep creature">
+                    <span class="btn-icon">💕</span>
+                    <span class="btn-text">Stay!</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings overlay -->
+    <div id="overlay-settings" class="overlay" role="dialog" aria-modal="true" aria-label="Settings" aria-hidden="true">
+        <div class="overlay-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <h2>Settings</h2>
+            <div class="setting-row">
+                <label for="volume-slider">
+                    <span class="setting-icon">🔊</span>
+                    Volume
+                </label>
+                <input id="volume-slider" type="range" min="0" max="100" value="80" aria-label="Volume">
+            </div>
+            <div class="setting-row">
+                <label for="mute-toggle">
+                    <span class="setting-icon">🔇</span>
+                    Mute
+                </label>
+                <button id="mute-toggle" class="btn btn-toggle" role="switch" aria-checked="false" aria-label="Mute sounds">Off</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unlock notification -->
+    <div id="overlay-unlock" class="overlay" role="alert" aria-live="assertive" aria-hidden="true">
+        <div class="overlay-content unlock-celebration">
+            <h2>NEW!</h2>
+            <p id="unlock-message"></p>
+            <div id="unlock-preview"></div>
+            <button id="btn-unlock-ok" class="btn btn-primary" aria-label="Awesome!">
+                <span class="btn-icon">🎉</span>
+                <span class="btn-text">Awesome!</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast (quota error, etc.) -->
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-hidden="true">
+        <p id="toast-message"></p>
+    </div>
+
+    <!-- Screen reader live region -->
+    <div id="sr-announcer" class="sr-only" aria-live="polite" role="status"></div>
+
+    <!-- ═══ SCRIPTS ═══ -->
+    <script src="js/save.js" defer></script>
+    <script src="js/audio.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/parts.js" defer></script>
+    <script src="js/creature-cache.js" defer></script>
+    <script src="js/animation.js" defer></script>
+    <script src="js/accessories.js" defer></script>
+    <script src="js/creator.js" defer></script>
+    <script src="js/care.js" defer></script>
+    <script src="js/room.js" defer></script>
+    <script src="js/park.js" defer></script>
+    <script src="js/tutorial.js" defer></script>
+    <script src="js/progress.js" defer></script>
+    <script src="js/renderer.js" defer></script>
+    <script src="js/game.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "theme-party",
+    "name": "Party",
+    "backgroundColor": "#FFE4F0",
+    "suggestedAccessories": ["acc-party-hat", "acc-bow-tie"],
+    "ambientSound": "party",
+    "unlockCondition": null,
+    "tags": ["starter"]
+  },
+  {
+    "id": "theme-morning",
+    "name": "Morning",
+    "backgroundColor": "#FFF8E1",
+    "suggestedAccessories": ["acc-flower-crown"],
+    "ambientSound": "morning",
+    "unlockCondition": null,
+    "tags": ["starter"]
+  },
+  {
+    "id": "theme-nighttime",
+    "name": "Nighttime",
+    "backgroundColor": "#1A1A3E",
+    "suggestedAccessories": [],
+    "ambientSound": "night",
+    "unlockCondition": null,
+    "tags": ["starter"]
+  },
+  {
+    "id": "theme-adventure",
+    "name": "Adventure",
+    "backgroundColor": "#C8E6C9",
+    "suggestedAccessories": ["acc-cape", "acc-boots"],
+    "ambientSound": "outdoors",
+    "unlockCondition": "milestone-park-visit",
+    "tags": ["outdoors"]
+  },
+  {
+    "id": "theme-fancy",
+    "name": "Fancy Sparkle",
+    "backgroundColor": "#F3E5F5",
+    "suggestedAccessories": ["acc-crown", "acc-tiara", "acc-necklace"],
+    "ambientSound": "sparkle",
+    "unlockCondition": null,
+    "tags": ["starter"]
+  },
+  {
+    "id": "theme-space",
+    "name": "Space",
+    "backgroundColor": "#0D0D2B",
+    "suggestedAccessories": [],
+    "ambientSound": "space",
+    "unlockCondition": "milestone-adult-stage",
+    "tags": ["cosmic"]
+  },
+  {
+    "id": "theme-underwater",
+    "name": "Underwater",
+    "backgroundColor": "#E0F7FA",
+    "suggestedAccessories": [],
+    "ambientSound": "underwater",
+    "unlockCondition": "milestone-5-creatures",
+    "tags": ["aquatic"]
+  },
+  {
+    "id": "theme-rainbow",
+    "name": "Rainbow",
+    "backgroundColor": "#FFFFFF",
+    "suggestedAccessories": [],
+    "ambientSound": "happy",
+    "unlockCondition": "milestone-5-creatures",
+    "tags": ["colorful"]
+  },
+  {
+    "id": "theme-school",
+    "name": "School",
+    "backgroundColor": "#FFFDE7",
+    "suggestedAccessories": [],
+    "ambientSound": "school",
+    "unlockCondition": null,
+    "tags": ["starter"]
+  },
+  {
+    "id": "theme-galaxy",
+    "name": "Galaxy",
+    "backgroundColor": "#1A0533",
+    "suggestedAccessories": [],
+    "ambientSound": "space",
+    "unlockCondition": "milestone-2-creatures",
+    "tags": ["cosmic"]
+  }
+]

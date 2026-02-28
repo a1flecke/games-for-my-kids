@@ -1,0 +1,92 @@
+[
+  {
+    "id": "acc-crown",
+    "name": "Crown",
+    "slot": "head",
+    "defaultColor": "#FFD700",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-dragon", "head-fox"],
+    "unlockCondition": null,
+    "tags": ["fancy", "starter"]
+  },
+  {
+    "id": "acc-flower-crown",
+    "name": "Flower Crown",
+    "slot": "head",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-fox"],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-party-hat",
+    "name": "Party Hat",
+    "slot": "head",
+    "defaultColor": "#FF6B6B",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-dragon", "head-fox"],
+    "unlockCondition": null,
+    "tags": ["fun", "starter"]
+  },
+  {
+    "id": "acc-bow-tie",
+    "name": "Bow Tie",
+    "slot": "neck",
+    "defaultColor": "#FF0000",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["fancy", "starter"]
+  },
+  {
+    "id": "acc-necklace",
+    "name": "Necklace",
+    "slot": "neck",
+    "defaultColor": "#FFD700",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["fancy", "starter"]
+  },
+  {
+    "id": "acc-cape",
+    "name": "Cape",
+    "slot": "body",
+    "defaultColor": "#9B59B6",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["adventure", "starter"]
+  },
+  {
+    "id": "acc-tutu",
+    "name": "Tutu",
+    "slot": "body",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-kid-stage",
+    "tags": ["fancy"]
+  },
+  {
+    "id": "acc-heart-sunglasses",
+    "name": "Heart Sunglasses",
+    "slot": "face",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox"],
+    "unlockCondition": null,
+    "tags": ["fun", "starter"]
+  },
+  {
+    "id": "acc-boots",
+    "name": "Boots",
+    "slot": "feet",
+    "defaultColor": "#8B4513",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["adventure", "starter"]
+  },
+  {
+    "id": "acc-tiara",
+    "name": "Tiara",
+    "slot": "head",
+    "defaultColor": "#C0C0C0",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-fox"],
+    "unlockCondition": "milestone-kid-stage",
+    "tags": ["fancy"]
+  }
+]

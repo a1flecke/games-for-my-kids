@@ -15,6 +15,10 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/verify-kc4-levels-hook.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-petstore-data-hook.sh"
           }
         ]
       }

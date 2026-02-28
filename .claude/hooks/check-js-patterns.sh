@@ -14,8 +14,8 @@ except Exception:
     print('')
 " 2>/dev/null <<< "$input")
 
-# Only run on phonics-game or keyboard-command-4 JS/HTML files
-if [[ "$fp" != *"phonics-game/"* && "$fp" != *"keyboard-command-4/"* ]]; then exit 0; fi
+# Only run on phonics-game, keyboard-command-4, or lizzies-petstore JS/HTML files
+if [[ "$fp" != *"phonics-game/"* && "$fp" != *"keyboard-command-4/"* && "$fp" != *"lizzies-petstore/"* ]]; then exit 0; fi
 if [[ "$fp" != *.js && "$fp" != *.html ]]; then exit 0; fi
 
 # Determine game name for error messages and save key
@@ -25,6 +25,9 @@ if [[ "$fp" == *"phonics-game/"* ]]; then
 elif [[ "$fp" == *"keyboard-command-4/"* ]]; then
     game_name="keyboard-command-4"
     save_key="keyboard-command-4-save"
+elif [[ "$fp" == *"lizzies-petstore/"* ]]; then
+    game_name="lizzies-petstore"
+    save_key="lizzies-petstore-save"
 fi
 
 errors=()
