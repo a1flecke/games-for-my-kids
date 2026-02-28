@@ -151,7 +151,7 @@ Opus | Rules, hooks, skills, agents, validation, skeleton files
 ### Session 2 — Core Engine + Index Registration [COMPLETE]
 Opus | State machine, Canvas setup, save system, index registration
 
-### Session 3 — Body Part Drawing Library
+### Session 3 — Body Part Drawing Library [COMPLETE]
 Opus | Procedural Canvas drawing for all body part types
 
 ### Session 4 — Creator Studio: Layout, Palette, and Placement
