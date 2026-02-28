@@ -181,8 +181,14 @@ class BoardManager {
         // Build refill pool — fill each slot with the pattern that needs it most.
         const refillPool = [];
         for (let i = 0; i < matchedTiles.length; i++) {
-            const pattern = patterns.reduce((a, b) =>
-                (remaining[a] || 0) <= (remaining[b] || 0) ? a : b
+            // Fisher-Yates shuffle to randomize on ties.
+            const shuffledPatterns = [...patterns];
+            for (let j = shuffledPatterns.length - 1; j > 0; j--) {
+                const k = Math.floor(Math.random() * (j + 1));
+                [shuffledPatterns[j], shuffledPatterns[k]] = [shuffledPatterns[k], shuffledPatterns[j]];
+            }
+            const pattern = shuffledPatterns.reduce((a, b) =>
+                (remaining[a] || 0) < (remaining[b] || 0) ? a : b
             );
             const words = this.lesson.wordPool[pattern];
             const available = words.filter(w => !usedInBatch.has(w));
@@ -273,12 +279,31 @@ class BoardManager {
         // If fewer than 3 tiles remain, the board is effectively complete.
         if (nonMatched.length < 3) { window.game.onLessonComplete(); return; }
 
-        const targetPattern = this.lesson.patterns[0];
+        // Count tiles per pattern among the non-matched tiles.
+        const remaining = {};
+        for (const t of nonMatched) {
+            remaining[t.pattern] = (remaining[t.pattern] || 0) + 1;
+        }
+        // Fisher-Yates shuffle to randomize on ties.
+        const shuffledPatterns = [...this.lesson.patterns];
+        for (let i = shuffledPatterns.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledPatterns[i], shuffledPatterns[j]] = [shuffledPatterns[j], shuffledPatterns[i]];
+        }
+        // Pick the most underrepresented pattern.
+        const targetPattern = shuffledPatterns.reduce((a, b) =>
+            (remaining[a] || 0) < (remaining[b] || 0) ? a : b
+        );
+
+        // Use distinct words not already on the board.
         const words = this.lesson.wordPool[targetPattern];
+        const usedWords = new Set(nonMatched.map(t => t.word));
+        const available = words.filter(w => !usedWords.has(w));
+        const wordPool = available.length >= 3 ? available : words;
 
         for (let i = 0; i < 3; i++) {
             const tile = nonMatched[i];
-            tile.word = words[i % words.length];
+            tile.word = wordPool[i % wordPool.length];
             tile.pattern = targetPattern;
             // Ensure tile is in a clean interactive state before updating DOM.
             this.setTileState(tile, 'normal');

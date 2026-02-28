@@ -939,6 +939,7 @@ class Game {
                     // Update combo DOM display
                     this._updateComboDisplay();
                     this._updateHud();
+                    this._updateShortcutPrompt();
                 },
                 () => {
                     // On fire complete — nothing extra needed
