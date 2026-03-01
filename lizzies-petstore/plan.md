@@ -154,10 +154,10 @@ Opus | State machine, Canvas setup, save system, index registration
 ### Session 3 — Body Part Drawing Library [COMPLETE]
 Opus | Procedural Canvas drawing for all body part types
 
-### Session 4 — Creator Studio: Layout, Palette, and Placement
+### Session 4 — Creator Studio: Layout, Palette, and Placement [COMPLETE]
 Opus | Creator screen UI, part selection, placement system
 
-### Session 5 — Creator Studio: Styling Tools
+### Session 5 — Creator Studio: Styling Tools [COMPLETE]
 Opus | Colors, coverings, patterns, resize, rotate, eye customization
 
 ### Session 6 — Accessories, Themes, and Naming

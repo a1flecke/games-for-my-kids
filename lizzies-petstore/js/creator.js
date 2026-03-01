@@ -6,8 +6,45 @@
  *   - Tap-to-place (primary): tap part → auto-snap to attachment point
  *   - Drag-to-place (advanced): long-press 300ms → drag → snap to nearest valid point
  *
+ * Style panel: slides up when a placed part is selected, shows color/texture/transform/eyes tabs.
+ *
  * Does NOT own its own RAF loop. Exposes update(dt) and draw(ctx, w, h).
  */
+
+// ── Color Palettes ────────────────────────────────────
+const COLOR_PALETTES = {
+    Rainbow: ['#FF6B6B', '#FF9F43', '#FECA57', '#48DBFB', '#0ABDE3', '#5F27CD', '#FF69B4', '#1DD1A1'],
+    Pastel:  ['#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#E8BAFF', '#FFB3E6', '#C9BAFF'],
+    Earth:   ['#8B4513', '#A0522D', '#CD853F', '#DEB887', '#D2B48C', '#BC8F8F', '#F4A460', '#DAA520'],
+    Ocean:   ['#006994', '#0077B6', '#00B4D8', '#48CAE4', '#90E0EF', '#023E8A', '#0096C7', '#CAF0F8'],
+    Galaxy:  ['#2D1B69', '#5B2C6F', '#7D3C98', '#A569BD', '#D2B4DE', '#1A1A2E', '#E94560', '#533483'],
+    Candy:   ['#FF69B4', '#FF1493', '#FF6EB4', '#FFB6C1', '#FF85A2', '#C71585', '#DB7093', '#FFD1DC']
+};
+
+const EYE_COLORS = [
+    { hex: '#4A90D9', name: 'Blue' },
+    { hex: '#2ECC71', name: 'Green' },
+    { hex: '#8B4513', name: 'Brown' },
+    { hex: '#9B59B6', name: 'Purple' },
+    { hex: '#E67E22', name: 'Amber' },
+    { hex: '#1ABC9C', name: 'Teal' },
+    { hex: '#34495E', name: 'Dark grey' },
+    { hex: '#E74C3C', name: 'Ruby' }
+];
+
+const COVERING_TYPES = [
+    { id: 'fur',      label: 'Fur',      icon: '≈' },
+    { id: 'scales',   label: 'Scales',   icon: '◇' },
+    { id: 'feathers', label: 'Feathers', icon: '~' },
+    { id: 'smooth',   label: 'Smooth',   icon: '○' }
+];
+
+const PATTERN_TYPES = [
+    { id: 'solid',    label: 'Solid',    icon: '■' },
+    { id: 'spots',    label: 'Spots',    icon: '●' },
+    { id: 'stripes',  label: 'Stripes',  icon: '≡' },
+    { id: 'gradient', label: 'Gradient', icon: '▽' }
+];
 
 class Creator {
     constructor() {
@@ -55,6 +92,19 @@ class Creator {
 
         // Canvas input bound flag
         this._canvasBound = false;
+
+        // ── Style panel state ──
+        this._recentColors = [];         // max 8, most recent first
+        this._partRotations = new Map(); // slot → degrees
+        this._partFlips = new Map();     // slot → boolean
+        this._stylePanelBuilt = false;
+        this._coveringThumbsDirty = false;
+        this._activeStyleTab = 'color';
+        this._activePalette = 'Rainbow';
+        this._sizeSliderOldValue = 1;    // for undo on change
+
+        // Style panel DOM element refs (populated in _buildStylePanel)
+        this._stylePanelEls = {};
     }
 
     /**
@@ -74,9 +124,19 @@ class Creator {
         this._dragPart = null;
         this._dragPos = null;
         this._isDragging = false;
+        this._recentColors = [];
+        this._partRotations = new Map();
+        this._partFlips = new Map();
+        this._coveringThumbsDirty = false;
+        this._activeStyleTab = 'color';
+        this._activePalette = 'Rainbow';
+        this._sizeSliderOldValue = 1;
 
         // Build thumbnail cache (one-time per session)
         this._buildThumbnailCache();
+
+        // Build style panel DOM (once)
+        this._buildStylePanel();
 
         // Populate part strip with current category
         this._populateStrip(this._activeCategory);
@@ -110,6 +170,9 @@ class Creator {
         this._isDragging = false;
         this._popAnimations = {};
         this._poofAnimation = null;
+        this._recentColors = [];
+        this._partRotations = new Map();
+        this._partFlips = new Map();
 
         // Remove drag clone if present
         if (this._dragCloneEl) {
@@ -121,10 +184,14 @@ class Creator {
         const strip = document.getElementById('part-strip');
         if (strip) strip.innerHTML = '';
 
+        // Hide style panel
+        this._hideStylePanel();
+
         // Reset canvas binding so it re-binds on next session
         this._canvasBound = false;
 
         // Don't clear thumbnail cache — reusable across sessions
+        // Don't clear style panel DOM — rebuilt only once
     }
 
     /**
@@ -194,7 +261,9 @@ class Creator {
         return this._isDirty;
     }
 
-    // ── Thumbnail Cache ──────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Thumbnail Cache ──────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Build offscreen 72x72 canvas thumbnails for all parts.
@@ -243,7 +312,9 @@ class Creator {
         }
     }
 
-    // ── Part Strip ───────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Part Strip ───────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Populate the part strip with thumbnail buttons for a category.
@@ -347,7 +418,9 @@ class Creator {
         }
     }
 
-    // ── Tab Events ───────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Tab Events ───────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Bind click handlers to category tabs.
@@ -377,7 +450,9 @@ class Creator {
         }
     }
 
-    // ── Canvas Input ─────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Canvas Input ─────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Bind pointer events on the creator canvas.
@@ -417,12 +492,14 @@ class Creator {
             if (window.uiManager.hitTest(cssPos, box)) {
                 this._selectedPart = slot;
                 this._selectionPulse = 0;
+                this._showStylePanel(slot);
                 return;
             }
         }
 
         // Miss — deselect
         this._selectedPart = null;
+        this._hideStylePanel();
     }
 
     _onCanvasDragMove(pos) {
@@ -441,7 +518,9 @@ class Creator {
         }
     }
 
-    // ── Tap-to-Place ─────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Tap-to-Place ─────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Handle a tap on a part thumbnail in the strip.
@@ -459,6 +538,7 @@ class Creator {
             color: partMeta.defaultColor,
             covering: null,
             pattern: null,
+            patternColor: null,
             scale: 1
         };
 
@@ -495,6 +575,7 @@ class Creator {
                 color: '#4A90D9',
                 covering: null,
                 pattern: null,
+                patternColor: null,
                 scale: 1
             };
             this._creature.body.eyes = defaultEyes;
@@ -528,7 +609,9 @@ class Creator {
         this._updateUndoRedoButtons();
     }
 
-    // ── Drag-to-Place ────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Drag-to-Place ────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Start dragging a part from the thumbnail strip.
@@ -615,7 +698,9 @@ class Creator {
         }
     }
 
-    // ── Undo/Redo ────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Undo/Redo ────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Push a command to the undo stack.
@@ -635,23 +720,8 @@ class Creator {
     undo() {
         if (this._undoStack.length === 0) return;
         const cmd = this._undoStack.pop();
-
-        // Restore old value
-        this._setSlotValue(cmd.slot, cmd.oldValue);
         this._redoStack.push(cmd);
-
-        // Invalidate cache
-        if (window.creatureCache.hasCache(this._creature.id)) {
-            window.creatureCache.invalidatePart(
-                this._creature.id, cmd.slot, this._creature
-            );
-        }
-
-        this._computePartHitBoxes();
-        this._selectedPart = null;
-        this._isDirty = true;
-        this._updateDoneButton();
-        this._updateUndoRedoButtons();
+        this._applyCommand(cmd, true);
     }
 
     /**
@@ -660,20 +730,46 @@ class Creator {
     redo() {
         if (this._redoStack.length === 0) return;
         const cmd = this._redoStack.pop();
-
-        // Apply new value
-        this._setSlotValue(cmd.slot, cmd.newValue);
         this._undoStack.push(cmd);
+        this._applyCommand(cmd, false);
+    }
 
-        // Invalidate cache
-        if (window.creatureCache.hasCache(this._creature.id)) {
-            window.creatureCache.invalidatePart(
-                this._creature.id, cmd.slot, this._creature
-            );
+    /**
+     * Apply a command (for undo/redo).
+     * @param {object} cmd — the command
+     * @param {boolean} isUndo — true for undo, false for redo
+     */
+    _applyCommand(cmd, isUndo) {
+        if (cmd.type === 'style') {
+            // Style change: set only the changed property
+            const partData = this._getPartDataForSlot(this._creature.body, cmd.slot);
+            if (partData) {
+                partData[cmd.property] = isUndo ? cmd.oldValue : cmd.newValue;
+            }
+            // Invalidate the part's cache
+            if (window.creatureCache.hasCache(this._creature.id)) {
+                window.creatureCache.invalidatePart(
+                    this._creature.id, cmd.slot, this._creature
+                );
+            }
+            this._computePartHitBoxes();
+        } else if (cmd.type === 'rotate') {
+            this._partRotations.set(cmd.slot, isUndo ? cmd.oldValue : cmd.newValue);
+        } else if (cmd.type === 'flip') {
+            this._partFlips.set(cmd.slot, isUndo ? cmd.oldValue : cmd.newValue);
+        } else {
+            // place/remove: restore full slot value
+            this._setSlotValue(cmd.slot, isUndo ? cmd.oldValue : cmd.newValue);
+            if (window.creatureCache.hasCache(this._creature.id)) {
+                window.creatureCache.invalidatePart(
+                    this._creature.id, cmd.slot, this._creature
+                );
+            }
+            this._computePartHitBoxes();
         }
 
-        this._computePartHitBoxes();
         this._selectedPart = null;
+        this._hideStylePanel();
         this._isDirty = true;
         this._updateDoneButton();
         this._updateUndoRedoButtons();
@@ -689,7 +785,9 @@ class Creator {
         if (redoBtn) redoBtn.disabled = this._redoStack.length === 0;
     }
 
-    // ── Slot Helpers ─────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Slot Helpers ─────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Get a deep copy of a slot's current value.
@@ -722,7 +820,9 @@ class Creator {
         return false;
     }
 
-    // ── Selection & Delete ───────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Selection & Delete ───────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Delete the currently selected part.
@@ -762,13 +862,16 @@ class Creator {
         }
 
         this._selectedPart = null;
+        this._hideStylePanel();
         this._computePartHitBoxes();
         this._isDirty = true;
         this._updateDoneButton();
         this._updateUndoRedoButtons();
     }
 
-    // ── Layout ───────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Layout ───────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Compute display size and creature center from canvas dimensions.
@@ -848,7 +951,897 @@ class Creator {
         return data;
     }
 
-    // ── Update ───────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Style Panel ──────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+
+    /**
+     * Build the style panel DOM once. Stores element references.
+     */
+    _buildStylePanel() {
+        if (this._stylePanelBuilt) return;
+        this._stylePanelBuilt = true;
+
+        const panel = document.getElementById('style-panel');
+        if (!panel) return;
+        panel.innerHTML = '';
+
+        const els = this._stylePanelEls;
+
+        // ── Close button ──
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'btn-close';
+        closeBtn.setAttribute('aria-label', 'Close style panel');
+        closeBtn.textContent = '✕';
+        closeBtn.addEventListener('click', () => {
+            this._selectedPart = null;
+            this._hideStylePanel();
+        });
+        panel.appendChild(closeBtn);
+
+        // ── Sub-tabs ──
+        const tabBar = document.createElement('div');
+        tabBar.className = 'style-tabs';
+        tabBar.setAttribute('role', 'tablist');
+        tabBar.setAttribute('aria-label', 'Style categories');
+
+        const tabDefs = [
+            { id: 'color',     label: '🎨 Color' },
+            { id: 'texture',   label: '✨ Texture' },
+            { id: 'transform', label: '📐 Transform' },
+            { id: 'eyes',      label: '👁 Eyes' }
+        ];
+
+        els.tabs = {};
+        for (const def of tabDefs) {
+            const tab = document.createElement('button');
+            tab.className = 'style-tab';
+            if (def.id === 'eyes') tab.classList.add('style-tab-eyes');
+            tab.setAttribute('role', 'tab');
+            tab.setAttribute('aria-selected', def.id === 'color' ? 'true' : 'false');
+            tab.setAttribute('aria-controls', `style-panel-${def.id}`);
+            tab.textContent = def.label;
+            tab.addEventListener('click', () => this._switchStyleTab(def.id));
+            tabBar.appendChild(tab);
+            els.tabs[def.id] = tab;
+        }
+        panel.appendChild(tabBar);
+
+        // ── Color tab panel ──
+        els.colorPanel = this._buildColorPanel();
+        els.colorPanel.id = 'style-panel-color';
+        panel.appendChild(els.colorPanel);
+
+        // ── Texture tab panel ──
+        els.texturePanel = this._buildTexturePanel();
+        els.texturePanel.id = 'style-panel-texture';
+        els.texturePanel.classList.add('hidden');
+        panel.appendChild(els.texturePanel);
+
+        // ── Transform tab panel ──
+        els.transformPanel = this._buildTransformPanel();
+        els.transformPanel.id = 'style-panel-transform';
+        els.transformPanel.classList.add('hidden');
+        panel.appendChild(els.transformPanel);
+
+        // ── Eyes tab panel ──
+        els.eyesPanel = this._buildEyesPanel();
+        els.eyesPanel.id = 'style-panel-eyes';
+        els.eyesPanel.classList.add('hidden');
+        panel.appendChild(els.eyesPanel);
+    }
+
+    /**
+     * Build the Color sub-tab panel.
+     */
+    _buildColorPanel() {
+        const div = document.createElement('div');
+        div.className = 'style-content style-colors';
+        div.setAttribute('role', 'tabpanel');
+        div.setAttribute('aria-label', 'Color options');
+
+        const els = this._stylePanelEls;
+
+        // Palette tabs
+        const paletteTabs = document.createElement('div');
+        paletteTabs.className = 'palette-tabs';
+        paletteTabs.setAttribute('role', 'radiogroup');
+        paletteTabs.setAttribute('aria-label', 'Color palette');
+
+        els.paletteTabs = {};
+        for (const name of Object.keys(COLOR_PALETTES)) {
+            const btn = document.createElement('button');
+            btn.className = 'palette-tab';
+            btn.setAttribute('role', 'radio');
+            btn.setAttribute('aria-checked', name === this._activePalette ? 'true' : 'false');
+            btn.setAttribute('aria-label', name);
+            btn.textContent = name;
+            btn.addEventListener('click', () => this._onPaletteTab(name));
+            paletteTabs.appendChild(btn);
+            els.paletteTabs[name] = btn;
+        }
+        div.appendChild(paletteTabs);
+
+        // Color swatches
+        const swatchWrap = document.createElement('div');
+        swatchWrap.className = 'color-swatches';
+        swatchWrap.setAttribute('role', 'radiogroup');
+        swatchWrap.setAttribute('aria-label', 'Colors');
+        els.colorSwatches = swatchWrap;
+        div.appendChild(swatchWrap);
+
+        this._renderColorSwatches(this._activePalette);
+
+        // Recent colors
+        const recentLabel = document.createElement('div');
+        recentLabel.className = 'recent-label';
+        recentLabel.textContent = 'Recent';
+        els.recentLabel = recentLabel;
+        div.appendChild(recentLabel);
+
+        const recentWrap = document.createElement('div');
+        recentWrap.className = 'recent-colors';
+        recentWrap.setAttribute('role', 'radiogroup');
+        recentWrap.setAttribute('aria-label', 'Recent colors');
+        els.recentSwatches = recentWrap;
+        div.appendChild(recentWrap);
+
+        return div;
+    }
+
+    /**
+     * Render color swatch buttons for a given palette.
+     */
+    _renderColorSwatches(paletteName) {
+        const container = this._stylePanelEls.colorSwatches;
+        if (!container) return;
+        container.innerHTML = '';
+
+        const colors = COLOR_PALETTES[paletteName] || [];
+        const currentColor = this._getSelectedPartColor();
+
+        for (const hex of colors) {
+            const btn = this._createColorSwatch(hex, hex === currentColor);
+            btn.addEventListener('click', () => this._onColorSelect(hex));
+            container.appendChild(btn);
+        }
+    }
+
+    /**
+     * Create a single color swatch button.
+     */
+    _createColorSwatch(hex, checked) {
+        const btn = document.createElement('button');
+        btn.className = 'color-swatch';
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', checked ? 'true' : 'false');
+        btn.setAttribute('aria-label', hex);
+        btn.style.backgroundColor = hex;
+        return btn;
+    }
+
+    /**
+     * Render recent color swatches.
+     */
+    _renderRecentColors() {
+        const container = this._stylePanelEls.recentSwatches;
+        const label = this._stylePanelEls.recentLabel;
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (this._recentColors.length === 0) {
+            if (label) label.classList.add('hidden');
+            return;
+        }
+        if (label) label.classList.remove('hidden');
+
+        const currentColor = this._getSelectedPartColor();
+        for (const hex of this._recentColors) {
+            const btn = this._createColorSwatch(hex, hex === currentColor);
+            btn.addEventListener('click', () => this._onColorSelect(hex));
+            container.appendChild(btn);
+        }
+    }
+
+    /**
+     * Build the Texture sub-tab panel.
+     */
+    _buildTexturePanel() {
+        const div = document.createElement('div');
+        div.className = 'style-content style-textures';
+        div.setAttribute('role', 'tabpanel');
+        div.setAttribute('aria-label', 'Texture options');
+
+        const els = this._stylePanelEls;
+
+        // Covering label
+        const coverLabel = document.createElement('div');
+        coverLabel.className = 'style-section-label';
+        coverLabel.textContent = 'Covering';
+        div.appendChild(coverLabel);
+
+        // Covering buttons
+        const coverWrap = document.createElement('div');
+        coverWrap.className = 'covering-buttons';
+        coverWrap.setAttribute('role', 'radiogroup');
+        coverWrap.setAttribute('aria-label', 'Covering type');
+
+        els.coveringBtns = {};
+        for (const cov of COVERING_TYPES) {
+            const btn = document.createElement('button');
+            btn.className = 'covering-btn';
+            btn.setAttribute('role', 'radio');
+            btn.setAttribute('aria-checked', 'false');
+            btn.setAttribute('aria-label', cov.label);
+            btn.textContent = cov.icon;
+            btn.addEventListener('click', () => this._onCoveringSelect(cov.id));
+            coverWrap.appendChild(btn);
+            els.coveringBtns[cov.id] = btn;
+        }
+        div.appendChild(coverWrap);
+
+        // Pattern label
+        const patLabel = document.createElement('div');
+        patLabel.className = 'style-section-label';
+        patLabel.textContent = 'Pattern';
+        div.appendChild(patLabel);
+
+        // Pattern buttons
+        const patWrap = document.createElement('div');
+        patWrap.className = 'pattern-buttons';
+        patWrap.setAttribute('role', 'radiogroup');
+        patWrap.setAttribute('aria-label', 'Pattern type');
+
+        els.patternBtns = {};
+        for (const pat of PATTERN_TYPES) {
+            const btn = document.createElement('button');
+            btn.className = 'pattern-btn';
+            btn.setAttribute('role', 'radio');
+            btn.setAttribute('aria-checked', 'false');
+            btn.setAttribute('aria-label', pat.label);
+            btn.textContent = pat.icon;
+            btn.addEventListener('click', () => this._onPatternSelect(pat.id));
+            patWrap.appendChild(btn);
+            els.patternBtns[pat.id] = btn;
+        }
+        div.appendChild(patWrap);
+
+        return div;
+    }
+
+    /**
+     * Build the Transform sub-tab panel.
+     */
+    _buildTransformPanel() {
+        const div = document.createElement('div');
+        div.className = 'style-content style-transform';
+        div.setAttribute('role', 'tabpanel');
+        div.setAttribute('aria-label', 'Transform options');
+
+        const els = this._stylePanelEls;
+
+        // Size label
+        const sizeLabel = document.createElement('div');
+        sizeLabel.className = 'style-section-label';
+        sizeLabel.textContent = 'Size';
+        div.appendChild(sizeLabel);
+
+        // Size slider
+        const sliderWrap = document.createElement('div');
+        sliderWrap.className = 'size-slider-wrap';
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = '0.5';
+        slider.max = '2.0';
+        slider.step = '0.1';
+        slider.value = '1.0';
+        slider.setAttribute('aria-label', 'Part size');
+        slider.setAttribute('aria-valuetext', '1.0x');
+        slider.addEventListener('input', () => {
+            const val = parseFloat(slider.value);
+            slider.setAttribute('aria-valuetext', `${val.toFixed(1)}x`);
+            this._onSizeInput(val);
+        });
+        slider.addEventListener('pointerdown', () => {
+            this._sizeSliderOldValue = parseFloat(slider.value);
+        });
+        slider.addEventListener('change', () => {
+            const newVal = parseFloat(slider.value);
+            if (newVal !== this._sizeSliderOldValue) {
+                this._onSizeChange(this._sizeSliderOldValue, newVal);
+            }
+        });
+        sliderWrap.appendChild(slider);
+        els.sizeSlider = slider;
+        div.appendChild(sliderWrap);
+
+        // Rotate label
+        const rotLabel = document.createElement('div');
+        rotLabel.className = 'style-section-label';
+        rotLabel.textContent = 'Rotate';
+        div.appendChild(rotLabel);
+
+        // Rotate buttons
+        const rotWrap = document.createElement('div');
+        rotWrap.className = 'rotate-buttons';
+
+        const rotLeft = document.createElement('button');
+        rotLeft.className = 'rotate-btn';
+        rotLeft.setAttribute('aria-label', 'Rotate left');
+        rotLeft.textContent = '↶';
+        rotLeft.addEventListener('click', () => this._onRotate(-15));
+        rotWrap.appendChild(rotLeft);
+
+        const rotRight = document.createElement('button');
+        rotRight.className = 'rotate-btn';
+        rotRight.setAttribute('aria-label', 'Rotate right');
+        rotRight.textContent = '↷';
+        rotRight.addEventListener('click', () => this._onRotate(15));
+        rotWrap.appendChild(rotRight);
+
+        const flipBtn = document.createElement('button');
+        flipBtn.className = 'rotate-btn';
+        flipBtn.setAttribute('aria-label', 'Flip horizontal');
+        flipBtn.textContent = '↔';
+        flipBtn.addEventListener('click', () => this._onFlip());
+        rotWrap.appendChild(flipBtn);
+
+        div.appendChild(rotWrap);
+
+        return div;
+    }
+
+    /**
+     * Build the Eyes sub-tab panel.
+     */
+    _buildEyesPanel() {
+        const div = document.createElement('div');
+        div.className = 'style-content style-eyes';
+        div.setAttribute('role', 'tabpanel');
+        div.setAttribute('aria-label', 'Eye options');
+
+        const els = this._stylePanelEls;
+
+        // Eye type label
+        const typeLabel = document.createElement('div');
+        typeLabel.className = 'style-section-label';
+        typeLabel.textContent = 'Eye Style';
+        div.appendChild(typeLabel);
+
+        // Eye type buttons
+        const typeWrap = document.createElement('div');
+        typeWrap.className = 'eye-type-buttons';
+        typeWrap.setAttribute('role', 'radiogroup');
+        typeWrap.setAttribute('aria-label', 'Eye style');
+
+        // Get eye parts from parts catalog
+        const eyeParts = window.partsLib.getByCategory('eyes');
+        els.eyeTypeBtns = {};
+        for (const eyePart of eyeParts) {
+            const eyeType = eyePart.id.split('-').slice(1).join('-');
+            const btn = document.createElement('button');
+            btn.className = 'eye-type-btn';
+            btn.setAttribute('role', 'radio');
+            btn.setAttribute('aria-checked', 'false');
+            btn.setAttribute('aria-label', eyePart.name);
+
+            // Draw thumbnail
+            const thumb = this._buildMiniThumb(eyePart, '#4A90D9');
+            btn.appendChild(thumb);
+
+            btn.addEventListener('click', () => this._onEyeTypeSelect(eyeType));
+            typeWrap.appendChild(btn);
+            els.eyeTypeBtns[eyeType] = btn;
+        }
+        div.appendChild(typeWrap);
+
+        // Eye color label
+        const colorLabel = document.createElement('div');
+        colorLabel.className = 'style-section-label';
+        colorLabel.textContent = 'Eye Color';
+        div.appendChild(colorLabel);
+
+        // Eye color swatches
+        const eyeColorWrap = document.createElement('div');
+        eyeColorWrap.className = 'eye-color-swatches';
+        eyeColorWrap.setAttribute('role', 'radiogroup');
+        eyeColorWrap.setAttribute('aria-label', 'Eye color');
+
+        els.eyeColorBtns = {};
+        for (const ec of EYE_COLORS) {
+            const btn = this._createColorSwatch(ec.hex, false);
+            btn.setAttribute('aria-label', ec.name);
+            btn.addEventListener('click', () => this._onEyeColorSelect(ec.hex));
+            eyeColorWrap.appendChild(btn);
+            els.eyeColorBtns[ec.hex] = btn;
+        }
+        div.appendChild(eyeColorWrap);
+
+        return div;
+    }
+
+    /**
+     * Build a 40×40 DPR-scaled mini thumbnail of a part.
+     */
+    _buildMiniThumb(partMeta, color) {
+        const dpr = window.devicePixelRatio || 1;
+        const size = 40;
+        const canvas = document.createElement('canvas');
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        canvas.style.width = `${size}px`;
+        canvas.style.height = `${size}px`;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const drawW = partMeta.drawSize.w;
+        const drawH = partMeta.drawSize.h;
+        const scale = Math.min(
+            (size * 0.8) / drawW,
+            (size * 0.8) / drawH
+        );
+
+        ctx.save();
+        ctx.translate(
+            (size - drawW * scale) / 2,
+            (size - drawH * scale) / 2
+        );
+        ctx.scale(scale, scale);
+        window.partsLib.drawPart(ctx, partMeta.id, drawW, drawH, color, null, null, null);
+        ctx.restore();
+
+        return canvas;
+    }
+
+    /**
+     * Switch between style sub-tabs.
+     */
+    _switchStyleTab(tabId) {
+        this._activeStyleTab = tabId;
+        const els = this._stylePanelEls;
+
+        // Update tab aria-selected
+        for (const [id, tab] of Object.entries(els.tabs)) {
+            tab.setAttribute('aria-selected', id === tabId ? 'true' : 'false');
+        }
+
+        // Show/hide panels
+        const panels = {
+            color: els.colorPanel,
+            texture: els.texturePanel,
+            transform: els.transformPanel,
+            eyes: els.eyesPanel
+        };
+        for (const [id, panel] of Object.entries(panels)) {
+            if (!panel) continue;
+            if (id === tabId) {
+                panel.classList.remove('hidden');
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        // Lazy regen covering/pattern thumbs when switching to texture tab
+        if (tabId === 'texture' && this._coveringThumbsDirty) {
+            this._coveringThumbsDirty = false;
+            // Thumbnails show text icons, no regen needed for text-based buttons
+        }
+    }
+
+    /**
+     * Show the style panel for a given slot.
+     */
+    _showStylePanel(slot) {
+        const panel = document.getElementById('style-panel');
+        const strip = document.getElementById('part-strip');
+        const tabs = document.getElementById('creator-tabs');
+
+        if (panel) panel.classList.remove('hidden');
+        if (strip) strip.classList.add('hidden');
+        if (tabs) tabs.classList.add('hidden');
+
+        // Show/hide eyes tab
+        const eyesTab = this._stylePanelEls.tabs && this._stylePanelEls.tabs.eyes;
+        if (eyesTab) {
+            if (slot === 'head') {
+                eyesTab.classList.remove('hidden');
+            } else {
+                eyesTab.classList.add('hidden');
+                // If currently on eyes tab, switch to color
+                if (this._activeStyleTab === 'eyes') {
+                    this._switchStyleTab('color');
+                }
+            }
+        }
+
+        // Refresh panel to reflect selected part's values
+        this._refreshStylePanel(slot);
+    }
+
+    /**
+     * Hide the style panel and restore part strip + tabs.
+     */
+    _hideStylePanel() {
+        const panel = document.getElementById('style-panel');
+        const strip = document.getElementById('part-strip');
+        const tabs = document.getElementById('creator-tabs');
+
+        if (panel) panel.classList.add('hidden');
+        if (strip) strip.classList.remove('hidden');
+        if (tabs) tabs.classList.remove('hidden');
+    }
+
+    /**
+     * Refresh the style panel UI to reflect the selected part's current values.
+     */
+    _refreshStylePanel(slot) {
+        if (!this._creature) return;
+        const partData = this._getPartDataForSlot(this._creature.body, slot);
+        if (!partData) return;
+
+        const els = this._stylePanelEls;
+
+        // ── Color tab: highlight current color ──
+        this._renderColorSwatches(this._activePalette);
+        this._renderRecentColors();
+
+        // ── Texture tab: highlight current covering & pattern ──
+        const currentCovering = partData.covering || 'smooth';
+        for (const [id, btn] of Object.entries(els.coveringBtns || {})) {
+            btn.setAttribute('aria-checked', id === currentCovering ? 'true' : 'false');
+        }
+
+        const currentPattern = partData.pattern || 'solid';
+        for (const [id, btn] of Object.entries(els.patternBtns || {})) {
+            btn.setAttribute('aria-checked', id === currentPattern ? 'true' : 'false');
+        }
+
+        // ── Transform tab: set slider value ──
+        if (els.sizeSlider) {
+            els.sizeSlider.value = String(partData.scale || 1);
+            els.sizeSlider.setAttribute('aria-valuetext', `${(partData.scale || 1).toFixed(1)}x`);
+        }
+
+        // ── Eyes tab: highlight current eye type & color ──
+        if (slot === 'head' && this._creature.body.eyes) {
+            const eyeData = this._creature.body.eyes;
+
+            for (const [type, btn] of Object.entries(els.eyeTypeBtns || {})) {
+                btn.setAttribute('aria-checked', type === eyeData.type ? 'true' : 'false');
+            }
+
+            for (const [hex, btn] of Object.entries(els.eyeColorBtns || {})) {
+                btn.setAttribute('aria-checked', hex === eyeData.color ? 'true' : 'false');
+            }
+        }
+    }
+
+    /**
+     * Get the currently selected part's color.
+     */
+    _getSelectedPartColor() {
+        if (!this._selectedPart || !this._creature) return null;
+        const partData = this._getPartDataForSlot(this._creature.body, this._selectedPart);
+        return partData ? partData.color : null;
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // ── Style Handlers ───────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+
+    /**
+     * Handle color palette tab selection.
+     */
+    _onPaletteTab(name) {
+        this._activePalette = name;
+        const els = this._stylePanelEls;
+
+        // Update palette tab aria-checked
+        for (const [id, btn] of Object.entries(els.paletteTabs || {})) {
+            btn.setAttribute('aria-checked', id === name ? 'true' : 'false');
+        }
+
+        this._renderColorSwatches(name);
+    }
+
+    /**
+     * Handle color swatch selection.
+     */
+    _onColorSelect(hex) {
+        if (!this._selectedPart || !this._creature) return;
+        const partData = this._getPartDataForSlot(this._creature.body, this._selectedPart);
+        if (!partData) return;
+
+        const oldColor = partData.color;
+        if (oldColor === hex) return; // no change
+
+        partData.color = hex;
+
+        // Auto-update patternColor if pattern is active
+        if (partData.pattern && partData.pattern !== 'solid') {
+            partData.patternColor = window.partsLib._adjustBrightness(hex, 40);
+        }
+
+        // Push undo
+        this._pushCommand({
+            type: 'style',
+            slot: this._selectedPart,
+            property: 'color',
+            oldValue: oldColor,
+            newValue: hex
+        });
+
+        // Invalidate cache
+        if (window.creatureCache.hasCache(this._creature.id)) {
+            window.creatureCache.invalidatePart(
+                this._creature.id, this._selectedPart, this._creature
+            );
+        }
+
+        // Update recent colors
+        this._addRecentColor(hex);
+
+        // Mark covering thumbs dirty for lazy regen
+        this._coveringThumbsDirty = true;
+
+        // Refresh swatch highlights
+        this._renderColorSwatches(this._activePalette);
+        this._renderRecentColors();
+
+        this._isDirty = true;
+
+        // Sparkle feedback
+        const screenPos = this._attachmentScreenPos[this._selectedPart];
+        if (screenPos) {
+            window.renderer.spawnSparkles(screenPos.x, screenPos.y, 3);
+        }
+    }
+
+    /**
+     * Add a color to the recent colors list.
+     */
+    _addRecentColor(hex) {
+        const idx = this._recentColors.indexOf(hex);
+        if (idx !== -1) this._recentColors.splice(idx, 1);
+        this._recentColors.unshift(hex);
+        if (this._recentColors.length > 8) this._recentColors.pop();
+    }
+
+    /**
+     * Handle covering type selection.
+     */
+    _onCoveringSelect(covId) {
+        if (!this._selectedPart || !this._creature) return;
+        const partData = this._getPartDataForSlot(this._creature.body, this._selectedPart);
+        if (!partData) return;
+
+        const oldCovering = partData.covering;
+        const newCovering = covId === 'smooth' ? null : covId;
+        if (oldCovering === newCovering) return;
+
+        partData.covering = newCovering;
+
+        this._pushCommand({
+            type: 'style',
+            slot: this._selectedPart,
+            property: 'covering',
+            oldValue: oldCovering,
+            newValue: newCovering
+        });
+
+        if (window.creatureCache.hasCache(this._creature.id)) {
+            window.creatureCache.invalidatePart(
+                this._creature.id, this._selectedPart, this._creature
+            );
+        }
+
+        // Update button states
+        const currentCovering = newCovering || 'smooth';
+        for (const [id, btn] of Object.entries(this._stylePanelEls.coveringBtns || {})) {
+            btn.setAttribute('aria-checked', id === currentCovering ? 'true' : 'false');
+        }
+
+        this._isDirty = true;
+    }
+
+    /**
+     * Handle pattern type selection.
+     */
+    _onPatternSelect(patId) {
+        if (!this._selectedPart || !this._creature) return;
+        const partData = this._getPartDataForSlot(this._creature.body, this._selectedPart);
+        if (!partData) return;
+
+        const oldPattern = partData.pattern;
+        const newPattern = patId === 'solid' ? null : patId;
+        if (oldPattern === newPattern) return;
+
+        partData.pattern = newPattern;
+
+        // Auto-compute patternColor
+        if (newPattern) {
+            partData.patternColor = window.partsLib._adjustBrightness(partData.color, 40);
+        } else {
+            partData.patternColor = null;
+        }
+
+        this._pushCommand({
+            type: 'style',
+            slot: this._selectedPart,
+            property: 'pattern',
+            oldValue: oldPattern,
+            newValue: newPattern
+        });
+
+        if (window.creatureCache.hasCache(this._creature.id)) {
+            window.creatureCache.invalidatePart(
+                this._creature.id, this._selectedPart, this._creature
+            );
+        }
+
+        // Update button states
+        const currentPattern = newPattern || 'solid';
+        for (const [id, btn] of Object.entries(this._stylePanelEls.patternBtns || {})) {
+            btn.setAttribute('aria-checked', id === currentPattern ? 'true' : 'false');
+        }
+
+        this._isDirty = true;
+    }
+
+    /**
+     * Handle live size slider input (preview, no undo).
+     */
+    _onSizeInput(value) {
+        if (!this._selectedPart || !this._creature) return;
+        const partData = this._getPartDataForSlot(this._creature.body, this._selectedPart);
+        if (!partData) return;
+
+        partData.scale = value;
+
+        if (window.creatureCache.hasCache(this._creature.id)) {
+            window.creatureCache.invalidatePart(
+                this._creature.id, this._selectedPart, this._creature
+            );
+        }
+
+        this._computePartHitBoxes();
+        this._isDirty = true;
+    }
+
+    /**
+     * Handle size slider change (push undo with old/new values).
+     */
+    _onSizeChange(oldVal, newVal) {
+        if (!this._selectedPart) return;
+
+        this._pushCommand({
+            type: 'style',
+            slot: this._selectedPart,
+            property: 'scale',
+            oldValue: oldVal,
+            newValue: newVal
+        });
+    }
+
+    /**
+     * Handle rotation button press.
+     */
+    _onRotate(degrees) {
+        if (!this._selectedPart) return;
+
+        const oldDeg = this._partRotations.get(this._selectedPart) || 0;
+        const newDeg = oldDeg + degrees;
+
+        this._partRotations.set(this._selectedPart, newDeg);
+
+        this._pushCommand({
+            type: 'rotate',
+            slot: this._selectedPart,
+            oldValue: oldDeg,
+            newValue: newDeg
+        });
+
+        this._isDirty = true;
+    }
+
+    /**
+     * Handle flip button press.
+     */
+    _onFlip() {
+        if (!this._selectedPart) return;
+
+        const oldFlip = this._partFlips.get(this._selectedPart) || false;
+        const newFlip = !oldFlip;
+
+        this._partFlips.set(this._selectedPart, newFlip);
+
+        this._pushCommand({
+            type: 'flip',
+            slot: this._selectedPart,
+            oldValue: oldFlip,
+            newValue: newFlip
+        });
+
+        this._isDirty = true;
+    }
+
+    /**
+     * Handle eye type selection.
+     */
+    _onEyeTypeSelect(eyeType) {
+        if (!this._creature || !this._creature.body.eyes) return;
+
+        const eyes = this._creature.body.eyes;
+        const oldType = eyes.type;
+        if (oldType === eyeType) return;
+
+        eyes.type = eyeType;
+
+        this._pushCommand({
+            type: 'style',
+            slot: 'eyes',
+            property: 'type',
+            oldValue: oldType,
+            newValue: eyeType
+        });
+
+        if (window.creatureCache.hasCache(this._creature.id)) {
+            window.creatureCache.invalidatePart(
+                this._creature.id, 'eyes', this._creature
+            );
+        }
+
+        // Update button states
+        for (const [type, btn] of Object.entries(this._stylePanelEls.eyeTypeBtns || {})) {
+            btn.setAttribute('aria-checked', type === eyeType ? 'true' : 'false');
+        }
+
+        this._isDirty = true;
+
+        // Sparkle
+        const screenPos = this._attachmentScreenPos.eyes;
+        if (screenPos) {
+            window.renderer.spawnSparkles(screenPos.x, screenPos.y, 3);
+        }
+    }
+
+    /**
+     * Handle eye color selection.
+     */
+    _onEyeColorSelect(hex) {
+        if (!this._creature || !this._creature.body.eyes) return;
+
+        const eyes = this._creature.body.eyes;
+        const oldColor = eyes.color;
+        if (oldColor === hex) return;
+
+        eyes.color = hex;
+
+        this._pushCommand({
+            type: 'style',
+            slot: 'eyes',
+            property: 'color',
+            oldValue: oldColor,
+            newValue: hex
+        });
+
+        if (window.creatureCache.hasCache(this._creature.id)) {
+            window.creatureCache.invalidatePart(
+                this._creature.id, 'eyes', this._creature
+            );
+        }
+
+        // Update swatch states
+        for (const [h, btn] of Object.entries(this._stylePanelEls.eyeColorBtns || {})) {
+            btn.setAttribute('aria-checked', h === hex ? 'true' : 'false');
+        }
+
+        this._isDirty = true;
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // ── Update ───────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Update (called by game.js each frame).
@@ -875,7 +1868,9 @@ class Creator {
         this._selectionPulse += dt;
     }
 
-    // ── Draw ─────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Draw ─────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Draw (called by game.js each frame).
@@ -888,8 +1883,8 @@ class Creator {
 
         // Draw creature
         if (window.creatureCache.hasCache(this._creature.id)) {
-            // Build anim state with pop overrides
-            const animState = this._buildPopAnimState();
+            // Build anim state with pop, rotation, and flip overrides
+            const animState = this._buildAnimState();
             window.creatureCache.drawCreatureById(
                 ctx,
                 this._creatureCenter.x,
@@ -931,10 +1926,29 @@ class Creator {
     }
 
     /**
-     * Build animation state with pop-in scale overrides.
+     * Build animation state with pop-in scale overrides, rotation, and flip.
+     * Replaces the former _buildPopAnimState().
      */
-    _buildPopAnimState() {
+    _buildAnimState() {
         const state = {};
+
+        // Apply rotation and flip for all slots
+        for (const slot of RENDER_ORDER) {
+            const rotation = this._partRotations.get(slot) || 0;
+            const flip = this._partFlips.get(slot) || false;
+
+            if (rotation !== 0 || flip) {
+                state[slot] = {
+                    translateX: 0,
+                    translateY: 0,
+                    rotation: rotation,
+                    scaleX: flip ? -1 : 1,
+                    scaleY: 1
+                };
+            }
+        }
+
+        // Apply pop animation overrides (merge on top)
         for (const slot of Object.keys(this._popAnimations)) {
             const p = this._popAnimations[slot].progress;
             // Overshoot bounce: scale from 0 -> 1.2 -> 1.0
@@ -944,11 +1958,19 @@ class Creator {
             } else {
                 s = 1.2 - (p - 0.5) * 2 * 0.2; // 1.2 -> 1.0
             }
+
+            const existing = state[slot] || {
+                translateX: 0, translateY: 0, rotation: 0, scaleX: 1, scaleY: 1
+            };
             state[slot] = {
-                translateX: 0, translateY: 0, rotation: 0,
-                scaleX: s, scaleY: s
+                translateX: existing.translateX,
+                translateY: existing.translateY,
+                rotation: existing.rotation,
+                scaleX: (existing.scaleX < 0 ? -s : s),
+                scaleY: s
             };
         }
+
         return state;
     }
 
@@ -1114,7 +2136,9 @@ class Creator {
         ctx.restore();
     }
 
-    // ── Done Button ──────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
+    // ── Done Button ──────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════
 
     /**
      * Show/hide the Done button based on canFinish().
