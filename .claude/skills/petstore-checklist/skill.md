@@ -21,6 +21,17 @@ Session specs often contain code samples that violate CLAUDE.md rules. Before us
 | `new AudioContext()` in constructor | Create lazily on first `_getCtx()` call; `ctx.resume().then(() => schedule())` |
 | Independent `requestAnimationFrame` in a manager | Only `game.js` owns the RAF loop — expose `update(dt)` and `draw(ctx, w, h)` |
 | `touchstart` / `touchmove` / `touchend` | Use Pointer Events: `pointerdown` / `pointermove` / `pointerup` |
+| `Math.random()` in cached texture generation | Use seeded PRNG (`_seededRandom(hash)`) so re-cache produces identical results |
+| `globalAlpha < 1` then `source-atop` compositing | Draw fully opaque first, apply covering/pattern, then reduce alpha in a separate step |
+| `escHtml()` on `setAttribute('aria-label', ...)` | Don't escape — `setAttribute` doesn't parse HTML entities; `&amp;` reads literally to AT |
+| `timer % interval < threshold` on float timer | Use interval counter: `if (timer >= nextTime) { nextTime += interval; }` |
+| `aria-pressed` on `role="option"` elements | Use `aria-selected` — `aria-pressed` is for toggle buttons, not listbox options |
+| `role="listitem"` on `<button>` elements | Remove — `role="listitem"` overrides implicit button role, breaking AT |
+| `aria-live` + `aria-hidden` on same element | Remove `aria-live`; `role="status"` implies it. Toggling `aria-hidden` on a live region causes phantom AT announcements |
+| `SaveManager.load()`/`getCreature()` per frame | Cache on state entry: `this._cachedCreature = saveManager.getCreature(id)` |
+| LRU/indexOf/splice in draw loop | Only update LRU on build/invalidate, never in draw/update (hot path) |
+| Static background redrawn per frame | Cache to offscreen canvas on init/resize; `drawImage()` per frame |
+| `ctx.save()`/`ctx.restore()` per particle | Batch: set `globalAlpha` directly per particle, reset once at end |
 
 ---
 
@@ -167,6 +178,46 @@ const RENDER_ORDER = ['legs', 'tail', 'torso', 'wings', 'head', 'eyes', 'extras'
 - No real-time decay when app closed
 - On reopen: creature greets happily regardless of absence
 - Max decay capped at 24 hours
+
+---
+
+## Hot-Path Performance (60fps Draw/Update Loop)
+
+The `_update(dt)` and `_draw()` functions run 60×/sec. Never do expensive or allocating work inside them:
+
+- **No `SaveManager.load()` or `getCreature()` per frame** — cache the creature ref on state entry
+- **No LRU tracking in draw calls** — only update on `buildCache()` / `invalidatePart()`
+- **Cache static backgrounds** (grid dots, gradients) to offscreen canvas — `drawImage()` per frame
+- **No per-particle `ctx.save()`/`ctx.restore()`** — set `globalAlpha` directly, reset once at end
+- **No `document.createElement()`** — all DOM creation in setup code
+
+---
+
+## Seeded PRNG for Cached Textures
+
+Any procedurally generated texture cached to an offscreen canvas must use a seeded PRNG (not `Math.random()`). Otherwise LRU eviction + re-cache produces different visuals.
+
+Seed from a hash of partId + color for deterministic results.
+
+---
+
+## source-atop Compositing Requires Opaque Base
+
+When using `globalCompositeOperation = 'source-atop'`, the base shape must be fully opaque. Semi-transparent base pixels cause `base_alpha × texture_alpha` blending — visually wrong.
+
+If you need translucent final result: draw opaque → apply covering/pattern → composite the result at reduced alpha in a separate step.
+
+---
+
+## Periodic Effects: Interval Counters Not Modulus
+
+`timer % 100 < 20` on a float is unreliable. Use an explicit next-time counter:
+```js
+if (this._timer >= this._nextSparkleTime) {
+    this._nextSparkleTime = this._timer + 100;
+    spawnSparkle();
+}
+```
 
 ---
 

@@ -100,7 +100,7 @@ Rules that apply to ALL games in this repo. These prevent recurring bugs:
 
 **Modal dialogs:** Use `<div role="dialog" aria-modal="true" aria-label="...">` (not `<aside>` — conflicting landmark). First focusable element must be a close (✕) button. Implement Tab/Shift-Tab focus trap + Escape to close. On open: focus close button, `setAttribute('aria-hidden', 'false')` on overlay, set `aria-expanded="true"` on trigger. On close: `setAttribute('aria-hidden', 'true')` on overlay, reverse aria-expanded. Note: `removeAttribute('aria-hidden')` is correct for *filtered list items* (lesson cards) but overlays always use explicit `'false'`/`'true'` — never remove the attribute.
 
-**innerHTML safety:** HTML-escape any interpolated values: `String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')`. Use an `escHtml()` helper.
+**innerHTML safety:** HTML-escape any interpolated values: `String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')`. Use an `escHtml()` helper. **Important:** `escHtml()` is ONLY for `innerHTML` contexts. Never apply it to `setAttribute('aria-label', ...)` or `textContent` — those don't parse HTML entities, so `&amp;` reads literally as "&amp;" to screen readers.
 
 **Locked interactive elements:** For native `<button>` elements use the `disabled` attribute — it removes the element from tab order and announces correctly to AT automatically. For `role="button"` divs/spans, set `tabindex="-1"` AND `aria-disabled="true"`. A visual `.locked` class alone is insufficient in both cases.
 
@@ -147,6 +147,10 @@ Detached-element callbacks: use `if (el.isConnected) el.classList.remove(...)` i
 **Web Audio API (iOS Safari):** `AudioContext` must be created lazily inside a user-gesture handler — never in a constructor. `ctx.resume()` returns a Promise; never schedule oscillator nodes immediately after calling it. Chain scheduling inside `.then()`: `ctx.resume().then(() => scheduleOscillator())`.
 
 **Toggle/selection buttons:** `aria-pressed` is for buttons with a **persistent binary state** — tile selection, grade filter tabs, settings toggles. Set `aria-pressed="false"` on creation and update to `"true"` when active. Pure action triggers (navigate, speak-word, sort-into-bucket) do NOT use `aria-pressed`. A visual `.selected` class alone is invisible to assistive technology.
+
+**ARIA role compatibility:** `role="option"` (inside `role="listbox"`) uses `aria-selected`, NOT `aria-pressed`. `aria-pressed` is only for toggle buttons. Also: never put `role="listitem"` on a `<button>` — it overrides the implicit `button` role, making AT announce it as a list item instead of a button. Use no role on `<button>` elements inside `role="list"` containers (or use `role="group"` instead of `role="list"` for grids of buttons).
+
+**`aria-live` + `aria-hidden` conflict:** Never put `aria-live` on an element that also toggles `aria-hidden`. Toggling `aria-hidden` on a live region causes phantom AT announcements. Use `role="status"` (which implies `aria-live="polite"`) without an explicit `aria-live` attribute, or keep `aria-live` only on elements that are never hidden.
 
 **`aria-live` + `aria-label` conflict:** Never put both on the same element. VoiceOver announces both — an `aria-label` overrides `textContent` for AT, so a live region with an `aria-label` will either double-announce or announce the wrong text. Use `aria-live` alone; changing `textContent` drives the announcement.
 

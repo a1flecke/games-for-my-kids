@@ -14,6 +14,7 @@ Each body part is drawn procedurally to its own **offscreen canvas** once. The g
 - `drawCreature(ctx, x, y, animState)` composites all parts with animation transforms
 - Max **30 offscreen canvases** active — warn + LRU evict if exceeded
 - Covering textures pre-rendered as separate canvases via `globalCompositeOperation = 'source-atop'`
+- **LRU tracking** updated only on `buildCache()` / `invalidatePart()` — never in `drawCreature()` (hot path)
 
 ### `ctx.save()` / `ctx.restore()` Must Bracket Every Transform
 
@@ -203,6 +204,87 @@ TITLE → CREATOR → BIRTH_ANIMATION → CARE (hub) → PARK
 - `aria-hidden` always explicit `'true'`/`'false'` — never `removeAttribute` on overlays
 - Screen visibility: `.active` (screens), `.open` (overlays), `.hidden` (internal elements)
 - No `style.display` assignments in JS
+
+---
+
+## Hot-Path Performance (60fps Draw/Update Loop)
+
+The draw and update functions run 60 times per second. Never do expensive or allocating work inside them:
+
+| Pattern | Fix |
+|---------|-----|
+| `SaveManager.load()` / `getCreature()` per frame | Cache the creature ref on state entry (`this._cachedCreature = ...`). Invalidate on save. |
+| `LRU.touch()` / `indexOf + splice` per frame | Only update LRU on `buildCache()` / `invalidatePart()`, never in draw calls. |
+| Redraw static backgrounds per frame (grid dots, gradients) | Cache to an offscreen canvas on init/resize. `drawImage()` per frame. |
+| `ctx.save()` / `ctx.restore()` per particle (50×/frame) | Batch: set `globalAlpha` directly, reset once at end. No save/restore per element. |
+| `document.createElement()` in draw loop | All DOM creation in setup/state-entry code, never in update/draw. |
+
+---
+
+## Seeded PRNG for Cached Textures
+
+Any procedurally generated texture that gets cached to an offscreen canvas **must** use a seeded PRNG, not `Math.random()`. Otherwise LRU eviction + re-cache produces visually different results.
+
+```js
+// Mulberry32 seeded PRNG
+_seededRandom(seed) {
+    let s = seed | 0;
+    return () => {
+        s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 0xFFFFFFFF;
+    };
+}
+
+// Hash string for seed
+_hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+    }
+    return hash;
+}
+
+// Usage: const rng = this._seededRandom(this._hashString(color + 'fur'));
+```
+
+---
+
+## source-atop Compositing Requires Fully Opaque Base
+
+When using `globalCompositeOperation = 'source-atop'`, the base shape **must** be fully opaque (`globalAlpha = 1`). Semi-transparent base pixels cause the texture to render at `base_alpha × texture_alpha` — visually incorrect.
+
+```js
+// WRONG — fairy wings at 0.7 alpha, then source-atop covering = covering at 0.7 too
+ctx.globalAlpha = 0.7;
+drawWingShape(ctx);            // semi-transparent pixels
+ctx.globalCompositeOperation = 'source-atop';
+drawTexture(ctx);              // texture clipped AND dimmed to 0.7
+
+// CORRECT — draw fully opaque, apply covering, then composite at reduced alpha
+drawWingShape(ctx);            // opaque pixels
+ctx.globalCompositeOperation = 'source-atop';
+drawTexture(ctx);              // texture clipped correctly
+// If you need translucency: draw to temp canvas, then drawImage with globalAlpha
+```
+
+---
+
+## Periodic Effects: Interval Counters Not Modulus on Float
+
+`timer % 100 < 20` on a float timer is unreliable — it can miss intervals depending on `dt`. Use an explicit next-time counter:
+
+```js
+// WRONG — modulus on float
+if (this._timer % 100 < 20) spawnSparkle();
+
+// CORRECT — interval counter
+if (this._timer >= this._nextSparkleTime) {
+    this._nextSparkleTime = this._timer + 100;
+    spawnSparkle();
+}
+```
 
 ---
 
