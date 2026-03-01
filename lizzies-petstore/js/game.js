@@ -70,6 +70,9 @@ class Game {
         window.progressManager = new ProgressManager();
         window.renderer = new Renderer();
 
+        // Load parts catalog (fire-and-forget; resolves before user navigates)
+        window.partsLib.loadCatalog();
+
         // Apply saved settings
         this._applySettings();
 
@@ -146,6 +149,11 @@ class Game {
                     this._activeCanvas.w,
                     this._activeCanvas.h
                 );
+                window.creator._computeLayout();
+                window.creator._computePartHitBoxes();
+                if (window.tutorialManager.shouldRun()) {
+                    window.tutorialManager.start();
+                }
                 break;
 
             case 'NAMING':
@@ -280,6 +288,7 @@ class Game {
             case 'CREATOR':
                 window.renderer.updateParticles(dt);
                 window.creator.update(dt);
+                window.tutorialManager.update(dt);
                 break;
             case 'BIRTH_ANIMATION':
                 window.renderer.updateParticles(dt);
@@ -613,6 +622,13 @@ class Game {
             } else {
                 this.setState('GALLERY');
             }
+        });
+
+        document.getElementById('btn-undo').addEventListener('click', () => {
+            window.creator.undo();
+        });
+        document.getElementById('btn-redo').addEventListener('click', () => {
+            window.creator.redo();
         });
 
         document.getElementById('btn-name-finish').addEventListener('click', () => {
