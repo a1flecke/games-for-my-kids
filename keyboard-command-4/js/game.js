@@ -93,6 +93,13 @@ class Game {
         // Screen reader announcement debounce for kills
         this._killAnnounceCount = 0;
 
+        // Beforeunload handler to protect against accidental tab close during gameplay
+        this._beforeUnloadHandler = (e) => {
+            if (this.state === 'GAMEPLAY' || this.state === 'PAUSED') {
+                e.preventDefault();
+            }
+        };
+
         // Level data
         this._levelNames = [
             'Home Screen Ruins',
@@ -189,6 +196,9 @@ class Game {
         window.addEventListener('resize', () => {
             if (this._renderer) this._renderer.resize();
         });
+
+        // Protect against accidental tab close (cmd+w) during gameplay
+        window.addEventListener('beforeunload', this._beforeUnloadHandler);
 
         // Show title screen
         this.showTitle();
@@ -646,6 +656,12 @@ class Game {
 
         // Force-target check
         this._forceTargetCheck();
+
+        // Ensure a monster is always targeted if any are alive
+        if (!this._getTargetedMonster()) {
+            this._autoTarget();
+            this._updateShortcutPrompt();
+        }
 
         // Check wave progression
         this._checkWaveProgression(dt);
@@ -1479,12 +1495,11 @@ class Game {
                 );
             }
 
-            // Screen reader status text — always full info
+            // Screen reader status text — always include action name + keys
             if (statusEl) {
-                const text = target.promptMode === 'action'
-                    ? s.action || s.description
-                    : s.display || s.combo;
-                statusEl.textContent = `Target: ${target.config.name} — ${text}`;
+                const actionName = s.action || s.description || '';
+                const keys = s.display || s.combo || '';
+                statusEl.textContent = `Target: ${target.config.name} — ${actionName} (${keys})`;
             }
         }
     }
@@ -1957,8 +1972,12 @@ class Game {
             return;
         }
 
-        // GAMEPLAY keys are handled by InputManager — nothing to do here
-        if (this.state === 'GAMEPLAY') return;
+        // GAMEPLAY — InputManager handles shortcuts, but intercept modifier
+        // combos here too as safety net against browser-level actions (e.g. cmd+w)
+        if (this.state === 'GAMEPLAY') {
+            if (e.metaKey || e.ctrlKey) e.preventDefault();
+            return;
+        }
 
         // PAUSED — global fallback if focus escapes the overlay
         if (this.state === 'PAUSED') {

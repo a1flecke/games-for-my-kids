@@ -72,12 +72,8 @@ class HudManager {
         } else if (hintLevel === 'partial') {
             keysHtml = '<span class="prompt-partial">' + escHtml(partialText || '???') + ' + ???</span>';
         } else {
-            // Full — show keys or action based on mode
-            if (mode === 'action') {
-                keysHtml = '';
-            } else {
-                keysHtml = this._formatKeys(shortcut.display || shortcut.combo || '');
-            }
+            // Full — always show key combo alongside the action name
+            keysHtml = this._formatKeys(shortcut.display || shortcut.combo || '');
         }
 
         if (this._promptKeys) this._promptKeys.innerHTML = keysHtml;

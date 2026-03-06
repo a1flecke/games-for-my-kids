@@ -94,7 +94,9 @@ class ShortcutManager {
      * Returns a shortcut object.
      */
     getRandomShortcut(lvl) {
-        const pool = this.getShortcutsForLevel(lvl);
+        // Only assign interceptable shortcuts to monsters
+        const pool = this.getShortcutsForLevel(lvl)
+            .filter(s => s.canIntercept !== false);
         if (!pool.length) return null;
 
         // Fisher-Yates on a copy to pick one uniformly at random

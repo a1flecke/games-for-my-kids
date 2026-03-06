@@ -764,6 +764,8 @@ input[type="range"]:focus {
     transition: opacity 0.2s, transform 0.2s;
     z-index: 10;
     min-width: 120px;
+    display: flex;
+    flex-direction: column;
 }
 
 .shortcut-prompt.active {
@@ -771,21 +773,23 @@ input[type="range"]:focus {
     transform: translateX(-50%) translateY(0);
 }
 
-.prompt-keys {
-    font-size: 1.4rem;
+.prompt-action {
+    font-size: 1.1rem;
     font-weight: bold;
     color: #fff;
     margin-bottom: 0.2rem;
+    order: -1;
+}
+
+.prompt-keys {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent-gold);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.15rem;
     flex-wrap: wrap;
-}
-
-.prompt-action {
-    font-size: 0.85rem;
-    color: var(--accent-gold);
 }
 
 .prompt-physical {
