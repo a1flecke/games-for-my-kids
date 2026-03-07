@@ -15,7 +15,7 @@
     "description": "Fed a creature 5 times",
     "condition": { "type": "care_actions", "count": 5 },
     "rewards": [
-      { "type": "accessory", "id": "acc-chef-hat" }
+      { "type": "accessory", "id": "acc-scarf" }
     ]
   },
   {
@@ -25,7 +25,7 @@
     "condition": { "type": "park_visits", "count": 1 },
     "rewards": [
       { "type": "theme", "id": "theme-adventure" },
-      { "type": "accessory", "id": "acc-explorer-hat" }
+      { "type": "accessory", "id": "acc-backpack" }
     ]
   },
   {
@@ -74,7 +74,7 @@
     "description": "Visited the park 5 times",
     "condition": { "type": "park_visits", "count": 5 },
     "rewards": [
-      { "type": "accessory", "id": "acc-park-badge" }
+      { "type": "accessory", "id": "acc-medal" }
     ]
   }
 ]

@@ -152,6 +152,22 @@ class CareManager {
      * Draw (called by game.js each frame).
      */
     draw(ctx, w, h) {
-        // Draw creature room, creature, needs indicators — placeholder
+        if (!this._creature) return;
+
+        const creatureId = this._creature.id;
+        const displaySize = Math.min(w, h) * 0.45;
+        const cx = w / 2;
+        const cy = h * 0.42;
+
+        // Update creature position for particle spawning
+        window.animationEngine.setCreaturePosition(creatureId, cx, cy, displaySize);
+
+        // Get animation state and draw creature
+        if (window.creatureCache.hasCache(creatureId)) {
+            const animState = window.animationEngine.getState(creatureId);
+            window.creatureCache.drawCreatureById(
+                ctx, cx, cy, animState, displaySize, creatureId
+            );
+        }
     }
 }

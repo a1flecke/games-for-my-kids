@@ -336,20 +336,73 @@ body {
 #screen-naming.active {
     display: flex;
     align-items: center;
-    padding: 20px;
-    gap: 16px;
+    padding: 0 20px 20px;
+    gap: 12px;
 }
 
-#screen-naming h2 {
-    font-size: 1.75rem;
+.naming-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--panel-bg);
+    border-bottom: 2px solid var(--btn-secondary-bg);
+    width: calc(100% + 40px);
+    margin: 0 -20px;
+}
+
+.naming-top-bar h2 {
+    font-size: 1.5rem;
     color: var(--accent-purple);
     text-align: center;
 }
 
+.naming-spacer {
+    width: 44px;
+}
+
 #naming-preview {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 180px;
     touch-action: none;
+}
+
+.species-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+    font-style: italic;
+}
+
+/* Vibe filter pills */
+.vibe-filter-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 4px 0;
+}
+
+.vibe-pill {
+    padding: 6px 14px;
+    border: 2px solid var(--btn-secondary-bg);
+    border-radius: 20px;
+    background: transparent;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.vibe-pill.active-vibe {
+    background: var(--accent-purple);
+    color: white;
+    border-color: var(--accent-purple);
 }
 
 .name-grid {
@@ -357,7 +410,7 @@ body {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
-    max-height: 30vh;
+    max-height: 25vh;
     overflow-y: auto;
     padding: 8px;
 }
@@ -383,13 +436,6 @@ body {
     outline: 3px solid var(--accent-pink);
     outline-offset: 2px;
     border-color: var(--accent-pink);
-}
-
-.species-label {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    text-align: center;
-    font-style: italic;
 }
 
 /* ═══ CARE SCREEN ═══ */
@@ -634,6 +680,39 @@ body {
     background: var(--accent-pink);
     color: var(--btn-primary-text);
     border-color: var(--accent-pink);
+}
+
+/* ═══ STRIP SLOT LABEL ═══ */
+
+.strip-slot-label {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 0 4px;
+    flex-shrink: 0;
+}
+
+/* ═══ ACCESSORY EQUIPPED INDICATOR ═══ */
+
+.part-thumb-equipped {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 18px;
+    height: 18px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.625rem;
+    color: white;
+    pointer-events: none;
+    line-height: 1;
 }
 
 /* ═══ WARDROBE SCREEN ═══ */

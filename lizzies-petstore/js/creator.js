@@ -58,6 +58,8 @@ class Creator {
 
         // Thumbnail cache: partId -> offscreen 72x72 canvas
         this._thumbnailCache = new Map();
+        // Accessory thumbnail cache: accId -> offscreen 72x72 canvas
+        this._accThumbnailCache = new Map();
 
         // Drag state
         this._dragPart = null;       // Part meta being dragged
@@ -326,6 +328,12 @@ class Creator {
         strip.innerHTML = '';
         this._activeCategory = category;
 
+        // Accessories use a different population path
+        if (category === 'accessories') {
+            this._populateAccessoriesStrip(strip);
+            return;
+        }
+
         const parts = window.partsLib.getByCategory(category);
         const saveData = window.saveManager.load();
         const unlockedParts = saveData.unlockedParts || [];
@@ -416,6 +424,203 @@ class Creator {
 
             strip.appendChild(btn);
         }
+    }
+
+    /**
+     * Populate the strip with accessories grouped by slot.
+     */
+    _populateAccessoriesStrip(strip) {
+        if (!window.accessoriesLib) return;
+
+        const allAccessories = window.accessoriesLib.getAllAccessories();
+        const saveData = window.saveManager.load();
+        const unlockedMilestones = saveData.unlockedMilestones || [];
+        const equipped = (this._creature && this._creature.accessories) || [];
+        const equippedIds = new Set(equipped.map(a => a.type));
+
+        // Group by slot
+        const slotOrder = ['head', 'face', 'neck', 'body', 'feet'];
+        const slotLabels = { head: 'Head', face: 'Face', neck: 'Neck', body: 'Body', feet: 'Feet' };
+        const grouped = {};
+        for (const s of slotOrder) grouped[s] = [];
+        for (const acc of allAccessories) {
+            if (grouped[acc.slot]) grouped[acc.slot].push(acc);
+        }
+
+        for (const slot of slotOrder) {
+            const items = grouped[slot];
+            if (items.length === 0) continue;
+
+            // Slot label
+            const label = document.createElement('span');
+            label.className = 'strip-slot-label';
+            label.textContent = slotLabels[slot];
+            strip.appendChild(label);
+
+            for (const acc of items) {
+                const isLocked = acc.unlockCondition !== null &&
+                                 !unlockedMilestones.includes(acc.unlockCondition);
+                const isEquipped = equippedIds.has(acc.id);
+
+                const btn = document.createElement('button');
+                btn.className = 'part-thumb';
+                btn.setAttribute('role', 'option');
+                btn.setAttribute('aria-label',
+                    isLocked ? `${acc.name} (locked)` :
+                    isEquipped ? `${acc.name} (equipped)` : acc.name);
+                btn.setAttribute('aria-selected', isEquipped ? 'true' : 'false');
+
+                if (isLocked) {
+                    btn.disabled = true;
+                }
+
+                // Draw thumbnail (cached)
+                const thumbCanvas = this._getAccessoryThumbnail(acc);
+                const wrap = document.createElement('div');
+                wrap.className = 'part-thumb-wrap';
+                thumbCanvas.style.width = '60px';
+                thumbCanvas.style.height = '60px';
+                wrap.appendChild(thumbCanvas);
+
+                if (isLocked) {
+                    const lockIcon = document.createElement('span');
+                    lockIcon.className = 'part-lock-icon';
+                    lockIcon.textContent = '🔒';
+                    lockIcon.setAttribute('aria-hidden', 'true');
+                    wrap.appendChild(lockIcon);
+                }
+
+                if (isEquipped) {
+                    const eqDot = document.createElement('span');
+                    eqDot.className = 'part-thumb-equipped';
+                    eqDot.textContent = '✓';
+                    eqDot.setAttribute('aria-hidden', 'true');
+                    wrap.appendChild(eqDot);
+                }
+
+                btn.appendChild(wrap);
+
+                if (!isLocked) {
+                    btn.addEventListener('click', () => {
+                        this._onAccessoryTap(acc);
+                    });
+                }
+
+                strip.appendChild(btn);
+            }
+        }
+    }
+
+    /**
+     * Get a cached 72x72 thumbnail canvas for an accessory.
+     */
+    _getAccessoryThumbnail(acc) {
+        if (this._accThumbnailCache.has(acc.id)) {
+            // Return a clone so we can append to DOM independently
+            const cached = this._accThumbnailCache.get(acc.id);
+            const clone = cached.cloneNode(false);
+            const cloneCtx = clone.getContext('2d');
+            cloneCtx.drawImage(cached, 0, 0);
+            return clone;
+        }
+        const canvas = this._buildAccessoryThumbnail(acc);
+        this._accThumbnailCache.set(acc.id, canvas);
+        // Return a clone
+        const clone = canvas.cloneNode(false);
+        const cloneCtx = clone.getContext('2d');
+        cloneCtx.drawImage(canvas, 0, 0);
+        return clone;
+    }
+
+    /**
+     * Build a 72x72 thumbnail canvas for an accessory.
+     */
+    _buildAccessoryThumbnail(acc) {
+        const dpr = window.devicePixelRatio || 1;
+        const thumbSize = 72;
+        const canvas = document.createElement('canvas');
+        canvas.width = thumbSize * dpr;
+        canvas.height = thumbSize * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        // Draw accessory centered at ~90% scale (60px accessory in 72px thumb)
+        ctx.save();
+        ctx.translate(6, 6);
+        window.accessoriesLib.drawAccessory(ctx, acc.id, acc.defaultColor, 1);
+        ctx.restore();
+
+        return canvas;
+    }
+
+    /**
+     * Handle tap on an accessory thumbnail — toggle equip/unequip.
+     */
+    _onAccessoryTap(acc) {
+        if (!this._creature) return;
+
+        const equipped = this._creature.accessories;
+        const existingIndex = equipped.findIndex(a => a.type === acc.id);
+
+        if (existingIndex >= 0) {
+            // Unequip
+            const old = equipped[existingIndex];
+            equipped.splice(existingIndex, 1);
+
+            this._pushCommand({
+                type: 'unequip-accessory',
+                accessoryId: acc.id,
+                oldEntry: old,
+                index: existingIndex
+            });
+        } else {
+            // Equip — remove any existing accessory in the same slot
+            const sameSlot = equipped.findIndex(a => {
+                const meta = window.accessoriesLib.getById(a.type);
+                return meta && meta.slot === acc.slot;
+            });
+            let replacedEntry = null;
+            let replacedIndex = -1;
+            if (sameSlot >= 0) {
+                replacedEntry = equipped[sameSlot];
+                replacedIndex = sameSlot;
+                equipped.splice(sameSlot, 1);
+            }
+
+            const newEntry = { type: acc.id, color: acc.defaultColor };
+            equipped.push(newEntry);
+
+            this._pushCommand({
+                type: 'equip-accessory',
+                accessoryId: acc.id,
+                newEntry: newEntry,
+                replacedEntry: replacedEntry,
+                replacedIndex: replacedIndex
+            });
+
+            // Spawn sparkles at creature center
+            if (this._creatureCenter) {
+                window.renderer.spawnSparkles(
+                    this._creatureCenter.x, this._creatureCenter.y, 4
+                );
+            }
+
+            window.audioManager.playSound('pop');
+        }
+
+        // Invalidate accessories cache
+        if (window.creatureCache.hasCache(this._creature.id)) {
+            window.creatureCache.invalidatePart(
+                this._creature.id, 'accessories', this._creature
+            );
+        }
+
+        // Re-populate strip to show updated equipped state
+        this._populateStrip('accessories');
+
+        this._isDirty = true;
+        this._updateDoneButton();
+        this._updateUndoRedoButtons();
     }
 
     // ══════════════════════════════════════════════════════════
@@ -757,6 +962,59 @@ class Creator {
             this._partRotations.set(cmd.slot, isUndo ? cmd.oldValue : cmd.newValue);
         } else if (cmd.type === 'flip') {
             this._partFlips.set(cmd.slot, isUndo ? cmd.oldValue : cmd.newValue);
+        } else if (cmd.type === 'equip-accessory') {
+            const accessories = this._creature.accessories;
+            if (isUndo) {
+                // Remove the equipped accessory
+                const idx = accessories.findIndex(a => a.type === cmd.accessoryId);
+                if (idx >= 0) accessories.splice(idx, 1);
+                // Restore replaced accessory if any
+                if (cmd.replacedEntry) {
+                    accessories.splice(cmd.replacedIndex, 0, cmd.replacedEntry);
+                }
+            } else {
+                // Re-equip: remove same-slot if needed, add new
+                if (cmd.replacedEntry) {
+                    const sIdx = accessories.findIndex(a => a.type === cmd.replacedEntry.type);
+                    if (sIdx >= 0) accessories.splice(sIdx, 1);
+                }
+                accessories.push(cmd.newEntry);
+            }
+            if (window.creatureCache.hasCache(this._creature.id)) {
+                window.creatureCache.invalidatePart(
+                    this._creature.id, 'accessories', this._creature
+                );
+            }
+            if (this._activeCategory === 'accessories') {
+                this._populateStrip('accessories');
+            }
+        } else if (cmd.type === 'unequip-accessory') {
+            const accessories = this._creature.accessories;
+            if (isUndo) {
+                // Re-add the removed accessory at its original index
+                accessories.splice(cmd.index, 0, cmd.oldEntry);
+            } else {
+                const idx = accessories.findIndex(a => a.type === cmd.accessoryId);
+                if (idx >= 0) accessories.splice(idx, 1);
+            }
+            if (window.creatureCache.hasCache(this._creature.id)) {
+                window.creatureCache.invalidatePart(
+                    this._creature.id, 'accessories', this._creature
+                );
+            }
+            if (this._activeCategory === 'accessories') {
+                this._populateStrip('accessories');
+            }
+        } else if (cmd.type === 'accessory-style') {
+            const entry = this._creature.accessories.find(a => a.type === cmd.accessoryId);
+            if (entry) {
+                entry[cmd.property] = isUndo ? cmd.oldValue : cmd.newValue;
+            }
+            if (window.creatureCache.hasCache(this._creature.id)) {
+                window.creatureCache.invalidatePart(
+                    this._creature.id, 'accessories', this._creature
+                );
+            }
         } else {
             // place/remove: restore full slot value
             this._setSlotValue(cmd.slot, isUndo ? cmd.oldValue : cmd.newValue);

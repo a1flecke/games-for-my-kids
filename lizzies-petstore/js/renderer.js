@@ -7,7 +7,7 @@ class Renderer {
     constructor() {
         this._canvasMap = {};   // id -> { canvas, ctx, w, h }
         this._particlePool = [];
-        this._maxParticles = 50;
+        this._maxParticles = 80;
         this._fontsReady = false;
         this._resizeDirty = false;
         this._creatorBgCache = null;
@@ -20,6 +20,7 @@ class Renderer {
                 x: 0, y: 0, vx: 0, vy: 0,
                 life: 0, maxLife: 0,
                 color: '#FFD700', size: 4,
+                shape: 'circle', // 'circle', 'heart', 'zzz', 'star'
                 active: false
             });
         }
@@ -183,16 +184,20 @@ class Renderer {
         ctx.restore();
     }
 
+    // ── Particle System ──────────────────────────────────
+
     /**
      * Get a particle from the pool.
+     * @param {string} [shape='circle'] — 'circle', 'heart', 'zzz', 'star'
      */
-    spawnParticle(x, y, vx, vy, life, color, size) {
+    spawnParticle(x, y, vx, vy, life, color, size, shape) {
         for (const p of this._particlePool) {
             if (!p.active) {
                 p.x = x; p.y = y;
                 p.vx = vx; p.vy = vy;
                 p.life = life; p.maxLife = life;
                 p.color = color; p.size = size;
+                p.shape = shape || 'circle';
                 p.active = true;
                 return p;
             }
@@ -214,7 +219,59 @@ class Renderer {
                 Math.sin(angle) * speed,
                 600 + Math.random() * 400,
                 colors[i % colors.length],
-                3 + Math.random() * 3
+                3 + Math.random() * 3,
+                'star'
+            );
+        }
+    }
+
+    /**
+     * Spawn heart particles floating upward.
+     */
+    spawnHearts(x, y, count) {
+        for (let i = 0; i < count; i++) {
+            this.spawnParticle(
+                x + (Math.random() - 0.5) * 40,
+                y,
+                (Math.random() - 0.5) * 20,
+                -30 - Math.random() * 30,
+                800 + Math.random() * 400,
+                '#FF69B4',
+                4 + Math.random() * 3,
+                'heart'
+            );
+        }
+    }
+
+    /**
+     * Spawn a single Zzz particle floating up and right.
+     */
+    spawnZzz(x, y) {
+        this.spawnParticle(
+            x, y,
+            8 + Math.random() * 5,
+            -15 - Math.random() * 10,
+            1200 + Math.random() * 400,
+            '#9B59B6',
+            6 + Math.random() * 3,
+            'zzz'
+        );
+    }
+
+    /**
+     * Spawn clean sparkle particles (blue/cyan).
+     */
+    spawnCleanSparkles(x, y, count) {
+        const colors = ['#4A90D9', '#00CED1', '#48CAE4', '#90E0EF'];
+        for (let i = 0; i < count; i++) {
+            this.spawnParticle(
+                x, y,
+                (Math.random() - 0.5) * 40,
+                -20 - Math.random() * 30,
+                500 + Math.random() * 300,
+                colors[i % colors.length],
+                3 + Math.random() * 2,
+                'star'
             );
         }
     }
@@ -228,7 +285,14 @@ class Renderer {
             if (!p.active) continue;
             p.x += p.vx * dtSec;
             p.y += p.vy * dtSec;
-            p.vy += 30 * dtSec; // gentle gravity
+            // Gravity varies by shape: hearts/zzz float up, others fall gently
+            if (p.shape === 'zzz') {
+                p.vy -= 5 * dtSec; // slight upward acceleration
+            } else if (p.shape === 'heart') {
+                p.vy += 10 * dtSec; // very gentle gravity
+            } else {
+                p.vy += 30 * dtSec; // normal gravity
+            }
             p.life -= dt;
             if (p.life <= 0) p.active = false;
         }
@@ -236,6 +300,7 @@ class Renderer {
 
     /**
      * Draw all active particles to a context.
+     * Batched: no ctx.save()/restore() per particle.
      */
     drawParticles(ctx) {
         for (const p of this._particlePool) {
@@ -243,11 +308,71 @@ class Renderer {
             const alpha = Math.max(0, p.life / p.maxLife);
             ctx.globalAlpha = alpha;
             ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size * (0.5 + 0.5 * alpha), 0, Math.PI * 2);
-            ctx.fill();
+
+            const s = p.size * (0.5 + 0.5 * alpha);
+
+            switch (p.shape) {
+                case 'heart':
+                    this._drawHeartParticle(ctx, p.x, p.y, s);
+                    break;
+                case 'zzz':
+                    this._drawZzzParticle(ctx, p.x, p.y, s, alpha);
+                    break;
+                case 'star':
+                    this._drawStarParticle(ctx, p.x, p.y, s);
+                    break;
+                default:
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, s, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+            }
         }
         ctx.globalAlpha = 1;
+    }
+
+    /**
+     * Draw a heart shape at (x, y) with radius s.
+     */
+    _drawHeartParticle(ctx, x, y, s) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + s * 0.3);
+        ctx.bezierCurveTo(x, y - s * 0.3, x - s, y - s * 0.3, x - s, y + s * 0.1);
+        ctx.bezierCurveTo(x - s, y + s * 0.6, x, y + s, x, y + s);
+        ctx.bezierCurveTo(x, y + s, x + s, y + s * 0.6, x + s, y + s * 0.1);
+        ctx.bezierCurveTo(x + s, y - s * 0.3, x, y - s * 0.3, x, y + s * 0.3);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    /**
+     * Draw a "Z" character at (x, y).
+     */
+    _drawZzzParticle(ctx, x, y, s, alpha) {
+        ctx.font = `bold ${Math.round(s * 2.5)}px OpenDyslexic, 'Comic Sans MS', cursive`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Z', x, y);
+    }
+
+    /**
+     * Draw a 5-point star at (x, y) with radius s.
+     */
+    _drawStarParticle(ctx, x, y, s) {
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+            const outerAngle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+            const innerAngle = outerAngle + Math.PI / 5;
+            const ox = x + Math.cos(outerAngle) * s;
+            const oy = y + Math.sin(outerAngle) * s;
+            const ix = x + Math.cos(innerAngle) * s * 0.4;
+            const iy = y + Math.sin(innerAngle) * s * 0.4;
+            if (i === 0) ctx.moveTo(ox, oy);
+            else ctx.lineTo(ox, oy);
+            ctx.lineTo(ix, iy);
+        }
+        ctx.closePath();
+        ctx.fill();
     }
 
     /**

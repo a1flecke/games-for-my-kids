@@ -71,13 +71,31 @@
             <button class="tab" role="tab" data-category="extras" aria-label="Extras" aria-selected="false">
                 <span class="tab-icon">⭐</span>
             </button>
+            <button class="tab" role="tab" data-category="accessories" aria-label="Accessories" aria-selected="false">
+                <span class="tab-icon">👑</span>
+            </button>
         </div>
     </div>
 
     <!-- ═══ NAMING SCREEN ═══ -->
     <div id="screen-naming" class="screen" aria-label="Name your creature">
-        <h2>Name Your Creature!</h2>
+        <div class="naming-top-bar">
+            <button id="btn-naming-back" class="btn btn-icon-only" aria-label="Back to creator">
+                <span class="btn-icon">←</span>
+            </button>
+            <h2>Name Your Creature!</h2>
+            <div class="naming-spacer"></div>
+        </div>
         <canvas id="naming-preview" aria-label="Creature preview"></canvas>
+        <p id="species-name" class="species-label"></p>
+        <div id="vibe-filters" class="vibe-filter-bar" role="radiogroup" aria-label="Name vibes">
+            <button class="vibe-pill active-vibe" role="radio" aria-checked="true" data-vibe="all">All</button>
+            <button class="vibe-pill" role="radio" aria-checked="false" data-vibe="cute">Cute</button>
+            <button class="vibe-pill" role="radio" aria-checked="false" data-vibe="silly">Silly</button>
+            <button class="vibe-pill" role="radio" aria-checked="false" data-vibe="magical">Magical</button>
+            <button class="vibe-pill" role="radio" aria-checked="false" data-vibe="nature">Nature</button>
+            <button class="vibe-pill" role="radio" aria-checked="false" data-vibe="space">Space</button>
+        </div>
         <div id="name-presets" class="name-grid" role="listbox" aria-label="Name suggestions">
             <!-- Populated dynamically -->
         </div>
@@ -85,8 +103,7 @@
             <label for="name-input" class="sr-only">Custom name</label>
             <input id="name-input" type="text" maxlength="20" placeholder="Or type a name..." aria-label="Custom creature name">
         </div>
-        <p id="species-name" class="species-label" aria-live="polite"></p>
-        <button id="btn-birth" class="btn btn-primary" aria-label="Welcome your creature!">
+        <button id="btn-birth" class="btn btn-primary" aria-label="Welcome your creature!" disabled>
             <span class="btn-icon">🎉</span>
             <span class="btn-text">Welcome!</span>
         </button>
@@ -150,7 +167,7 @@
                 <span class="btn-text">New!</span>
             </button>
         </div>
-        <div id="gallery-grid" class="gallery-grid" role="list" aria-label="Your creatures">
+        <div id="gallery-grid" class="gallery-grid" role="group" aria-label="Your creatures">
             <!-- Populated dynamically by save.js -->
         </div>
         <div id="gallery-empty" class="gallery-empty hidden" aria-hidden="true">

@@ -70,8 +70,13 @@ class Game {
         window.progressManager = new ProgressManager();
         window.renderer = new Renderer();
 
-        // Load parts catalog (fire-and-forget; resolves before user navigates)
+        // Load catalogs (fire-and-forget; resolves before user navigates)
         window.partsLib.loadCatalog();
+        window.accessoriesLib.loadCatalog();
+
+        // Load names data
+        this._namesData = null;
+        this._loadNames();
 
         // Apply saved settings
         this._applySettings();
@@ -91,6 +96,18 @@ class Game {
         // Start the game loop
         this._lastTime = performance.now();
         this._tick(this._lastTime);
+    }
+
+    /**
+     * Load names.json data.
+     */
+    async _loadNames() {
+        try {
+            const resp = await fetch('data/names.json');
+            this._namesData = await resp.json();
+        } catch (e) {
+            console.warn('Failed to load names.json', e);
+        }
     }
 
     // ── State Machine ──────────────────────────────────
@@ -115,13 +132,29 @@ class Game {
     _exitState(state) {
         switch (state) {
             case 'CREATOR':
-                window.creator.cancel();
+                // Don't cancel creator when going to NAMING — we'll come back
+                if (this.state !== 'NAMING') {
+                    window.creator.cancel();
+                }
+                if (this._activeCreatureId) {
+                    window.animationEngine.stopAnimation(this._activeCreatureId);
+                }
+                // Stop temp creature animation
+                if (window.creator._creature) {
+                    window.animationEngine.stopAnimation(window.creator._creature.id);
+                }
                 break;
             case 'CARE':
                 window.careManager.cancel();
+                if (this._activeCreatureId) {
+                    window.animationEngine.stopAnimation(this._activeCreatureId);
+                }
                 break;
             case 'PARK':
                 window.parkManager.cancel();
+                if (this._activeCreatureId) {
+                    window.animationEngine.stopAnimation(this._activeCreatureId);
+                }
                 break;
             case 'ROOM_EDIT':
                 window.roomManager.cancel();
@@ -129,6 +162,9 @@ class Game {
             case 'BIRTH_ANIMATION':
                 this._birthTimer = 0;
                 this._nextSparkleTime = 0;
+                if (this._activeCreatureId) {
+                    window.animationEngine.stopAnimation(this._activeCreatureId);
+                }
                 break;
         }
         // Always cancel tutorial on state change
@@ -151,6 +187,8 @@ class Game {
                 );
                 window.creator._computeLayout();
                 window.creator._computePartHitBoxes();
+                // Re-bind canvas input if needed (e.g., coming back from NAMING)
+                window.creator._bindCanvasInput();
                 if (window.tutorialManager.shouldRun()) {
                     window.tutorialManager.start();
                 }
@@ -158,6 +196,9 @@ class Game {
 
             case 'NAMING':
                 this._populateNamePresets();
+                this._bindNamingEvents();
+                this._setupNamingPreview();
+                this._generateSpeciesName();
                 break;
 
             case 'BIRTH_ANIMATION':
@@ -166,6 +207,19 @@ class Game {
                 this._cachedCreature = this._activeCreatureId
                     ? window.saveManager.getCreature(this._activeCreatureId) : null;
                 this._setupCanvas('birth-canvas');
+                // Build creature cache for rendering in birth animation
+                if (this._cachedCreature) {
+                    const birthInfo = window.renderer.getCanvas('birth-canvas');
+                    const birthSize = birthInfo ? Math.min(birthInfo.w, birthInfo.h) * 0.4 : 150;
+                    if (!window.creatureCache.hasCache(this._activeCreatureId)) {
+                        window.creatureCache.buildCache(
+                            this._activeCreatureId, this._cachedCreature, birthSize
+                        );
+                    }
+                    window.animationEngine.startAnimation(
+                        this._activeCreatureId, 'happy', this._cachedCreature
+                    );
+                }
                 break;
 
             case 'CARE':
@@ -175,6 +229,17 @@ class Game {
                     if (this._cachedCreature) {
                         window.careManager.startCaring(this._cachedCreature);
                         this._updateNeedsDisplay(this._cachedCreature.needs);
+                        // Build cache and start idle animation
+                        const careInfo = window.renderer.getCanvas('care-canvas');
+                        const careSize = careInfo ? Math.min(careInfo.w, careInfo.h) * 0.45 : 150;
+                        if (!window.creatureCache.hasCache(this._activeCreatureId)) {
+                            window.creatureCache.buildCache(
+                                this._activeCreatureId, this._cachedCreature, careSize
+                            );
+                        }
+                        window.animationEngine.startAnimation(
+                            this._activeCreatureId, 'idle', this._cachedCreature
+                        );
                     }
                 }
                 break;
@@ -288,10 +353,12 @@ class Game {
             case 'CREATOR':
                 window.renderer.updateParticles(dt);
                 window.creator.update(dt);
+                window.animationEngine.update(dt);
                 window.tutorialManager.update(dt);
                 break;
             case 'BIRTH_ANIMATION':
                 window.renderer.updateParticles(dt);
+                window.animationEngine.update(dt);
                 this._birthTimer += dt;
                 if (this._birthTimer >= this._birthDuration) {
                     this.setState('CARE');
@@ -388,6 +455,36 @@ class Game {
             );
         }
 
+        // Draw creature with elastic reveal
+        if (this._cachedCreature && this._activeCreatureId) {
+            const creatureY = h * 0.42;
+            const displaySize = Math.min(w, h) * 0.4;
+
+            // Elastic scale-in: 0 -> overshoot -> settle
+            let creatureScale = 1;
+            if (progress < 0.3) {
+                const t = progress / 0.3;
+                creatureScale = t * 1.15; // grow to 115%
+            } else if (progress < 0.5) {
+                const t = (progress - 0.3) / 0.2;
+                creatureScale = 1.15 - t * 0.15; // settle to 100%
+            }
+
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, progress / 0.2);
+            const animState = window.animationEngine.getState(this._activeCreatureId);
+            window.animationEngine.setCreaturePosition(
+                this._activeCreatureId, w / 2, creatureY, displaySize
+            );
+            ctx.translate(w / 2, creatureY);
+            ctx.scale(creatureScale, creatureScale);
+            ctx.translate(-w / 2, -creatureY);
+            window.creatureCache.drawCreatureById(
+                ctx, w / 2, creatureY, animState, displaySize, this._activeCreatureId
+            );
+            ctx.restore();
+        }
+
         window.renderer.drawParticles(ctx);
 
         // "Welcome!" text fading in during second half
@@ -396,16 +493,18 @@ class Game {
             ctx.save();
             ctx.globalAlpha = textAlpha;
             ctx.fillStyle = '#FF69B4';
-            ctx.font = "bold 32px OpenDyslexic, 'Comic Sans MS', cursive";
+            ctx.font = "bold 28px OpenDyslexic, 'Comic Sans MS', cursive";
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('Welcome!', w / 2, h / 2 - 20);
 
-            // Creature name below (use cached creature, not per-frame load)
+            const textY = h * 0.72;
+            ctx.fillText('Welcome!', w / 2, textY);
+
+            // Creature name below
             if (this._cachedCreature) {
                 ctx.fillStyle = '#9B59B6';
-                ctx.font = "24px OpenDyslexic, 'Comic Sans MS', cursive";
-                ctx.fillText(this._cachedCreature.name, w / 2, h / 2 + 30);
+                ctx.font = "22px OpenDyslexic, 'Comic Sans MS', cursive";
+                ctx.fillText(this._cachedCreature.name, w / 2, textY + 35);
             }
             ctx.restore();
         }
@@ -479,16 +578,29 @@ class Game {
 
     // ── Naming ──────────────────────────────────────────
 
-    _populateNamePresets() {
+    _populateNamePresets(vibeFilter) {
         const grid = document.getElementById('name-presets');
         if (!grid) return;
 
-        // Pick 8 random names from the names data
-        const allNames = [
-            'Sparkle', 'Bubbles', 'Moonbeam', 'Cupcake',
-            'Stardust', 'Biscuit', 'Twinkle', 'Marshmallow',
-            'Pepper', 'Sunshine', 'Pudding', 'Zigzag'
-        ];
+        const vibe = vibeFilter || 'all';
+        let allNames = [];
+
+        if (this._namesData && this._namesData.categories) {
+            for (const cat of this._namesData.categories) {
+                if (vibe === 'all' || cat.vibe === vibe) {
+                    allNames = allNames.concat(cat.names);
+                }
+            }
+        }
+
+        // Fallback if data not loaded yet
+        if (allNames.length === 0) {
+            allNames = [
+                'Sparkle', 'Bubbles', 'Moonbeam', 'Cupcake',
+                'Stardust', 'Biscuit', 'Twinkle', 'Marshmallow',
+                'Pepper', 'Sunshine', 'Pudding', 'Zigzag'
+            ];
+        }
 
         // Fisher-Yates shuffle
         const shuffled = [...allNames];
@@ -497,8 +609,11 @@ class Game {
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
 
+        // Show up to 12 names
+        const count = Math.min(12, shuffled.length);
+
         grid.innerHTML = '';
-        for (const name of shuffled.slice(0, 8)) {
+        for (const name of shuffled.slice(0, count)) {
             const btn = document.createElement('button');
             btn.className = 'btn btn-secondary name-preset';
             btn.textContent = name;
@@ -506,7 +621,10 @@ class Game {
             btn.setAttribute('aria-label', name);
             btn.addEventListener('click', () => {
                 const input = document.getElementById('name-input');
-                if (input) input.value = name;
+                if (input) {
+                    input.value = name;
+                    this._updateBirthButton();
+                }
                 // Deselect others
                 grid.querySelectorAll('.name-preset').forEach(b => {
                     b.setAttribute('aria-selected', 'false');
@@ -516,6 +634,157 @@ class Game {
             btn.setAttribute('aria-selected', 'false');
             grid.appendChild(btn);
         }
+    }
+
+    /**
+     * Bind naming screen events (vibe filters, input, back button).
+     * Uses clone-replace for idempotent re-binding.
+     */
+    _bindNamingEvents() {
+        // Vibe filter pills
+        const vibeBar = document.getElementById('vibe-filters');
+        if (vibeBar) {
+            const pills = vibeBar.querySelectorAll('.vibe-pill');
+            for (const pill of pills) {
+                const newPill = pill.cloneNode(true);
+                pill.parentNode.replaceChild(newPill, pill);
+
+                newPill.addEventListener('click', () => {
+                    // Update active state
+                    vibeBar.querySelectorAll('.vibe-pill').forEach(p => {
+                        p.classList.remove('active-vibe');
+                        p.setAttribute('aria-checked', 'false');
+                    });
+                    newPill.classList.add('active-vibe');
+                    newPill.setAttribute('aria-checked', 'true');
+
+                    const vibe = newPill.getAttribute('data-vibe');
+                    this._populateNamePresets(vibe);
+                });
+            }
+        }
+
+        // Name input — enable/disable Welcome button
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) {
+            const newInput = nameInput.cloneNode(true);
+            nameInput.parentNode.replaceChild(newInput, nameInput);
+            newInput.addEventListener('input', () => {
+                this._updateBirthButton();
+                // Deselect any preset pills
+                const grid = document.getElementById('name-presets');
+                if (grid) {
+                    grid.querySelectorAll('.name-preset').forEach(b => {
+                        b.setAttribute('aria-selected', 'false');
+                    });
+                }
+            });
+        }
+
+        // Back button — return to creator
+        const backBtn = document.getElementById('btn-naming-back');
+        if (backBtn) {
+            const newBack = backBtn.cloneNode(true);
+            backBtn.parentNode.replaceChild(newBack, backBtn);
+            newBack.addEventListener('click', () => {
+                // Restore creator state
+                this.setState('CREATOR');
+            });
+        }
+
+        // Re-bind birth button (clone-replace for idempotent)
+        const birthBtn = document.getElementById('btn-birth');
+        if (birthBtn) {
+            const newBirth = birthBtn.cloneNode(true);
+            birthBtn.parentNode.replaceChild(newBirth, birthBtn);
+            newBirth.addEventListener('click', () => {
+                const input = document.getElementById('name-input');
+                const name = (input && input.value.trim()) || 'Creature';
+                const creature = window.creator.getCreature();
+                if (!creature) return;
+
+                creature.name = name;
+                creature.createdAt = Date.now();
+                creature.lastActiveAt = Date.now();
+
+                if (window.saveManager.addCreature(creature)) {
+                    this._activeCreatureId = creature.id;
+                    this.setState('BIRTH_ANIMATION');
+                }
+            });
+        }
+    }
+
+    /**
+     * Enable/disable the Welcome button based on name input.
+     */
+    _updateBirthButton() {
+        const input = document.getElementById('name-input');
+        const btn = document.getElementById('btn-birth');
+        if (!input || !btn) return;
+        btn.disabled = input.value.trim().length === 0;
+    }
+
+    /**
+     * Set up the naming preview canvas with creature rendering.
+     */
+    _setupNamingPreview() {
+        const creature = window.creator.getCreature();
+        if (!creature) return;
+
+        const previewInfo = window.renderer.setupCanvas('naming-preview');
+        if (!previewInfo) return;
+
+        const { ctx, w, h } = previewInfo;
+        const displaySize = Math.min(w, h) * 0.7;
+
+        // Build cache if needed
+        if (!window.creatureCache.hasCache(creature.id)) {
+            window.creatureCache.buildCache(creature.id, creature, displaySize);
+        }
+
+        // Draw once (static preview)
+        window.renderer.clear(ctx, w, h);
+        window.renderer.drawBackground(ctx, w, h);
+        const animState = window.animationEngine.getState(creature.id);
+        window.creatureCache.drawCreatureById(
+            ctx, w / 2, h / 2, animState, displaySize, creature.id
+        );
+    }
+
+    /**
+     * Generate a species name from the creature's body parts.
+     */
+    _generateSpeciesName() {
+        const creature = window.creator.getCreature();
+        const el = document.getElementById('species-name');
+        if (!creature || !el) return;
+
+        const head = creature.body.head ? creature.body.head.type : '';
+        const wings = creature.body.wings ? creature.body.wings.type : '';
+        const tail = creature.body.tail ? creature.body.tail.type : '';
+
+        // Combine head + modifier from wings/tail
+        const headNames = {
+            'cat': 'Kitling', 'dog': 'Puppling', 'bunny': 'Bunnifae',
+            'bird': 'Aviari', 'dragon': 'Dragonette', 'fox': 'Foxlet',
+            'owl': 'Owlkin', 'bear': 'Bearling', 'unicorn': 'Unicorni',
+            'mermaid': 'Merfae'
+        };
+        const wingMods = {
+            'feathered': ' Flyer', 'butterfly': ' Flutter', 'bat': ' Swooper',
+            'fairy': ' Fae', 'dragon': ' Wyrm'
+        };
+        const tailMods = {
+            'fluffy': ' Floof', 'spiky': ' Spike', 'phoenix': ' Blaze',
+            'fish': ' Splash', 'devil': ' Imp'
+        };
+
+        let species = headNames[head] || 'Creature';
+        if (wings && wingMods[wings]) species += wingMods[wings];
+        else if (tail && tailMods[tail]) species += tailMods[tail];
+
+        el.textContent = `a ${species}`;
     }
 
     // ── Needs Display ────────────────────────────────────
@@ -637,21 +906,48 @@ class Game {
             }
         });
 
-        // Naming screen
-        document.getElementById('btn-birth').addEventListener('click', () => {
-            const input = document.getElementById('name-input');
-            const name = (input && input.value.trim()) || 'Creature';
-            const creature = window.creator.getCreature();
-            if (!creature) return;
+        // Naming screen birth button is bound in _bindNamingEvents()
 
-            creature.name = name;
-            creature.createdAt = Date.now();
-            creature.lastActiveAt = Date.now();
-
-            if (window.saveManager.addCreature(creature)) {
-                this._activeCreatureId = creature.id;
-                this.setState('BIRTH_ANIMATION');
-            }
+        // Care action buttons
+        document.getElementById('btn-feed').addEventListener('click', () => {
+            if (!this._cachedCreature) return;
+            window.careManager.feed();
+            this._updateNeedsDisplay(this._cachedCreature.needs);
+            window.animationEngine.startAnimation(
+                this._activeCreatureId, 'eating', this._cachedCreature
+            );
+        });
+        document.getElementById('btn-bathe').addEventListener('click', () => {
+            if (!this._cachedCreature) return;
+            window.careManager.bathe();
+            this._updateNeedsDisplay(this._cachedCreature.needs);
+            window.animationEngine.startAnimation(
+                this._activeCreatureId, 'bathing', this._cachedCreature
+            );
+        });
+        document.getElementById('btn-pet').addEventListener('click', () => {
+            if (!this._cachedCreature) return;
+            window.careManager.pet();
+            this._updateNeedsDisplay(this._cachedCreature.needs);
+            window.animationEngine.startAnimation(
+                this._activeCreatureId, 'happy', this._cachedCreature
+            );
+        });
+        document.getElementById('btn-play').addEventListener('click', () => {
+            if (!this._cachedCreature) return;
+            window.careManager.play();
+            this._updateNeedsDisplay(this._cachedCreature.needs);
+            window.animationEngine.startAnimation(
+                this._activeCreatureId, 'happy', this._cachedCreature
+            );
+        });
+        document.getElementById('btn-sleep').addEventListener('click', () => {
+            if (!this._cachedCreature) return;
+            window.careManager.sleep();
+            this._updateNeedsDisplay(this._cachedCreature.needs);
+            window.animationEngine.startAnimation(
+                this._activeCreatureId, 'sleeping', this._cachedCreature
+            );
         });
 
         // Care screen

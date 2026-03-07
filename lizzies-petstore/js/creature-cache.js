@@ -65,7 +65,11 @@ class CreatureCache {
         // Render each part to an offscreen canvas
         for (const slot of RENDER_ORDER) {
             if (slot === 'accessories') {
-                // Accessories rendered as a group on one canvas (future session)
+                // Accessories rendered as a composite canvas
+                const accCanvas = this._buildAccessoriesCanvas(creatureData, dpr);
+                if (accCanvas) {
+                    partCanvases['accessories'] = accCanvas;
+                }
                 continue;
             }
 
@@ -118,6 +122,25 @@ class CreatureCache {
         const cache = this._caches.get(creatureId);
         if (!cache) return;
 
+        // Accessories are a special composite canvas
+        if (partSlot === 'accessories') {
+            const dpr = window.devicePixelRatio || 1;
+            const hadAccessories = !!cache['accessories'];
+            const accCanvas = this._buildAccessoriesCanvas(creatureData, dpr);
+            if (accCanvas) {
+                if (!hadAccessories) {
+                    this._checkBudget(1);
+                    this._totalCanvases++;
+                }
+                cache['accessories'] = accCanvas;
+            } else if (hadAccessories) {
+                delete cache['accessories'];
+                this._totalCanvases--;
+            }
+            this._touchLRU(creatureId);
+            return;
+        }
+
         const body = creatureData.body || {};
         const partData = this._getPartData(body, partSlot);
 
@@ -166,6 +189,51 @@ class CreatureCache {
 
         cache[partSlot] = { canvas, w: cw, h: ch };
         this._touchLRU(creatureId);
+    }
+
+    /**
+     * Build a composite offscreen canvas with all accessories drawn.
+     * Each accessory is drawn at its anchor position relative to a 200x200 reference.
+     * Returns { canvas, w, h } or null if no accessories.
+     */
+    _buildAccessoriesCanvas(creatureData, dpr) {
+        if (!creatureData.accessories || creatureData.accessories.length === 0) return null;
+        if (!window.accessoriesLib) return null;
+
+        const refSize = 200; // match reference creature size
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.ceil(refSize * dpr);
+        canvas.height = Math.ceil(refSize * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        // Determine head type for anchor lookup
+        const headType = creatureData.body && creatureData.body.head
+            ? `head-${creatureData.body.head.type}` : null;
+
+        for (const acc of creatureData.accessories) {
+            const accMeta = window.accessoriesLib.getById(acc.type);
+            if (!accMeta) continue;
+
+            const anchor = window.accessoriesLib.getAnchor(accMeta.slot, headType);
+            const accScale = anchor.scale || 1;
+
+            // Position relative to refSize center
+            const drawX = anchor.x * refSize;
+            const drawY = anchor.y * refSize;
+
+            ctx.save();
+            ctx.translate(drawX, drawY);
+            if (anchor.rotation) {
+                ctx.rotate(anchor.rotation * Math.PI / 180);
+            }
+            // Accessory draws into 60x60 box centered at origin
+            ctx.translate(-30 * accScale, -30 * accScale);
+            window.accessoriesLib.drawAccessory(ctx, acc.type, acc.color || accMeta.defaultColor, accScale);
+            ctx.restore();
+        }
+
+        return { canvas, w: refSize, h: refSize };
     }
 
     /**

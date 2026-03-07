@@ -44,6 +44,7 @@ class SaveManager {
             unlockedParts: [],
             unlockedAccessories: [],
             unlockedThemes: [],
+            unlockedMilestones: [],
             savedOutfits: {}
         };
     }

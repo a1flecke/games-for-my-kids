@@ -4,27 +4,108 @@
     "name": "Crown",
     "slot": "head",
     "defaultColor": "#FFD700",
-    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-dragon", "head-fox"],
+    "compatibleParts": [],
     "unlockCondition": null,
     "tags": ["fancy", "starter"]
   },
   {
-    "id": "acc-flower-crown",
-    "name": "Flower Crown",
+    "id": "acc-tiara",
+    "name": "Tiara",
     "slot": "head",
-    "defaultColor": "#FF69B4",
-    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-fox"],
-    "unlockCondition": null,
-    "tags": ["cute", "starter"]
+    "defaultColor": "#C0C0C0",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-kid-stage",
+    "tags": ["fancy"]
   },
   {
     "id": "acc-party-hat",
     "name": "Party Hat",
     "slot": "head",
     "defaultColor": "#FF6B6B",
-    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-dragon", "head-fox"],
+    "compatibleParts": [],
     "unlockCondition": null,
     "tags": ["fun", "starter"]
+  },
+  {
+    "id": "acc-top-hat",
+    "name": "Top Hat",
+    "slot": "head",
+    "defaultColor": "#2C2416",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-mythical",
+    "tags": ["fancy"]
+  },
+  {
+    "id": "acc-beanie",
+    "name": "Beanie",
+    "slot": "head",
+    "defaultColor": "#4A90D9",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-flower-crown",
+    "name": "Flower Crown",
+    "slot": "head",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-butterfly-clip",
+    "name": "Butterfly Clip",
+    "slot": "head",
+    "defaultColor": "#9B59B6",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-bow",
+    "name": "Bow",
+    "slot": "head",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-headband",
+    "name": "Headband",
+    "slot": "head",
+    "defaultColor": "#FFD700",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-princess-cone",
+    "name": "Princess Cone Hat",
+    "slot": "head",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-kid-stage",
+    "tags": ["fancy"]
+  },
+  {
+    "id": "acc-cat-ears-band",
+    "name": "Cat Ears Headband",
+    "slot": "head",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-star-hairpin",
+    "name": "Star Hairpin",
+    "slot": "head",
+    "defaultColor": "#FFD700",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
   },
   {
     "id": "acc-bow-tie",
@@ -45,10 +126,73 @@
     "tags": ["fancy", "starter"]
   },
   {
+    "id": "acc-scarf",
+    "name": "Scarf",
+    "slot": "neck",
+    "defaultColor": "#FF6B6B",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-feather-boa",
+    "name": "Feather Boa",
+    "slot": "neck",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-kid-stage",
+    "tags": ["fancy"]
+  },
+  {
+    "id": "acc-ribbon",
+    "name": "Ribbon",
+    "slot": "neck",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-collar-bell",
+    "name": "Collar with Bell",
+    "slot": "neck",
+    "defaultColor": "#FF0000",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-lei",
+    "name": "Lei",
+    "slot": "neck",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-park-visit",
+    "tags": ["nature"]
+  },
+  {
+    "id": "acc-medal",
+    "name": "Medal",
+    "slot": "neck",
+    "defaultColor": "#FFD700",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-5-creatures",
+    "tags": ["fancy"]
+  },
+  {
     "id": "acc-cape",
     "name": "Cape",
     "slot": "body",
     "defaultColor": "#9B59B6",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["adventure", "starter"]
+  },
+  {
+    "id": "acc-vest",
+    "name": "Vest",
+    "slot": "body",
+    "defaultColor": "#8B4513",
     "compatibleParts": [],
     "unlockCondition": null,
     "tags": ["adventure", "starter"]
@@ -63,13 +207,67 @@
     "tags": ["fancy"]
   },
   {
-    "id": "acc-heart-sunglasses",
-    "name": "Heart Sunglasses",
-    "slot": "face",
+    "id": "acc-dress",
+    "name": "Dress",
+    "slot": "body",
     "defaultColor": "#FF69B4",
-    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox"],
+    "compatibleParts": [],
+    "unlockCondition": "milestone-kid-stage",
+    "tags": ["fancy"]
+  },
+  {
+    "id": "acc-armor",
+    "name": "Armor",
+    "slot": "body",
+    "defaultColor": "#C0C0C0",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-mythical",
+    "tags": ["adventure"]
+  },
+  {
+    "id": "acc-saddle",
+    "name": "Saddle",
+    "slot": "body",
+    "defaultColor": "#8B4513",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-mythical",
+    "tags": ["adventure"]
+  },
+  {
+    "id": "acc-backpack",
+    "name": "Backpack",
+    "slot": "body",
+    "defaultColor": "#4A90D9",
+    "compatibleParts": [],
     "unlockCondition": null,
-    "tags": ["fun", "starter"]
+    "tags": ["adventure", "starter"]
+  },
+  {
+    "id": "acc-fairy-wings-deco",
+    "name": "Fairy Wings (Decorative)",
+    "slot": "body",
+    "defaultColor": "#00CED1",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-kid-stage",
+    "tags": ["magical"]
+  },
+  {
+    "id": "acc-superhero-cape",
+    "name": "Superhero Cape",
+    "slot": "body",
+    "defaultColor": "#FF0000",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-5-creatures",
+    "tags": ["adventure"]
+  },
+  {
+    "id": "acc-sweater",
+    "name": "Sweater",
+    "slot": "body",
+    "defaultColor": "#FF6B6B",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
   },
   {
     "id": "acc-boots",
@@ -81,12 +279,102 @@
     "tags": ["adventure", "starter"]
   },
   {
-    "id": "acc-tiara",
-    "name": "Tiara",
-    "slot": "head",
-    "defaultColor": "#C0C0C0",
-    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-bird", "head-fox"],
+    "id": "acc-socks",
+    "name": "Socks",
+    "slot": "feet",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-leg-warmers",
+    "name": "Leg Warmers",
+    "slot": "feet",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-anklets",
+    "name": "Anklets",
+    "slot": "feet",
+    "defaultColor": "#FFD700",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-slippers",
+    "name": "Slippers",
+    "slot": "feet",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": [],
+    "unlockCondition": null,
+    "tags": ["cute", "starter"]
+  },
+  {
+    "id": "acc-roller-skates",
+    "name": "Roller Skates",
+    "slot": "feet",
+    "defaultColor": "#FF0000",
+    "compatibleParts": [],
+    "unlockCondition": "milestone-5-creatures",
+    "tags": ["fun"]
+  },
+  {
+    "id": "acc-glasses",
+    "name": "Glasses",
+    "slot": "face",
+    "defaultColor": "#2C2416",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox", "head-bear", "head-unicorn"],
+    "unlockCondition": null,
+    "tags": ["fun", "starter"]
+  },
+  {
+    "id": "acc-heart-sunglasses",
+    "name": "Heart Sunglasses",
+    "slot": "face",
+    "defaultColor": "#FF69B4",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox", "head-bear", "head-unicorn"],
+    "unlockCondition": null,
+    "tags": ["fun", "starter"]
+  },
+  {
+    "id": "acc-star-sunglasses",
+    "name": "Star Sunglasses",
+    "slot": "face",
+    "defaultColor": "#FFD700",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox", "head-bear", "head-unicorn"],
+    "unlockCondition": null,
+    "tags": ["fun", "starter"]
+  },
+  {
+    "id": "acc-monocle",
+    "name": "Monocle",
+    "slot": "face",
+    "defaultColor": "#FFD700",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox", "head-bear", "head-unicorn"],
+    "unlockCondition": "milestone-mythical",
+    "tags": ["fancy"]
+  },
+  {
+    "id": "acc-masquerade-mask",
+    "name": "Masquerade Mask",
+    "slot": "face",
+    "defaultColor": "#9B59B6",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox", "head-bear", "head-unicorn"],
     "unlockCondition": "milestone-kid-stage",
     "tags": ["fancy"]
+  },
+  {
+    "id": "acc-nose-ring",
+    "name": "Nose Ring",
+    "slot": "face",
+    "defaultColor": "#FFD700",
+    "compatibleParts": ["head-cat", "head-dog", "head-bunny", "head-fox", "head-bear", "head-unicorn"],
+    "unlockCondition": "milestone-5-creatures",
+    "tags": ["fun"]
   }
 ]
