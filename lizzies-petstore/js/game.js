@@ -920,6 +920,10 @@ class Game {
             this.setState('GALLERY');
         });
 
+        document.getElementById('btn-settings').addEventListener('click', () => {
+            window.uiManager.showOverlay('overlay-settings');
+        });
+
         // Creator screen
         document.getElementById('btn-creator-back').addEventListener('click', (e) => {
             if (window.creator.isDirty()) {

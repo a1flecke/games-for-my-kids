@@ -39,11 +39,21 @@ Run these skills after editing the relevant files — before committing:
 | After editing `math-coloring-2/index.html` themes | `/verify-math-geometry` | Every section overlaps nearest neighbor by ≥15px |
 | After editing any `phonics-game/data/lessons/*.json` | `/validate-lessons` | Word count ≥8, no cross-pattern duplicates, no homographs, no British spellings |
 | After editing any `keyboard-command-4/data/levels/levelN.json` | `/verify-kc4-levels` | Item safety, shortcut ID validity, hp/phases consistency, offsetX collisions, mage depths, instruction accuracy, taunt uniqueness |
+| After editing any `lizzies-petstore/data/*.json` | `/validate-petstore-data` | Schema integrity, color format, referential consistency, unlock conditions |
+
+Pre-implementation checklists (run before starting a session):
+
+| Game | Skill |
+|------|-------|
+| lizzies-petstore | `/petstore-checklist` |
+| keyboard-command-4 | `/kc4-checklist` |
+| phonics-game | `/phonics-checklist` |
 
 PostToolUse hooks run automatically after each Edit/Write:
 - Lesson validator (phonics lesson JSON files)
 - JS pattern checks (phonics-game and keyboard-command-4 JS/HTML files)
 - Level JSON validator (keyboard-command-4 level JSON files)
+- Petstore data validator (lizzies-petstore data JSON files)
 
 ## Adding a New Game
 
@@ -62,6 +72,7 @@ Game-specific architecture notes are in path-scoped rules files (auto-loaded whe
 - **math-coloring-2** — 2nd grade math coloring game, single-file. See `.claude/rules/math-coloring.md`.
 - **phonics-game** — Word Explorer, phonics matching for grades 1–5. See `.claude/rules/phonics.md`.
 - **keyboard-command-4** — Shortcut-teaching shooter, multi-file Canvas. See `.claude/rules/kc4-architecture.md`.
+- **lizzies-petstore** — Creature creator + virtual pet. Canvas 2D with offscreen caching, pointer input, Web Audio synthesis. See `.claude/rules/lizzies-petstore.md`.
 
 ### keyboard-command-4
 

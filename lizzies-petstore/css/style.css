@@ -255,6 +255,13 @@ body {
     align-items: center;
 }
 
+.title-settings {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 1.5rem;
+}
+
 /* ═══ CREATOR SCREEN ═══ */
 
 #screen-creator.active {

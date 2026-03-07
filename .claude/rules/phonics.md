@@ -7,9 +7,7 @@ paths:
 
 Word Explorer — phonics matching game for grades 1–5. Multi-file modular JS.
 
-**Session workflow:** After each session: run a web engineer review agent → fix issues → delete the session file → commit + push.
-
-**Session tracking:** Sessions defined in `phonics-game/sessions/`. Delete session file after completing it. Run sessions in order per `sessions/MODEL-ASSIGNMENTS.md` (Haiku for data-entry sessions, Sonnet for implementation sessions).
+**Status:** ALL 14 sessions complete. Game is production-ready. Phonics data rules below still apply for any future lesson edits.
 
 **Key files:**
 - `index.html` — game shell with 4 screens: `#screen-select`, `#screen-board`, `#screen-sort`, `#screen-summary`

@@ -189,8 +189,8 @@ class Creator {
         // Hide style panel
         this._hideStylePanel();
 
-        // Reset canvas binding so it re-binds on next session
-        this._canvasBound = false;
+        // Keep _canvasBound = true — listener persists across sessions
+        // (removing + re-adding would require storing the handler reference)
 
         // Don't clear thumbnail cache — reusable across sessions
         // Don't clear style panel DOM — rebuilt only once
