@@ -48,14 +48,10 @@
                 <span class="btn-text">Done!</span>
             </button>
         </div>
-        <canvas id="creator-canvas" aria-label="Creature workspace"></canvas>
-        <div id="style-panel" class="panel hidden" role="group" aria-label="Style tools">
-            <!-- Populated dynamically by creator.js -->
-        </div>
-        <div id="part-strip" class="part-strip" role="listbox" aria-label="Available parts">
-            <!-- Populated dynamically by creator.js -->
-        </div>
-        <div id="creator-tabs" class="tab-bar" role="tablist" aria-label="Part categories">
+        <div class="creator-main">
+            <canvas id="creator-canvas" aria-label="Creature workspace"></canvas>
+            <div class="creator-sidebar">
+                <div id="creator-tabs" class="tab-bar" role="tablist" aria-label="Part categories">
             <button class="tab" role="tab" data-category="head" aria-label="Heads" aria-selected="true">
                 <span class="tab-icon">😺</span>
             </button>
@@ -77,6 +73,14 @@
             <button class="tab" role="tab" data-category="accessories" aria-label="Accessories" aria-selected="false">
                 <span class="tab-icon">👑</span>
             </button>
+                </div>
+                <div id="part-strip" class="part-strip" role="listbox" aria-label="Available parts">
+                    <!-- Populated dynamically by creator.js -->
+                </div>
+                <div id="style-panel" class="panel hidden" role="group" aria-label="Style tools">
+                    <!-- Populated dynamically by creator.js -->
+                </div>
+            </div>
         </div>
     </div>
 
