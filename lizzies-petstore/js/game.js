@@ -45,6 +45,7 @@ class Game {
         this._birthTimer = 0;
         this._birthDuration = 2500; // ms
         this._nextSparkleTime = 0;
+        this._birthGradient = null; // cached gradient for birth animation
 
         // Cached creature data for draw loop (avoid JSON.parse per frame)
         this._cachedCreature = null;
@@ -120,7 +121,7 @@ class Game {
         const oldState = this.state;
         if (oldState === newState) return;
 
-        this._exitState(oldState);
+        this._exitState(oldState, newState);
         this.state = newState;
         this._showScreen(newState);
         this._enterState(newState);
@@ -129,11 +130,11 @@ class Game {
     /**
      * Clean up when leaving a state.
      */
-    _exitState(state) {
+    _exitState(state, newState) {
         switch (state) {
             case 'CREATOR':
                 // Don't cancel creator when going to NAMING — we'll come back
-                if (this.state !== 'NAMING') {
+                if (newState !== 'NAMING') {
                     window.creator.cancel();
                 }
                 if (this._activeCreatureId) {
@@ -143,18 +144,22 @@ class Game {
                 if (window.creator._creature) {
                     window.animationEngine.stopAnimation(window.creator._creature.id);
                 }
+                window.audioManager.stopMusic();
                 break;
             case 'CARE':
                 window.careManager.cancel();
                 if (this._activeCreatureId) {
                     window.animationEngine.stopAnimation(this._activeCreatureId);
                 }
+                window.audioManager.stopMusic();
                 break;
             case 'PARK':
                 window.parkManager.cancel();
                 if (this._activeCreatureId) {
                     window.animationEngine.stopAnimation(this._activeCreatureId);
                 }
+                window.audioManager.stopMusic();
+                window.audioManager.stopAmbient();
                 break;
             case 'ROOM_EDIT':
                 window.roomManager.cancel();
@@ -192,6 +197,7 @@ class Game {
                 if (window.tutorialManager.shouldRun()) {
                     window.tutorialManager.start();
                 }
+                window.audioManager.startMusic('creator');
                 break;
 
             case 'NAMING':
@@ -207,6 +213,16 @@ class Game {
                 this._cachedCreature = this._activeCreatureId
                     ? window.saveManager.getCreature(this._activeCreatureId) : null;
                 this._setupCanvas('birth-canvas');
+                window.audioManager.playSound('happy');
+                window.audioManager.stopMusic();
+                // Cache birth gradient (avoid creating per frame)
+                if (this._activeCanvas) {
+                    const { ctx, w, h } = this._activeCanvas;
+                    const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.6);
+                    grad.addColorStop(0, '#FFE4F0');
+                    grad.addColorStop(1, '#F5F0E8');
+                    this._birthGradient = grad;
+                }
                 // Build creature cache for rendering in birth animation
                 if (this._cachedCreature) {
                     const birthInfo = window.renderer.getCanvas('birth-canvas');
@@ -242,6 +258,7 @@ class Game {
                         );
                     }
                 }
+                window.audioManager.startMusic('care');
                 break;
 
             case 'GALLERY':
@@ -255,6 +272,8 @@ class Game {
                         window.saveManager.getCreature(this._activeCreatureId)
                     );
                 }
+                window.audioManager.startMusic('park');
+                window.audioManager.startAmbient();
                 break;
 
             case 'ROOM_EDIT':
@@ -438,11 +457,12 @@ class Game {
     _drawBirthAnimation(ctx, w, h) {
         const progress = Math.min(1, this._birthTimer / this._birthDuration);
 
-        // Pastel gradient background
-        const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.6);
-        grad.addColorStop(0, '#FFE4F0');
-        grad.addColorStop(1, '#F5F0E8');
-        ctx.fillStyle = grad;
+        // Pastel gradient background (gradient cached on state entry)
+        if (this._birthGradient) {
+            ctx.fillStyle = this._birthGradient;
+        } else {
+            ctx.fillStyle = '#FFE4F0';
+        }
         ctx.fillRect(0, 0, w, h);
 
         // Spawn sparkles during first half (interval-based, not modulus on float)
@@ -822,8 +842,9 @@ class Game {
 
     _applySettings() {
         const settings = window.saveManager.getSettings();
-        window.audioManager.setVolume(settings.volume);
+        window.audioManager.setVolume(settings.volume / 100);
         window.audioManager.setMuted(settings.muted);
+        window.audioManager.setMusicEnabled(settings.musicEnabled);
     }
 
     _bindSettingsControls() {
@@ -837,7 +858,7 @@ class Game {
 
             volumeSlider.addEventListener('input', () => {
                 const vol = parseInt(volumeSlider.value, 10);
-                window.audioManager.setVolume(vol);
+                window.audioManager.setVolume(vol / 100);
                 window.saveManager.updateSettings({ volume: vol });
             });
         }
@@ -854,6 +875,23 @@ class Game {
                 window.saveManager.updateSettings({ muted: newMuted });
                 muteToggle.textContent = newMuted ? 'On' : 'Off';
                 muteToggle.setAttribute('aria-checked', String(newMuted));
+            });
+        }
+
+        // Music toggle (ADHD-friendly opt-in, defaults to Off)
+        const musicToggle = document.getElementById('music-toggle');
+        if (musicToggle) {
+            const settings = window.saveManager.getSettings();
+            musicToggle.textContent = settings.musicEnabled ? 'On' : 'Off';
+            musicToggle.setAttribute('aria-checked', String(settings.musicEnabled));
+
+            musicToggle.addEventListener('click', () => {
+                const currentSettings = window.saveManager.getSettings();
+                const newEnabled = !currentSettings.musicEnabled;
+                window.audioManager.setMusicEnabled(newEnabled);
+                window.saveManager.updateSettings({ musicEnabled: newEnabled });
+                musicToggle.textContent = newEnabled ? 'On' : 'Off';
+                musicToggle.setAttribute('aria-checked', String(newEnabled));
             });
         }
     }
@@ -916,6 +954,8 @@ class Game {
             window.animationEngine.startAnimation(
                 this._activeCreatureId, 'eating', this._cachedCreature
             );
+            window.audioManager.playSound('munch');
+            window.audioManager.playCreatureVoice(this._cachedCreature);
         });
         document.getElementById('btn-bathe').addEventListener('click', () => {
             if (!this._cachedCreature) return;
@@ -924,6 +964,8 @@ class Game {
             window.animationEngine.startAnimation(
                 this._activeCreatureId, 'bathing', this._cachedCreature
             );
+            window.audioManager.playSound('splash');
+            window.audioManager.playCreatureVoice(this._cachedCreature);
         });
         document.getElementById('btn-pet').addEventListener('click', () => {
             if (!this._cachedCreature) return;
@@ -932,6 +974,8 @@ class Game {
             window.animationEngine.startAnimation(
                 this._activeCreatureId, 'happy', this._cachedCreature
             );
+            window.audioManager.playCreatureVoice(this._cachedCreature);
+            window.audioManager.playSound('happy');
         });
         document.getElementById('btn-play').addEventListener('click', () => {
             if (!this._cachedCreature) return;
@@ -940,6 +984,8 @@ class Game {
             window.animationEngine.startAnimation(
                 this._activeCreatureId, 'happy', this._cachedCreature
             );
+            window.audioManager.playCreatureVoice(this._cachedCreature);
+            window.audioManager.playSound('happy');
         });
         document.getElementById('btn-sleep').addEventListener('click', () => {
             if (!this._cachedCreature) return;
@@ -948,6 +994,7 @@ class Game {
             window.animationEngine.startAnimation(
                 this._activeCreatureId, 'sleeping', this._cachedCreature
             );
+            window.audioManager.playCreatureVoice(this._cachedCreature);
         });
 
         // Care screen

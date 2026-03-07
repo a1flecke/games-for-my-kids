@@ -218,6 +218,7 @@ class Creator {
                 wings: null,
                 extras: []
             },
+            voiceType: null,
             accessories: [],
             room: {
                 wallColor: '#FFE4E1',
@@ -771,6 +772,12 @@ class Creator {
             window.creatureCache.buildCache(
                 this._creature.id, this._creature, this._displaySize
             );
+        }
+
+        // Auto-assign voice type and play preview when head is placed
+        if (slot === 'head') {
+            this._creature.voiceType = window.audioManager.getDefaultVoice(this._creature);
+            window.audioManager.playCreatureVoice(this._creature);
         }
 
         // Auto-add default eyes when head is placed and no eyes exist

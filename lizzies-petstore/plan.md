@@ -167,7 +167,7 @@ Sonnet | Accessory catalog, theme system, creature naming, data files
 Opus | Pivot-based animation for all creature states
 
 ### Session 8 — Audio System
-Opus | Warm Web Audio synthesis, creature voices, interaction SFX
+Opus | Background music (3 tracks), ambient park sounds, 10 creature voices, 8 interaction SFX, touch body reactions, voice preview
 
 ### Session 9 — Care Mode: Room, Needs, and Mini-Games
 Opus | Creature room, needs meters, interactive care activities

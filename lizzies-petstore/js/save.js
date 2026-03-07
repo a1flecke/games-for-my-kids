@@ -35,7 +35,8 @@ class SaveManager {
             lastActiveCreatureId: null,
             settings: {
                 volume: 80,
-                muted: false
+                muted: false,
+                musicEnabled: false
             },
             tutorialComplete: false,
             milestones: {},
