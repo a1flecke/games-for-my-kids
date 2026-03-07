@@ -483,13 +483,16 @@ body {
 
 .needs-bar {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
+    flex: 1;
+    min-width: 0;
 }
 
 #care-canvas {
     flex: 1;
     width: 100%;
+    min-height: 0;
     touch-action: none;
     background: var(--bg-cream);
 }
@@ -687,12 +690,54 @@ body {
 
 /* ═══ NEEDS DISPLAY ═══ */
 
-.need-icon {
-    font-size: 1.25rem;
-    transition: opacity 0.3s ease;
+.need-meter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.need-icon.need-low {
+.need-meter-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.need-meter-icon.need-pulse {
+    animation: need-pulse 1s ease infinite;
+}
+
+@keyframes need-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+}
+
+.need-meter-track {
+    width: 48px;
+    height: 8px;
+    background: var(--btn-secondary-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.need-meter-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease, background-color 0.4s ease;
+    background-color: var(--accent-green);
+}
+
+.need-meter-fill.need-warn {
+    background-color: var(--accent-gold);
+}
+
+.need-meter-fill.need-low {
+    background-color: var(--accent-coral);
+}
+
+/* Care action buttons disabled during activity */
+.btn-action:disabled .btn-icon {
     opacity: 0.4;
 }
 

@@ -125,7 +125,30 @@
     <div id="screen-care" class="screen" aria-label="Care for your creature">
         <div class="care-top-bar">
             <div id="needs-display" class="needs-bar" aria-label="Creature needs">
-                <!-- Populated dynamically by care.js -->
+                <div class="need-meter" id="need-hunger" aria-label="Hunger: 80%">
+                    <span class="need-meter-icon">🍽️</span>
+                    <div class="need-meter-track">
+                        <div class="need-meter-fill" data-need="hunger"></div>
+                    </div>
+                </div>
+                <div class="need-meter" id="need-happiness" aria-label="Happiness: 80%">
+                    <span class="need-meter-icon">💕</span>
+                    <div class="need-meter-track">
+                        <div class="need-meter-fill" data-need="happiness"></div>
+                    </div>
+                </div>
+                <div class="need-meter hidden" id="need-cleanliness" aria-label="Cleanliness: 80%" aria-hidden="true">
+                    <span class="need-meter-icon">🛁</span>
+                    <div class="need-meter-track">
+                        <div class="need-meter-fill" data-need="cleanliness"></div>
+                    </div>
+                </div>
+                <div class="need-meter hidden" id="need-energy" aria-label="Energy: 80%" aria-hidden="true">
+                    <span class="need-meter-icon">💤</span>
+                    <div class="need-meter-track">
+                        <div class="need-meter-fill" data-need="energy"></div>
+                    </div>
+                </div>
             </div>
             <button id="btn-care-gallery" class="btn btn-icon-only" aria-label="My Pets">
                 <span class="btn-icon">📋</span>

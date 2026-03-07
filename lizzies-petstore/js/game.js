@@ -361,6 +361,10 @@ class Game {
                 const canvasId = this._activeCanvas.canvas.id;
                 this._setupCanvas(canvasId);
             }
+            // Invalidate room positions on resize
+            if (window.careManager) {
+                window.careManager._roomPositions = null;
+            }
         }
 
         this._update(dt);
@@ -810,31 +814,52 @@ class Game {
     // ── Needs Display ────────────────────────────────────
 
     _updateNeedsDisplay(needs) {
-        const container = document.getElementById('needs-display');
-        if (!container || !needs) return;
+        if (!needs) return;
 
-        const icons = {
-            hunger: '🍽️',
-            cleanliness: '🛁',
-            energy: '💤',
-            happiness: '💕'
-        };
+        // Unlock energy + cleanliness after 2nd creature
+        const data = window.saveManager.load();
+        const hasUnlocked = data.totalCreaturesCreated >= 2;
 
-        container.innerHTML = '';
-        for (const [key, value] of Object.entries(needs)) {
-            const icon = icons[key] || '❓';
-            const el = document.createElement('span');
-            el.className = 'need-icon';
-            el.setAttribute('aria-label', `${key}: ${value}%`);
-            el.setAttribute('title', `${key}: ${value}%`);
-            el.textContent = icon;
+        const needKeys = ['hunger', 'happiness', 'cleanliness', 'energy'];
+        for (const key of needKeys) {
+            const value = needs[key];
+            const meter = document.getElementById('need-' + key);
+            if (!meter) continue;
 
-            // Dim the icon when need is low
-            if (value < 40) {
-                el.classList.add('need-low');
+            // Show/hide unlockable needs
+            if (key === 'cleanliness' || key === 'energy') {
+                if (hasUnlocked) {
+                    meter.classList.remove('hidden');
+                    meter.setAttribute('aria-hidden', 'false');
+                } else {
+                    meter.classList.add('hidden');
+                    meter.setAttribute('aria-hidden', 'true');
+                    continue;
+                }
             }
 
-            container.appendChild(el);
+            // Update bar fill width
+            const fill = meter.querySelector('.need-meter-fill');
+            if (fill) {
+                fill.style.width = value + '%';
+                // Color class
+                fill.classList.remove('need-warn', 'need-low');
+                if (value < 40) fill.classList.add('need-low');
+                else if (value < 60) fill.classList.add('need-warn');
+            }
+
+            // Pulse icon when low
+            const icon = meter.querySelector('.need-meter-icon');
+            if (icon) {
+                if (value < 40) {
+                    icon.classList.add('need-pulse');
+                } else {
+                    icon.classList.remove('need-pulse');
+                }
+            }
+
+            // Update aria-label
+            meter.setAttribute('aria-label', key + ': ' + value + '%');
         }
     }
 
@@ -950,55 +975,30 @@ class Game {
 
         // Naming screen birth button is bound in _bindNamingEvents()
 
-        // Care action buttons
+        // Care action buttons — start activities (not instant effects)
         document.getElementById('btn-feed').addEventListener('click', () => {
             if (!this._cachedCreature) return;
-            window.careManager.feed();
-            this._updateNeedsDisplay(this._cachedCreature.needs);
-            window.animationEngine.startAnimation(
-                this._activeCreatureId, 'eating', this._cachedCreature
-            );
-            window.audioManager.playSound('munch');
-            window.audioManager.playCreatureVoice(this._cachedCreature);
+            window.careManager.startActivity('feeding');
         });
         document.getElementById('btn-bathe').addEventListener('click', () => {
             if (!this._cachedCreature) return;
-            window.careManager.bathe();
-            this._updateNeedsDisplay(this._cachedCreature.needs);
-            window.animationEngine.startAnimation(
-                this._activeCreatureId, 'bathing', this._cachedCreature
-            );
-            window.audioManager.playSound('splash');
-            window.audioManager.playCreatureVoice(this._cachedCreature);
+            window.careManager.startActivity('bathing');
         });
         document.getElementById('btn-pet').addEventListener('click', () => {
             if (!this._cachedCreature) return;
-            window.careManager.pet();
-            this._updateNeedsDisplay(this._cachedCreature.needs);
-            window.animationEngine.startAnimation(
-                this._activeCreatureId, 'happy', this._cachedCreature
-            );
-            window.audioManager.playCreatureVoice(this._cachedCreature);
-            window.audioManager.playSound('happy');
+            window.careManager.startActivity('petting');
         });
         document.getElementById('btn-play').addEventListener('click', () => {
             if (!this._cachedCreature) return;
-            window.careManager.play();
-            this._updateNeedsDisplay(this._cachedCreature.needs);
-            window.animationEngine.startAnimation(
-                this._activeCreatureId, 'happy', this._cachedCreature
-            );
-            window.audioManager.playCreatureVoice(this._cachedCreature);
-            window.audioManager.playSound('happy');
+            window.careManager.startActivity('playing');
         });
         document.getElementById('btn-sleep').addEventListener('click', () => {
             if (!this._cachedCreature) return;
-            window.careManager.sleep();
-            this._updateNeedsDisplay(this._cachedCreature.needs);
-            window.animationEngine.startAnimation(
-                this._activeCreatureId, 'sleeping', this._cachedCreature
-            );
-            window.audioManager.playCreatureVoice(this._cachedCreature);
+            if (!window.careManager.canSleep()) {
+                window.saveManager._showToast('Not tired!');
+                return;
+            }
+            window.careManager.startActivity('sleeping');
         });
 
         // Care screen
