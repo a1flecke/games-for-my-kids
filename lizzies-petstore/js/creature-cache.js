@@ -408,4 +408,125 @@ class CreatureCache {
             this.clearCache(oldestId);
         }
     }
+
+    // ── Composite Cache (for NPC park creatures) ─────────
+
+    /**
+     * Build a single composite offscreen canvas containing all parts rendered in
+     * RENDER_ORDER. Used for NPC creatures in the park to save canvas budget
+     * (1 canvas per NPC instead of ~8).
+     *
+     * NPCs cannot have per-part animation — only whole-sprite transforms.
+     *
+     * @param {string} creatureId
+     * @param {object} creatureData — full creature object
+     * @param {number} displaySize — base display size in CSS pixels
+     */
+    buildCompositeCache(creatureId, creatureData, displaySize) {
+        if (this._caches.has(creatureId)) {
+            this.clearCache(creatureId);
+        }
+
+        this._checkBudget(1);
+
+        const dpr = window.devicePixelRatio || 1;
+        const canvasSize = displaySize * 2; // Extra room for offset parts (wings, tail)
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.ceil(canvasSize * dpr);
+        canvas.height = Math.ceil(canvasSize * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const body = creatureData.body || {};
+        const cx = canvasSize / 2; // center X
+        const cy = canvasSize / 2; // center Y
+        const scale = displaySize / 200; // normalize to 200px reference
+
+        for (const slot of RENDER_ORDER) {
+            if (slot === 'accessories') continue; // skip accessories for NPCs
+
+            const partData = this._getPartData(body, slot);
+            if (!partData) continue;
+
+            const partId = this._getPartId(partData, slot);
+            const partMeta = window.partsLib ? window.partsLib.getById(partId) : null;
+            if (!partMeta) continue;
+
+            const drawSize = partMeta.drawSize || { w: 100, h: 100 };
+            const partScale = partData.scale || 1;
+            const cw = drawSize.w * partScale;
+            const ch = drawSize.h * partScale;
+
+            // Draw part to a temp canvas first
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = Math.ceil(cw * dpr);
+            tmpCanvas.height = Math.ceil(ch * dpr);
+            const tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.scale(dpr, dpr);
+            tmpCtx.lineWidth = 3;
+            tmpCtx.lineCap = 'round';
+            tmpCtx.lineJoin = 'round';
+            tmpCtx.strokeStyle = '#2C2416';
+
+            window.partsLib.drawPart(
+                tmpCtx, partId, cw, ch,
+                partData.color || partMeta.defaultColor,
+                partData.covering || null,
+                partData.pattern || null,
+                partData.patternColor || null
+            );
+
+            // Composite onto the main canvas at attachment offset
+            const attachment = ATTACHMENT_OFFSETS[slot] || { x: 0, y: 0 };
+            const px = cx + attachment.x * displaySize;
+            const py = cy + attachment.y * displaySize;
+            const partW = cw * scale;
+            const partH = ch * scale;
+
+            ctx.drawImage(tmpCanvas, px - partW / 2, py - partH / 2, partW, partH);
+
+            // Mirror wings
+            if (slot === 'wings') {
+                const mirrorPx = cx - attachment.x * displaySize;
+                ctx.save();
+                ctx.translate(mirrorPx, py);
+                ctx.scale(-1, 1);
+                ctx.drawImage(tmpCanvas, -partW / 2, -partH / 2, partW, partH);
+                ctx.restore();
+            }
+        }
+
+        // Store as a single-canvas entry with a special '_composite' key
+        this._caches.set(creatureId, { _composite: { canvas, w: canvasSize, h: canvasSize } });
+        this._totalCanvases += 1;
+        this._touchLRU(creatureId);
+    }
+
+    /**
+     * Draw a composite-cached creature (whole-sprite, no per-part transforms).
+     * Supports whole-sprite scale and horizontal flip.
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} x — center X (CSS pixels)
+     * @param {number} y — center Y (CSS pixels)
+     * @param {string} creatureId
+     * @param {number} [scaleX=1]
+     * @param {number} [scaleY=1]
+     */
+    drawComposite(ctx, x, y, creatureId, scaleX, scaleY) {
+        const cache = this._caches.get(creatureId);
+        if (!cache || !cache._composite) return;
+
+        const comp = cache._composite;
+        const sx = scaleX || 1;
+        const sy = scaleY || 1;
+
+        ctx.save();
+        ctx.translate(x, y);
+        if (sx !== 1 || sy !== 1) {
+            ctx.scale(sx, sy);
+        }
+        ctx.drawImage(comp.canvas, -comp.w / 2, -comp.h / 2, comp.w, comp.h);
+        ctx.restore();
+    }
 }

@@ -170,6 +170,7 @@ class Game {
                 window.audioManager.stopMusic();
                 break;
             case 'PARK':
+                window.parkManager.saveResults();
                 window.parkManager.cancel();
                 if (this._activeCreatureId) {
                     window.animationEngine.stopAnimation(this._activeCreatureId);
@@ -295,16 +296,26 @@ class Game {
                 this._populateGallery();
                 break;
 
-            case 'PARK':
+            case 'PARK': {
                 this._setupCanvas('park-canvas');
+                // Increment park visits and check milestones
+                const parkData = window.saveManager.load();
+                parkData.parkVisits = (parkData.parkVisits || 0) + 1;
+                window.saveManager.save(parkData);
+                this._checkAndNotifyMilestones();
+
                 if (this._activeCreatureId) {
-                    window.parkManager.enterPark(
-                        window.saveManager.getCreature(this._activeCreatureId)
-                    );
+                    this._cachedCreature = window.saveManager.getCreature(this._activeCreatureId);
+                    if (this._cachedCreature) {
+                        window.parkManager.enterPark(
+                            this._cachedCreature, parkData.parkVisits
+                        );
+                    }
                 }
                 window.audioManager.startMusic('park');
                 window.audioManager.startAmbient();
                 break;
+            }
 
             case 'ROOM_EDIT':
                 this._setupCanvas('room-canvas');
@@ -430,6 +441,13 @@ class Game {
             if (window.careManager) {
                 window.careManager._roomPositions = null;
             }
+            // Invalidate park caches on resize
+            if (window.parkManager) {
+                window.parkManager._bgCache = null;
+                if (this.state === 'PARK') {
+                    window.parkManager._buildPlayerCache();
+                }
+            }
         }
 
         this._update(dt);
@@ -504,7 +522,6 @@ class Game {
 
             case 'PARK':
                 window.renderer.clear(ctx, w, h);
-                window.renderer.drawParkBackground(ctx, w, h);
                 window.parkManager.draw(ctx, w, h);
                 window.renderer.drawParticles(ctx);
                 break;
