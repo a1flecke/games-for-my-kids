@@ -898,6 +898,9 @@ class CareManager {
         // Draw room furniture (behind creature)
         this._drawRoomFurniture(ctx, w, h);
 
+        // Draw user-placed room items (behind creature)
+        this._drawPlacedItems(ctx, w, h);
+
         // Creature position
         const displaySize = Math.min(w, h) * 0.45;
         let cx = w / 2;
@@ -1085,6 +1088,19 @@ class CareManager {
         ctx.stroke();
 
         ctx.restore();
+    }
+
+    /**
+     * Draw user-placed room items from creature.room.items.
+     * Delegates to RoomManager's item drawing functions.
+     */
+    _drawPlacedItems(ctx, w, h) {
+        if (!this._creature || !this._creature.room || !this._creature.room.items) return;
+        for (const item of this._creature.room.items) {
+            const ix = item.x * w;
+            const iy = item.y * h;
+            window.roomManager.drawRoomItem(ctx, item.type, ix, iy, w, h, false);
+        }
     }
 
     // ── Activity Drawing ─────────────────────────────────

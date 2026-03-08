@@ -13,6 +13,8 @@ class Renderer {
         this._creatorBgCache = null;
         this._creatorBgW = 0;
         this._creatorBgH = 0;
+        this._careBgCache = null;
+        this._careBgKey = null;
 
         // Pre-allocate particle pool
         for (let i = 0; i < this._maxParticles; i++) {
@@ -70,6 +72,7 @@ class Renderer {
         if (!this._resizeDirty) return;
         this._resizeDirty = false;
         this._creatorBgCache = null; // invalidate cached backgrounds
+        this._careBgCache = null;
         for (const id of Object.keys(this._canvasMap)) {
             this.setupCanvas(id);
         }
@@ -101,20 +104,85 @@ class Renderer {
     }
 
     /**
-     * Draw the care room background.
+     * Draw the care room background (cached to offscreen canvas).
+     * @param {string} floorPattern — 'wood', 'carpet', or 'tiles'
      */
-    drawCareBackground(ctx, w, h, wallColor) {
+    drawCareBackground(ctx, w, h, wallColor, floorPattern) {
+        const wc = wallColor || '#FFE4E1';
+        const pat = floorPattern || 'wood';
+
+        // Use cached background if valid
+        if (this._careBgCache && this._careBgKey === wc + pat + w + h) {
+            ctx.drawImage(this._careBgCache, 0, 0);
+            return;
+        }
+
+        // Build offscreen cache
+        const dpr = window.devicePixelRatio || 1;
+        const c = document.createElement('canvas');
+        c.width = w * dpr;
+        c.height = h * dpr;
+        const offCtx = c.getContext('2d');
+        offCtx.scale(dpr, dpr);
+
         // Wall
-        ctx.fillStyle = wallColor || '#FFE4E1';
-        ctx.fillRect(0, 0, w, h * 0.6);
+        offCtx.fillStyle = wc;
+        offCtx.fillRect(0, 0, w, h * 0.6);
 
         // Floor
-        ctx.fillStyle = '#D4C4A8';
-        ctx.fillRect(0, h * 0.6, w, h * 0.4);
+        const floorY = h * 0.6;
+        const floorH = h * 0.4;
+
+        if (pat === 'carpet') {
+            offCtx.fillStyle = '#C8A8B8';
+            offCtx.fillRect(0, floorY, w, floorH);
+            offCtx.fillStyle = 'rgba(160, 120, 140, 0.3)';
+            for (let y = floorY; y < h; y += 6) {
+                for (let x = ((y - floorY) % 12 === 0 ? 0 : 3); x < w; x += 6) {
+                    offCtx.fillRect(x, y, 2, 2);
+                }
+            }
+        } else if (pat === 'tiles') {
+            offCtx.fillStyle = '#E0D8D0';
+            offCtx.fillRect(0, floorY, w, floorH);
+            offCtx.strokeStyle = '#C8C0B8';
+            offCtx.lineWidth = 1;
+            const tileSize = 30;
+            for (let y = floorY; y < h; y += tileSize) {
+                for (let x = 0; x < w; x += tileSize) {
+                    offCtx.strokeRect(x, y, tileSize, tileSize);
+                }
+            }
+        } else {
+            // wood (default)
+            offCtx.fillStyle = '#D4C4A8';
+            offCtx.fillRect(0, floorY, w, floorH);
+            offCtx.strokeStyle = '#C0B090';
+            offCtx.lineWidth = 1;
+            const plankH = 20;
+            for (let y = floorY; y < h; y += plankH) {
+                offCtx.beginPath();
+                offCtx.moveTo(0, y);
+                offCtx.lineTo(w, y);
+                offCtx.stroke();
+                const offset = (Math.floor((y - floorY) / plankH) % 2) * 50;
+                for (let x = offset; x < w; x += 100) {
+                    offCtx.beginPath();
+                    offCtx.moveTo(x, y);
+                    offCtx.lineTo(x, y + plankH);
+                    offCtx.stroke();
+                }
+            }
+        }
 
         // Baseboard
-        ctx.fillStyle = '#B8A88A';
-        ctx.fillRect(0, h * 0.58, w, h * 0.04);
+        offCtx.fillStyle = '#B8A88A';
+        offCtx.fillRect(0, h * 0.58, w, h * 0.04);
+
+        this._careBgCache = c;
+        this._careBgKey = wc + pat + w + h;
+
+        ctx.drawImage(c, 0, 0);
     }
 
     /**

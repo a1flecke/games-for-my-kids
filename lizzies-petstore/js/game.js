@@ -162,7 +162,20 @@ class Game {
                 window.audioManager.stopAmbient();
                 break;
             case 'ROOM_EDIT':
+                // Room data is auto-saved by roomManager on every change
                 window.roomManager.cancel();
+                if (this._activeCreatureId) {
+                    window.animationEngine.stopAnimation(this._activeCreatureId);
+                }
+                // Invalidate care background cache (wall/floor may have changed)
+                window.renderer._careBgCache = null;
+                break;
+            case 'WARDROBE':
+                if (this._activeCreatureId) {
+                    window.animationEngine.stopAnimation(this._activeCreatureId);
+                    // Invalidate creature cache so CARE re-renders with new accessories
+                    window.creatureCache.clearCache(this._activeCreatureId);
+                }
                 break;
             case 'BIRTH_ANIMATION':
                 this._birthTimer = 0;
@@ -278,10 +291,45 @@ class Game {
 
             case 'ROOM_EDIT':
                 this._setupCanvas('room-canvas');
+                if (this._activeCreatureId) {
+                    this._cachedCreature = window.saveManager.getCreature(this._activeCreatureId);
+                    if (this._cachedCreature) {
+                        window.roomManager.startEditing(this._cachedCreature);
+                        this._populateRoomUI();
+                        // Build cache and start idle animation
+                        const roomInfo = window.renderer.getCanvas('room-canvas');
+                        const roomSize = roomInfo ? Math.min(roomInfo.w, roomInfo.h) * 0.35 : 120;
+                        if (!window.creatureCache.hasCache(this._activeCreatureId)) {
+                            window.creatureCache.buildCache(
+                                this._activeCreatureId, this._cachedCreature, roomSize
+                            );
+                        }
+                        window.animationEngine.startAnimation(
+                            this._activeCreatureId, 'idle', this._cachedCreature
+                        );
+                    }
+                }
                 break;
 
             case 'WARDROBE':
                 this._setupCanvas('wardrobe-canvas');
+                if (this._activeCreatureId) {
+                    this._cachedCreature = window.saveManager.getCreature(this._activeCreatureId);
+                    if (this._cachedCreature) {
+                        this._populateWardrobeUI();
+                        // Build cache and start idle animation
+                        const wardInfo = window.renderer.getCanvas('wardrobe-canvas');
+                        const wardSize = wardInfo ? Math.min(wardInfo.w, wardInfo.h) * 0.45 : 150;
+                        if (!window.creatureCache.hasCache(this._activeCreatureId)) {
+                            window.creatureCache.buildCache(
+                                this._activeCreatureId, this._cachedCreature, wardSize
+                            );
+                        }
+                        window.animationEngine.startAnimation(
+                            this._activeCreatureId, 'idle', this._cachedCreature
+                        );
+                    }
+                }
                 break;
         }
 
@@ -398,10 +446,12 @@ class Game {
                 window.animationEngine.update(dt);
                 break;
             case 'WARDROBE':
+                window.renderer.updateParticles(dt);
                 window.animationEngine.update(dt);
                 break;
             case 'ROOM_EDIT':
                 window.roomManager.update(dt);
+                window.animationEngine.update(dt);
                 break;
         }
     }
@@ -427,7 +477,9 @@ class Game {
                 window.renderer.clear(ctx, w, h);
                 const wallColor = this._cachedCreature
                     ? this._cachedCreature.room.wallColor : '#FFE4E1';
-                window.renderer.drawCareBackground(ctx, w, h, wallColor);
+                const floorPat = this._cachedCreature
+                    ? (this._cachedCreature.room.floorPattern || 'wood') : 'wood';
+                window.renderer.drawCareBackground(ctx, w, h, wallColor, floorPat);
                 window.careManager.draw(ctx, w, h);
                 window.renderer.drawParticles(ctx);
                 break;
@@ -442,16 +494,24 @@ class Game {
 
             case 'ROOM_EDIT':
                 window.renderer.clear(ctx, w, h);
-                window.renderer.drawCareBackground(ctx, w, h);
                 window.roomManager.draw(ctx, w, h);
                 break;
 
-            case 'WARDROBE':
+            case 'WARDROBE': {
                 window.renderer.clear(ctx, w, h);
                 window.renderer.drawBackground(ctx, w, h);
-                // Wardrobe preview rendering (future session)
-                window.renderer.drawPlaceholderText(ctx, w, h, 'Wardrobe coming soon!');
+                // Draw creature preview centered
+                if (this._cachedCreature && this._activeCreatureId &&
+                    window.creatureCache.hasCache(this._activeCreatureId)) {
+                    const displaySize = Math.min(w, h) * 0.45;
+                    const animState = window.animationEngine.getState(this._activeCreatureId);
+                    window.creatureCache.drawCreatureById(
+                        ctx, w / 2, h / 2, animState, displaySize, this._activeCreatureId
+                    );
+                }
+                window.renderer.drawParticles(ctx);
                 break;
+            }
         }
     }
 
@@ -860,6 +920,365 @@ class Game {
 
             // Update aria-label
             meter.setAttribute('aria-label', key + ': ' + value + '%');
+        }
+    }
+
+    // ── Color Name Helper ──────────────────────────────
+
+    _colorName(hex) {
+        const names = {
+            '#FF69B4': 'Pink', '#FF6B6B': 'Red', '#FFD700': 'Gold', '#FF8C00': 'Orange',
+            '#9B59B6': 'Purple', '#4A90D9': 'Blue', '#00CED1': 'Teal', '#27AE60': 'Green',
+            '#C0C0C0': 'Silver', '#8B4513': 'Brown', '#2C2416': 'Black', '#FFFFFF': 'White',
+            '#FFE4E1': 'Light Pink', '#E8D5E0': 'Lavender', '#D5E8D5': 'Mint',
+            '#D5E0E8': 'Light Blue', '#F5E6CC': 'Peach', '#E8E0D6': 'Tan',
+            '#F0D5D5': 'Rose', '#D5D5F0': 'Periwinkle', '#FF0000': 'Red'
+        };
+        return names[hex] || hex;
+    }
+
+    // ── Wardrobe UI ─────────────────────────────────────
+
+    _populateWardrobeUI() {
+        this._wardrobeSlot = 'head'; // current active slot
+        this._populateWardrobeSlot('head');
+        this._populateWardrobeColors();
+
+        // Bind wardrobe tab clicks
+        const tabs = document.querySelectorAll('#wardrobe-tabs .tab');
+        for (const tab of tabs) {
+            // Clone-replace for idempotent binding
+            const newTab = tab.cloneNode(true);
+            tab.parentNode.replaceChild(newTab, tab);
+
+            newTab.addEventListener('click', () => {
+                // Update active state
+                document.querySelectorAll('#wardrobe-tabs .tab').forEach(t => {
+                    t.setAttribute('aria-selected', 'false');
+                });
+                newTab.setAttribute('aria-selected', 'true');
+
+                const slot = newTab.getAttribute('data-slot');
+                this._wardrobeSlot = slot;
+                this._populateWardrobeSlot(slot);
+                this._populateWardrobeColors();
+            });
+        }
+    }
+
+    _populateWardrobeSlot(slot) {
+        const strip = document.getElementById('wardrobe-strip');
+        if (!strip) return;
+
+        strip.innerHTML = '';
+        const allAcc = window.accessoriesLib.getBySlot(slot);
+        const creature = this._cachedCreature;
+        if (!creature) return;
+
+        // Check which accessories are unlocked
+        const saveData = window.saveManager.load();
+        const unlockedAcc = saveData.unlockedAccessories || [];
+
+        // Current equipped accessory for this slot
+        const equipped = (creature.accessories || []).find(a => {
+            const meta = window.accessoriesLib.getById(a.type);
+            return meta && meta.slot === slot;
+        });
+
+        for (const acc of allAcc) {
+            // Check if locked
+            const isLocked = acc.unlockCondition && !acc.tags.includes('starter') &&
+                !unlockedAcc.includes(acc.id);
+            const isEquipped = equipped && equipped.type === acc.id;
+
+            const btn = document.createElement('button');
+            btn.className = 'part-thumb';
+            btn.setAttribute('role', 'option');
+            btn.setAttribute('aria-label', acc.name + (isEquipped ? ' (equipped)' : '') + (isLocked ? ' (locked)' : ''));
+            btn.setAttribute('aria-selected', isEquipped ? 'true' : 'false');
+
+            if (isLocked) {
+                btn.disabled = true;
+            }
+
+            // Thumbnail canvas
+            const wrap = document.createElement('div');
+            wrap.className = 'part-thumb-wrap';
+
+            const thumbCanvas = document.createElement('canvas');
+            thumbCanvas.width = 60;
+            thumbCanvas.height = 60;
+            const tctx = thumbCanvas.getContext('2d');
+            const color = (isEquipped && equipped.color) ? equipped.color : acc.defaultColor;
+            window.accessoriesLib.drawAccessory(tctx, acc.id, color, 1);
+            wrap.appendChild(thumbCanvas);
+
+            // Equipped badge
+            if (isEquipped) {
+                const badge = document.createElement('span');
+                badge.className = 'part-thumb-equipped';
+                badge.textContent = '\u2713';
+                wrap.appendChild(badge);
+            }
+
+            // Lock icon
+            if (isLocked) {
+                const lock = document.createElement('span');
+                lock.className = 'part-lock-icon';
+                lock.textContent = '\uD83D\uDD12';
+                wrap.appendChild(lock);
+            }
+
+            btn.appendChild(wrap);
+
+            if (!isLocked) {
+                btn.addEventListener('click', () => {
+                    if (isEquipped) {
+                        this._unequipAccessory(slot);
+                    } else {
+                        this._equipAccessory(acc.id, slot);
+                    }
+                    // Re-populate to reflect changes
+                    this._populateWardrobeSlot(slot);
+                    this._populateWardrobeColors();
+                });
+            }
+
+            strip.appendChild(btn);
+        }
+    }
+
+    _equipAccessory(accId, slot) {
+        if (!this._cachedCreature) return;
+        const acc = window.accessoriesLib.getById(accId);
+        if (!acc) return;
+
+        // Remove any existing accessory in this slot
+        this._cachedCreature.accessories = (this._cachedCreature.accessories || [])
+            .filter(a => {
+                const meta = window.accessoriesLib.getById(a.type);
+                return !meta || meta.slot !== slot;
+            });
+
+        // Add new accessory
+        this._cachedCreature.accessories.push({
+            type: accId,
+            slot: slot,
+            color: acc.defaultColor
+        });
+
+        // Invalidate cache and save
+        window.creatureCache.invalidatePart(
+            this._activeCreatureId, 'accessories', this._cachedCreature
+        );
+        window.saveManager.updateCreature(this._activeCreatureId, {
+            accessories: this._cachedCreature.accessories
+        });
+
+        window.audioManager.playSound('sparkle');
+        // Sparkle burst on creature
+        if (this._activeCanvas) {
+            const { w, h } = this._activeCanvas;
+            window.renderer.spawnSparkles(w / 2, h / 2, 5);
+        }
+    }
+
+    _unequipAccessory(slot) {
+        if (!this._cachedCreature) return;
+
+        this._cachedCreature.accessories = (this._cachedCreature.accessories || [])
+            .filter(a => {
+                const meta = window.accessoriesLib.getById(a.type);
+                return !meta || meta.slot !== slot;
+            });
+
+        window.creatureCache.invalidatePart(
+            this._activeCreatureId, 'accessories', this._cachedCreature
+        );
+        window.saveManager.updateCreature(this._activeCreatureId, {
+            accessories: this._cachedCreature.accessories
+        });
+
+        window.audioManager.playSound('pop');
+    }
+
+    _populateWardrobeColors() {
+        const row = document.getElementById('wardrobe-color-row');
+        if (!row) return;
+
+        // Find equipped accessory for current slot
+        const slot = this._wardrobeSlot;
+        const creature = this._cachedCreature;
+        if (!creature) {
+            row.classList.add('hidden');
+            return;
+        }
+
+        const equipped = (creature.accessories || []).find(a => {
+            const meta = window.accessoriesLib.getById(a.type);
+            return meta && meta.slot === slot;
+        });
+
+        if (!equipped) {
+            row.classList.add('hidden');
+            return;
+        }
+
+        row.classList.remove('hidden');
+        row.innerHTML = '';
+
+        const colors = [
+            '#FF69B4', '#FF6B6B', '#FFD700', '#FF8C00',
+            '#9B59B6', '#4A90D9', '#00CED1', '#27AE60',
+            '#C0C0C0', '#8B4513', '#2C2416', '#FFFFFF'
+        ];
+
+        for (const color of colors) {
+            const swatch = document.createElement('button');
+            swatch.className = 'wardrobe-color-swatch';
+            swatch.setAttribute('role', 'radio');
+            swatch.setAttribute('aria-label', this._colorName(color));
+            swatch.setAttribute('aria-checked', equipped.color === color ? 'true' : 'false');
+            swatch.style.backgroundColor = color;
+            if (color === '#FFFFFF') {
+                swatch.classList.add('wardrobe-color-swatch--white');
+            }
+
+            swatch.addEventListener('click', () => {
+                equipped.color = color;
+                window.creatureCache.invalidatePart(
+                    this._activeCreatureId, 'accessories', this._cachedCreature
+                );
+                window.saveManager.updateCreature(this._activeCreatureId, {
+                    accessories: this._cachedCreature.accessories
+                });
+                // Update swatch selection
+                row.querySelectorAll('.wardrobe-color-swatch').forEach(s => {
+                    s.setAttribute('aria-checked', 'false');
+                });
+                swatch.setAttribute('aria-checked', 'true');
+                // Re-draw thumbnails
+                this._populateWardrobeSlot(slot);
+            });
+
+            row.appendChild(swatch);
+        }
+    }
+
+    // ── Room Edit UI ──────────────────────────────────────
+
+    _populateRoomUI() {
+        this._populateRoomItemStrip();
+        this._populateWallColorPicker();
+        this._populateFloorPatternPicker();
+    }
+
+    _populateRoomItemStrip() {
+        const strip = document.getElementById('room-items-strip');
+        if (!strip) return;
+
+        strip.innerHTML = '';
+        const atMax = window.roomManager.isAtMaxItems();
+
+        for (const item of ROOM_ITEM_CATALOG) {
+            const btn = document.createElement('button');
+            btn.className = 'part-thumb';
+            btn.setAttribute('role', 'option');
+            btn.setAttribute('aria-label', item.label);
+            btn.setAttribute('aria-selected', 'false');
+
+            if (atMax) {
+                btn.disabled = true;
+            }
+
+            // Emoji thumbnail
+            const wrap = document.createElement('div');
+            wrap.className = 'part-thumb-wrap';
+            const emoji = document.createElement('span');
+            emoji.className = 'room-item-emoji';
+            emoji.textContent = item.emoji;
+            wrap.appendChild(emoji);
+            btn.appendChild(wrap);
+
+            btn.addEventListener('click', () => {
+                if (window.roomManager.addItem(item.type)) {
+                    window.audioManager.playSound('pop');
+                    // Refresh strip to update disabled state
+                    this._populateRoomItemStrip();
+                } else {
+                    window.saveManager._showToast('Room is full! (8 items max)');
+                }
+            });
+
+            strip.appendChild(btn);
+        }
+    }
+
+    _populateWallColorPicker() {
+        const row = document.getElementById('room-wall-colors');
+        if (!row) return;
+
+        // Keep the label, remove old swatches
+        const label = row.querySelector('.room-picker-label');
+        row.innerHTML = '';
+        if (label) row.appendChild(label);
+
+        const currentColor = this._cachedCreature
+            ? (this._cachedCreature.room.wallColor || '#FFE4E1')
+            : '#FFE4E1';
+
+        for (const color of WALL_COLORS) {
+            const swatch = document.createElement('button');
+            swatch.className = 'room-wall-swatch';
+            swatch.setAttribute('role', 'radio');
+            swatch.setAttribute('aria-label', 'Wall color: ' + this._colorName(color));
+            swatch.setAttribute('aria-checked', color === currentColor ? 'true' : 'false');
+            swatch.style.backgroundColor = color;
+
+            swatch.addEventListener('click', () => {
+                window.roomManager.setWallColor(color);
+                // Update selection
+                row.querySelectorAll('.room-wall-swatch').forEach(s => {
+                    s.setAttribute('aria-checked', 'false');
+                });
+                swatch.setAttribute('aria-checked', 'true');
+            });
+
+            row.appendChild(swatch);
+        }
+    }
+
+    _populateFloorPatternPicker() {
+        const row = document.getElementById('room-floor-patterns');
+        if (!row) return;
+
+        const label = row.querySelector('.room-picker-label');
+        row.innerHTML = '';
+        if (label) row.appendChild(label);
+
+        const currentPattern = this._cachedCreature
+            ? (this._cachedCreature.room.floorPattern || 'wood')
+            : 'wood';
+
+        const labels = { wood: 'Wood', carpet: 'Carpet', tiles: 'Tiles' };
+
+        for (const pattern of FLOOR_PATTERNS) {
+            const btn = document.createElement('button');
+            btn.className = 'room-floor-btn';
+            btn.setAttribute('role', 'radio');
+            btn.setAttribute('aria-label', labels[pattern]);
+            btn.setAttribute('aria-checked', pattern === currentPattern ? 'true' : 'false');
+            btn.textContent = labels[pattern];
+
+            btn.addEventListener('click', () => {
+                window.roomManager.setFloorPattern(pattern);
+                row.querySelectorAll('.room-floor-btn').forEach(b => {
+                    b.setAttribute('aria-checked', 'false');
+                });
+                btn.setAttribute('aria-checked', 'true');
+            });
+
+            row.appendChild(btn);
         }
     }
 

@@ -216,7 +216,27 @@
             <h2>Wardrobe</h2>
         </div>
         <canvas id="wardrobe-canvas" aria-label="Creature preview"></canvas>
-        <div id="wardrobe-panel" class="panel" aria-label="Accessories">
+        <div id="wardrobe-color-row" class="wardrobe-color-row hidden" aria-label="Accessory color" role="radiogroup">
+            <!-- 12 color swatches populated dynamically -->
+        </div>
+        <div id="wardrobe-tabs" class="tab-bar" role="tablist" aria-label="Accessory slots">
+            <button class="tab" role="tab" data-slot="head" aria-label="Head" aria-selected="true">
+                <span class="tab-icon">👑</span>
+            </button>
+            <button class="tab" role="tab" data-slot="neck" aria-label="Neck" aria-selected="false">
+                <span class="tab-icon">🎀</span>
+            </button>
+            <button class="tab" role="tab" data-slot="body" aria-label="Body" aria-selected="false">
+                <span class="tab-icon">👗</span>
+            </button>
+            <button class="tab" role="tab" data-slot="feet" aria-label="Feet" aria-selected="false">
+                <span class="tab-icon">👢</span>
+            </button>
+            <button class="tab" role="tab" data-slot="face" aria-label="Face" aria-selected="false">
+                <span class="tab-icon">👓</span>
+            </button>
+        </div>
+        <div id="wardrobe-strip" class="part-strip" role="listbox" aria-label="Available accessories">
             <!-- Populated dynamically -->
         </div>
     </div>
@@ -234,6 +254,14 @@
             </button>
         </div>
         <canvas id="room-canvas" aria-label="Room workspace"></canvas>
+        <div id="room-pickers" class="room-pickers">
+            <div id="room-wall-colors" class="room-picker-row" role="radiogroup" aria-label="Wall color">
+                <span class="room-picker-label">Wall</span>
+            </div>
+            <div id="room-floor-patterns" class="room-picker-row" role="radiogroup" aria-label="Floor pattern">
+                <span class="room-picker-label">Floor</span>
+            </div>
+        </div>
         <div id="room-items-strip" class="part-strip" role="listbox" aria-label="Room items">
             <!-- Populated dynamically -->
         </div>

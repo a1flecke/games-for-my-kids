@@ -222,6 +222,7 @@ class Creator {
             accessories: [],
             room: {
                 wallColor: '#FFE4E1',
+                floorPattern: 'wood',
                 items: []
             },
             needs: { hunger: 80, cleanliness: 90, energy: 70, happiness: 85 },
