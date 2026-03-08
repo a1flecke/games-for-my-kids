@@ -58,6 +58,7 @@ class Game {
 
         // Gallery: creature options overlay — which creature is being actioned
         this._optionsCreatureId = null;
+        this._optionsTriggerEl = null;
 
         // Delete confirmation — which creature is pending deletion
         this._pendingDeleteId = null;
@@ -67,6 +68,21 @@ class Game {
 
         // Reset progress confirmation flag
         this._resetConfirmPending = false;
+
+        // Show mode state
+        this._showModeActive = false;
+        this._showModeCreatureId = null;
+        this._showModeSparkles = [];
+        this._showModeSparkleTimer = 0;
+        this._showModeCanvas = null; // cached { canvas, ctx, w, h }
+        this._showModeOverlayEl = null; // cached DOM element
+
+        // Photo mode state
+        this._photoBg = '#FFD1E8';
+        this._photoFrame = 'none';
+
+        // Card creature ID (persists through overlay transitions)
+        this._cardCreatureId = null;
     }
 
     init() {
@@ -102,6 +118,9 @@ class Game {
         this._bindScreenButtons();
         this._bindOverlayButtons();
         this._bindSettingsControls();
+
+        // Cache show mode overlay element
+        this._showModeOverlayEl = document.getElementById('overlay-show-mode');
 
         // Load last active creature
         const data = window.saveManager.load();
@@ -147,6 +166,11 @@ class Game {
      * Clean up when leaving a state.
      */
     _exitState(state, newState) {
+        // Clean up show mode if active (can be open from GALLERY)
+        if (this._showModeActive) {
+            this._closeShowMode();
+        }
+
         switch (state) {
             case 'CREATOR':
                 // Don't cancel creator when going to NAMING — we'll come back
@@ -452,6 +476,25 @@ class Game {
 
         this._update(dt);
         this._draw();
+
+        // Show mode renders to its own canvas (overlay), independent of state
+        if (this._showModeActive) {
+            // Check if overlay was closed by Escape/focus trap (UIManager doesn't call _closeShowMode)
+            if (!this._showModeOverlayEl || !this._showModeOverlayEl.classList.contains('open')) {
+                this._showModeActive = false;
+                if (this._showModeCreatureId) {
+                    window.animationEngine.stopAnimation(this._showModeCreatureId);
+                }
+                this._showModeCreatureId = null;
+                this._showModeSparkles = [];
+            } else {
+                // Only update animation engine if it's not already updated by the state loop
+                if (this.state === 'GALLERY' || this.state === 'TITLE' || this.state === 'NAMING') {
+                    window.animationEngine.update(dt);
+                }
+                this._drawShowMode(dt);
+            }
+        }
     }
 
     _update(dt) {
@@ -696,6 +739,7 @@ class Game {
         if (!creature) return;
 
         this._optionsCreatureId = creatureId;
+        this._optionsTriggerEl = triggerEl;
 
         const titleEl = document.getElementById('creature-options-name');
         if (titleEl) {
@@ -938,11 +982,20 @@ class Game {
         const el = document.getElementById('species-name');
         if (!creature || !el) return;
 
+        el.textContent = `a ${this._getSpeciesName(creature)}`;
+    }
+
+    /**
+     * Get the species name string for any creature data object.
+     * Reusable version of _generateSpeciesName for trading cards and show mode.
+     */
+    _getSpeciesName(creature) {
+        if (!creature || !creature.body) return 'Creature';
+
         const head = creature.body.head ? creature.body.head.type : '';
         const wings = creature.body.wings ? creature.body.wings.type : '';
         const tail = creature.body.tail ? creature.body.tail.type : '';
 
-        // Combine head + modifier from wings/tail
         const headNames = {
             'cat': 'Kitling', 'dog': 'Puppling', 'bunny': 'Bunnifae',
             'bird': 'Aviari', 'dragon': 'Dragonette', 'fox': 'Foxlet',
@@ -962,7 +1015,590 @@ class Game {
         if (wings && wingMods[wings]) species += wingMods[wings];
         else if (tail && tailMods[tail]) species += tailMods[tail];
 
-        el.textContent = `a ${species}`;
+        return species;
+    }
+
+    // ── Photo Mode ──────────────────────────────────────────
+
+    /**
+     * Open photo mode overlay for the current creature.
+     * Renders a preview canvas with background/frame options.
+     */
+    _openPhotoMode() {
+        const creature = this._cachedCreature;
+        if (!creature || !this._activeCreatureId) return;
+
+        // Build background options
+        const bgContainer = document.getElementById('photo-bg-options');
+        const frameContainer = document.getElementById('photo-frame-options');
+        if (!bgContainer || !frameContainer) return;
+
+        const backgrounds = [
+            { id: 'pink', color: '#FFD1E8', label: 'Pink' },
+            { id: 'blue', color: '#D1E8FF', label: 'Blue' },
+            { id: 'purple', color: '#E8D1FF', label: 'Purple' },
+            { id: 'green', color: '#D1FFE0', label: 'Green' },
+            { id: 'cream', color: '#F5F0E8', label: 'Cream' },
+            { id: 'gold', color: '#FFF3D1', label: 'Gold' }
+        ];
+
+        const frames = [
+            { id: 'none', icon: '⬜', label: 'No frame' },
+            { id: 'hearts', icon: '💕', label: 'Hearts' },
+            { id: 'stars', icon: '⭐', label: 'Stars' },
+            { id: 'flowers', icon: '🌸', label: 'Flowers' },
+            { id: 'sparkles', icon: '✨', label: 'Sparkles' }
+        ];
+
+        this._photoBg = backgrounds[0].color;
+        this._photoFrame = 'none';
+
+        // Populate background swatches
+        bgContainer.innerHTML = '';
+        for (const bg of backgrounds) {
+            const swatch = document.createElement('button');
+            swatch.className = 'photo-bg-swatch';
+            swatch.style.backgroundColor = bg.color;
+            swatch.setAttribute('role', 'radio');
+            swatch.setAttribute('aria-checked', bg === backgrounds[0] ? 'true' : 'false');
+            swatch.setAttribute('aria-label', bg.label);
+            swatch.addEventListener('click', () => {
+                this._photoBg = bg.color;
+                bgContainer.querySelectorAll('.photo-bg-swatch').forEach(s => {
+                    s.setAttribute('aria-checked', 'false');
+                });
+                swatch.setAttribute('aria-checked', 'true');
+                this._renderPhotoPreview();
+            });
+            bgContainer.appendChild(swatch);
+        }
+
+        // Populate frame options
+        frameContainer.innerHTML = '';
+        for (const frame of frames) {
+            const btn = document.createElement('button');
+            btn.className = 'photo-frame-btn';
+            btn.textContent = frame.icon;
+            btn.setAttribute('role', 'radio');
+            btn.setAttribute('aria-checked', frame === frames[0] ? 'true' : 'false');
+            btn.setAttribute('aria-label', frame.label);
+            btn.addEventListener('click', () => {
+                this._photoFrame = frame.id;
+                frameContainer.querySelectorAll('.photo-frame-btn').forEach(b => {
+                    b.setAttribute('aria-checked', 'false');
+                });
+                btn.setAttribute('aria-checked', 'true');
+                this._renderPhotoPreview();
+            });
+            frameContainer.appendChild(btn);
+        }
+
+        window.uiManager.showOverlay('overlay-photo-mode');
+        this._renderPhotoPreview();
+    }
+
+    /**
+     * Render the photo preview canvas with current background/frame settings.
+     */
+    _renderPhotoPreview() {
+        const canvas = document.getElementById('photo-preview-canvas');
+        if (!canvas || !this._activeCreatureId) return;
+
+        const creature = this._cachedCreature || window.saveManager.getCreature(this._activeCreatureId);
+        if (!creature) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        const cssSize = 300;
+        canvas.width = cssSize * dpr;
+        canvas.height = cssSize * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        this._drawPhotoContent(ctx, cssSize, cssSize, creature);
+        ctx.restore();
+    }
+
+    /**
+     * Draw photo content (shared between preview and final export).
+     */
+    _drawPhotoContent(ctx, w, h, creature) {
+        // Background
+        ctx.fillStyle = this._photoBg;
+        ctx.fillRect(0, 0, w, h);
+
+        // Draw creature centered
+        const displaySize = w * 0.55;
+        const creatureY = h * 0.4;
+
+        // Build a temporary cache at the right size if needed
+        const cacheId = this._activeCreatureId;
+        if (!window.creatureCache.hasCache(cacheId)) {
+            window.creatureCache.buildCache(cacheId, creature, displaySize);
+        }
+        const animState = window.animationEngine.getState(cacheId) || {};
+        window.creatureCache.drawCreatureById(ctx, w / 2, creatureY, animState, displaySize, cacheId);
+
+        // Creature name below
+        ctx.fillStyle = '#2C2416';
+        ctx.font = "bold 18px OpenDyslexic, 'Comic Sans MS', cursive";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(creature.name, w / 2, h * 0.75);
+
+        // Species name
+        ctx.fillStyle = '#595143';
+        ctx.font = "italic 16px OpenDyslexic, 'Comic Sans MS', cursive";
+        ctx.fillText(this._getSpeciesName(creature), w / 2, h * 0.82);
+
+        // Frame
+        if (this._photoFrame !== 'none') {
+            this._drawPhotoFrame(ctx, w, h, this._photoFrame);
+        }
+    }
+
+    /**
+     * Draw a decorative frame around the photo.
+     */
+    _drawPhotoFrame(ctx, w, h, frameType) {
+        const spacing = 30;
+        const margin = 12;
+        ctx.save();
+
+        const drawItem = (x, y) => {
+            ctx.save();
+            ctx.translate(x, y);
+            switch (frameType) {
+                case 'hearts':
+                    ctx.fillStyle = '#FF69B4';
+                    ctx.beginPath();
+                    ctx.moveTo(0, -3);
+                    ctx.bezierCurveTo(-5, -8, -10, -3, 0, 5);
+                    ctx.bezierCurveTo(10, -3, 5, -8, 0, -3);
+                    ctx.fill();
+                    break;
+                case 'stars':
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 72 - 90) * Math.PI / 180;
+                        const innerAngle = ((i * 72) + 36 - 90) * Math.PI / 180;
+                        const outerR = 6;
+                        const innerR = 3;
+                        ctx.lineTo(Math.cos(angle) * outerR, Math.sin(angle) * outerR);
+                        ctx.lineTo(Math.cos(innerAngle) * innerR, Math.sin(innerAngle) * innerR);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                case 'flowers':
+                    ctx.fillStyle = '#FF9ECD';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 72) * Math.PI / 180;
+                        ctx.beginPath();
+                        ctx.arc(Math.cos(angle) * 4, Math.sin(angle) * 4, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case 'sparkles':
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    for (let i = 0; i < 4; i++) {
+                        const angle = (i * 90) * Math.PI / 180;
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(Math.cos(angle - 0.15) * 2, Math.sin(angle - 0.15) * 2);
+                        ctx.lineTo(Math.cos(angle) * 6, Math.sin(angle) * 6);
+                        ctx.lineTo(Math.cos(angle + 0.15) * 2, Math.sin(angle + 0.15) * 2);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+            }
+            ctx.restore();
+        };
+
+        // Top and bottom edges
+        for (let x = margin; x < w - margin; x += spacing) {
+            drawItem(x, margin);
+            drawItem(x, h - margin);
+        }
+        // Left and right edges
+        for (let y = margin + spacing; y < h - margin - spacing; y += spacing) {
+            drawItem(margin, y);
+            drawItem(w - margin, y);
+        }
+
+        ctx.restore();
+    }
+
+    /**
+     * Snap photo — render to offscreen canvas at export resolution and download.
+     */
+    _snapPhoto() {
+        const creature = this._cachedCreature || window.saveManager.getCreature(this._activeCreatureId);
+        if (!creature) return;
+
+        window.audioManager.playSound('shutter');
+
+        const size = 1024;
+        const offscreen = document.createElement('canvas');
+        offscreen.width = size;
+        offscreen.height = size;
+        const ctx = offscreen.getContext('2d');
+
+        this._drawPhotoContent(ctx, size, size, creature);
+
+        offscreen.toBlob((blob) => {
+            if (!blob) return;
+
+            const fileName = (creature.name || 'creature') + '-photo.png';
+            const file = new File([blob], fileName, { type: 'image/png' });
+
+            // Try Web Share API first (iPad Safari)
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file] }).catch(() => {
+                    this._downloadBlob(blob, fileName);
+                });
+            } else {
+                this._downloadBlob(blob, fileName);
+            }
+
+            // Show feedback toast
+            window.saveManager._showToast('Photo saved!');
+        }, 'image/png');
+    }
+
+    /**
+     * Download a blob as a file.
+     */
+    _downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+
+    // ── Creature Trading Cards ──────────────────────────────
+
+    /**
+     * Open the creature card overlay and render the trading card.
+     */
+    _openCreatureCard(creatureId, triggerEl) {
+        const creature = window.saveManager.getCreature(creatureId);
+        if (!creature) return;
+
+        this._cardCreatureId = creatureId;
+        window.uiManager.showOverlay('overlay-creature-card', triggerEl);
+        this._renderTradingCard(creature);
+    }
+
+    /**
+     * Render a trading card to the card preview canvas.
+     */
+    _renderTradingCard(creature) {
+        const canvas = document.getElementById('card-preview-canvas');
+        if (!canvas) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        const cardW = 280;
+        const cardH = 420;
+        canvas.width = cardW * dpr;
+        canvas.height = cardH * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        this._drawCardContent(ctx, cardW, cardH, creature);
+        ctx.restore();
+    }
+
+    /**
+     * Draw trading card content (shared between preview and export).
+     */
+    _drawCardContent(ctx, w, h, creature) {
+        const borderColor = creature.body.torso ? creature.body.torso.color : '#FFD700';
+        const innerMargin = 12;
+        const borderWidth = 8;
+
+        // Helper for rounded rectangles (Safari 15 compat — no ctx.roundRect)
+        const roundedRect = (x, y, rw, rh, r) => {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + rw - r, y);
+            ctx.arcTo(x + rw, y, x + rw, y + r, r);
+            ctx.lineTo(x + rw, y + rh - r);
+            ctx.arcTo(x + rw, y + rh, x + rw - r, y + rh, r);
+            ctx.lineTo(x + r, y + rh);
+            ctx.arcTo(x, y + rh, x, y + rh - r, r);
+            ctx.lineTo(x, y + r);
+            ctx.arcTo(x, y, x + r, y, r);
+            ctx.closePath();
+        };
+
+        // Card background
+        ctx.fillStyle = '#FFFAF5';
+        roundedRect(0, 0, w, h, 16);
+        ctx.fill();
+
+        // Decorative border
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = borderWidth;
+        roundedRect(borderWidth / 2, borderWidth / 2, w - borderWidth, h - borderWidth, 14);
+        ctx.stroke();
+
+        // Inner border
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2;
+        roundedRect(innerMargin + 4, innerMargin + 4, w - (innerMargin + 4) * 2, h - (innerMargin + 4) * 2, 10);
+        ctx.stroke();
+
+        // Species name at top
+        const species = this._getSpeciesName(creature);
+        ctx.fillStyle = '#9B59B6';
+        ctx.font = "bold 16px OpenDyslexic, 'Comic Sans MS', cursive";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(species, w / 2, 36);
+
+        // Draw creature centered
+        const creatureSize = w * 0.45;
+        const creatureY = h * 0.3;
+
+        // Build cache for this creature
+        if (!window.creatureCache.hasCache(creature.id)) {
+            window.creatureCache.buildCache(creature.id, creature, creatureSize);
+        }
+        const animState = window.animationEngine.getState(creature.id) || {};
+        window.creatureCache.drawCreatureById(ctx, w / 2, creatureY, animState, creatureSize, creature.id);
+
+        // Creature name
+        ctx.fillStyle = '#2C2416';
+        ctx.font = "bold 18px OpenDyslexic, 'Comic Sans MS', cursive";
+        ctx.textAlign = 'center';
+        ctx.fillText(creature.name, w / 2, h * 0.52);
+
+        // Decorative line
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.2, h * 0.57);
+        ctx.lineTo(w * 0.8, h * 0.57);
+        ctx.stroke();
+
+        // Stats
+        const stats = this._getCardStats(creature);
+        const statsStartY = h * 0.63;
+        const lineHeight = 28;
+
+        ctx.textAlign = 'left';
+        ctx.font = "16px OpenDyslexic, 'Comic Sans MS', cursive";
+
+        for (let i = 0; i < stats.length; i++) {
+            const y = statsStartY + i * lineHeight;
+            // Icon
+            ctx.font = "16px sans-serif";
+            ctx.fillStyle = '#2C2416';
+            ctx.fillText(stats[i].icon, w * 0.15, y);
+            // Text
+            ctx.font = "16px OpenDyslexic, 'Comic Sans MS', cursive";
+            ctx.fillStyle = '#595143';
+            ctx.fillText(stats[i].text, w * 0.25, y);
+        }
+    }
+
+    /**
+     * Get stat lines for a trading card.
+     */
+    _getCardStats(creature) {
+        const stats = [];
+
+        // Growth stage
+        const stage = (creature.growthStage || 'baby');
+        stats.push({ icon: '⭐', text: stage.charAt(0).toUpperCase() + stage.slice(1) });
+
+        // Personality
+        const personality = (creature.personality || 'playful');
+        stats.push({ icon: '💕', text: personality.charAt(0).toUpperCase() + personality.slice(1) });
+
+        // Age
+        const ageMs = Date.now() - (creature.createdAt || Date.now());
+        const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+        const ageText = ageDays === 0 ? 'Born today!' : ageDays === 1 ? '1 day old' : ageDays + ' days old';
+        stats.push({ icon: '🎂', text: ageText });
+
+        // Care actions
+        const careCount = creature.totalCareActions || 0;
+        stats.push({ icon: '✨', text: careCount + ' care actions' });
+
+        return stats;
+    }
+
+    /**
+     * Save trading card — render at export resolution and download.
+     */
+    _saveCard() {
+        const creatureId = this._cardCreatureId;
+        const creature = creatureId ? window.saveManager.getCreature(creatureId) : null;
+        if (!creature) return;
+
+        const exportW = 600;
+        const exportH = 900;
+        const offscreen = document.createElement('canvas');
+        offscreen.width = exportW;
+        offscreen.height = exportH;
+        const ctx = offscreen.getContext('2d');
+
+        this._drawCardContent(ctx, exportW, exportH, creature);
+
+        offscreen.toBlob((blob) => {
+            if (!blob) return;
+            const fileName = (creature.name || 'creature') + '-card.png';
+            const file = new File([blob], fileName, { type: 'image/png' });
+
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file] }).catch(() => {
+                    this._downloadBlob(blob, fileName);
+                });
+            } else {
+                this._downloadBlob(blob, fileName);
+            }
+        }, 'image/png');
+    }
+
+    // ── Show Mode ───────────────────────────────────────────
+
+    /**
+     * Open show mode — full-screen creature display with animation.
+     */
+    _openShowMode(creatureId, triggerEl) {
+        const creature = window.saveManager.getCreature(creatureId);
+        if (!creature) return;
+
+        this._showModeActive = true;
+        this._showModeCreatureId = creatureId;
+        this._showModeSparkles = [];
+        this._showModeSparkleTimer = 0;
+
+        // Set species and name text
+        const speciesEl = document.getElementById('show-mode-species');
+        const nameEl = document.getElementById('show-mode-name');
+        if (speciesEl) speciesEl.textContent = this._getSpeciesName(creature);
+        if (nameEl) nameEl.textContent = creature.name;
+
+        // Setup the show canvas — cache for hot path
+        const canvas = document.getElementById('show-mode-canvas');
+        if (canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const cssSize = canvas.clientWidth || Math.min(400, window.innerWidth * 0.8);
+            canvas.width = cssSize * dpr;
+            canvas.height = cssSize * dpr;
+            this._showModeCanvas = {
+                canvas: canvas,
+                ctx: canvas.getContext('2d'),
+                w: cssSize,
+                h: cssSize,
+                dpr: dpr
+            };
+        }
+
+        // Build creature cache at large size — force rebuild to ensure correct resolution
+        const displaySize = (this._showModeCanvas ? this._showModeCanvas.w : 300) * 0.7;
+        window.creatureCache.buildCache(creatureId, creature, displaySize);
+
+        // Start idle animation
+        window.animationEngine.startAnimation(creatureId, 'idle', creature);
+
+        window.uiManager.showOverlay('overlay-show-mode', triggerEl);
+    }
+
+    /**
+     * Close show mode overlay and clean up.
+     */
+    _closeShowMode() {
+        this._showModeActive = false;
+        if (this._showModeCreatureId) {
+            window.animationEngine.stopAnimation(this._showModeCreatureId);
+        }
+        this._showModeCreatureId = null;
+        this._showModeSparkles = [];
+        window.uiManager.hideOverlay('overlay-show-mode');
+    }
+
+    /**
+     * Draw show mode — called from the game loop when show mode is active.
+     */
+    _drawShowMode(dt) {
+        if (!this._showModeCanvas || !this._showModeCreatureId) return;
+
+        const { ctx, w, h, dpr } = this._showModeCanvas;
+
+        ctx.save();
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Clear
+        ctx.clearRect(0, 0, w, h);
+
+        // Draw creature centered
+        const displaySize = w * 0.7;
+        const animState = window.animationEngine.getState(this._showModeCreatureId) || {};
+        window.creatureCache.drawCreatureById(
+            ctx, w / 2, h / 2, animState, displaySize, this._showModeCreatureId
+        );
+
+        // Sparkle particles
+        this._showModeSparkleTimer += dt;
+        if (this._showModeSparkleTimer >= 400) {
+            this._showModeSparkleTimer = 0;
+            // Add a new sparkle at random position around the creature
+            const angle = Math.random() * Math.PI * 2;
+            const dist = displaySize * 0.3 + Math.random() * displaySize * 0.25;
+            this._showModeSparkles.push({
+                x: w / 2 + Math.cos(angle) * dist,
+                y: h / 2 + Math.sin(angle) * dist,
+                life: 1,
+                size: 3 + Math.random() * 4,
+                speed: 0.5 + Math.random() * 0.5
+            });
+        }
+
+        // Update and draw sparkles
+        for (let i = this._showModeSparkles.length - 1; i >= 0; i--) {
+            const s = this._showModeSparkles[i];
+            s.life -= (dt / 1000) * s.speed;
+            if (s.life <= 0) {
+                // Swap-and-pop: O(1) removal
+                this._showModeSparkles[i] = this._showModeSparkles[this._showModeSparkles.length - 1];
+                this._showModeSparkles.pop();
+                continue;
+            }
+            ctx.globalAlpha = s.life * 0.8;
+            ctx.fillStyle = '#FFD700';
+            // 4-pointed sparkle
+            ctx.beginPath();
+            const sz = s.size * s.life;
+            ctx.moveTo(s.x, s.y - sz);
+            ctx.lineTo(s.x + sz * 0.3, s.y);
+            ctx.lineTo(s.x, s.y + sz);
+            ctx.lineTo(s.x - sz * 0.3, s.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(s.x - sz, s.y);
+            ctx.lineTo(s.x, s.y + sz * 0.3);
+            ctx.lineTo(s.x + sz, s.y);
+            ctx.lineTo(s.x, s.y - sz * 0.3);
+            ctx.closePath();
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.restore();
     }
 
     // ── Milestone / Unlock Notifications ─────────────────
@@ -1624,6 +2260,18 @@ class Game {
         document.getElementById('btn-park-home').addEventListener('click', () => {
             this.setState('CARE');
         });
+
+        // Photo buttons (care and park)
+        document.getElementById('btn-photo-care').addEventListener('click', () => {
+            this._openPhotoMode();
+        });
+        document.getElementById('btn-photo-park').addEventListener('click', () => {
+            // For park, cache the creature before opening photo mode
+            if (this._activeCreatureId) {
+                this._cachedCreature = window.saveManager.getCreature(this._activeCreatureId);
+            }
+            this._openPhotoMode();
+        });
     }
 
     _bindOverlayButtons() {
@@ -1740,11 +2388,71 @@ class Game {
             }
         });
 
+        // Show Off button
+        document.getElementById('btn-option-showoff').addEventListener('click', () => {
+            const id = this._optionsCreatureId;
+            // Find the gallery card that triggered options — use as focus-return target
+            const triggerCard = this._optionsTriggerEl;
+            window.uiManager.hideOverlay('overlay-creature-options');
+            if (id) {
+                this._openShowMode(id, triggerCard);
+            }
+        });
+
+        // Card button
+        document.getElementById('btn-option-card').addEventListener('click', () => {
+            const id = this._optionsCreatureId;
+            const triggerCard = this._optionsTriggerEl;
+            window.uiManager.hideOverlay('overlay-creature-options');
+            if (id) {
+                this._openCreatureCard(id, triggerCard);
+            }
+        });
+
         const optionsClose = document.querySelector('#overlay-creature-options .btn-close');
         if (optionsClose) {
             optionsClose.addEventListener('click', () => {
                 this._optionsCreatureId = null;
                 window.uiManager.hideOverlay('overlay-creature-options');
+            });
+        }
+
+        // Photo mode overlay
+        document.getElementById('btn-photo-snap').addEventListener('click', () => {
+            this._snapPhoto();
+        });
+        const photoClose = document.querySelector('#overlay-photo-mode .btn-close');
+        if (photoClose) {
+            photoClose.addEventListener('click', () => {
+                window.uiManager.hideOverlay('overlay-photo-mode');
+            });
+        }
+
+        // Creature card overlay
+        document.getElementById('btn-card-save').addEventListener('click', () => {
+            this._saveCard();
+        });
+        const cardClose = document.querySelector('#overlay-creature-card .btn-close');
+        if (cardClose) {
+            cardClose.addEventListener('click', () => {
+                window.uiManager.hideOverlay('overlay-creature-card');
+            });
+        }
+
+        // Show mode overlay — use MutationObserver to catch all close paths (Escape, close btn, bg tap)
+        const showOverlay = document.getElementById('overlay-show-mode');
+        if (showOverlay) {
+            const showClose = showOverlay.querySelector('.btn-close');
+            if (showClose) {
+                showClose.addEventListener('click', () => {
+                    this._closeShowMode();
+                });
+            }
+            // Tap overlay background to close
+            showOverlay.addEventListener('click', (e) => {
+                if (e.target === showOverlay) {
+                    this._closeShowMode();
+                }
             });
         }
 

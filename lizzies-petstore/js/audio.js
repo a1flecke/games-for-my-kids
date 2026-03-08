@@ -387,6 +387,7 @@ class AudioManager {
                 case 'footstep': this._playFootstep(); break;
                 case 'wingWhoosh': this._playWingWhoosh(); break;
                 case 'happy': this._playHappyJingle(); break;
+                case 'shutter': this._playShutter(); break;
                 default: break;
             }
         });
@@ -880,5 +881,28 @@ class AudioManager {
             v.osc.start(t + offset);
             v.osc.stop(t + offset + 0.12);
         }
+    }
+
+    /**
+     * Shutter click — short mechanical-sounding click for photo mode.
+     * Two quick bursts: high click + lower thunk.
+     */
+    _playShutter() {
+        const ctx = this._ctx;
+        const t = ctx.currentTime;
+
+        // High click
+        const v1 = this._voiceChain(800, 2000, 0);
+        v1.gain.gain.setValueAtTime(0.3, t);
+        v1.gain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+        v1.osc.start(t);
+        v1.osc.stop(t + 0.015);
+
+        // Lower thunk
+        const v2 = this._voiceChain(400, 1500, 0);
+        v2.gain.gain.setValueAtTime(0.2, t + 0.02);
+        v2.gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        v2.osc.start(t + 0.02);
+        v2.osc.stop(t + 0.04);
     }
 }

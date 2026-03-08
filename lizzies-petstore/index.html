@@ -182,6 +182,9 @@
             <button id="btn-park" class="btn btn-nav" aria-label="Pet Park">
                 <span class="btn-icon">🌳</span>
             </button>
+            <button id="btn-photo-care" class="btn btn-nav" aria-label="Take photo">
+                <span class="btn-icon">📷</span>
+            </button>
         </div>
     </div>
 
@@ -282,6 +285,9 @@
                 <span class="btn-icon">🏠</span>
             </button>
             <h2 id="park-name">Sunny Park</h2>
+            <button id="btn-photo-park" class="btn btn-icon-only" aria-label="Take photo">
+                <span class="btn-icon">📷</span>
+            </button>
         </div>
         <canvas id="park-canvas" aria-label="Pet park"></canvas>
     </div>
@@ -370,9 +376,17 @@
                     <span class="btn-icon">🎮</span>
                     <span class="btn-text">Play!</span>
                 </button>
+                <button id="btn-option-showoff" class="btn btn-secondary creature-option-btn" aria-label="Show off creature">
+                    <span class="btn-icon">⭐</span>
+                    <span class="btn-text">Show Off!</span>
+                </button>
                 <button id="btn-option-dressup" class="btn btn-secondary creature-option-btn" aria-label="Dress up creature">
                     <span class="btn-icon">👗</span>
                     <span class="btn-text">Dress Up</span>
+                </button>
+                <button id="btn-option-card" class="btn btn-secondary creature-option-btn" aria-label="Make trading card">
+                    <span class="btn-icon">🃏</span>
+                    <span class="btn-text">Card</span>
                 </button>
                 <button id="btn-option-goodbye" class="btn btn-danger creature-option-btn" aria-label="Say goodbye to creature">
                     <span class="btn-icon">👋</span>
@@ -392,6 +406,51 @@
                 <span class="btn-icon">🎉</span>
                 <span class="btn-text">Awesome!</span>
             </button>
+        </div>
+    </div>
+
+    <!-- Photo mode overlay -->
+    <div id="overlay-photo-mode" class="overlay" role="dialog" aria-modal="true" aria-label="Photo mode" aria-hidden="true">
+        <div class="overlay-content photo-mode-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <h2 class="photo-mode-title">Photo Mode</h2>
+            <canvas id="photo-preview-canvas" class="photo-preview-canvas" aria-label="Photo preview"></canvas>
+            <div class="photo-options">
+                <div class="photo-option-row">
+                    <span class="photo-option-label">Background</span>
+                    <div id="photo-bg-options" class="photo-option-group" role="radiogroup" aria-label="Background color"></div>
+                </div>
+                <div class="photo-option-row">
+                    <span class="photo-option-label">Frame</span>
+                    <div id="photo-frame-options" class="photo-option-group" role="radiogroup" aria-label="Frame style"></div>
+                </div>
+            </div>
+            <button id="btn-photo-snap" class="btn btn-primary" aria-label="Take photo">
+                <span class="btn-icon">📸</span>
+                <span class="btn-text">Snap!</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Creature card overlay -->
+    <div id="overlay-creature-card" class="overlay" role="dialog" aria-modal="true" aria-label="Creature trading card" aria-hidden="true">
+        <div class="overlay-content creature-card-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <canvas id="card-preview-canvas" class="card-preview-canvas" aria-label="Trading card preview"></canvas>
+            <button id="btn-card-save" class="btn btn-primary" aria-label="Save card">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Save Card</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Show mode overlay -->
+    <div id="overlay-show-mode" class="overlay show-mode-overlay" role="dialog" aria-modal="true" aria-label="Show off creature" aria-hidden="true">
+        <div class="overlay-content show-mode-content">
+            <button class="btn-close show-mode-close" aria-label="Close">✕</button>
+            <p id="show-mode-species" class="show-mode-species"></p>
+            <canvas id="show-mode-canvas" class="show-mode-canvas" aria-label="Creature display"></canvas>
+            <h2 id="show-mode-name" class="show-mode-name"></h2>
         </div>
     </div>
 
