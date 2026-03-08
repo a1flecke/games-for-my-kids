@@ -217,6 +217,13 @@ class CareManager {
         // Check growth and save
         this._checkGrowth();
 
+        // Check milestones (loadUnlocks is idempotent once loaded)
+        if (window.game && window.progressManager) {
+            window.progressManager.loadUnlocks().then(() => {
+                if (window.game) window.game._checkAndNotifyMilestones();
+            }).catch(() => {});
+        }
+
         // Update needs display
         if (window.game) {
             window.game._updateNeedsDisplay(this._creature.needs);
@@ -713,12 +720,10 @@ class CareManager {
                 window.renderer.spawnHearts(pos.x, pos.y - pos.displaySize * 0.4, 5);
             }
 
-            // Show unlock overlay with growth message
-            const msgEl = document.getElementById('unlock-message');
-            if (msgEl) {
-                msgEl.textContent = this._creature.name + ' is now a ' + newStage + '!';
+            // Queue growth notification through game's unlock queue
+            if (window.game) {
+                window.game.queueGrowthNotification(this._creature.name, newStage);
             }
-            window.uiManager.showOverlay('overlay-unlock');
         }
     }
 

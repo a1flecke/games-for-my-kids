@@ -80,7 +80,7 @@
     "hitBox": { "x": 0.1, "y": 0.1, "w": 0.8, "h": 0.8 },
     "pivotPoint": { "x": 0.5, "y": 0.85 },
     "attachSlot": "head",
-    "unlockCondition": "milestone-3-creatures",
+    "unlockCondition": "milestone-mythical",
     "tags": ["cute"]
   },
   {
@@ -92,7 +92,7 @@
     "hitBox": { "x": 0.05, "y": 0.1, "w": 0.9, "h": 0.85 },
     "pivotPoint": { "x": 0.5, "y": 0.85 },
     "attachSlot": "head",
-    "unlockCondition": "milestone-3-creatures",
+    "unlockCondition": "milestone-mythical",
     "tags": ["cute"]
   },
   {
@@ -116,7 +116,7 @@
     "hitBox": { "x": 0.1, "y": 0.1, "w": 0.8, "h": 0.8 },
     "pivotPoint": { "x": 0.5, "y": 0.85 },
     "attachSlot": "head",
-    "unlockCondition": "milestone-park-5",
+    "unlockCondition": "milestone-5-park-visits",
     "tags": ["magical"]
   },
 
@@ -177,7 +177,7 @@
     "hitBox": { "x": 0.1, "y": 0.1, "w": 0.8, "h": 0.8 },
     "pivotPoint": { "x": 0.5, "y": 0.5 },
     "attachSlot": "eyes",
-    "unlockCondition": "milestone-3-creatures",
+    "unlockCondition": "milestone-mythical",
     "tags": []
   },
   {
@@ -347,7 +347,7 @@
     "hitBox": { "x": 0.0, "y": 0.0, "w": 1.0, "h": 1.0 },
     "pivotPoint": { "x": 0.5, "y": 0.0 },
     "attachSlot": "legs",
-    "unlockCondition": "milestone-3-creatures",
+    "unlockCondition": "milestone-mythical",
     "tags": ["mythical"]
   },
   {
@@ -444,7 +444,7 @@
     "hitBox": { "x": 0.0, "y": 0.0, "w": 1.0, "h": 1.0 },
     "pivotPoint": { "x": 0.0, "y": 0.4 },
     "attachSlot": "tail",
-    "unlockCondition": "milestone-park-5",
+    "unlockCondition": "milestone-5-park-visits",
     "tags": ["magical"]
   },
   {
@@ -517,7 +517,7 @@
     "hitBox": { "x": 0.0, "y": 0.0, "w": 1.0, "h": 1.0 },
     "pivotPoint": { "x": 0.9, "y": 0.3 },
     "attachSlot": "wings",
-    "unlockCondition": "milestone-3-creatures",
+    "unlockCondition": "milestone-mythical",
     "tags": ["magical"]
   },
   {
@@ -541,7 +541,7 @@
     "hitBox": { "x": 0.0, "y": 0.0, "w": 1.0, "h": 1.0 },
     "pivotPoint": { "x": 0.9, "y": 0.3 },
     "attachSlot": "wings",
-    "unlockCondition": "milestone-park-5",
+    "unlockCondition": "milestone-5-park-visits",
     "tags": ["magical"]
   },
 
@@ -566,7 +566,7 @@
     "hitBox": { "x": 0.0, "y": 0.0, "w": 1.0, "h": 1.0 },
     "pivotPoint": { "x": 0.5, "y": 1.0 },
     "attachSlot": "extras",
-    "unlockCondition": "milestone-3-creatures",
+    "unlockCondition": "milestone-mythical",
     "tags": []
   },
   {
@@ -626,7 +626,7 @@
     "hitBox": { "x": 0.1, "y": 0.0, "w": 0.8, "h": 1.0 },
     "pivotPoint": { "x": 0.5, "y": 1.0 },
     "attachSlot": "extras",
-    "unlockCondition": "milestone-3-creatures",
+    "unlockCondition": "milestone-mythical",
     "tags": []
   },
   {
@@ -638,7 +638,7 @@
     "hitBox": { "x": 0.0, "y": 0.0, "w": 1.0, "h": 1.0 },
     "pivotPoint": { "x": 0.5, "y": 0.5 },
     "attachSlot": "extras",
-    "unlockCondition": "milestone-park-5",
+    "unlockCondition": "milestone-5-park-visits",
     "tags": []
   },
   {

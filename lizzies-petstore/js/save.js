@@ -197,6 +197,18 @@ class SaveManager {
     }
 
     /**
+     * Delete all save data and reload the page.
+     * Called from reset-progress confirmation.
+     */
+    resetAllData() {
+        try {
+            localStorage.removeItem(this._key);
+            localStorage.removeItem(this._backupKey);
+        } catch (e) { /* ignore */ }
+        location.reload();
+    }
+
+    /**
      * Show a user-visible toast message.
      */
     _showToast(message) {

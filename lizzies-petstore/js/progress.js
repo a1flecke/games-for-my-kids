@@ -13,8 +13,10 @@ class ProgressManager {
 
     /**
      * Load unlock definitions from data/unlocks.json.
+     * Idempotent: returns cached data if already loaded.
      */
     async loadUnlocks() {
+        if (this._unlockData) return this._unlockData;
         const resp = await fetch('data/unlocks.json');
         this._unlockData = await resp.json();
         return this._unlockData;

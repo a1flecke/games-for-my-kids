@@ -5,7 +5,7 @@
     "description": "Created 2 creatures",
     "condition": { "type": "creatures_created", "count": 2 },
     "rewards": [
-      { "type": "part", "id": "head-fox" },
+      { "type": "accessory", "id": "acc-feather-boa" },
       { "type": "theme", "id": "theme-galaxy" }
     ]
   },
@@ -25,7 +25,7 @@
     "condition": { "type": "park_visits", "count": 1 },
     "rewards": [
       { "type": "theme", "id": "theme-adventure" },
-      { "type": "accessory", "id": "acc-backpack" }
+      { "type": "accessory", "id": "acc-lei" }
     ]
   },
   {

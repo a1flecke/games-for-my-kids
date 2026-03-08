@@ -197,8 +197,16 @@
                 <span class="btn-text">New!</span>
             </button>
         </div>
+        <div class="gallery-sort-bar" role="group" aria-label="Sort creatures">
+            <button id="btn-sort-newest" class="btn btn-sort active-sort" aria-pressed="true" aria-label="Sort by newest">
+                🕐 Newest
+            </button>
+            <button id="btn-sort-name" class="btn btn-sort" aria-pressed="false" aria-label="Sort by name">
+                🔤 Name
+            </button>
+        </div>
         <div id="gallery-grid" class="gallery-grid" role="group" aria-label="Your creatures">
-            <!-- Populated dynamically by save.js -->
+            <!-- Populated dynamically -->
         </div>
         <div id="gallery-empty" class="gallery-empty hidden" aria-hidden="true">
             <p>Your petstore is empty!</p>
@@ -342,6 +350,34 @@
                     Music
                 </label>
                 <button id="music-toggle" class="btn btn-toggle" role="switch" aria-checked="false" aria-label="Background music">Off</button>
+            </div>
+            <div class="setting-row setting-row--reset">
+                <button id="btn-reset-progress" class="btn btn-danger" aria-label="Reset all progress and creatures">
+                    <span class="btn-icon">🗑️</span>
+                    <span class="btn-text">Reset Progress</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Creature options overlay -->
+    <div id="overlay-creature-options" class="overlay" role="dialog" aria-modal="true" aria-label="Creature options" aria-hidden="true">
+        <div class="overlay-content creature-options-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <h2 id="creature-options-name" class="creature-options-title"></h2>
+            <div class="creature-options-buttons">
+                <button id="btn-option-play" class="btn btn-primary creature-option-btn" aria-label="Play with creature">
+                    <span class="btn-icon">🎮</span>
+                    <span class="btn-text">Play!</span>
+                </button>
+                <button id="btn-option-dressup" class="btn btn-secondary creature-option-btn" aria-label="Dress up creature">
+                    <span class="btn-icon">👗</span>
+                    <span class="btn-text">Dress Up</span>
+                </button>
+                <button id="btn-option-goodbye" class="btn btn-danger creature-option-btn" aria-label="Say goodbye to creature">
+                    <span class="btn-icon">👋</span>
+                    <span class="btn-text">Bye Bye!</span>
+                </button>
             </div>
         </div>
     </div>

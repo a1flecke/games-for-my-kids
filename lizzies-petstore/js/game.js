@@ -52,6 +52,21 @@ class Game {
 
         // Confirm dialog callback
         this._confirmCallback = null;
+
+        // Gallery sort state ('newest' | 'name')
+        this._gallerySort = 'newest';
+
+        // Gallery: creature options overlay — which creature is being actioned
+        this._optionsCreatureId = null;
+
+        // Delete confirmation — which creature is pending deletion
+        this._pendingDeleteId = null;
+
+        // Unlock notification queue
+        this._pendingUnlockQueue = [];
+
+        // Reset progress confirmation flag
+        this._resetConfirmPending = false;
     }
 
     init() {
@@ -74,6 +89,7 @@ class Game {
         // Load catalogs (fire-and-forget; resolves before user navigates)
         window.partsLib.loadCatalog();
         window.accessoriesLib.loadCatalog();
+        window.progressManager.loadUnlocks().catch(() => {});
 
         // Load names data
         this._namesData = null;
@@ -275,6 +291,7 @@ class Game {
                 break;
 
             case 'GALLERY':
+                this._bindGallerySortButtons();
                 this._populateGallery();
                 break;
 
@@ -597,13 +614,13 @@ class Game {
     // ── Gallery ──────────────────────────────────────────
 
     _populateGallery() {
-        const creatures = window.saveManager.getCreatures();
+        const allCreatures = window.saveManager.getCreatures();
         const grid = document.getElementById('gallery-grid');
         const empty = document.getElementById('gallery-empty');
 
         if (!grid || !empty) return;
 
-        if (creatures.length === 0) {
+        if (allCreatures.length === 0) {
             grid.classList.add('hidden');
             empty.classList.remove('hidden');
             empty.setAttribute('aria-hidden', 'false');
@@ -614,12 +631,21 @@ class Game {
         empty.setAttribute('aria-hidden', 'true');
         grid.classList.remove('hidden');
 
+        // Sort creatures
+        const creatures = [...allCreatures];
+        if (this._gallerySort === 'name') {
+            creatures.sort((a, b) => a.name.localeCompare(b.name));
+        } else {
+            // newest first
+            creatures.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        }
+
         // Build gallery cards
         grid.innerHTML = '';
         for (const creature of creatures) {
             const card = document.createElement('button');
             card.className = 'gallery-card';
-            card.setAttribute('aria-label', creature.name);
+            card.setAttribute('aria-label', creature.name + ', ' + (creature.growthStage || 'baby'));
 
             const icon = document.createElement('span');
             icon.className = 'gallery-card-icon';
@@ -638,13 +664,60 @@ class Game {
             card.appendChild(stage);
 
             card.addEventListener('click', () => {
-                this._activeCreatureId = creature.id;
-                window.saveManager.setLastActiveCreature(creature.id);
-                this.setState('CARE');
+                this._showCreatureOptions(creature.id, card);
             });
 
             grid.appendChild(card);
         }
+    }
+
+    /**
+     * Show the creature options overlay for the given creature.
+     */
+    _showCreatureOptions(creatureId, triggerEl) {
+        const creature = window.saveManager.getCreature(creatureId);
+        if (!creature) return;
+
+        this._optionsCreatureId = creatureId;
+
+        const titleEl = document.getElementById('creature-options-name');
+        if (titleEl) {
+            titleEl.textContent = creature.name;
+        }
+
+        window.uiManager.showOverlay('overlay-creature-options', triggerEl);
+    }
+
+    /**
+     * Bind gallery sort buttons (idempotent via clone-replace).
+     */
+    _bindGallerySortButtons() {
+        const newestBtn = document.getElementById('btn-sort-newest');
+        const nameBtn = document.getElementById('btn-sort-name');
+        if (!newestBtn || !nameBtn) return;
+
+        const newNewest = newestBtn.cloneNode(true);
+        const newName = nameBtn.cloneNode(true);
+        newestBtn.parentNode.replaceChild(newNewest, newestBtn);
+        nameBtn.parentNode.replaceChild(newName, nameBtn);
+
+        newNewest.addEventListener('click', () => {
+            this._gallerySort = 'newest';
+            newNewest.setAttribute('aria-pressed', 'true');
+            newNewest.classList.add('active-sort');
+            newName.setAttribute('aria-pressed', 'false');
+            newName.classList.remove('active-sort');
+            this._populateGallery();
+        });
+
+        newName.addEventListener('click', () => {
+            this._gallerySort = 'name';
+            newName.setAttribute('aria-pressed', 'true');
+            newName.classList.add('active-sort');
+            newNewest.setAttribute('aria-pressed', 'false');
+            newNewest.classList.remove('active-sort');
+            this._populateGallery();
+        });
     }
 
     /**
@@ -793,6 +866,10 @@ class Game {
 
                 if (window.saveManager.addCreature(creature)) {
                     this._activeCreatureId = creature.id;
+                    // Load milestone data if not yet loaded, then check
+                    window.progressManager.loadUnlocks().then(() => {
+                        this._checkAndNotifyMilestones();
+                    }).catch(() => {});
                     this.setState('BIRTH_ANIMATION');
                 }
             });
@@ -869,6 +946,76 @@ class Game {
         else if (tail && tailMods[tail]) species += tailMods[tail];
 
         el.textContent = `a ${species}`;
+    }
+
+    // ── Milestone / Unlock Notifications ─────────────────
+
+    /**
+     * Check milestones after any progress-triggering event.
+     * Queues any new unlocks and shows the first one.
+     */
+    _checkAndNotifyMilestones() {
+        if (!window.progressManager || !window.progressManager._unlockData) return;
+        const newUnlocks = window.progressManager.checkMilestones();
+        if (newUnlocks.length > 0) {
+            for (const m of newUnlocks) {
+                this._pendingUnlockQueue.push(m);
+            }
+            this._showNextUnlock();
+        }
+    }
+
+    /**
+     * Show the next queued unlock notification.
+     * Called after btn-unlock-ok dismisses the current one.
+     */
+    _showNextUnlock() {
+        if (this._pendingUnlockQueue.length === 0) return;
+
+        // Don't interrupt an already-open unlock overlay
+        const overlay = document.getElementById('overlay-unlock');
+        if (overlay && overlay.classList.contains('open')) return;
+
+        const milestone = this._pendingUnlockQueue.shift();
+
+        const msgEl = document.getElementById('unlock-message');
+        if (msgEl) {
+            msgEl.textContent = milestone.name + ' — ' + milestone.description;
+        }
+
+        const previewEl = document.getElementById('unlock-preview');
+        if (previewEl) {
+            // Map reward IDs to human-readable names via accessories/parts libs
+            const names = milestone.rewards.map(r => {
+                if (r.type === 'accessory' && window.accessoriesLib) {
+                    const acc = window.accessoriesLib.getById(r.id);
+                    return acc ? acc.name : r.id;
+                }
+                if (r.type === 'part' && window.partsLib) {
+                    const part = window.partsLib.getById(r.id);
+                    return part ? part.name : r.id;
+                }
+                return r.id;
+            });
+            previewEl.textContent = names.length > 0
+                ? 'New: ' + names.join(', ')
+                : '';
+        }
+
+        window.uiManager.showOverlay('overlay-unlock');
+    }
+
+    /**
+     * Queue a growth stage notification to be shown via the unlock overlay.
+     * Called from care.js after _checkGrowth() fires.
+     */
+    queueGrowthNotification(creatureName, newStage) {
+        this._pendingUnlockQueue.push({
+            name: creatureName + ' grew up!',
+            description: 'Now a ' + newStage + '!',
+            rewards: []
+        });
+        this._showNextUnlock();
     }
 
     // ── Needs Display ────────────────────────────────────
@@ -1463,9 +1610,14 @@ class Game {
     }
 
     _bindOverlayButtons() {
-        // Unsaved changes confirm
+        // Unsaved changes / reset confirm
         document.getElementById('btn-confirm-yes').addEventListener('click', () => {
             window.uiManager.hideOverlay('overlay-confirm');
+            if (this._resetConfirmPending) {
+                this._resetConfirmPending = false;
+                window.saveManager.resetAllData(); // clears localStorage and reloads
+                return;
+            }
             if (this._confirmCallback) {
                 const cb = this._confirmCallback;
                 this._confirmCallback = null;
@@ -1475,6 +1627,7 @@ class Game {
 
         document.getElementById('btn-confirm-no').addEventListener('click', () => {
             window.uiManager.hideOverlay('overlay-confirm');
+            this._resetConfirmPending = false;
             this._confirmCallback = null;
         });
 
@@ -1483,23 +1636,39 @@ class Game {
         if (confirmClose) {
             confirmClose.addEventListener('click', () => {
                 window.uiManager.hideOverlay('overlay-confirm');
+                this._resetConfirmPending = false;
                 this._confirmCallback = null;
             });
         }
 
         // Delete creature confirm
         document.getElementById('btn-delete-yes').addEventListener('click', () => {
-            // Delete handled by gallery in future session
+            if (this._pendingDeleteId) {
+                // If deleting the active creature, clear active ref
+                if (this._activeCreatureId === this._pendingDeleteId) {
+                    const remaining = window.saveManager.getCreatures()
+                        .filter(c => c.id !== this._pendingDeleteId);
+                    this._activeCreatureId = remaining.length > 0 ? remaining[0].id : null;
+                    if (this._activeCreatureId) {
+                        window.saveManager.setLastActiveCreature(this._activeCreatureId);
+                    }
+                }
+                window.saveManager.removeCreature(this._pendingDeleteId);
+                this._pendingDeleteId = null;
+            }
             window.uiManager.hideOverlay('overlay-delete');
+            this._populateGallery();
         });
 
         document.getElementById('btn-delete-no').addEventListener('click', () => {
+            this._pendingDeleteId = null;
             window.uiManager.hideOverlay('overlay-delete');
         });
 
         const deleteClose = document.querySelector('#overlay-delete .btn-close');
         if (deleteClose) {
             deleteClose.addEventListener('click', () => {
+                this._pendingDeleteId = null;
                 window.uiManager.hideOverlay('overlay-delete');
             });
         }
@@ -1512,9 +1681,65 @@ class Game {
             });
         }
 
-        // Unlock notification
+        // Unlock notification — show next in queue after dismissal
         document.getElementById('btn-unlock-ok').addEventListener('click', () => {
             window.uiManager.hideOverlay('overlay-unlock');
+            // Small delay so overlay closes before next one opens
+            setTimeout(() => { this._showNextUnlock(); }, 150);
+        });
+
+        // Creature options overlay
+        document.getElementById('btn-option-play').addEventListener('click', () => {
+            const id = this._optionsCreatureId;
+            window.uiManager.hideOverlay('overlay-creature-options');
+            if (id) {
+                this._activeCreatureId = id;
+                window.saveManager.setLastActiveCreature(id);
+                this.setState('CARE');
+            }
+        });
+
+        document.getElementById('btn-option-dressup').addEventListener('click', () => {
+            const id = this._optionsCreatureId;
+            window.uiManager.hideOverlay('overlay-creature-options');
+            if (id) {
+                this._activeCreatureId = id;
+                window.saveManager.setLastActiveCreature(id);
+                this.setState('WARDROBE');
+            }
+        });
+
+        document.getElementById('btn-option-goodbye').addEventListener('click', () => {
+            const id = this._optionsCreatureId;
+            window.uiManager.hideOverlay('overlay-creature-options');
+            if (id) {
+                this._pendingDeleteId = id;
+                const creature = window.saveManager.getCreature(id);
+                const msgEl = document.getElementById('delete-message');
+                if (msgEl && creature) {
+                    msgEl.textContent = creature.name + ' is going on a big adventure! Wave goodbye?';
+                }
+                window.uiManager.showOverlay('overlay-delete');
+            }
+        });
+
+        const optionsClose = document.querySelector('#overlay-creature-options .btn-close');
+        if (optionsClose) {
+            optionsClose.addEventListener('click', () => {
+                this._optionsCreatureId = null;
+                window.uiManager.hideOverlay('overlay-creature-options');
+            });
+        }
+
+        // Reset progress button in settings
+        document.getElementById('btn-reset-progress').addEventListener('click', () => {
+            this._resetConfirmPending = true;
+            const msgEl = document.getElementById('confirm-message');
+            if (msgEl) {
+                msgEl.textContent = 'Delete ALL creatures and reset everything? This cannot be undone!';
+            }
+            window.uiManager.hideOverlay('overlay-settings');
+            window.uiManager.showOverlay('overlay-confirm');
         });
     }
 }
