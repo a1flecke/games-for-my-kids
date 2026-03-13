@@ -663,6 +663,8 @@ class ParkManager {
                     this._greetedNpcs.add(npc.id);
                     this._happinessGained += 3;
                     this._spawnFloatingText('+3', npc.pos.x * w, npc.pos.y * h - 40, '#FF69B4');
+                    // Check daily task
+                    if (window.game) window.game._checkTaskCompletion('park_greet');
                 }
             }
         }

@@ -109,6 +109,14 @@ class AudioManager {
     }
 
     /**
+     * Pre-warm AudioContext during a user gesture (iOS Safari requirement).
+     * Call once from the first button tap on the title screen.
+     */
+    preWarm() {
+        this._resume();
+    }
+
+    /**
      * Resume AudioContext (required after iOS Safari suspension).
      * Returns a Promise — schedule sounds inside .then().
      */

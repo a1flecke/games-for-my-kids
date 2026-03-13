@@ -50,6 +50,9 @@ class Game {
         // Cached creature data for draw loop (avoid JSON.parse per frame)
         this._cachedCreature = null;
 
+        // Task celebration timer
+        this._taskCelebrationTimer = null;
+
         // Confirm dialog callback
         this._confirmCallback = null;
 
@@ -100,12 +103,17 @@ class Game {
         window.parkManager = new ParkManager();
         window.tutorialManager = new TutorialManager();
         window.progressManager = new ProgressManager();
+        window.taskManager = new TaskManager();
         window.renderer = new Renderer();
 
         // Load catalogs (fire-and-forget; resolves before user navigates)
         window.partsLib.loadCatalog();
         window.accessoriesLib.loadCatalog();
         window.progressManager.loadUnlocks().catch(() => {});
+        window.taskManager.loadTasks().then(() => {
+            window.taskManager.getDailyTasks(); // generate if needed
+            this._updateTaskBadge();
+        }).catch(() => {});
 
         // Load names data
         this._namesData = null;
@@ -118,6 +126,9 @@ class Game {
         this._bindScreenButtons();
         this._bindOverlayButtons();
         this._bindSettingsControls();
+        this._bindCareSoundToggle();
+        this._bindSoundPromptButtons();
+        this._bindTaskBoard();
 
         // Cache show mode overlay element
         this._showModeOverlayEl = document.getElementById('overlay-show-mode');
@@ -170,6 +181,10 @@ class Game {
         if (this._showModeActive) {
             this._closeShowMode();
         }
+
+        // Cancel task celebration timer on any state exit
+        clearTimeout(this._taskCelebrationTimer);
+        this._taskCelebrationTimer = null;
 
         switch (state) {
             case 'CREATOR':
@@ -313,6 +328,7 @@ class Game {
                     }
                 }
                 window.audioManager.startMusic('care');
+                this._updateTaskBadge();
                 break;
 
             case 'GALLERY':
@@ -338,6 +354,7 @@ class Game {
                 }
                 window.audioManager.startMusic('park');
                 window.audioManager.startAmbient();
+                this._checkTaskCompletion('park_visit');
                 break;
             }
 
@@ -348,6 +365,7 @@ class Game {
                     if (this._cachedCreature) {
                         window.roomManager.startEditing(this._cachedCreature);
                         this._populateRoomUI();
+                        this._checkTaskCompletion('room_edit');
                         // Build cache and start idle animation
                         const roomInfo = window.renderer.getCanvas('room-canvas');
                         const roomSize = roomInfo ? Math.min(roomInfo.w, roomInfo.h) * 0.35 : 120;
@@ -369,6 +387,7 @@ class Game {
                     this._cachedCreature = window.saveManager.getCreature(this._activeCreatureId);
                     if (this._cachedCreature) {
                         this._populateWardrobeUI();
+                        this._checkTaskCompletion('wardrobe');
                         // Build cache and start idle animation
                         const wardInfo = window.renderer.getCanvas('wardrobe-canvas');
                         const wardSize = wardInfo ? Math.min(wardInfo.w, wardInfo.h) * 0.45 : 150;
@@ -510,7 +529,10 @@ class Game {
                 window.animationEngine.update(dt);
                 this._birthTimer += dt;
                 if (this._birthTimer >= this._birthDuration) {
+                    this._checkTaskCompletion('create');
                     this.setState('CARE');
+                    // Show sound prompt on first creature birth
+                    this._maybeSoundPrompt();
                 }
                 break;
             case 'CARE':
@@ -1028,6 +1050,8 @@ class Game {
         const creature = this._cachedCreature;
         if (!creature || !this._activeCreatureId) return;
 
+        this._checkTaskCompletion('photo');
+
         // Build background options
         const bgContainer = document.getElementById('photo-bg-options');
         const frameContainer = document.getElementById('photo-frame-options');
@@ -1292,6 +1316,8 @@ class Game {
     _openCreatureCard(creatureId, triggerEl) {
         const creature = window.saveManager.getCreature(creatureId);
         if (!creature) return;
+
+        this._checkTaskCompletion('card');
 
         this._cardCreatureId = creatureId;
         window.uiManager.showOverlay('overlay-creature-card', triggerEl);
@@ -2140,6 +2166,201 @@ class Game {
         }
     }
 
+    // ── Care Screen Sound Toggle ──────────────────────────
+
+    _bindCareSoundToggle() {
+        const btn = document.getElementById('btn-care-sound');
+        if (!btn) return;
+
+        // Set initial state
+        const settings = window.saveManager.getSettings();
+        const isMuted = settings.muted;
+        btn.querySelector('.btn-icon').textContent = isMuted ? '🔇' : '🔊';
+        btn.setAttribute('aria-pressed', String(!isMuted));
+        btn.setAttribute('aria-label', isMuted ? 'Sound off' : 'Sound on');
+
+        btn.addEventListener('click', () => {
+            const currentSettings = window.saveManager.getSettings();
+            const newMuted = !currentSettings.muted;
+            window.audioManager.setMuted(newMuted);
+            window.saveManager.updateSettings({ muted: newMuted });
+
+            btn.querySelector('.btn-icon').textContent = newMuted ? '🔇' : '🔊';
+            btn.setAttribute('aria-pressed', String(!newMuted));
+            btn.setAttribute('aria-label', newMuted ? 'Sound off' : 'Sound on');
+
+            // Sync settings overlay toggle if it exists
+            const muteToggle = document.getElementById('mute-toggle');
+            if (muteToggle) {
+                muteToggle.textContent = newMuted ? 'On' : 'Off';
+                muteToggle.setAttribute('aria-checked', String(newMuted));
+            }
+
+            // Play a quick feedback sound when un-muting
+            if (!newMuted) {
+                window.audioManager.playSound('pop');
+            }
+        });
+    }
+
+    /**
+     * Show sound prompt after first creature is born.
+     * Only shown once — tracked in save data.
+     */
+    _maybeSoundPrompt() {
+        const data = window.saveManager.load();
+        if (data.soundPromptShown) return;
+
+        data.soundPromptShown = true;
+        window.saveManager.save(data);
+
+        const trigger = document.getElementById('btn-feed');
+        window.uiManager.showOverlay('overlay-sound-prompt', trigger);
+    }
+
+    _bindSoundPromptButtons() {
+        document.getElementById('btn-sound-yes').addEventListener('click', () => {
+            window.audioManager.setMuted(false);
+            window.audioManager.setMusicEnabled(true);
+            window.saveManager.updateSettings({ muted: false, musicEnabled: true });
+            window.uiManager.hideOverlay('overlay-sound-prompt');
+
+            // Update care sound toggle icon
+            const btn = document.getElementById('btn-care-sound');
+            if (btn) {
+                btn.querySelector('.btn-icon').textContent = '🔊';
+                btn.setAttribute('aria-pressed', 'true');
+                btn.setAttribute('aria-label', 'Sound on');
+            }
+
+            // Start care music since we just enabled it
+            window.audioManager.startMusic('care');
+            window.audioManager.playSound('happy');
+        });
+
+        document.getElementById('btn-sound-no').addEventListener('click', () => {
+            window.uiManager.hideOverlay('overlay-sound-prompt');
+        });
+
+        const closeBtn = document.querySelector('#overlay-sound-prompt .btn-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                window.uiManager.hideOverlay('overlay-sound-prompt');
+            });
+        }
+    }
+
+    // ── Daily Tasks ──────────────────────────────────────
+
+    _bindTaskBoard() {
+        document.getElementById('btn-tasks').addEventListener('click', (e) => {
+            this._renderTaskBoard();
+            window.uiManager.showOverlay('overlay-tasks', e.currentTarget);
+        });
+
+        const closeBtn = document.querySelector('#overlay-tasks .btn-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                window.uiManager.hideOverlay('overlay-tasks');
+            });
+        }
+    }
+
+    _renderTaskBoard() {
+        const taskList = document.getElementById('task-list');
+        const starsEl = document.getElementById('task-stars');
+        const allDoneEl = document.getElementById('task-all-done');
+
+        taskList.innerHTML = '';
+
+        const daily = window.taskManager.getDailyTasks();
+        if (!daily || !daily.taskIds || daily.taskIds.length === 0) {
+            taskList.innerHTML = '<p class="task-loading">Loading tasks...</p>';
+            return;
+        }
+
+        const creatureName = this._cachedCreature ? this._cachedCreature.name : 'your pet';
+
+        for (const taskId of daily.taskIds) {
+            const task = window.taskManager.getTaskById(taskId);
+            if (!task) continue;
+
+            const isDone = daily.completed.includes(taskId);
+            const item = document.createElement('div');
+            item.className = 'task-item' + (isDone ? ' task-done' : '');
+            item.setAttribute('role', 'listitem');
+
+            const text = task.text.replace('{name}', creatureName);
+
+            item.innerHTML =
+                '<span class="task-item-icon">' + window.uiManager.escHtml(task.icon) + '</span>' +
+                '<span class="task-item-text">' + window.uiManager.escHtml(text) + '</span>' +
+                '<span class="task-item-check">' + (isDone ? '\u2713' : '') + '</span>';
+
+            taskList.appendChild(item);
+        }
+
+        // Stars display
+        const stars = window.taskManager.getTotalStars();
+        starsEl.textContent = stars > 0 ? '\u2b50 ' + stars + ' star' + (stars !== 1 ? 's' : '') + ' earned' : '';
+
+        // All done celebration
+        if (window.taskManager.allComplete()) {
+            allDoneEl.classList.remove('hidden');
+            allDoneEl.setAttribute('aria-hidden', 'false');
+        } else {
+            allDoneEl.classList.add('hidden');
+            allDoneEl.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    /**
+     * Called when an action that might complete a daily task fires.
+     * Shows a toast if a task was completed.
+     */
+    _checkTaskCompletion(action) {
+        const result = window.taskManager.completeTask(action);
+        if (!result) return;
+
+        window.audioManager.playSound('sparkle');
+        window.saveManager._showToast('\u2713 Task done: ' + result.task.icon);
+        this._updateTaskBadgeFromCount(result.incompleteCount);
+
+        if (result.allComplete) {
+            // Brief delay then show celebration
+            clearTimeout(this._taskCelebrationTimer);
+            this._taskCelebrationTimer = setTimeout(() => {
+                this._taskCelebrationTimer = null;
+                window.audioManager.playSound('happy');
+                window.saveManager._showToast('\u2b50 All tasks done! Star earned!');
+            }, 1500);
+        }
+    }
+
+    /**
+     * Update the task badge count on the care nav button.
+     */
+    _updateTaskBadge() {
+        this._updateTaskBadgeFromCount(window.taskManager.incompleteCount());
+    }
+
+    _updateTaskBadgeFromCount(count) {
+        const badge = document.getElementById('task-badge');
+        if (!badge) return;
+
+        const btn = document.getElementById('btn-tasks');
+        if (count > 0) {
+            badge.textContent = String(count);
+            badge.classList.remove('hidden');
+            badge.setAttribute('aria-hidden', 'false');
+            if (btn) btn.setAttribute('aria-label', 'Daily tasks - ' + count + ' remaining');
+        } else {
+            badge.classList.add('hidden');
+            badge.setAttribute('aria-hidden', 'true');
+            if (btn) btn.setAttribute('aria-label', 'Daily tasks - all complete');
+        }
+    }
+
     // ── Unsaved Changes Confirmation ─────────────────────
 
     /**
@@ -2154,7 +2375,17 @@ class Game {
     // ── Button Bindings ────────────────────────────────
 
     _bindScreenButtons() {
-        // Title screen
+        // Pre-warm AudioContext on first user gesture (iOS Safari requirement)
+        let audioPreWarmed = false;
+        const preWarmAudio = () => {
+            if (audioPreWarmed) return;
+            audioPreWarmed = true;
+            window.audioManager.preWarm();
+        };
+        document.getElementById('btn-new-creature').addEventListener('click', preWarmAudio);
+        document.getElementById('btn-my-pets').addEventListener('click', preWarmAudio);
+        document.getElementById('btn-settings').addEventListener('click', preWarmAudio);
+
         document.getElementById('btn-new-creature').addEventListener('click', () => {
             window.creator.startCreating();
             this.setState('CREATOR');

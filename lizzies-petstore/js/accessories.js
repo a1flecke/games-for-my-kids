@@ -185,27 +185,52 @@ class AccessoriesLibrary {
     // ══════════════════════════════════════════════════════
 
     _drawCrown(ctx, color) {
+        // Solid base band for visual weight
         ctx.beginPath();
-        ctx.moveTo(10, 45);
-        ctx.lineTo(10, 20);
-        ctx.lineTo(18, 30);
-        ctx.lineTo(25, 10);
-        ctx.lineTo(30, 25);
-        ctx.lineTo(35, 10);
-        ctx.lineTo(42, 30);
-        ctx.lineTo(50, 20);
-        ctx.lineTo(50, 45);
+        ctx.roundRect(6, 36, 48, 12, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Crown points (5 peaks rising from base)
+        ctx.beginPath();
+        ctx.moveTo(6, 38);
+        ctx.lineTo(8, 18);
+        ctx.lineTo(16, 28);
+        ctx.lineTo(22, 8);
+        ctx.lineTo(26, 22);
+        ctx.lineTo(30, 5);
+        ctx.lineTo(34, 22);
+        ctx.lineTo(38, 8);
+        ctx.lineTo(44, 28);
+        ctx.lineTo(52, 18);
+        ctx.lineTo(54, 38);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // Gems at peaks
+
+        // Inner highlight line along top of base band
+        ctx.save();
+        ctx.strokeStyle = this._lighten(color, 0.4);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(10, 38);
+        ctx.lineTo(50, 38);
+        ctx.stroke();
+        ctx.restore();
+
+        // Gems at the three tallest peaks
         ctx.fillStyle = '#FFD700';
-        for (const x of [25, 35]) {
+        for (const [gx, gy] of [[22, 12], [30, 9], [38, 12]]) {
             ctx.beginPath();
-            ctx.arc(x, 14, 3, 0, Math.PI * 2);
+            ctx.arc(gx, gy, 3.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
         }
+        // Small red gem at center peak
+        ctx.fillStyle = '#E74C3C';
+        ctx.beginPath();
+        ctx.arc(30, 9, 2, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     _drawTiara(ctx, color) {

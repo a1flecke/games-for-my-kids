@@ -39,6 +39,13 @@ class SaveManager {
                 musicEnabled: false
             },
             tutorialComplete: false,
+            soundPromptShown: false,
+            dailyTasks: {
+                date: null,
+                taskIds: [],
+                completed: [],
+                totalStars: 0
+            },
             milestones: {},
             parkVisits: 0,
             totalCreaturesCreated: 0,

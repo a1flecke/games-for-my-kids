@@ -235,6 +235,16 @@ class CareManager {
             window.renderer.spawnSparkles(pos.x, pos.y - pos.displaySize * 0.3, 6);
         }
 
+        // Check daily task completion
+        if (window.game) {
+            const actionMap = {
+                feeding: 'feed', bathing: 'bathe', petting: 'pet',
+                playing: 'play', sleeping: 'sleep'
+            };
+            const taskAction = actionMap[activity];
+            if (taskAction) window.game._checkTaskCompletion(taskAction);
+        }
+
         // Re-enable action buttons
         this._setActionButtonsDisabled(false);
         this._completing = false;

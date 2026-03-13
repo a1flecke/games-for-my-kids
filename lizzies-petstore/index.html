@@ -150,6 +150,9 @@
                     </div>
                 </div>
             </div>
+            <button id="btn-care-sound" class="btn btn-icon-only" aria-label="Sound on" aria-pressed="true">
+                <span class="btn-icon">🔊</span>
+            </button>
             <button id="btn-care-gallery" class="btn btn-icon-only" aria-label="My Pets">
                 <span class="btn-icon">📋</span>
             </button>
@@ -173,6 +176,10 @@
             </button>
         </div>
         <div class="care-nav">
+            <button id="btn-tasks" class="btn btn-nav" aria-label="Daily tasks">
+                <span class="btn-icon">⭐</span>
+                <span id="task-badge" class="task-badge hidden" aria-hidden="true">3</span>
+            </button>
             <button id="btn-wardrobe" class="btn btn-nav" aria-label="Wardrobe">
                 <span class="btn-icon">👗</span>
             </button>
@@ -281,8 +288,9 @@
     <!-- ═══ PARK SCREEN ═══ -->
     <div id="screen-park" class="screen" aria-label="Pet Park">
         <div class="park-top-bar">
-            <button id="btn-park-home" class="btn btn-icon-only" aria-label="Go home">
+            <button id="btn-park-home" class="btn btn-secondary" aria-label="Go home">
                 <span class="btn-icon">🏠</span>
+                <span class="btn-text">Home</span>
             </button>
             <h2 id="park-name">Sunny Park</h2>
             <button id="btn-photo-park" class="btn btn-icon-only" aria-label="Take photo">
@@ -293,6 +301,40 @@
     </div>
 
     <!-- ═══ OVERLAYS ═══ -->
+
+    <!-- Daily Tasks overlay -->
+    <div id="overlay-tasks" class="overlay" role="dialog" aria-modal="true" aria-label="Daily tasks" aria-hidden="true">
+        <div class="overlay-content task-board-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <h2 class="task-board-title">Today's Tasks</h2>
+            <div id="task-list" class="task-list" role="list" aria-label="Daily tasks">
+                <!-- Populated dynamically -->
+            </div>
+            <div id="task-stars" class="task-stars"></div>
+            <div id="task-all-done" class="task-all-done hidden" aria-hidden="true">
+                <p>All done! Great job!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound prompt (first creature born) -->
+    <div id="overlay-sound-prompt" class="overlay" role="dialog" aria-modal="true" aria-label="Enable sounds" aria-hidden="true">
+        <div class="overlay-content">
+            <button class="btn-close" aria-label="Close">✕</button>
+            <p class="sound-prompt-icon">🔊</p>
+            <p class="sound-prompt-title">Want sounds?</p>
+            <p class="sound-prompt-desc">Music and cute creature noises!</p>
+            <div class="overlay-buttons">
+                <button id="btn-sound-yes" class="btn btn-primary" aria-label="Yes, turn on sounds">
+                    <span class="btn-icon">🎵</span>
+                    <span class="btn-text">Yes!</span>
+                </button>
+                <button id="btn-sound-no" class="btn btn-secondary" aria-label="No thanks">
+                    <span class="btn-text">Not now</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Unsaved changes confirmation -->
     <div id="overlay-confirm" class="overlay" role="dialog" aria-modal="true" aria-label="Unsaved changes" aria-hidden="true">
@@ -476,6 +518,7 @@
     <script src="js/park.js" defer></script>
     <script src="js/tutorial.js" defer></script>
     <script src="js/progress.js" defer></script>
+    <script src="js/tasks.js" defer></script>
     <script src="js/renderer.js" defer></script>
     <script src="js/game.js" defer></script>
 </body>

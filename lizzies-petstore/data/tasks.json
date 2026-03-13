@@ -1,0 +1,14 @@
+[
+  { "id": "feed", "text": "Feed {name}", "icon": "\ud83c\udf4e", "action": "feed" },
+  { "id": "bathe", "text": "Give {name} a bath", "icon": "\ud83d\udec1", "action": "bathe" },
+  { "id": "pet", "text": "Pet {name}", "icon": "\ud83d\udc9c", "action": "pet" },
+  { "id": "play", "text": "Play catch with {name}", "icon": "\u26bd", "action": "play" },
+  { "id": "sleep", "text": "Tuck {name} into bed", "icon": "\ud83d\ude34", "action": "sleep" },
+  { "id": "park", "text": "Visit the park", "icon": "\ud83c\udf33", "action": "park_visit" },
+  { "id": "friend", "text": "Make a park friend", "icon": "\ud83d\udc95", "action": "park_greet" },
+  { "id": "wardrobe", "text": "Try a new look", "icon": "\ud83d\udc51", "action": "wardrobe" },
+  { "id": "photo", "text": "Take a photo", "icon": "\ud83d\udcf7", "action": "photo" },
+  { "id": "room", "text": "Decorate the room", "icon": "\ud83c\udfa8", "action": "room_edit" },
+  { "id": "card", "text": "Make a creature card", "icon": "\ud83c\udccf", "action": "card" },
+  { "id": "create", "text": "Create a new friend", "icon": "\u2728", "action": "create" }
+]
