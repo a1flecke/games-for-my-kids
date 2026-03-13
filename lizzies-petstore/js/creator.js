@@ -1198,8 +1198,10 @@ class Creator {
             const hitW = Math.max(60, partW * (partMeta.hitBox ? partMeta.hitBox.w : 0.8));
             const hitH = Math.max(60, partH * (partMeta.hitBox ? partMeta.hitBox.h : 0.8));
 
+            // Tails extend LEFT from attachment point (flipped), so
+            // shift hit box left instead of centering it
             this._partHitBoxes[slot] = {
-                x: screenPos.x - hitW / 2,
+                x: slot === 'tail' ? screenPos.x - hitW : screenPos.x - hitW / 2,
                 y: screenPos.y - hitH / 2,
                 w: hitW,
                 h: hitH

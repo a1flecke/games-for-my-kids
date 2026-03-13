@@ -19,7 +19,7 @@ const ATTACHMENT_OFFSETS = {
     head:        { x: 0,      y: -0.48 },
     eyes:        { x: 0,      y: -0.52 },
     legs:        { x: 0,      y: 0.42 },
-    tail:        { x: -0.52,  y: 0.1 },
+    tail:        { x: -0.20,  y: 0.1 },
     wings:       { x: -0.1,   y: -0.2 },
     extras:      { x: 0,      y: -0.65 },
     accessories: { x: 0,      y: -0.55 }
@@ -193,7 +193,11 @@ class CreatureCache {
 
     /**
      * Build a composite offscreen canvas with all accessories drawn.
-     * Each accessory is drawn at its anchor position relative to a 200x200 reference.
+     * Each accessory is drawn at its anchor position relative to a 200px reference.
+     * Canvas is padded vertically so negative-y anchors (hats above head) and
+     * high-y anchors (feet at y=1.0) aren't clipped. The padding preserves each
+     * anchor's distance from canvas center, so the ATTACHMENT_OFFSETS position
+     * stays correct.
      * Returns { canvas, w, h } or null if no accessories.
      */
     _buildAccessoriesCanvas(creatureData, dpr) {
@@ -201,9 +205,11 @@ class CreatureCache {
         if (!window.accessoriesLib) return null;
 
         const refSize = 200; // match reference creature size
+        const padY = 40;     // vertical margin for above-head / below-feet anchors
+        const canvasH = refSize + padY * 2;
         const canvas = document.createElement('canvas');
         canvas.width = Math.ceil(refSize * dpr);
-        canvas.height = Math.ceil(refSize * dpr);
+        canvas.height = Math.ceil(canvasH * dpr);
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
 
@@ -218,9 +224,10 @@ class CreatureCache {
             const anchor = window.accessoriesLib.getAnchor(accMeta.slot, headType);
             const accScale = anchor.scale || 1;
 
-            // Position relative to refSize center
+            // Position relative to refSize, shifted down by padY so negative
+            // y anchors (head-slot hats) land inside the canvas
             const drawX = anchor.x * refSize;
-            const drawY = anchor.y * refSize;
+            const drawY = anchor.y * refSize + padY;
 
             ctx.save();
             ctx.translate(drawX, drawY);
@@ -233,7 +240,7 @@ class CreatureCache {
             ctx.restore();
         }
 
-        return { canvas, w: refSize, h: refSize };
+        return { canvas, w: refSize, h: canvasH };
     }
 
     /**
@@ -280,21 +287,35 @@ class CreatureCache {
             ctx.save();
             ctx.translate(px, py);
 
-            // Apply animation transforms
-            if (partAnim.rotation) {
-                ctx.rotate(partAnim.rotation * Math.PI / 180);
+            if (slot === 'tail') {
+                // Tails: flip horizontally so narrow base (x=0) is at the
+                // attachment point and the shape extends left (away from body).
+                // Negate rotation to preserve world-space direction after flip.
+                if (partAnim.rotation) {
+                    ctx.rotate(-partAnim.rotation * Math.PI / 180);
+                }
+                ctx.scale(
+                    partAnim.scaleX || 1,
+                    partAnim.scaleY || 1
+                );
+                ctx.scale(-1, 1);
+                ctx.drawImage(part.canvas, 0, -partH / 2, partW, partH);
+            } else {
+                // Apply animation transforms
+                if (partAnim.rotation) {
+                    ctx.rotate(partAnim.rotation * Math.PI / 180);
+                }
+                ctx.scale(
+                    partAnim.scaleX || 1,
+                    partAnim.scaleY || 1
+                );
+                // Draw the cached canvas centered on the attachment point
+                ctx.drawImage(
+                    part.canvas,
+                    -partW / 2, -partH / 2,
+                    partW, partH
+                );
             }
-            ctx.scale(
-                partAnim.scaleX || 1,
-                partAnim.scaleY || 1
-            );
-
-            // Draw the cached canvas centered on the attachment point
-            ctx.drawImage(
-                part.canvas,
-                -partW / 2, -partH / 2,
-                partW, partH
-            );
 
             ctx.restore();
 
@@ -483,7 +504,17 @@ class CreatureCache {
             const partW = cw * scale;
             const partH = ch * scale;
 
-            ctx.drawImage(tmpCanvas, px - partW / 2, py - partH / 2, partW, partH);
+            // Tails: flip horizontally so narrow base is at attachment
+            // and the shape extends left (away from body)
+            if (slot === 'tail') {
+                ctx.save();
+                ctx.translate(px, py);
+                ctx.scale(-1, 1);
+                ctx.drawImage(tmpCanvas, 0, -partH / 2, partW, partH);
+                ctx.restore();
+            } else {
+                ctx.drawImage(tmpCanvas, px - partW / 2, py - partH / 2, partW, partH);
+            }
 
             // Mirror wings
             if (slot === 'wings') {
