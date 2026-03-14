@@ -1399,7 +1399,7 @@ class PartsLibrary {
 
     _drawLegsPaws4(ctx, w, h, color) {
         const legW = w * 0.14;
-        const positions = [-0.38, -0.13, 0.13, 0.38];
+        const positions = [-0.28, -0.09, 0.09, 0.28];
 
         for (const pos of positions) {
             const x = w / 2 + pos * w;
@@ -1451,7 +1451,7 @@ class PartsLibrary {
 
     _drawLegsHooves(ctx, w, h, color) {
         const legW = w * 0.1;
-        const positions = [-0.38, -0.13, 0.13, 0.38];
+        const positions = [-0.28, -0.09, 0.09, 0.28];
 
         for (const pos of positions) {
             const x = w / 2 + pos * w;
@@ -1472,7 +1472,7 @@ class PartsLibrary {
     }
 
     _drawLegsTentacles(ctx, w, h, color) {
-        const positions = [-0.35, -0.12, 0.12, 0.35];
+        const positions = [-0.27, -0.09, 0.09, 0.27];
 
         for (let idx = 0; idx < positions.length; idx++) {
             const x = w / 2 + positions[idx] * w;
