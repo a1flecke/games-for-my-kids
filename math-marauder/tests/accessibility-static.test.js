@@ -20,3 +20,8 @@ assert.ok(/aria-hidden="true"/.test(html));
 assert.ok(!/style\.display/.test(allSource));
 assert.ok(!/(aria-live="[^"]+"[^>]*aria-hidden=|aria-hidden="[^"]+"[^>]*aria-live=)/.test(html));
 assert.ok(!/(aria-live="[^"]+"[^>]*aria-label=|aria-label="[^"]+"[^>]*aria-live=)/.test(html));
+assert.ok(/speechSynthesis/.test(allSource));
+assert.ok(/setTimeout\s*\(/.test(allSource));
+assert.ok(/window\.AudioContext\s*\|\|\s*window\.webkitAudioContext/.test(allSource));
+assert.ok(/ctx\.resume\(\)\.then/.test(allSource));
+assert.ok(!/constructor\(\)[\s\S]{0,300}new\s+AudioContext/.test(allSource));
