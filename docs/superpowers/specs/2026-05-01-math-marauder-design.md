@@ -131,6 +131,7 @@ No exact prompt should repeat within the last 6 prompts unless the player is in 
 - Wrong answer: monster attacks; player loses a shield pip or heart depending on monster strength.
 - Two wrong attempts on the same prompt reveal a structured hint, then the player can still answer.
 - The game never blocks progress with shame text. Feedback uses neutral phrasing like "Try the matching factor" or "Split 48 into 6 equal groups."
+- If hearts reach zero, the player retreats with earned coins, keeps mastery progress, hears a short neutral line, and can retry the room with one restored heart. The game never shows a failure screen that discards the session.
 - A streak unlocks a spell. Spells are assistive rewards, not required reading:
   - **Starbolt:** Big damage after 3 correct answers.
   - **Mirror Spark:** Removes one wrong answer.
@@ -237,6 +238,7 @@ Default save object:
 {
   version: 1,
   raidsCompleted: 0,
+  standardRaidsCompleted: 0,
   bestStarsByMode: {},
   factMastery: {},
   weakFactQueue: [],
@@ -269,6 +271,7 @@ Every key read by the game must exist in the defaults. Versioned migration start
 - `math-marauder/js/content.js`: Biomes, monsters, spells, dialogue, and reward tables.
 - `math-marauder/js/problem-engine.js`: Pure arithmetic generation, distractors, prompt history, fact keys.
 - `math-marauder/js/progression.js`: Mastery updates, adaptive weights, unlocks, raid scoring.
+- `math-marauder/js/game-rules.js`: Raid mode room contracts, encounter state, combat resolution, and retreat recovery.
 - `math-marauder/js/save.js`: Defaults, load, save, reset, migration.
 - `math-marauder/js/audio.js`: Lazy Web Audio sound effects and optional music.
 - `math-marauder/js/speech.js`: Speech synthesis narration queue.
@@ -277,6 +280,7 @@ Every key read by the game must exist in the defaults. Versioned migration start
 - `math-marauder/js/game.js`: Main state machine, single RAF loop, combat flow.
 - `math-marauder/scripts/run-tests.js`: Node test runner.
 - `math-marauder/tests/*.test.js`: Unit, content, save, and static accessibility tests.
+- `math-marauder/tests/browser-ui.html`: Browser-side UI interaction test runner for focus traps, duplicate-click guards, keyboard choices, and reduced motion.
 
 ### State Machine
 
@@ -315,14 +319,21 @@ Required test groups:
   - Multiplication factors stay within 0-12.
   - Division prompts never divide by zero.
   - Division prompts always produce whole-number quotients.
+  - Missing-factor prompts avoid ambiguous zero-factor forms and keep answers in 0-12.
   - Four answer choices contain exactly one correct answer.
   - Distractors are unique, non-negative, and plausible.
   - Prompt history prevents immediate repetition.
+  - Adaptive weighting produces current-band, weak, adjacent, and mastered-review facts during normal raids.
 - `progression.test.js`
   - Correct answers increase mastery.
   - Wrong answers decrease mastery and add weak-fact weight.
   - Mastered zero and one facts appear less often without disappearing entirely.
   - Raid scoring maps accuracy and hearts to stars.
+- `game-rules.test.js`
+  - Quick and standard raids use the expected room counts and prompt targets.
+  - Boss rooms expose phase counts.
+  - Correct and wrong answers update combat state visibly.
+  - Zero-heart recovery retreats without losing earned progress.
 - `save.test.js`
   - Defaults include every key read by the game.
   - Corrupt localStorage falls back to defaults.
@@ -349,6 +360,7 @@ Manual browser checks after implementation:
 - Open through a local static server.
 - Start a quick raid.
 - Answer correctly, answer incorrectly, use keyboard choices, use touch or pointer choices.
+- Open `math-marauder/tests/browser-ui.html` and confirm all browser UI behavior tests pass.
 - Toggle speech, replay narration, mute sound, enable reduced motion, increase font size.
 - Confirm a standard raid can finish.
 - Confirm LocalStorage progress persists after reload.

@@ -18,6 +18,7 @@
 - Create: `math-marauder/js/content.js`
 - Create: `math-marauder/js/problem-engine.js`
 - Create: `math-marauder/js/progression.js`
+- Create: `math-marauder/js/game-rules.js`
 - Create: `math-marauder/js/save.js`
 - Create: `math-marauder/js/audio.js`
 - Create: `math-marauder/js/speech.js`
@@ -27,9 +28,12 @@
 - Create: `math-marauder/scripts/run-tests.js`
 - Create: `math-marauder/tests/problem-engine.test.js`
 - Create: `math-marauder/tests/progression.test.js`
+- Create: `math-marauder/tests/game-rules.test.js`
 - Create: `math-marauder/tests/save.test.js`
 - Create: `math-marauder/tests/content.test.js`
 - Create: `math-marauder/tests/accessibility-static.test.js`
+- Create: `math-marauder/tests/browser-ui.html`
+- Create: `math-marauder/tests/browser-ui.test.js`
 - Modify: `.github/scripts/update-index.js`
 - Modify after generator run: `index.html`
 
@@ -83,6 +87,7 @@ const path = require('path');
 const tests = [
     '../tests/problem-engine.test.js',
     '../tests/progression.test.js',
+    '../tests/game-rules.test.js',
     '../tests/save.test.js',
     '../tests/content.test.js',
     '../tests/accessibility-static.test.js'
@@ -112,7 +117,7 @@ Expected: FAIL with a module-not-found error for `problem-engine.test.js`.
 
 - [ ] **Step 3: Commit the harness after test files exist in later tasks**
 
-Commit command to use after Task 6 creates the first passing full suite:
+Commit command to use after Task 7 creates the first passing full suite:
 
 ```bash
 git add math-marauder/scripts/run-tests.js math-marauder/tests
@@ -165,7 +170,7 @@ function makeEngine(seed) {
 {
     const engine = makeEngine();
     for (let i = 0; i < 250; i += 1) {
-        const problem = engine.generate({ operations: ['multiply', 'divide'], band: 'deep' });
+        const problem = engine.generate({ operations: ['multiply', 'divide', 'missing'], band: 'deep' });
         assert.strictEqual(problem.choices.length, 4);
         assert.strictEqual(new Set(problem.choices).size, 4);
         assert.ok(problem.choices.includes(problem.correct));
@@ -183,6 +188,40 @@ function makeEngine(seed) {
         assert.ok(!seen.slice(-6).includes(key), `prompt repeated too soon: ${key}`);
         seen.push(key);
     }
+}
+
+{
+    const engine = makeEngine();
+    for (let i = 0; i < 250; i += 1) {
+        const problem = engine.generate({ operations: ['missing'], band: 'deep' });
+        assert.strictEqual(problem.operation, 'missing');
+        assert.ok(problem.a >= 1 && problem.a <= 12);
+        assert.ok(problem.missing >= 0 && problem.missing <= 12);
+        assert.strictEqual(problem.product, problem.a * problem.missing);
+        assert.strictEqual(problem.correct, problem.missing);
+        assert.ok(problem.choices.every((choice) => choice >= 0 && choice <= 12));
+        assert.ok(problem.voiceText.includes('what number'));
+    }
+}
+
+{
+    const engine = makeEngine(98765);
+    const counts = { weak: 0, adjacent: 0, mastered: 0, band: 0 };
+    for (let i = 0; i < 240; i += 1) {
+        const problem = engine.generate({
+            operations: ['multiply', 'divide', 'missing'],
+            band: 'deep',
+            adaptive: {
+                weakFactQueue: ['mul:7:8', 'div:56:7'],
+                factMastery: { 'mul:2:2': 8, 'mul:3:3': 6 }
+            }
+        });
+        counts[problem.source] += 1;
+    }
+    assert.ok(counts.weak >= 35, `weak facts not weighted enough: ${counts.weak}`);
+    assert.ok(counts.adjacent >= 15, `adjacent facts not represented: ${counts.adjacent}`);
+    assert.ok(counts.mastered >= 5, `mastered review facts not represented: ${counts.mastered}`);
+    assert.ok(counts.band >= 40, `current-band facts not represented: ${counts.band}`);
 }
 ```
 
@@ -240,19 +279,54 @@ Create `math-marauder/js/problem-engine.js`:
             const opts = options || {};
             const operations = opts.operations && opts.operations.length ? opts.operations : ['multiply', 'divide'];
             for (let attempt = 0; attempt < 40; attempt += 1) {
-                const operation = this._rng.pick(operations);
-                const problem = operation === 'divide' ? this._division(opts.band) : this._multiplication(opts.band);
+                const problem = this._makeProblem(opts, operations);
                 if (!this._history.includes(problem.promptKey)) {
                     this._remember(problem.promptKey);
                     return this._withChoices(problem);
                 }
             }
-            const fallback = this._multiplication(opts.band);
+            const fallback = this._forOperation(this._rng.pick(operations), opts.band, 'band');
             this._remember(fallback.promptKey);
             return this._withChoices(fallback);
         }
 
-        _multiplication(band) {
+        _makeProblem(opts, operations) {
+            const adaptive = opts.adaptive || {};
+            const source = this._chooseSource(adaptive);
+            if (source === 'weak') {
+                const problem = this._fromFactKey(this._rng.pick(adaptive.weakFactQueue || []), operations, source);
+                if (problem) return problem;
+            }
+            if (source === 'adjacent') {
+                const weak = this._rng.pick(adaptive.weakFactQueue || []);
+                const problem = this._adjacentToFact(weak, operations, opts.band);
+                if (problem) return Object.assign(problem, { source });
+            }
+            if (source === 'mastered') {
+                const mastered = Object.keys(adaptive.factMastery || {}).filter((key) => adaptive.factMastery[key] >= 4);
+                const problem = this._fromFactKey(this._rng.pick(mastered), operations, source);
+                if (problem) return problem;
+            }
+            return this._forOperation(this._rng.pick(operations), opts.band, 'band');
+        }
+
+        _chooseSource(adaptive) {
+            const weak = adaptive.weakFactQueue || [];
+            const mastered = Object.keys(adaptive.factMastery || {}).filter((key) => adaptive.factMastery[key] >= 4);
+            const roll = this._rng.next();
+            if (weak.length && roll < 0.30) return 'weak';
+            if (weak.length && roll < 0.45) return 'adjacent';
+            if (mastered.length && roll < 0.55) return 'mastered';
+            return 'band';
+        }
+
+        _forOperation(operation, band, source) {
+            if (operation === 'divide') return this._division(band, source);
+            if (operation === 'missing') return this._missingFactor(band, source);
+            return this._multiplication(band, source);
+        }
+
+        _multiplication(band, source) {
             const factors = this._factorsForBand(band);
             const a = this._rng.pick(factors);
             const b = this._rng.pick(factors);
@@ -264,11 +338,13 @@ Create `math-marauder/js/problem-engine.js`:
                 prompt: `${a} x ${b}`,
                 voiceText: `${a} times ${b}`,
                 factKey: `mul:${Math.min(a, b)}:${Math.max(a, b)}`,
-                promptKey: `mul:${a}:${b}`
+                promptKey: `mul:${a}:${b}`,
+                answerMax: 144,
+                source
             };
         }
 
-        _division(band) {
+        _division(band, source) {
             const factors = this._factorsForBand(band).filter((n) => n > 0);
             const divisor = this._rng.pick(factors);
             const quotient = this._rng.pick(this._factorsForBand(band));
@@ -282,8 +358,109 @@ Create `math-marauder/js/problem-engine.js`:
                 prompt: `${dividend} / ${divisor}`,
                 voiceText: `${dividend} divided by ${divisor}`,
                 factKey: `div:${dividend}:${divisor}`,
-                promptKey: `div:${dividend}:${divisor}`
+                promptKey: `div:${dividend}:${divisor}`,
+                answerMax: 12,
+                source
             };
+        }
+
+        _missingFactor(band, source) {
+            const factors = this._factorsForBand(band);
+            const nonZero = factors.filter((n) => n > 0);
+            const a = this._rng.pick(nonZero);
+            const missing = this._rng.pick(factors);
+            const product = a * missing;
+            return {
+                operation: 'missing',
+                a,
+                missing,
+                product,
+                correct: missing,
+                prompt: `${a} x ? = ${product}`,
+                voiceText: `${a} times what number equals ${product}`,
+                factKey: `missing:${a}:${product}`,
+                promptKey: `missing:${a}:${product}`,
+                answerMax: 12,
+                source
+            };
+        }
+
+        _fromFactKey(key, operations, source) {
+            if (!key) return null;
+            const parts = key.split(':');
+            if (parts[0] === 'mul' && operations.includes('multiply')) {
+                const a = Number(parts[1]);
+                const b = Number(parts[2]);
+                return {
+                    operation: 'multiply',
+                    a,
+                    b,
+                    correct: a * b,
+                    prompt: `${a} x ${b}`,
+                    voiceText: `${a} times ${b}`,
+                    factKey: `mul:${Math.min(a, b)}:${Math.max(a, b)}`,
+                    promptKey: `mul:${a}:${b}`,
+                    answerMax: 144,
+                    source
+                };
+            }
+            if (parts[0] === 'div' && operations.includes('divide')) {
+                const dividend = Number(parts[1]);
+                const divisor = Number(parts[2]);
+                return {
+                    operation: 'divide',
+                    dividend,
+                    divisor,
+                    quotient: dividend / divisor,
+                    correct: dividend / divisor,
+                    prompt: `${dividend} / ${divisor}`,
+                    voiceText: `${dividend} divided by ${divisor}`,
+                    factKey: key,
+                    promptKey: key,
+                    answerMax: 12,
+                    source
+                };
+            }
+            return null;
+        }
+
+        _adjacentToFact(key, operations, band) {
+            if (!key) return null;
+            const parts = key.split(':');
+            if (parts[0] === 'mul' && operations.includes('multiply')) {
+                const anchor = Number(parts[1]);
+                const neighbors = this._factorsForBand(band).filter((n) => Math.abs(n - Number(parts[2])) <= 1);
+                const b = this._rng.pick(neighbors.length ? neighbors : this._factorsForBand(band));
+                return {
+                    operation: 'multiply',
+                    a: anchor,
+                    b,
+                    correct: anchor * b,
+                    prompt: `${anchor} x ${b}`,
+                    voiceText: `${anchor} times ${b}`,
+                    factKey: `mul:${Math.min(anchor, b)}:${Math.max(anchor, b)}`,
+                    promptKey: `mul:${anchor}:${b}`,
+                    answerMax: 144
+                };
+            }
+            if (parts[0] === 'div' && operations.includes('divide')) {
+                const divisor = Number(parts[2]);
+                const quotient = this._rng.pick(this._factorsForBand(band));
+                const dividend = divisor * quotient;
+                return {
+                    operation: 'divide',
+                    dividend,
+                    divisor,
+                    quotient,
+                    correct: quotient,
+                    prompt: `${dividend} / ${divisor}`,
+                    voiceText: `${dividend} divided by ${divisor}`,
+                    factKey: `div:${dividend}:${divisor}`,
+                    promptKey: `div:${dividend}:${divisor}`,
+                    answerMax: 12
+                };
+            }
+            return null;
         }
 
         _factorsForBand(band) {
@@ -294,13 +471,14 @@ Create `math-marauder/js/problem-engine.js`:
         _withChoices(problem) {
             const choices = new Set([problem.correct]);
             const near = [-24, -12, -10, -6, -4, -3, -2, -1, 1, 2, 3, 4, 6, 10, 12, 24];
+            const max = problem.answerMax;
             for (const delta of near) {
                 if (choices.size >= 4) break;
                 const value = problem.correct + delta;
-                if (value >= 0 && Number.isInteger(value)) choices.add(value);
+                if (value >= 0 && value <= max && Number.isInteger(value)) choices.add(value);
             }
             while (choices.size < 4) {
-                const value = problem.operation === 'divide' ? this._rng.int(13) : this._rng.int(145);
+                const value = this._rng.int(max + 1);
                 choices.add(value);
             }
             const shuffled = Array.from(choices);
@@ -380,6 +558,16 @@ const Progression = require('../js/progression.js');
 
 {
     const progression = new Progression();
+    progression.recordAnswer({ factKey: 'mul:7:8', correct: false, firstTry: false });
+    progression.recordAnswer({ factKey: 'mul:3:3', correct: true, firstTry: true });
+    progression.recordAnswer({ factKey: 'mul:3:3', correct: true, firstTry: true });
+    const adaptive = progression.getAdaptiveConfig();
+    assert.deepStrictEqual(adaptive.weakFactQueue, ['mul:7:8']);
+    assert.strictEqual(adaptive.factMastery['mul:3:3'], 4);
+}
+
+{
+    const progression = new Progression();
     const threeStars = progression.scoreRaid({ total: 30, correctFirstTry: 28, hearts: 3, longestStreak: 12 });
     const oneStar = progression.scoreRaid({ total: 30, correctFirstTry: 18, hearts: 1, longestStreak: 4 });
     assert.strictEqual(threeStars.stars, 3);
@@ -420,6 +608,13 @@ Create `math-marauder/js/progression.js`:
 
         getWeakFacts() {
             return this._weakFacts.slice();
+        }
+
+        getAdaptiveConfig() {
+            return {
+                factMastery: Object.assign({}, this._mastery),
+                weakFactQueue: this._weakFacts.slice()
+            };
         }
 
         recordAnswer(result) {
@@ -479,7 +674,193 @@ git add math-marauder/js/progression.js math-marauder/tests/progression.test.js
 git commit -m "feat: add math marauder progression model"
 ```
 
-## Task 4: Save Manager
+## Task 4: Game Rules And Encounter Contracts
+
+**Files:**
+- Create: `math-marauder/js/game-rules.js`
+- Create: `math-marauder/tests/game-rules.test.js`
+- Modify: `math-marauder/js/content.js` in Task 6 to expose matching raid-mode metadata for UI labels and content tests.
+
+- [ ] **Step 1: Write rules tests**
+
+Create `math-marauder/tests/game-rules.test.js`:
+
+```js
+const assert = require('assert');
+const GameRules = require('../js/game-rules.js');
+
+{
+    const quick = GameRules.createRaidState('quick');
+    assert.strictEqual(quick.mode, 'quick');
+    assert.strictEqual(quick.rooms.length, 3);
+    assert.deepStrictEqual(quick.rooms.map((room) => room.promptTarget), [6, 7, 8]);
+    assert.strictEqual(quick.hearts, 3);
+    assert.strictEqual(quick.shields, 1);
+}
+
+{
+    const standard = GameRules.createRaidState('standard');
+    assert.strictEqual(standard.mode, 'standard');
+    assert.strictEqual(standard.rooms.length, 5);
+    assert.deepStrictEqual(standard.rooms.map((room) => room.promptTarget), [7, 8, 8, 9, 10]);
+    assert.strictEqual(standard.rooms[4].bossPhaseCount, 4);
+}
+
+{
+    const state = GameRules.createEncounterState({ monsterId: 'ember-imp', hp: 3, damage: 1, promptTarget: 6 });
+    const afterCorrect = GameRules.resolveAnswer(state, { correct: true, firstTry: true });
+    assert.strictEqual(afterCorrect.monsterHp, 2);
+    assert.strictEqual(afterCorrect.streak, 1);
+    assert.strictEqual(afterCorrect.feedbackKind, 'correct');
+}
+
+{
+    const state = GameRules.createEncounterState({ monsterId: 'split-slime', hp: 4, damage: 1, promptTarget: 6 });
+    const afterWrong = GameRules.resolveAnswer(state, { correct: false, firstTry: false });
+    assert.strictEqual(afterWrong.hearts, 3);
+    assert.strictEqual(afterWrong.shields, 0);
+    assert.strictEqual(afterWrong.feedbackKind, 'try-again');
+    const afterSecondWrong = GameRules.resolveAnswer(afterWrong, { correct: false, firstTry: false });
+    assert.strictEqual(afterSecondWrong.hearts, 2);
+    assert.ok(afterSecondWrong.hintText.includes('Think'));
+}
+
+{
+    const state = GameRules.createEncounterState({ monsterId: 'rune-knight', hp: 4, damage: 2, promptTarget: 6 });
+    state.hearts = 1;
+    state.shields = 0;
+    const retreat = GameRules.resolveAnswer(state, { correct: false, firstTry: false });
+    assert.strictEqual(retreat.recoveryMode, 'retreat');
+    assert.strictEqual(retreat.hearts, 1);
+    assert.strictEqual(retreat.keepsProgress, true);
+    assert.ok(retreat.feedbackText.includes('Regroup'));
+}
+```
+
+- [ ] **Step 2: Run the rules test and verify it fails**
+
+Run:
+
+```bash
+node math-marauder/tests/game-rules.test.js
+```
+
+Expected: FAIL with `Cannot find module '../js/game-rules.js'`.
+
+- [ ] **Step 3: Implement `game-rules.js`**
+
+Create `math-marauder/js/game-rules.js`:
+
+```js
+(function attach(root, factory) {
+    const exported = factory();
+    if (typeof module !== 'undefined' && module.exports) module.exports = exported;
+    root.MathMarauder = root.MathMarauder || {};
+    root.MathMarauder.GameRules = exported;
+})(typeof globalThis !== 'undefined' ? globalThis : window, function buildGameRules() {
+    const RAID_MODES = {
+        quick: {
+            rooms: [
+                { biomeId: 'ember-library', monsterId: 'ember-imp', hp: 3, damage: 1, promptTarget: 6, operations: ['multiply', 'divide'], band: 'warm' },
+                { biomeId: 'slime-foundry', monsterId: 'split-slime', hp: 4, damage: 1, promptTarget: 7, operations: ['divide', 'multiply'], band: 'deep' },
+                { biomeId: 'moonlit-catacombs', monsterId: 'rune-knight', hp: 5, damage: 1, promptTarget: 8, operations: ['multiply', 'divide', 'missing'], band: 'inverse', bossPhaseCount: 2 }
+            ]
+        },
+        standard: {
+            rooms: [
+                { biomeId: 'ember-library', monsterId: 'mirror-mage', hp: 4, damage: 1, promptTarget: 7, operations: ['multiply'], band: 'warm' },
+                { biomeId: 'slime-foundry', monsterId: 'split-slime', hp: 5, damage: 1, promptTarget: 8, operations: ['divide'], band: 'deep' },
+                { biomeId: 'dragon-asteroid-belt', monsterId: 'star-wyvern', hp: 5, damage: 1, promptTarget: 8, operations: ['multiply', 'divide'], band: 'deep' },
+                { biomeId: 'void-reef', monsterId: 'void-wraith', hp: 6, damage: 1, promptTarget: 9, operations: ['multiply', 'divide', 'missing'], band: 'inverse' },
+                { biomeId: 'final-fortress', monsterId: 'factor-dragon', hp: 9, damage: 2, promptTarget: 10, operations: ['multiply', 'divide', 'missing'], band: 'boss', bossPhaseCount: 4 }
+            ]
+        }
+    };
+
+    function createRaidState(mode) {
+        const config = RAID_MODES[mode] || RAID_MODES.quick;
+        return {
+            mode: mode || 'quick',
+            roomIndex: 0,
+            hearts: 3,
+            shields: 1,
+            streak: 0,
+            coins: 0,
+            promptsAnswered: 0,
+            correctFirstTry: 0,
+            longestStreak: 0,
+            rooms: config.rooms.map((room) => Object.assign({}, room))
+        };
+    }
+
+    function createEncounterState(room) {
+        return Object.assign(createRaidState('quick'), {
+            monsterId: room.monsterId,
+            monsterHp: room.hp,
+            monsterMaxHp: room.hp,
+            monsterDamage: room.damage,
+            promptTarget: room.promptTarget,
+            wrongAttemptsOnPrompt: 0
+        });
+    }
+
+    function resolveAnswer(state, answer) {
+        const next = Object.assign({}, state);
+        next.promptsAnswered += 1;
+        if (answer.correct) {
+            next.monsterHp = Math.max(0, next.monsterHp - 1);
+            next.streak += 1;
+            next.longestStreak = Math.max(next.longestStreak, next.streak);
+            if (answer.firstTry) next.correctFirstTry += 1;
+            next.wrongAttemptsOnPrompt = 0;
+            next.feedbackKind = 'correct';
+            next.feedbackText = 'Spell hit!';
+            return next;
+        }
+
+        next.streak = 0;
+        next.wrongAttemptsOnPrompt += 1;
+        if (next.shields > 0) next.shields -= 1;
+        else next.hearts -= next.monsterDamage;
+
+        if (next.hearts <= 0) {
+            next.hearts = 1;
+            next.shields = 0;
+            next.recoveryMode = 'retreat';
+            next.keepsProgress = true;
+            next.feedbackKind = 'regroup';
+            next.feedbackText = 'Regroup at the campfire. Your coins and practice stay saved.';
+            return next;
+        }
+
+        next.feedbackKind = 'try-again';
+        next.feedbackText = 'Try again.';
+        next.hintText = next.wrongAttemptsOnPrompt >= 2 ? 'Think about the matching factor family.' : '';
+        return next;
+    }
+
+    return { RAID_MODES, createRaidState, createEncounterState, resolveAnswer };
+});
+```
+
+- [ ] **Step 4: Run the rules test**
+
+Run:
+
+```bash
+node math-marauder/tests/game-rules.test.js
+```
+
+Expected: PASS with no output.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add math-marauder/js/game-rules.js math-marauder/tests/game-rules.test.js
+git commit -m "feat: add math marauder game rules"
+```
+
+## Task 5: Save Manager
 
 **Files:**
 - Create: `math-marauder/js/save.js`
@@ -506,6 +887,7 @@ function storage() {
     const manager = new SaveManager(storage());
     const defaults = manager.defaults();
     assert.strictEqual(defaults.version, 1);
+    assert.strictEqual(defaults.standardRaidsCompleted, 0);
     assert.deepStrictEqual(defaults.unlockedBiomes, ['ember-library']);
     assert.deepStrictEqual(defaults.unlockedSpells, ['starbolt']);
     assert.strictEqual(defaults.settings.speech, true);
@@ -547,7 +929,7 @@ Expected: FAIL with `Cannot find module '../js/save.js'`.
 
 - [ ] **Step 3: Implement save manager**
 
-Create `math-marauder/js/save.js` using the default object from the design spec, a `load()` method that merges stored data onto defaults, a `save(data)` method that writes JSON, and a `reset()` method that removes the key.
+Create `math-marauder/js/save.js` using the default object from the design spec, including `standardRaidsCompleted: 0`, a `load()` method that merges stored data onto defaults, a `save(data)` method that writes JSON, and a `reset()` method that removes the key.
 
 The file must export a `SaveManager` class and attach it to `window.MathMarauder.SaveManager`.
 
@@ -568,7 +950,7 @@ git add math-marauder/js/save.js math-marauder/tests/save.test.js
 git commit -m "feat: add math marauder save manager"
 ```
 
-## Task 5: Content Data
+## Task 6: Content Data
 
 **Files:**
 - Create: `math-marauder/js/content.js`
@@ -585,6 +967,10 @@ const content = require('../js/content.js');
 assert.ok(content.biomes.length >= 6);
 assert.ok(content.monsters.length >= 8);
 assert.ok(content.spells.length >= 4);
+assert.ok(content.raidModes.quick.rooms.length === 3);
+assert.ok(content.raidModes.standard.rooms.length === 5);
+assert.deepStrictEqual(content.raidModes.quick.rooms.map((room) => room.promptTarget), [6, 7, 8]);
+assert.deepStrictEqual(content.raidModes.standard.rooms.map((room) => room.promptTarget), [7, 8, 8, 9, 10]);
 
 for (const biome of content.biomes) {
     assert.ok(biome.id);
@@ -607,6 +993,17 @@ for (const line of content.dialogue) {
     assert.ok(line.caption.length <= 120, `caption too long: ${line.id}`);
     assert.ok(line.voiceText.length <= 180, `voice text too long: ${line.id}`);
 }
+
+for (const mode of Object.values(content.raidModes)) {
+    for (const room of mode.rooms) {
+        assert.ok(room.biomeId);
+        assert.ok(room.monsterId);
+        assert.ok(room.hp >= 3);
+        assert.ok(room.damage >= 1 && room.damage <= 2);
+        assert.ok(room.promptTarget >= 6 && room.promptTarget <= 10);
+        assert.ok(room.operations.includes('multiply') || room.operations.includes('divide') || room.operations.includes('missing'));
+    }
+}
 ```
 
 - [ ] **Step 2: Run the content test and verify it fails**
@@ -626,6 +1023,8 @@ Create `math-marauder/js/content.js` with:
 - 6 biomes from the design spec.
 - 8 monster definitions from the design spec.
 - 4 spells from the design spec.
+- `raidModes.quick` with exactly 3 rooms and prompt targets `[6, 7, 8]`.
+- `raidModes.standard` with exactly 5 rooms, prompt targets `[7, 8, 8, 9, 10]`, and a 4-phase final boss room.
 - At least 10 dialogue lines covering title intro, first room, wrong answer hint, first division encounter, mini-boss, boss intro, victory, settings speech prompt, reduced-motion explanation, and Practice Forge unlock.
 
 Use this export shape:
@@ -641,6 +1040,7 @@ Use this export shape:
         biomes: [],
         monsters: [],
         spells: [],
+        raidModes: { quick: { rooms: [] }, standard: { rooms: [] } },
         dialogue: []
     };
 });
@@ -665,7 +1065,7 @@ git add math-marauder/js/content.js math-marauder/tests/content.test.js
 git commit -m "feat: add math marauder content data"
 ```
 
-## Task 6: Static Page And Accessibility Tests
+## Task 7: Static Page And Accessibility Tests
 
 **Files:**
 - Create: `math-marauder/index.html`
@@ -694,12 +1094,12 @@ assert.ok(!/user-scalable\s*=\s*no/i.test(html));
 assert.strictEqual((html.match(/opendyslexic/gi) || []).length, 1);
 assert.ok(/<canvas[^>]+id="battle-canvas"[^>]+aria-label="Animated monster battle"/.test(html));
 assert.ok(/<button[^>]+id="answer-0"/.test(html));
-assert.ok(/role="dialog"/.test(html));
+assert.ok(/<div[^>]+role="dialog"/.test(html));
 assert.ok(/aria-modal="true"/.test(html));
 assert.ok(/aria-hidden="true"/.test(html));
 assert.ok(!/style\.display/.test(allSource));
-assert.ok(!/aria-live="[^"]+"[^>]*aria-hidden=/.test(html));
-assert.ok(!/aria-live="[^"]+"[^>]*aria-label=/.test(html));
+assert.ok(!/(aria-live="[^"]+"[^>]*aria-hidden=|aria-hidden="[^"]+"[^>]*aria-live=)/.test(html));
+assert.ok(!/(aria-live="[^"]+"[^>]*aria-label=|aria-label="[^"]+"[^>]*aria-live=)/.test(html));
 ```
 
 - [ ] **Step 2: Run the static test and verify it fails**
@@ -753,10 +1153,13 @@ Create `math-marauder/index.html` with these required parts:
 
     <div id="screen-results" class="screen" aria-label="Raid results"></div>
 
-    <div id="dialogue-panel" class="dialogue-panel hidden" role="status">
-        <p id="dialogue-speaker"></p>
-        <p id="dialogue-caption"></p>
-        <button id="btn-replay-dialogue">Replay narration</button>
+    <div id="dialogue-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Story panel" aria-hidden="true">
+        <div class="overlay-panel dialogue-panel">
+            <button id="btn-close-dialogue" class="close-button" aria-label="Close story panel">x</button>
+            <p id="dialogue-speaker"></p>
+            <p id="dialogue-caption"></p>
+            <button id="btn-replay-dialogue">Replay narration</button>
+        </div>
     </div>
 
     <div id="settings-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Settings" aria-hidden="true">
@@ -848,7 +1251,7 @@ git add math-marauder/index.html math-marauder/css/style.css math-marauder/js/co
 git commit -m "feat: add math marauder page shell"
 ```
 
-## Task 7: Audio And Speech Managers
+## Task 8: Audio And Speech Managers
 
 **Files:**
 - Create: `math-marauder/js/audio.js`
@@ -857,7 +1260,15 @@ git commit -m "feat: add math marauder page shell"
 
 - [ ] **Step 1: Extend static checks**
 
-Add checks to `accessibility-static.test.js` that source contains `speechSynthesis`, `setTimeout`, `AudioContext`, and `ctx.resume().then`.
+Add these checks to `accessibility-static.test.js`:
+
+```js
+assert.ok(/speechSynthesis/.test(allSource));
+assert.ok(/setTimeout\s*\(/.test(allSource));
+assert.ok(/window\.AudioContext\s*\|\|\s*window\.webkitAudioContext/.test(allSource));
+assert.ok(/ctx\.resume\(\)\.then/.test(allSource));
+assert.ok(!/constructor\(\)[\s\S]{0,300}new\s+AudioContext/.test(allSource));
+```
 
 - [ ] **Step 2: Verify the extended static test fails**
 
@@ -875,6 +1286,7 @@ Implement an `AudioManager` class that:
 
 - Has `_ctx`, `_masterGain`, `_volume`, and `_muted` initialized in the constructor.
 - Creates AudioContext only inside `_getCtx()`, called from `preWarm()` or a sound method triggered by user input.
+- Uses `const Ctor = window.AudioContext || window.webkitAudioContext;` and returns without sound if no constructor exists.
 - Schedules oscillators only inside `ctx.resume().then(() => { ... })`.
 - Provides `playCorrect()`, `playWrong()`, `playHit()`, `playVictory()`, `setMuted()`, and `setVolume()`.
 
@@ -904,7 +1316,7 @@ git add math-marauder/js/audio.js math-marauder/js/speech.js math-marauder/tests
 git commit -m "feat: add math marauder audio and speech"
 ```
 
-## Task 8: Renderer
+## Task 9: Renderer
 
 **Files:**
 - Create: `math-marauder/js/renderer.js`
@@ -934,7 +1346,7 @@ Add procedural drawing for the 8 monster IDs from `content.js`. Each monster nee
 
 - [ ] **Step 3: Add renderer smoke path in `game.js` later**
 
-Leave renderer callable as `new MathMarauder.Renderer(canvas)` so Task 10 can wire it into the state machine.
+Leave renderer callable as `new MathMarauder.Renderer(canvas)` so Task 11 can wire it into the state machine.
 
 - [ ] **Step 4: Browser-check the canvas**
 
@@ -947,10 +1359,12 @@ git add math-marauder/js/renderer.js math-marauder/css/style.css
 git commit -m "feat: add math marauder combat renderer"
 ```
 
-## Task 9: UI Manager And Accessibility Behavior
+## Task 10: UI Manager And Accessibility Behavior
 
 **Files:**
 - Create: `math-marauder/js/ui.js`
+- Create: `math-marauder/tests/browser-ui.html`
+- Create: `math-marauder/tests/browser-ui.test.js`
 - Modify: `math-marauder/index.html`
 - Modify: `math-marauder/css/style.css`
 
@@ -987,6 +1401,7 @@ git commit -m "feat: add math marauder combat renderer"
 - `setPrompt(problem)`
 - `setAnswers(choices, onChoose)`
 - `showDialogue(line, onClose)`
+- `closeDialogue()`
 - `openSettings(settings)`
 - `closeSettings()`
 - `announce(text)`
@@ -1005,6 +1420,15 @@ Settings overlay must:
 - Set `aria-hidden="true"` on close.
 - Restore focus to `#btn-settings` on close.
 
+Dialogue overlay must follow the same dialog rules:
+
+- Set `#dialogue-overlay` to `aria-hidden="false"` and add `.open` when shown.
+- Focus `#btn-close-dialogue` before narration starts.
+- Trap Tab and Shift-Tab inside close and replay controls.
+- Close on Escape only when `.open` is present.
+- Set `aria-hidden="true"` and remove `.open` on close.
+- Restore focus to the control that opened the dialogue or the active answer group if dialogue opened automatically.
+
 - [ ] **Step 3: Implement answer binding guard**
 
 When a choice is made:
@@ -1013,11 +1437,135 @@ When a choice is made:
 - Call the game callback once.
 - Re-enable buttons only when the next prompt is rendered.
 
-- [ ] **Step 4: Browser-check interactions**
+- [ ] **Step 4: Create browser UI behavior tests**
+
+Create `math-marauder/tests/browser-ui.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Marauder Browser UI Tests</title>
+</head>
+<body>
+    <div id="test-root"></div>
+    <pre id="test-output" role="status"></pre>
+    <script src="../js/ui.js"></script>
+    <script src="browser-ui.test.js"></script>
+</body>
+</html>
+```
+
+Create `math-marauder/tests/browser-ui.test.js`:
+
+```js
+(function runBrowserUiTests() {
+    const output = document.getElementById('test-output');
+    const root = document.getElementById('test-root');
+    const results = [];
+
+    function assert(condition, message) {
+        if (!condition) throw new Error(message);
+    }
+
+    function test(name, fn) {
+        try {
+            root.innerHTML = `
+                <button id="btn-settings" aria-expanded="false">Settings</button>
+                <div id="settings-overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+                    <button id="btn-close-settings">x</button>
+                    <label><input id="setting-reduced-motion" type="checkbox"> Reduced motion</label>
+                </div>
+                <div id="dialogue-overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+                    <button id="btn-close-dialogue">x</button>
+                    <p id="dialogue-speaker"></p>
+                    <p id="dialogue-caption"></p>
+                    <button id="btn-replay-dialogue">Replay narration</button>
+                </div>
+                <div id="math-prompt"></div>
+                <div id="answer-grid">
+                    <button id="answer-0"></button>
+                    <button id="answer-1"></button>
+                    <button id="answer-2"></button>
+                    <button id="answer-3"></button>
+                </div>
+                <div id="battle-status" role="status"></div>
+            `;
+            fn(new MathMarauder.UIManager(document));
+            results.push(`PASS ${name}`);
+        } catch (err) {
+            results.push(`FAIL ${name}: ${err.message}`);
+        }
+    }
+
+    test('settings trap and escape restore focus', (ui) => {
+        const trigger = document.getElementById('btn-settings');
+        trigger.focus();
+        ui.openSettings({ reducedMotion: false });
+        assert(document.getElementById('settings-overlay').classList.contains('open'), 'settings did not open');
+        assert(document.activeElement.id === 'btn-close-settings', 'close settings button did not receive focus');
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        assert(!document.getElementById('settings-overlay').classList.contains('open'), 'settings did not close');
+        assert(document.activeElement.id === 'btn-settings', 'settings focus did not return');
+    });
+
+    test('dialogue trap and replay keep caption stable', (ui) => {
+        ui.showDialogue({ speaker: 'Guide', caption: 'Pick the matching rune.', voiceText: 'Pick the matching rune.' });
+        assert(document.getElementById('dialogue-overlay').getAttribute('aria-hidden') === 'false', 'dialogue aria-hidden not false');
+        assert(document.activeElement.id === 'btn-close-dialogue', 'dialogue close did not receive focus');
+        document.getElementById('btn-replay-dialogue').click();
+        assert(document.getElementById('dialogue-caption').textContent === 'Pick the matching rune.', 'caption changed on replay');
+    });
+
+    test('answer click is processed once and disables buttons', (ui) => {
+        let calls = 0;
+        ui.setAnswers([12, 24, 36, 48], () => { calls += 1; });
+        document.getElementById('answer-0').click();
+        document.getElementById('answer-0').click();
+        assert(calls === 1, `expected one callback, got ${calls}`);
+        assert(document.getElementById('answer-1').disabled, 'other answer buttons were not disabled');
+    });
+
+    test('number keys choose answers', (ui) => {
+        let picked = null;
+        ui.setAnswers([3, 6, 9, 12], (choice) => { picked = choice; });
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: '3' }));
+        assert(picked === 9, `expected 9, got ${picked}`);
+    });
+
+    test('reduced motion toggles root class immediately', (ui) => {
+        ui.applySettings({ reducedMotion: true });
+        assert(document.documentElement.classList.contains('reduced-motion'), 'reduced motion class missing');
+        ui.applySettings({ reducedMotion: false });
+        assert(!document.documentElement.classList.contains('reduced-motion'), 'reduced motion class stuck');
+    });
+
+    output.textContent = results.join('\n');
+    if (results.some((line) => line.startsWith('FAIL'))) {
+        throw new Error(results.join('\n'));
+    }
+})();
+```
+
+- [ ] **Step 5: Browser-check scripted UI tests**
+
+Open `math-marauder/tests/browser-ui.html` in the browser or through the local static server. Expected visible output:
+
+```text
+PASS settings trap and escape restore focus
+PASS dialogue trap and replay keep caption stable
+PASS answer click is processed once and disables buttons
+PASS number keys choose answers
+PASS reduced motion toggles root class immediately
+```
+
+- [ ] **Step 6: Browser-check gameplay interactions**
 
 Use keyboard and pointer paths for title, settings, answers, and replay narration.
 
-- [ ] **Step 5: Run tests**
+- [ ] **Step 7: Run tests**
 
 Run:
 
@@ -1027,19 +1575,20 @@ node math-marauder/scripts/run-tests.js
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add math-marauder/js/ui.js math-marauder/index.html math-marauder/css/style.css
+git add math-marauder/js/ui.js math-marauder/index.html math-marauder/css/style.css math-marauder/tests/browser-ui.html math-marauder/tests/browser-ui.test.js
 git commit -m "feat: add math marauder accessible UI"
 ```
 
-## Task 10: Game State Machine And Combat
+## Task 11: Game State Machine And Combat
 
 **Files:**
 - Create: `math-marauder/js/game.js`
 - Modify: `math-marauder/js/problem-engine.js`
 - Modify: `math-marauder/js/progression.js`
+- Modify: `math-marauder/js/game-rules.js`
 
 - [ ] **Step 1: Add combat state helpers**
 
@@ -1052,6 +1601,26 @@ Create pure helper methods in `game.js` or a small internal object:
 - `finishRoom()`
 - `finishRaid()`
 - `tick(timestamp)`
+
+`startRaid(mode)` must call `GameRules.createRaidState(mode)` and use the room contracts from `GameRules.RAID_MODES`:
+
+```js
+quick:    prompt targets [6, 7, 8], one 2-phase mini-boss
+standard: prompt targets [7, 8, 8, 9, 10], one 4-phase Factor Dragon boss
+```
+
+`presentProblem()` must call:
+
+```js
+const room = this._raid.rooms[this._raid.roomIndex];
+const problem = this._problemEngine.generate({
+    operations: room.operations,
+    band: room.band,
+    adaptive: this._progression.getAdaptiveConfig()
+});
+```
+
+This is the regular raid path, not only Practice Forge; weak, adjacent, mastered, and current-band sources must all be reachable during normal play.
 
 - [ ] **Step 2: Wire managers**
 
@@ -1076,7 +1645,9 @@ Rules:
 - Correct answer after a mistake damages monster, resets streak, updates mastery as correct but not first try.
 - Wrong answer marks the prompt as attempted, damages shield or heart, updates mastery as wrong.
 - Two wrong attempts announce a hint and keep the same prompt.
+- If hearts reach zero, call the no-shame retreat path from `GameRules.resolveAnswer()`: keep coins and mastery progress, restore one heart, announce "Regroup at the campfire", and restart the current room instead of showing a failure screen.
 - Monster defeat advances room.
+- Boss rooms use `bossPhaseCount`; when a boss phase reaches zero HP, advance to the next phase with the same room operations and a fresh prompt target before calling `finishRaid()`.
 - Last room defeat calls `finishRaid()`.
 
 - [ ] **Step 5: Implement speech and audio events**
@@ -1106,11 +1677,11 @@ Expected: PASS.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add math-marauder/js/game.js math-marauder/js/problem-engine.js math-marauder/js/progression.js
+git add math-marauder/js/game.js math-marauder/js/problem-engine.js math-marauder/js/progression.js math-marauder/js/game-rules.js
 git commit -m "feat: add math marauder raid loop"
 ```
 
-## Task 11: Practice Forge And Unlocks
+## Task 12: Practice Forge And Unlocks
 
 **Files:**
 - Modify: `math-marauder/index.html`
@@ -1124,9 +1695,30 @@ git commit -m "feat: add math marauder raid loop"
 
 Extend `progression.test.js` to verify:
 
-- Practice Forge unlocks after one completed raid.
+- Practice Forge stays locked after completed quick raids.
+- Practice Forge unlocks after one completed standard raid.
 - Weak fact queue can produce a focused practice config.
 - A mastered fact remains eligible at a low weight.
+
+Add this test block:
+
+```js
+{
+    const progression = new Progression();
+    const quickSave = { raidsCompleted: 0, standardRaidsCompleted: 0, bestStarsByMode: {} };
+    progression.completeRaid(quickSave, { mode: 'quick', stars: 3 });
+    assert.ok(!progression.getUnlockedModes(quickSave).includes('practice-forge'));
+
+    const standardSave = { raidsCompleted: 0, standardRaidsCompleted: 0, bestStarsByMode: {} };
+    progression.completeRaid(standardSave, { mode: 'standard', stars: 2 });
+    assert.ok(progression.getUnlockedModes(standardSave).includes('practice-forge'));
+
+    const practice = progression.makePracticeConfig('mul:7:8');
+    assert.deepStrictEqual(practice.operations, ['multiply', 'divide', 'missing']);
+    assert.strictEqual(practice.factorFamily, 7);
+    assert.ok(practice.promptTarget <= 8);
+}
+```
 
 - [ ] **Step 2: Verify tests fail**
 
@@ -1146,11 +1738,44 @@ Add:
 - `completeRaid(saveData, raidResult)`
 - `makePracticeConfig(factKey)`
 
+Use this implementation contract:
+
+```js
+getUnlockedModes(saveData) {
+    const modes = ['quick', 'standard'];
+    if ((saveData.standardRaidsCompleted || 0) >= 1) modes.push('practice-forge');
+    return modes;
+}
+
+completeRaid(saveData, raidResult) {
+    saveData.raidsCompleted = (saveData.raidsCompleted || 0) + 1;
+    if (raidResult.mode === 'standard') {
+        saveData.standardRaidsCompleted = (saveData.standardRaidsCompleted || 0) + 1;
+    }
+    saveData.bestStarsByMode = saveData.bestStarsByMode || {};
+    saveData.bestStarsByMode[raidResult.mode] = Math.max(saveData.bestStarsByMode[raidResult.mode] || 0, raidResult.stars || 1);
+    return saveData;
+}
+
+makePracticeConfig(factKey) {
+    const parts = factKey.split(':');
+    const factorFamily = Number(parts[1]);
+    return {
+        mode: 'practice-forge',
+        factorFamily,
+        operations: ['multiply', 'divide', 'missing'],
+        band: 'practice',
+        promptTarget: 8,
+        avoidExactRepeatWindow: 4
+    };
+}
+```
+
 Practice Forge should target one factor family or inverse pair without repeating the exact same prompt more than necessary.
 
 - [ ] **Step 4: Add Practice Forge UI**
 
-Add a disabled Practice Forge button on title or map. Enable it after one completed raid. Use the native `disabled` attribute while locked.
+Add a disabled Practice Forge button on title or map. Enable it only when `saveData.standardRaidsCompleted >= 1`. Use the native `disabled` attribute while locked.
 
 - [ ] **Step 5: Run tests**
 
@@ -1169,7 +1794,7 @@ git add math-marauder/index.html math-marauder/js/game.js math-marauder/js/progr
 git commit -m "feat: add math marauder practice forge"
 ```
 
-## Task 12: Index Integration
+## Task 13: Index Integration
 
 **Files:**
 - Modify: `.github/scripts/update-index.js`
@@ -1224,7 +1849,7 @@ git add .github/scripts/update-index.js index.html
 git commit -m "feat: list math marauder on game index"
 ```
 
-## Task 13: Full Verification
+## Task 14: Full Verification
 
 **Files:**
 - All files touched in prior tasks.
@@ -1237,7 +1862,7 @@ Run:
 node math-marauder/scripts/run-tests.js
 ```
 
-Expected: `All Math Marauder tests passed: 5/5`.
+Expected: `All Math Marauder tests passed: 6/6`.
 
 - [ ] **Step 2: Run index generation**
 
@@ -1278,7 +1903,17 @@ Verify:
 - Replay narration button speaks the current line when speech is available.
 - Reduced motion removes answer orbit and large particles.
 
-- [ ] **Step 5: Local-server browser smoke test**
+- [ ] **Step 5: Browser UI behavior test**
+
+Open:
+
+```text
+math-marauder/tests/browser-ui.html
+```
+
+Expected: all five browser UI tests print `PASS`.
+
+- [ ] **Step 6: Local-server browser smoke test**
 
 Run:
 
@@ -1292,9 +1927,9 @@ Open:
 http://localhost:8000/math-marauder/
 ```
 
-Repeat the direct-file smoke test.
+Repeat the direct-file smoke test and open `http://localhost:8000/math-marauder/tests/browser-ui.html`.
 
-- [ ] **Step 6: iPad Safari checklist**
+- [ ] **Step 7: iPad Safari checklist**
 
 Verify on iPad Safari or record as not run:
 
@@ -1305,7 +1940,7 @@ Verify on iPad Safari or record as not run:
 - No hover-only control is required.
 - No visible countdown timer appears by default.
 
-- [ ] **Step 7: Final commit if verification changed files**
+- [ ] **Step 8: Final commit if verification changed files**
 
 If verification changed expected files, commit them:
 
