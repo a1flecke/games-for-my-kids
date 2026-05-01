@@ -188,7 +188,7 @@ Single RAF chain owned by `game.js`; all draw passes are passive `update(dt)` / 
 
 1. **Panel background** — solid zone color + halftone gradient (cached offscreen)
 2. **Parallax silhouettes** — 2 layers of zone-specific landmarks (cached offscreen)
-3. **Monster sprite** — procedural, drawn fresh each frame for animation
+3. **Monster sprite** — base shape cached to one offscreen canvas per part (head/body/limbs); composited per frame via `drawImage` with animation transforms (translate/rotate/scale). Re-cache only when palette/scale changes (Petstore-precedent paper-doll model).
 4. **Spell projectile** — only during RESOLVE; trail of ink dots
 5. **Wizard portrait** — bottom-left frame, animates on hit/cast
 6. **Comic-effects layer** — burst text, speed lines, screen-flash, panel flashes
@@ -458,11 +458,15 @@ Class roster:
 2. Compute pull weight per fact:
    ```
    weight = boxWeight[box] × shakyMultiplier × recencyDamping
-   boxWeight = [_, 5, 4, 3, 2, 1]   // lower box = higher weight
+   boxWeight = { 1: 5, 2: 4, 3: 3, 4: 2, 5: 1 }   // lower box = higher weight
    shakyMultiplier = 2.5 if shaky else 1.0
    recencyDamping = 0.3 if seen in last 5 problems else 1.0
    ```
-3. With probability `0.10 + 0.02 × realmTier` (0.12 in realm 1 → 0.20 in realm 5), instead pull a **stretch fact** from a mastered family (`5×N`, `10×N`, `2×N` where N ∈ {13..30}, plus their division inverses)
+3. With probability `0.10 + 0.02 × realmTier` (0.12 in realm 1 → 0.20 in realm 5), instead pull a **stretch fact** from a mastered family (and only when that family is mastered):
+   - **5s:** `5 × N` for `N ∈ [13, 30]` (max product 150) + division inverses
+   - **10s:** `10 × N` for `N ∈ [13, 30]` (max product 300) + division inverses
+   - **2s:** `2 × N` for `N ∈ [13, 50]` (max product 100; covers `2 × 25`, `2 × 50` etc.) + division inverses
+   - All stretch facts are tagged so combat fires the bonus "chrono blast" celebration on correct answer
 4. Pick weighted-random from the resulting distribution
 5. 70% multiplication / 30% division by default; realm config can override
 
