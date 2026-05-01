@@ -40,11 +40,15 @@ const Progression = require('../js/progression.js');
     assert.ok(!progression.getUnlockedModes(quickSave).includes('practice-forge'));
 
     const standardSave = { raidsCompleted: 0, standardRaidsCompleted: 0, bestStarsByMode: {} };
-    progression.completeRaid(standardSave, { mode: 'standard', stars: 2 });
+    progression.completeRaid(standardSave, { mode: 'standard', stars: 2, coins: 75 });
     assert.ok(progression.getUnlockedModes(standardSave).includes('practice-forge'));
+    assert.strictEqual(standardSave.coins, 75);
 
     const practice = progression.makePracticeConfig('mul:7:8');
     assert.deepStrictEqual(practice.operations, ['multiply', 'divide', 'missing']);
     assert.strictEqual(practice.factorFamily, 7);
     assert.ok(practice.promptTarget <= 8);
+
+    assert.strictEqual(progression.makePracticeConfig('div:56:7').factorFamily, 7);
+    assert.strictEqual(progression.makePracticeConfig('missing:9:81').factorFamily, 9);
 }

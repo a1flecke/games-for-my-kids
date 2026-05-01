@@ -20,10 +20,27 @@ const GameRules = require('../js/game-rules.js');
 
 {
     const state = GameRules.createEncounterState({ monsterId: 'ember-imp', hp: 3, damage: 1, promptTarget: 6 });
+    assert.strictEqual(state.promptsRemaining, 6);
     const afterCorrect = GameRules.resolveAnswer(state, { correct: true, firstTry: true });
-    assert.strictEqual(afterCorrect.monsterHp, 2);
+    assert.strictEqual(afterCorrect.promptsRemaining, 5);
+    assert.strictEqual(afterCorrect.roomComplete, false);
     assert.strictEqual(afterCorrect.streak, 1);
     assert.strictEqual(afterCorrect.feedbackKind, 'correct');
+}
+
+{
+    let state = GameRules.createEncounterState({ monsterId: 'factor-dragon', hp: 9, damage: 2, promptTarget: 10, bossPhaseCount: 4 });
+    const phaseTargets = [];
+    for (let phase = 1; phase <= 4; phase += 1) {
+        phaseTargets.push(state.phaseTarget);
+        while (!state.phaseComplete && !state.roomComplete) {
+            state = GameRules.resolveAnswer(state, { correct: true, firstTry: true });
+        }
+        if (!state.roomComplete) state = GameRules.advanceEncounterPhase(state);
+    }
+    assert.deepStrictEqual(phaseTargets, [3, 3, 2, 2]);
+    assert.strictEqual(state.roomCorrectAnswers, 10);
+    assert.strictEqual(state.roomComplete, true);
 }
 
 {
@@ -46,4 +63,22 @@ const GameRules = require('../js/game-rules.js');
     assert.strictEqual(retreat.hearts, 1);
     assert.strictEqual(retreat.keepsProgress, true);
     assert.ok(retreat.feedbackText.includes('Regroup'));
+}
+
+{
+    let state = GameRules.createEncounterState({ monsterId: 'ember-imp', hp: 3, damage: 1, promptTarget: 6 });
+    state = GameRules.resolveAnswer(state, { correct: true, firstTry: true });
+    state = GameRules.resolveAnswer(state, { correct: true, firstTry: true });
+    state = GameRules.resolveAnswer(state, { correct: true, firstTry: true });
+    assert.strictEqual(state.spellTriggered, 'starbolt');
+    assert.ok(state.feedbackText.includes('Starbolt'));
+}
+
+{
+    let state = GameRules.createEncounterState({ monsterId: 'ember-imp', hp: 3, damage: 1, promptTarget: 8 });
+    for (let i = 0; i < 5; i += 1) {
+        state = GameRules.resolveAnswer(state, { correct: true, firstTry: true });
+    }
+    assert.strictEqual(state.spellTriggered, 'dragon-guard');
+    assert.ok(state.shields >= 2);
 }

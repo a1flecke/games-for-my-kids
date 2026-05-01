@@ -23,6 +23,12 @@
         }
     };
 
+    function phasePromptCount(promptTarget, phaseCount, phaseIndex) {
+        const base = Math.floor(promptTarget / phaseCount);
+        const extra = promptTarget % phaseCount;
+        return Math.max(1, base + (phaseIndex <= extra ? 1 : 0));
+    }
+
     function createRaidState(mode) {
         const resolvedMode = mode || 'quick';
         const config = RAID_MODES[resolvedMode] || RAID_MODES.quick;
@@ -41,32 +47,61 @@
     }
 
     function createEncounterState(room) {
+        const promptTarget = Math.max(1, room.promptTarget || room.hp || 1);
+        const phaseCount = Math.max(1, room.bossPhaseCount || 1);
+        const phaseTarget = phasePromptCount(promptTarget, phaseCount, 1);
         return Object.assign(createRaidState('quick'), {
             monsterId: room.monsterId,
-            monsterHp: room.hp,
-            monsterMaxHp: room.hp,
+            monsterHp: phaseTarget,
+            monsterMaxHp: phaseTarget,
             monsterDamage: room.damage,
-            promptTarget: room.promptTarget,
+            promptTarget,
+            promptsRemaining: promptTarget,
+            roomCorrectAnswers: 0,
+            phaseIndex: 1,
+            phaseCount,
+            phaseTarget,
+            phaseProgress: 0,
             wrongAttemptsOnPrompt: 0
         });
     }
 
     function resolveAnswer(state, answer) {
         const next = Object.assign({}, state);
+        next.phaseComplete = false;
+        next.roomComplete = false;
+        next.spellTriggered = '';
         next.promptsAnswered += 1;
         if (answer.correct) {
-            next.monsterHp = Math.max(0, next.monsterHp - 1);
             next.streak += 1;
             next.longestStreak = Math.max(next.longestStreak, next.streak);
             if (answer.firstTry) next.correctFirstTry += 1;
             next.wrongAttemptsOnPrompt = 0;
+            next.roomCorrectAnswers = (next.roomCorrectAnswers || 0) + 1;
+            next.promptsRemaining = Math.max(0, next.promptTarget - next.roomCorrectAnswers);
+            next.phaseProgress = (next.phaseProgress || 0) + 1;
+            next.monsterHp = Math.max(0, (next.phaseTarget || 1) - next.phaseProgress);
+            if (next.streak > 0 && next.streak % 5 === 0) {
+                next.shields += 1;
+                next.spellTriggered = 'dragon-guard';
+            } else if (next.streak > 0 && next.streak % 3 === 0) {
+                next.spellTriggered = 'starbolt';
+            }
+            if (next.promptsRemaining <= 0) {
+                next.roomComplete = true;
+                next.monsterHp = 0;
+            } else if (next.phaseProgress >= next.phaseTarget) {
+                next.phaseComplete = true;
+                next.monsterHp = 0;
+            }
             next.feedbackKind = 'correct';
-            next.feedbackText = 'Spell hit!';
+            next.feedbackText = spellText(next.spellTriggered) || 'Spell hit!';
             return next;
         }
 
         next.streak = 0;
         next.wrongAttemptsOnPrompt += 1;
+        next.spellTriggered = 'mirror-spark';
         if (next.shields > 0) next.shields -= 1;
         else next.hearts -= next.monsterDamage;
 
@@ -81,10 +116,31 @@
         }
 
         next.feedbackKind = 'try-again';
-        next.feedbackText = 'Try again.';
+        next.feedbackText = 'Mirror Spark reveals the field. Try again.';
         next.hintText = next.wrongAttemptsOnPrompt >= 2 ? 'Think about the matching factor family.' : '';
         return next;
     }
 
-    return { RAID_MODES, createRaidState, createEncounterState, resolveAnswer };
+    function advanceEncounterPhase(state) {
+        const next = Object.assign({}, state);
+        if (next.roomComplete) return next;
+        next.phaseIndex = Math.min((next.phaseIndex || 1) + 1, next.phaseCount || 1);
+        next.phaseTarget = phasePromptCount(next.promptTarget, next.phaseCount || 1, next.phaseIndex);
+        next.phaseProgress = 0;
+        next.phaseComplete = false;
+        next.monsterMaxHp = next.phaseTarget;
+        next.monsterHp = next.phaseTarget;
+        next.spellTriggered = 'time-gem';
+        next.feedbackText = 'Time Gem steadies the next phase.';
+        return next;
+    }
+
+    function spellText(spellId) {
+        return {
+            'starbolt': 'Starbolt surge!',
+            'dragon-guard': 'Dragon Guard recharged a shield.'
+        }[spellId] || '';
+    }
+
+    return { RAID_MODES, createRaidState, createEncounterState, resolveAnswer, advanceEncounterPhase };
 });

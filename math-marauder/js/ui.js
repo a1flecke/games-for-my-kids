@@ -43,9 +43,9 @@
             });
         }
 
-        showDialogue(line, onClose) {
+        showDialogue(line, onClose, returnFocus) {
             this._lastDialogue = line;
-            this._dialogueReturnFocus = this._doc.activeElement;
+            this._dialogueReturnFocus = returnFocus || this._doc.activeElement;
             const overlay = this._doc.getElementById('dialogue-overlay');
             if (!overlay) return;
             const speaker = this._doc.getElementById('dialogue-speaker');
@@ -93,6 +93,11 @@
         announce(text) {
             const el = this._doc.getElementById('battle-status');
             if (el) el.textContent = text;
+        }
+
+        showSpell(text) {
+            const el = this._doc.getElementById('spell-banner');
+            if (el) el.textContent = text || '';
         }
 
         updateHud(raid, roomLabel) {

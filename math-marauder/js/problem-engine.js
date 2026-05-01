@@ -43,7 +43,7 @@
                     return this._withChoices(problem);
                 }
             }
-            const fallback = this._forOperation(this._rng.pick(operations), opts.band, 'band');
+            const fallback = this._forOperation(this._rng.pick(operations), opts.band, 'band', opts.factorFamily);
             this._remember(fallback.promptKey);
             return this._withChoices(fallback);
         }
@@ -65,7 +65,7 @@
                 const problem = this._fromFactKey(this._rng.pick(mastered), operations, source);
                 if (problem) return problem;
             }
-            return this._forOperation(this._rng.pick(operations), opts.band, 'band');
+            return this._forOperation(this._rng.pick(operations), opts.band, 'band', opts.factorFamily);
         }
 
         _chooseSource(adaptive) {
@@ -78,7 +78,13 @@
             return 'band';
         }
 
-        _forOperation(operation, band, source) {
+        _forOperation(operation, band, source, factorFamily) {
+            const family = this._normalFamily(factorFamily);
+            if (family !== null) {
+                if (operation === 'divide') return this._divisionForFamily(band, source, family);
+                if (operation === 'missing') return this._missingForFamily(band, source, family);
+                return this._multiplicationForFamily(band, source, family);
+            }
             if (operation === 'divide') return this._division(band, source);
             if (operation === 'missing') return this._missingFactor(band, source);
             return this._multiplication(band, source);
@@ -117,6 +123,62 @@
                 voiceText: `${dividend} divided by ${divisor}`,
                 factKey: `div:${dividend}:${divisor}`,
                 promptKey: `div:${dividend}:${divisor}`,
+                answerMax: 12,
+                source
+            };
+        }
+
+        _multiplicationForFamily(band, source, family) {
+            const b = this._rng.pick(this._factorsForBand(band));
+            return {
+                operation: 'multiply',
+                a: family,
+                b,
+                correct: family * b,
+                prompt: `${family} x ${b}`,
+                voiceText: `${family} times ${b}`,
+                factKey: `mul:${Math.min(family, b)}:${Math.max(family, b)}`,
+                promptKey: `mul:${family}:${b}`,
+                answerMax: 144,
+                source
+            };
+        }
+
+        _divisionForFamily(band, source, family) {
+            const nonZero = this._factorsForBand(band).filter((n) => n > 0);
+            const divisor = family > 0 ? family : this._rng.pick(nonZero);
+            const quotient = family > 0 ? this._rng.pick(this._factorsForBand(band)) : 0;
+            const dividend = divisor * quotient;
+            return {
+                operation: 'divide',
+                dividend,
+                divisor,
+                quotient,
+                correct: quotient,
+                prompt: `${dividend} / ${divisor}`,
+                voiceText: `${dividend} divided by ${divisor}`,
+                factKey: `div:${dividend}:${divisor}`,
+                promptKey: `div:${dividend}:${divisor}`,
+                answerMax: 12,
+                source
+            };
+        }
+
+        _missingForFamily(band, source, family) {
+            const nonZero = this._factorsForBand(band).filter((n) => n > 0);
+            const a = family > 0 ? family : this._rng.pick(nonZero);
+            const missing = family > 0 ? this._rng.pick(this._factorsForBand(band)) : 0;
+            const product = a * missing;
+            return {
+                operation: 'missing',
+                a,
+                missing,
+                product,
+                correct: missing,
+                prompt: `${a} x ? = ${product}`,
+                voiceText: `${a} times what number equals ${product}`,
+                factKey: `missing:${a}:${product}`,
+                promptKey: `missing:${a}:${product}`,
                 answerMax: 12,
                 source
             };
@@ -179,6 +241,26 @@
                     source
                 };
             }
+            if (parts[0] === 'missing' && operations.includes('missing')) {
+                const a = Number(parts[1]);
+                const product = Number(parts[2]);
+                if (!a) return null;
+                const missing = product / a;
+                if (!Number.isInteger(missing) || missing < 0 || missing > 12) return null;
+                return {
+                    operation: 'missing',
+                    a,
+                    missing,
+                    product,
+                    correct: missing,
+                    prompt: `${a} x ? = ${product}`,
+                    voiceText: `${a} times what number equals ${product}`,
+                    factKey: key,
+                    promptKey: key,
+                    answerMax: 12,
+                    source
+                };
+            }
             return null;
         }
 
@@ -218,12 +300,38 @@
                     answerMax: 12
                 };
             }
+            if (parts[0] === 'missing' && operations.includes('missing')) {
+                const a = Number(parts[1]);
+                const missing = Number(parts[2]) / a;
+                const neighbors = this._factorsForBand(band).filter((n) => Number.isInteger(missing) && Math.abs(n - missing) <= 1);
+                const nextMissing = this._rng.pick(neighbors.length ? neighbors : this._factorsForBand(band));
+                const product = a * nextMissing;
+                return {
+                    operation: 'missing',
+                    a,
+                    missing: nextMissing,
+                    product,
+                    correct: nextMissing,
+                    prompt: `${a} x ? = ${product}`,
+                    voiceText: `${a} times what number equals ${product}`,
+                    factKey: `missing:${a}:${product}`,
+                    promptKey: `missing:${a}:${product}`,
+                    answerMax: 12
+                };
+            }
             return null;
         }
 
         _factorsForBand(band) {
             if (band === 'warm') return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
             return FACTORS;
+        }
+
+        _normalFamily(value) {
+            if (value === undefined || value === null || value === '') return null;
+            const family = Number(value);
+            if (!Number.isInteger(family) || family < 0 || family > 12) return null;
+            return family;
         }
 
         _withChoices(problem) {

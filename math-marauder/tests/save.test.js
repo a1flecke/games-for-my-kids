@@ -15,6 +15,7 @@ function storage() {
     const defaults = manager.defaults();
     assert.strictEqual(defaults.version, 1);
     assert.strictEqual(defaults.standardRaidsCompleted, 0);
+    assert.strictEqual(defaults.coins, 0);
     assert.deepStrictEqual(defaults.unlockedBiomes, ['ember-library']);
     assert.deepStrictEqual(defaults.unlockedSpells, ['starbolt']);
     assert.strictEqual(defaults.settings.speech, true);

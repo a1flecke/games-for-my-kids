@@ -61,6 +61,7 @@
 
         completeRaid(saveData, raidResult) {
             saveData.raidsCompleted = (saveData.raidsCompleted || 0) + 1;
+            saveData.coins = (saveData.coins || 0) + (raidResult.coins || 0);
             if (raidResult.mode === 'standard') {
                 saveData.standardRaidsCompleted = (saveData.standardRaidsCompleted || 0) + 1;
             }
@@ -71,7 +72,8 @@
 
         makePracticeConfig(factKey) {
             const parts = factKey.split(':');
-            const factorFamily = Number(parts[1]);
+            let factorFamily = Number(parts[1]);
+            if (parts[0] === 'div') factorFamily = Number(parts[2]);
             return {
                 mode: 'practice-forge',
                 factorFamily,

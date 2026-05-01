@@ -20,6 +20,7 @@ assert.ok(/aria-hidden="true"/.test(html));
 assert.ok(!/style\.display/.test(allSource));
 assert.ok(!/(aria-live="[^"]+"[^>]*aria-hidden=|aria-hidden="[^"]+"[^>]*aria-live=)/.test(html));
 assert.ok(!/(aria-live="[^"]+"[^>]*aria-label=|aria-label="[^"]+"[^>]*aria-live=)/.test(html));
+assert.ok(!/font-size\s*:[^;]*(vw|vh|vmin|vmax)/i.test(css), 'font sizes must not scale with viewport units');
 assert.ok(/speechSynthesis/.test(allSource));
 assert.ok(/setTimeout\s*\(/.test(allSource));
 assert.ok(/window\.AudioContext\s*\|\|\s*window\.webkitAudioContext/.test(allSource));

@@ -33,6 +33,7 @@
                 version: 1,
                 raidsCompleted: 0,
                 standardRaidsCompleted: 0,
+                coins: 0,
                 bestStarsByMode: {},
                 factMastery: {},
                 weakFactQueue: [],

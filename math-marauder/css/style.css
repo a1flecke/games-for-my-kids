@@ -94,7 +94,7 @@ button:disabled {
 
 h1 {
     margin: 0;
-    font-size: clamp(2.6rem, 8vw, 5.4rem);
+    font-size: 4.4rem;
     line-height: 1.05;
 }
 
@@ -152,6 +152,27 @@ h2 {
     text-shadow: 0 2px 4px #000;
 }
 
+.spell-banner {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    min-height: 44px;
+    min-width: min(420px, calc(100% - 32px));
+    padding: 8px 14px;
+    transform: translateX(-50%);
+    border: 3px solid #fffaf0;
+    border-radius: 8px;
+    background: rgba(34, 21, 40, 0.78);
+    color: #fffaf0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.spell-banner:empty {
+    visibility: hidden;
+}
+
 #screen-raid.active {
     flex-direction: column;
     gap: 14px;
@@ -167,7 +188,7 @@ h2 {
 #math-prompt {
     min-height: 64px;
     text-align: center;
-    font-size: clamp(2rem, 8vw, 4rem);
+    font-size: 3.4rem;
     font-weight: 700;
 }
 
@@ -179,7 +200,7 @@ h2 {
 
 .answer-button {
     min-height: 72px;
-    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    font-size: 2rem;
     background: #e0f2fe;
 }
 
@@ -260,5 +281,17 @@ h2 {
 
     #answer-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    h1 {
+        font-size: 3rem;
+    }
+
+    #math-prompt {
+        font-size: 2.4rem;
+    }
+
+    .answer-button {
+        font-size: 1.6rem;
     }
 }

@@ -8,7 +8,8 @@ const tests = [
     '../tests/game-rules.test.js',
     '../tests/save.test.js',
     '../tests/content.test.js',
-    '../tests/accessibility-static.test.js'
+    '../tests/accessibility-static.test.js',
+    '../tests/ui-manager.test.js'
 ];
 
 let passed = 0;

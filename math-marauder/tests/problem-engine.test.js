@@ -86,3 +86,39 @@ function makeEngine(seed) {
     assert.ok(counts.mastered >= 5, `mastered review facts not represented: ${counts.mastered}`);
     assert.ok(counts.band >= 40, `current-band facts not represented: ${counts.band}`);
 }
+
+{
+    const engine = makeEngine(24680);
+    let weakMissingSeen = 0;
+    for (let i = 0; i < 100; i += 1) {
+        const problem = engine.generate({
+            operations: ['missing'],
+            band: 'deep',
+            adaptive: {
+                weakFactQueue: ['missing:7:56'],
+                factMastery: {}
+            }
+        });
+        if (problem.source === 'weak' && problem.prompt === '7 x ? = 56' && problem.correct === 8) {
+            weakMissingSeen += 1;
+        }
+    }
+    assert.ok(weakMissingSeen > 0, 'missing-factor weak facts should replay adaptively');
+}
+
+{
+    const engine = makeEngine(13579);
+    for (let i = 0; i < 120; i += 1) {
+        const problem = engine.generate({
+            operations: ['multiply', 'divide', 'missing'],
+            band: 'practice',
+            factorFamily: 7
+        });
+        const usesFamily = problem.operation === 'multiply'
+            ? problem.a === 7 || problem.b === 7
+            : problem.operation === 'divide'
+                ? problem.divisor === 7 || problem.dividend === 0
+                : problem.a === 7;
+        assert.ok(usesFamily, `practice problem did not target 7-family: ${problem.prompt}`);
+    }
+}

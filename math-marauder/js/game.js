@@ -69,7 +69,8 @@
                     damage: 1,
                     promptTarget: config.promptTarget,
                     operations: config.operations,
-                    band: config.band
+                    band: config.band,
+                    factorFamily: config.factorFamily
                 }];
             } else {
                 this._raid = MathMarauder.GameRules.createRaidState(mode);
@@ -77,7 +78,8 @@
             this._state = 'RAID';
             this._phase = 1;
             this._ui.showScreen('screen-raid');
-            this._ui.showDialogue(MathMarauder.Content.dialogue[mode === 'standard' ? 5 : 1], () => {});
+            this._ui.showSpell('');
+            this._ui.showDialogue(MathMarauder.Content.dialogue[mode === 'standard' ? 5 : 1], () => {}, document.getElementById('answer-0'));
             this._speech.speak((MathMarauder.Content.dialogue[mode === 'standard' ? 5 : 1] || {}).voiceText || '');
             this.startRoom();
         }
@@ -91,7 +93,7 @@
             this._encounter.correctFirstTry = this._raid.correctFirstTry;
             this._encounter.promptsAnswered = this._raid.promptsAnswered;
             this._encounter.longestStreak = this._raid.longestStreak;
-            this._phase = 1;
+            this._phase = this._encounter.phaseIndex || 1;
             this.presentProblem();
             this._syncScene();
         }
@@ -101,6 +103,7 @@
             this._currentProblem = this._problemEngine.generate({
                 operations: room.operations,
                 band: room.band,
+                factorFamily: room.factorFamily,
                 adaptive: this._progression.getAdaptiveConfig()
             });
             this._firstTry = true;
@@ -128,8 +131,10 @@
             this._syncScene(correct);
             if (correct) {
                 this._audio.playCorrect();
-                this._ui.announce('Correct. Spell hit.');
-                if (resolved.monsterHp <= 0) {
+                if (resolved.spellTriggered) this._ui.showSpell(this._spellLabel(resolved.spellTriggered));
+                this._ui.announce(resolved.feedbackText || 'Correct. Spell hit.');
+                if (resolved.spellTriggered === 'starbolt') this._audio.playHit();
+                if (resolved.roomComplete || resolved.phaseComplete) {
                     setTimeout(() => this._finishMonsterStep(), 550);
                 } else {
                     setTimeout(() => this.presentProblem(), 650);
@@ -138,6 +143,7 @@
             }
             this._audio.playWrong();
             this._firstTry = false;
+            if (resolved.spellTriggered) this._ui.showSpell(this._spellLabel(resolved.spellTriggered));
             if (resolved.recoveryMode === 'retreat') {
                 this._ui.announce(resolved.feedbackText);
                 this._speech.speak(resolved.feedbackText);
@@ -169,7 +175,7 @@
                 hearts: this._raid.hearts,
                 longestStreak: this._raid.longestStreak
             });
-            this._progression.completeRaid(this._save, { mode: this._raid.mode, stars: result.stars });
+            this._progression.completeRaid(this._save, { mode: this._raid.mode, stars: result.stars, coins: result.coins });
             const progress = this._progression.toJSON();
             this._save.factMastery = progress.factMastery;
             this._save.weakFactQueue = progress.weakFactQueue;
@@ -184,7 +190,7 @@
             if (summary) {
                 summary.innerHTML = '';
                 const p = document.createElement('p');
-                p.textContent = `${result.stars} stars. ${this._raid.correctFirstTry} first-try answers. Longest streak ${this._raid.longestStreak}.`;
+                p.textContent = `${result.stars} stars. ${result.coins} coins. ${this._raid.correctFirstTry} first-try answers. Longest streak ${this._raid.longestStreak}.`;
                 summary.appendChild(p);
             }
             this._state = 'RESULTS';
@@ -201,16 +207,29 @@
         }
 
         _finishMonsterStep() {
-            if (this._currentRoom.bossPhaseCount && this._phase < this._currentRoom.bossPhaseCount) {
-                this._phase += 1;
-                this._encounter.monsterHp = this._currentRoom.hp;
-                this._encounter.monsterMaxHp = this._currentRoom.hp;
+            if (this._encounter && this._encounter.roomComplete) {
+                this.finishRoom();
+                return;
+            }
+            if (this._encounter && this._encounter.phaseComplete && this._phase < this._encounter.phaseCount) {
+                this._encounter = MathMarauder.GameRules.advanceEncounterPhase(this._encounter);
+                this._phase = this._encounter.phaseIndex;
+                this._ui.showSpell(this._spellLabel(this._encounter.spellTriggered));
                 this._ui.announce(`Boss phase ${this._phase}`);
                 this.presentProblem();
                 this._syncScene();
                 return;
             }
             this.finishRoom();
+        }
+
+        _spellLabel(spellId) {
+            return {
+                'starbolt': 'Starbolt surge',
+                'mirror-spark': 'Mirror Spark hint',
+                'dragon-guard': 'Dragon Guard shield',
+                'time-gem': 'Time Gem phase shift'
+            }[spellId] || '';
         }
 
         _syncScene(spellFlash) {

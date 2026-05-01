@@ -25,7 +25,7 @@
     ];
 
     const spells = [
-        { id: 'starbolt', name: 'Starbolt', trigger: 'Three correct answers', description: 'A bright hit that deals extra damage.' },
+        { id: 'starbolt', name: 'Starbolt', trigger: 'Three correct answers', description: 'A bright surge that celebrates a three-answer streak.' },
         { id: 'mirror-spark', name: 'Mirror Spark', trigger: 'One wrong answer', description: 'Removes one wrong rune after a stumble.' },
         { id: 'dragon-guard', name: 'Dragon Guard', trigger: 'Five answer streak', description: 'Blocks the next monster hit.' },
         { id: 'time-gem', name: 'Time Gem', trigger: 'Boss phase', description: 'Slows rune movement without showing a timer.' }
