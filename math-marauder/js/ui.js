@@ -99,7 +99,7 @@
             const hearts = this._doc.getElementById('hud-hearts');
             const room = this._doc.getElementById('hud-room');
             const streak = this._doc.getElementById('hud-streak');
-            if (hearts) hearts.textContent = '♥ '.repeat(Math.max(0, raid.hearts || 0)).trim();
+            if (hearts) hearts.textContent = `HP ${Math.max(0, raid.hearts || 0)}`;
             if (room) room.textContent = roomLabel || `Room ${(raid.roomIndex || 0) + 1}`;
             if (streak) streak.textContent = `Streak ${raid.streak || 0}`;
         }
