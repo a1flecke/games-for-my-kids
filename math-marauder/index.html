@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Marauder</title>
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="screen-title" class="screen active" role="main" aria-label="Math Marauder">
+        <div class="title-panel">
+            <p class="eyebrow">Monster math raids</p>
+            <h1>Math Marauder</h1>
+            <p id="title-tagline">Raid monster realms with multiplication and division magic.</p>
+            <div class="title-buttons">
+                <button id="btn-quick-raid" class="primary-action">Quick Raid</button>
+                <button id="btn-standard-raid">Standard Raid</button>
+                <button id="btn-practice-forge" disabled>Practice Forge</button>
+            </div>
+        </div>
+        <button id="btn-settings" class="icon-button title-settings" aria-label="Settings" aria-expanded="false">⚙</button>
+    </div>
+
+    <div id="screen-map" class="screen" aria-label="Raid map">
+        <div id="map-cards" class="map-cards"></div>
+    </div>
+
+    <div id="screen-raid" class="screen" aria-label="Monster battle">
+        <div class="battle-wrap">
+            <canvas id="battle-canvas" width="960" height="540" aria-label="Animated monster battle"></canvas>
+            <div class="raid-hud" aria-hidden="true">
+                <span id="hud-hearts">♥ ♥ ♥</span>
+                <span id="hud-room">Room 1</span>
+                <span id="hud-streak">Streak 0</span>
+            </div>
+        </div>
+        <div id="battle-status" role="status" class="sr-only"></div>
+        <div id="prompt-panel">
+            <div id="math-prompt" aria-label="Math prompt"></div>
+            <div id="answer-grid" role="group" aria-label="Choose the correct answer">
+                <button id="answer-0" class="answer-button" data-answer-index="0"></button>
+                <button id="answer-1" class="answer-button" data-answer-index="1"></button>
+                <button id="answer-2" class="answer-button" data-answer-index="2"></button>
+                <button id="answer-3" class="answer-button" data-answer-index="3"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-results" class="screen" aria-label="Raid results">
+        <div class="results-panel">
+            <h2>Raid Complete</h2>
+            <div id="results-summary"></div>
+            <button id="btn-results-quick">Quick Raid</button>
+            <button id="btn-results-title">Title</button>
+        </div>
+    </div>
+
+    <div id="dialogue-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Story panel" aria-hidden="true">
+        <div class="overlay-panel dialogue-panel">
+            <button id="btn-close-dialogue" class="close-button" aria-label="Close story panel">x</button>
+            <p id="dialogue-speaker"></p>
+            <p id="dialogue-caption"></p>
+            <button id="btn-replay-dialogue">Replay narration</button>
+        </div>
+    </div>
+
+    <div id="settings-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="Settings" aria-hidden="true">
+        <div class="overlay-panel">
+            <button id="btn-close-settings" class="close-button" aria-label="Close settings">x</button>
+            <h2>Settings</h2>
+            <label><input id="setting-sfx" type="checkbox" checked> Sound effects</label>
+            <label><input id="setting-music" type="checkbox"> Music</label>
+            <label><input id="setting-speech" type="checkbox" checked> Narration</label>
+            <label><input id="setting-reduced-motion" type="checkbox"> Reduced motion</label>
+        </div>
+    </div>
+
+    <script src="js/constants.js" defer></script>
+    <script src="js/content.js" defer></script>
+    <script src="js/problem-engine.js" defer></script>
+    <script src="js/progression.js" defer></script>
+    <script src="js/game-rules.js" defer></script>
+    <script src="js/save.js" defer></script>
+    <script src="js/audio.js" defer></script>
+    <script src="js/speech.js" defer></script>
+    <script src="js/renderer.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/game.js" defer></script>
+</body>
+</html>
