@@ -37,7 +37,7 @@ function extractGameMetadata(gamePath) {
 const gameCategories = {
   history: ['ancient-greece-rpg', 'roman-quiz', 'roman-emperors-quiz'],
   language: ['grammar-quiz', 'phonics-game'],
-  math: ['math-coloring'],
+  math: ['math-coloring', 'math-coloring-2', 'math-marauder'],
   skills: ['keyboard-quest', 'keyboard-quest-2', 'keyboard-command-4'],
   creativity: ['lizzies-petstore']
 };
@@ -68,6 +68,11 @@ const manualGameConfig = {
     icon: '🔢🎨',
     title: 'Math Coloring',
     description: 'Combine math practice with creative fun! Solve math problems to reveal colorful pictures and patterns.'
+  },
+  'math-marauder': {
+    icon: 'x/?',
+    title: 'Math Marauder',
+    description: 'Battle imps, slimes, wizards, and dragons by mastering multiplication and clean division facts from 0 through 12.'
   },
   'keyboard-quest': {
     icon: '⌨️🦄🤖',
