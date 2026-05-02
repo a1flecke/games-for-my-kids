@@ -19,7 +19,7 @@
       totalCorrect: 0,
       gold: 0,
       ownedSpellIds: ['ember_bolt'],
-      equippedDeck: ['ember_bolt', null, null, null, null],
+      equippedDeck: ['ember_bolt', null, null, null],
       unlockedClassIds: ['apprentice'],
       selectedClassId: 'apprentice',
       realmStars: {

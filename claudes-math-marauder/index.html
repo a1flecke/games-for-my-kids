@@ -41,12 +41,23 @@
     <button id="resume-button" class="primary" aria-label="Resume game">Resume</button>
   </section>
 
-  <!-- Plain defer (not type="module") — all files use UMD globals so Node tests can require() them without a bundler -->
+  <!--
+    Script load order (all defer, UMD globals — no bundler required):
+      1. Utilities: save, rng, shuffle, escape, toast
+      2. Combat logic (pure, no DOM): factKeys → mastery → problemGen → distractors
+      3. Game orchestration: game.js last (reads all globals)
+  -->
   <script src="js/save.js" defer></script>
   <script src="js/util/rng.js" defer></script>
   <script src="js/util/shuffle.js" defer></script>
   <script src="js/util/escape.js" defer></script>
   <script src="js/ui/toast.js" defer></script>
+  <!-- Combat modules (Sessions 1–2) -->
+  <script src="js/combat/factKeys.js" defer></script>
+  <script src="js/combat/mastery.js" defer></script>
+  <script src="js/combat/problemGen.js" defer></script>
+  <script src="js/combat/distractors.js" defer></script>
+  <!-- Future sessions will add: fight.js, bossFight.js, mapGen.js, hub.js, etc. -->
   <script src="js/game.js" defer></script>
 </body>
 </html>

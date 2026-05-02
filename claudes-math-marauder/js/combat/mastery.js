@@ -37,8 +37,8 @@
     if (correct) {
       s.totalCorrect++;
       s.streak++;
-      // Fast = under 2× the mastered average (fall back to 8 s if no baseline)
-      const fastThreshold = (masteredAvgMs != null ? masteredAvgMs : 4000) * 2;
+      // Fast = under 2× the mastered average (fall back to 6 s if no baseline)
+      const fastThreshold = (masteredAvgMs != null ? masteredAvgMs : 6000) * 2;
       if (timeMs < fastThreshold) s.box = Math.min(5, s.box + 1);
       s.avgMs = s.avgMs === 0 ? timeMs : Math.round(s.avgMs * 0.7 + timeMs * 0.3);
     } else {

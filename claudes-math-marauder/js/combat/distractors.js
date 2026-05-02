@@ -5,11 +5,11 @@
   // problem: { kind, a, b, answer }
   // rng: run-seeded 0..1 PRNG (must be provided — no Math.random() inside combat modules)
   function generateDistractors(problem, rng) {
-    var correct = problem.answer;
-    var candidates = new Set();
+    const correct = problem.answer;
+    const candidates = new Set();
 
     if (problem.kind === 'mul') {
-      var a = problem.a, b = problem.b;
+      const a = problem.a, b = problem.b;
       candidates.add(a * (b + 1));
       candidates.add(a * (b - 1));
       candidates.add((a + 1) * b);
@@ -22,7 +22,7 @@
       candidates.add(correct + 2);
       candidates.add(correct - 2);
     } else {
-      var dividend = problem.a, divisor = problem.b;
+      const dividend = problem.a, divisor = problem.b;
       candidates.add(correct + 1);
       candidates.add(correct - 1);
       candidates.add(correct + 2);
@@ -34,7 +34,7 @@
     }
 
     // Filter: non-negative integers, not equal to correct, plausible range
-    var filtered = Array.from(candidates).filter(function(v) {
+    const filtered = Array.from(candidates).filter(function(v) {
       return Number.isInteger(v) && v >= 0 && v !== correct && v <= 999;
     });
 
@@ -42,22 +42,22 @@
     filtered.sort(function(x, y) { return Math.abs(x - correct) - Math.abs(y - correct); });
 
     // Take a pool then shuffle so distractor order isn't always the same
-    var pool = filtered.slice(0, Math.max(6, filtered.length));
-    for (var i = pool.length - 1; i > 0; i--) {
-      var j = Math.floor(rng() * (i + 1));
-      var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    const pool = filtered.slice(0, Math.max(6, filtered.length));
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
     }
 
-    var distractors = [];
-    for (var vi = 0; vi < pool.length; vi++) {
+    const distractors = [];
+    for (let vi = 0; vi < pool.length; vi++) {
       if (distractors.length === 3) break;
       if (!distractors.includes(pool[vi])) distractors.push(pool[vi]);
     }
 
     // Pathological fallback: answer=0 or very few valid candidates
-    var pad = 1;
+    let pad = 1;
     while (distractors.length < 3) {
-      var fallback = correct + pad;
+      const fallback = correct + pad;
       if (fallback !== correct && fallback >= 0 && !distractors.includes(fallback)) {
         distractors.push(fallback);
       }
@@ -65,18 +65,18 @@
       if (pad > 150) break;  // safety valve
     }
 
-    var orbs = [correct].concat(distractors);
+    const orbs = [correct].concat(distractors);
 
     // Final shuffle so correct answer isn't always position 0
-    for (var oi = orbs.length - 1; oi > 0; oi--) {
-      var oj = Math.floor(rng() * (oi + 1));
-      var otmp = orbs[oi]; orbs[oi] = orbs[oj]; orbs[oj] = otmp;
+    for (let oi = orbs.length - 1; oi > 0; oi--) {
+      const oj = Math.floor(rng() * (oi + 1));
+      const otmp = orbs[oi]; orbs[oi] = orbs[oj]; orbs[oj] = otmp;
     }
 
     return orbs;
   }
 
-  var exp = { generateDistractors };
+  const exp = { generateDistractors };
   if (typeof module !== 'undefined' && module.exports) module.exports = exp;
   else global.Distractors = exp;
 })(typeof window !== 'undefined' ? window : globalThis);

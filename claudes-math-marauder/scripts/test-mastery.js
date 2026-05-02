@@ -24,14 +24,14 @@ it('correct + slow (above 2× mastered avg) → box unchanged', function() {
   assert.strictEqual(map['mul:7x8'].box, 1);
 });
 
-it('correct + slow with null baseline → box unchanged above 8s threshold', function() {
+it('correct + slow with null baseline → box unchanged above 12s threshold', function() {
   const map = {};
-  // null masteredAvgMs → fastThreshold defaults to 8000; 9000 > 8000 → slow
-  M.recordResolve(map, 'mul:7x8', { correct: true, timeMs: 9000, now: 1, masteredAvgMs: null });
+  // null masteredAvgMs → fastThreshold defaults to 6000*2=12000; 13000 > 12000 → slow
+  M.recordResolve(map, 'mul:7x8', { correct: true, timeMs: 13000, now: 1, masteredAvgMs: null });
   assert.strictEqual(map['mul:7x8'].box, 1);
 });
 
-it('correct + fast with null baseline → box increments under 8s', function() {
+it('correct + fast with null baseline → box increments under 12s', function() {
   const map = {};
   M.recordResolve(map, 'mul:7x8', { correct: true, timeMs: 2000, now: 1, masteredAvgMs: null });
   assert.strictEqual(map['mul:7x8'].box, 2);
@@ -136,6 +136,16 @@ it('pullWeight: recency damping applies when key in recentKeys', function() {
 
 it('pullWeight: null stat treated as box=1', function() {
   assert.strictEqual(M.pullWeight('mul:7x8', null, []), 5);
+});
+
+it('avgMs converges toward actual answer time after many correct answers', function() {
+  const map = {};
+  for (let i = 0; i < 20; i++) {
+    M.recordResolve(map, 'mul:3x4', { correct: true, timeMs: 1000, now: i, masteredAvgMs: null });
+  }
+  // EWMA with α=0.3 starting from 0: after 20 answers at 1000ms it should be close to 1000
+  assert.ok(map['mul:3x4'].avgMs > 850 && map['mul:3x4'].avgMs <= 1000,
+    'avgMs should converge near 1000, got ' + map['mul:3x4'].avgMs);
 });
 
 it('100-problem simulation: most facts converge to box >= 3', function() {

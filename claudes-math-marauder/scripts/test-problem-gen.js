@@ -163,6 +163,13 @@ it('mulRatio=1.0 produces only mul problems', function() {
   }
 });
 
+it('selectProblem returns null when all family weights are 0', function() {
+  const rng = makeRng(7);
+  const emptyRealm = { factFamilyWeights: { x2: 0, x5: 0, x10: 0 } };
+  const result = PG.selectProblem({ realm: emptyRealm, masteryMap: {}, recentKeys: [], rng, mulRatio: 0.5, allowStretch: false, realmTier: 1 });
+  assert.strictEqual(result, null, 'expected null for all-zero weights, got: ' + JSON.stringify(result));
+});
+
 it('mulRatio=0.0 produces only div problems', function() {
   const rng = makeRng(6);
   for (let i = 0; i < 50; i++) {
