@@ -6,6 +6,8 @@ const tests = [
     '../tests/problem-engine.test.js',
     '../tests/progression.test.js',
     '../tests/game-rules.test.js',
+    '../tests/audio.test.js',
+    '../tests/game-audio-speech.test.js',
     '../tests/save.test.js',
     '../tests/content.test.js',
     '../tests/accessibility-static.test.js',
