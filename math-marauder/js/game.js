@@ -131,7 +131,10 @@
             this._syncScene(correct);
             if (correct) {
                 this._audio.playCorrect();
-                if (resolved.spellTriggered) this._ui.showSpell(this._spellLabel(resolved.spellTriggered));
+                if (resolved.spellTriggered) {
+                    this._ui.showSpell(this._spellLabel(resolved.spellTriggered));
+                    this._narrateSpell(resolved.spellTriggered);
+                }
                 this._ui.announce(resolved.feedbackText || 'Correct. Spell hit.');
                 if (resolved.spellTriggered === 'starbolt') this._audio.playHit();
                 if (resolved.roomComplete || resolved.phaseComplete) {
@@ -143,17 +146,20 @@
             }
             this._audio.playWrong();
             this._firstTry = false;
-            if (resolved.spellTriggered) this._ui.showSpell(this._spellLabel(resolved.spellTriggered));
+            const spellNarration = this._spellNarrationText(resolved.spellTriggered);
+            if (resolved.spellTriggered) {
+                this._ui.showSpell(this._spellLabel(resolved.spellTriggered));
+            }
             if (resolved.recoveryMode === 'retreat') {
                 this._ui.announce(resolved.feedbackText);
-                this._speech.speak(resolved.feedbackText);
+                this._speech.speak(this._joinSpeech(spellNarration, resolved.feedbackText));
                 this._saveProgressOnly();
                 setTimeout(() => this.startRoom(), 900);
                 return;
             }
             const hint = resolved.hintText || 'Try again. The right rune is still here.';
             this._ui.announce(hint);
-            this._speech.speak(hint);
+            this._speech.speak(this._joinSpeech(spellNarration, hint));
             setTimeout(() => {
                 this._ui.setAnswers(this._currentProblem.choices, (retryChoice, retryIndex) => this.handleAnswer(retryChoice, retryIndex));
             }, 650);
@@ -215,6 +221,7 @@
                 this._encounter = MathMarauder.GameRules.advanceEncounterPhase(this._encounter);
                 this._phase = this._encounter.phaseIndex;
                 this._ui.showSpell(this._spellLabel(this._encounter.spellTriggered));
+                this._narrateSpell(this._encounter.spellTriggered);
                 this._ui.announce(`Boss phase ${this._phase}`);
                 this.presentProblem();
                 this._syncScene();
@@ -230,6 +237,24 @@
                 'dragon-guard': 'Dragon Guard shield',
                 'time-gem': 'Time Gem phase shift'
             }[spellId] || '';
+        }
+
+        _narrateSpell(spellId) {
+            const line = this._spellNarrationText(spellId);
+            if (line && this._speech) this._speech.speak(line);
+        }
+
+        _spellNarrationText(spellId) {
+            return {
+                'starbolt': 'Starbolt surge.',
+                'mirror-spark': 'Mirror Spark hint.',
+                'dragon-guard': 'Dragon Guard shield.',
+                'time-gem': 'Time Gem phase shift.'
+            }[spellId] || '';
+        }
+
+        _joinSpeech(first, second) {
+            return [first, second].filter(Boolean).join(' ');
         }
 
         _syncScene(spellFlash) {
@@ -258,6 +283,7 @@
             this._save.settings.speech = document.getElementById('setting-speech').checked;
             this._save.settings.reducedMotion = document.getElementById('setting-reduced-motion').checked;
             this._audio.setMuted(!this._save.settings.sfx);
+            this._audio.setMusicEnabled(this._save.settings.music, true);
             this._speech.setEnabled(this._save.settings.speech);
             this._ui.applySettings(this._save.settings);
             this._saveManager.save(this._save);
@@ -265,6 +291,7 @@
 
         _applySettings() {
             this._audio.setMuted(!this._save.settings.sfx);
+            this._audio.setMusicEnabled(this._save.settings.music, false);
             this._speech.setEnabled(this._save.settings.speech);
             this._ui.applySettings(this._save.settings);
             document.getElementById('setting-sfx').checked = !!this._save.settings.sfx;
