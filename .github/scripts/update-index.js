@@ -93,6 +93,12 @@ const manualGameConfig = {
     icon: '🦄🐾✨',
     title: "Lizzie's Petstore",
     description: 'Design magical creatures from mix-and-match parts, dress them up, and care for your imaginary pets!'
+  },
+  'claudes-math-marauder': {
+    icon: '🤖⚔️📐',
+    title: "Claude's Math Marauder",
+    description: 'Claude built this fantasy roguelike where you cast multiplication and division spells to defeat goblins, dragons, and liches.',
+    category: 'learning',
   }
 };
 

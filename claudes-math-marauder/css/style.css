@@ -1,0 +1,207 @@
+/* ===== Design System ===== */
+:root {
+  --bg: #F5F0E8;
+  --text: #2C2416;
+  --text-secondary: #595143;
+  --accent-ink: #1a1a1a;
+  --accent-comic-red: #c93434;
+  --accent-comic-blue: #2c5fb3;
+  --accent-comic-yellow: #f0d840;
+  --panel-stroke: 4px;
+  --font-base: 20px;
+  --font-numerals: 64px;
+  --font-stack: "OpenDyslexic", "Comic Sans MS", cursive;
+  --line-height: 1.5;
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-stack);
+  font-size: var(--font-base);
+  line-height: var(--line-height);
+  overflow: hidden;
+}
+
+/* ===== Canvas ===== */
+#game-canvas {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+  z-index: 0;
+}
+
+#transition-canvas-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+#transition-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== Screens ===== */
+.screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+/* ID + class so specificity beats a naked .screen { display: none } */
+#title-screen.active,
+#hub-screen.active,
+#run-map-screen.active,
+#fight-screen.active,
+#results-screen.active,
+#paused-screen.active {
+  display: flex;
+}
+
+/* ===== Overlays ===== */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 36, 22, 0.55);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.overlay.open {
+  display: flex;
+}
+.overlay[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* ===== Panel (comic-style bordered card) ===== */
+.panel {
+  background: var(--bg);
+  border: var(--panel-stroke) solid var(--accent-ink);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* ===== Buttons ===== */
+button {
+  font-family: var(--font-stack);
+  font-size: var(--font-base);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 20px;
+  background: var(--accent-comic-yellow);
+  color: var(--text);
+  border: var(--panel-stroke) solid var(--accent-ink);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 80ms;
+}
+button:active { transform: scale(0.96); }
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+button.primary {
+  font-size: calc(var(--font-base) * 1.1);
+  padding: 14px 32px;
+  background: var(--accent-comic-yellow);
+}
+button.secondary {
+  background: var(--bg);
+}
+button.danger {
+  background: var(--accent-comic-red);
+  color: #fff;
+}
+
+/* ===== Focus ring ===== */
+*:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* ===== Visibility helpers ===== */
+.hidden { display: none; }
+.locked { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== HUD root ===== */
+#hud-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* ===== Toast root ===== */
+#toast-root {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--font-stack);
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid var(--accent-ink);
+  max-width: 80vw;
+  text-align: center;
+}
+
+/* ===== Title screen ===== */
+#title-screen h1 {
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+#title-screen .subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

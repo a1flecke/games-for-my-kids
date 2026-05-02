@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude's Math Marauder</title>
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <canvas id="game-canvas" aria-hidden="true"></canvas>
+  <!-- role="status" implies aria-live="polite"; aria-atomic="false" is intentional so sub-updates announce incrementally -->
+  <div id="hud-root" role="status" aria-atomic="false"></div>
+  <div id="overlay-root"></div>
+  <div id="toast-root" role="status"></div>
+  <div id="transition-canvas-wrap"><canvas id="transition-canvas"></canvas></div>
+
+  <!-- TITLE screen -->
+  <section id="title-screen" class="screen active" aria-label="Title screen">
+    <h1>Claude's Math Marauder</h1>
+    <p class="subtitle">A game by Claude</p>
+    <button id="start-button" class="primary" aria-label="Begin game">Begin</button>
+  </section>
+
+  <!-- HUB screen — populated by hub.js -->
+  <section id="hub-screen" class="screen" aria-label="Wizard's Tower"></section>
+
+  <!-- RUN MAP screen — populated by mapScreen.js -->
+  <section id="run-map-screen" class="screen" aria-label="Run map"></section>
+
+  <!-- FIGHT screen — populated by fight.js / bossFight.js -->
+  <section id="fight-screen" class="screen" aria-label="Combat"></section>
+
+  <!-- RESULTS screen — populated by resultsCard.js -->
+  <section id="results-screen" class="screen" aria-label="Results"></section>
+
+  <!-- PAUSED screen -->
+  <section id="paused-screen" class="screen" aria-label="Game paused">
+    <h2>Paused</h2>
+    <button id="resume-button" class="primary" aria-label="Resume game">Resume</button>
+  </section>
+
+  <!-- Plain defer (not type="module") — all files use UMD globals so Node tests can require() them without a bundler -->
+  <script src="js/save.js" defer></script>
+  <script src="js/util/rng.js" defer></script>
+  <script src="js/util/shuffle.js" defer></script>
+  <script src="js/util/escape.js" defer></script>
+  <script src="js/ui/toast.js" defer></script>
+  <script src="js/game.js" defer></script>
+</body>
+</html>
