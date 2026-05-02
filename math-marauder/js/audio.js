@@ -77,19 +77,19 @@
         }
 
         playCorrect() {
-            this._playArp([523, 659, 784], 0.08, 'triangle', 0.16);
+            this._playArp([523, 659, 784], 0.11, 'triangle', 0.28);
         }
 
         playWrong() {
-            this._playArp([220, 196], 0.11, 'sawtooth', 0.10);
+            this._playArp([196, 147], 0.14, 'sawtooth', 0.24);
         }
 
         playHit() {
-            this._playTone(140, 0.12, 'square', 0.12);
+            this._playTone(110, 0.18, 'square', 0.28);
         }
 
         playVictory() {
-            this._playArp([392, 523, 659, 784, 1046], 0.09, 'triangle', 0.18);
+            this._playArp([392, 523, 659, 784, 1046], 0.12, 'triangle', 0.26);
         }
 
         _getCtx() {
@@ -120,6 +120,7 @@
             const ctx = this._getCtx();
             if (!ctx || !this._effectsGain) return;
             ctx.resume().then(() => {
+                this._duckMusic(ctx, duration + 0.08);
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = type;
@@ -138,6 +139,7 @@
             const ctx = this._getCtx();
             if (!ctx || !this._effectsGain) return;
             ctx.resume().then(() => {
+                this._duckMusic(ctx, freqs.length * noteLength + 0.08);
                 freqs.forEach((freq, i) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -153,6 +155,15 @@
                     osc.stop(start + noteLength);
                 });
             });
+        }
+
+        _duckMusic(ctx, duration) {
+            if (!this._musicGain || !this.isMusicPlaying()) return;
+            const gain = this._musicGain.gain;
+            if (gain.cancelScheduledValues) gain.cancelScheduledValues(ctx.currentTime);
+            gain.setValueAtTime(Math.min(gain.value || 0.06, 0.06), ctx.currentTime);
+            gain.linearRampToValueAtTime(0.015, ctx.currentTime + 0.01);
+            gain.linearRampToValueAtTime(0.06, ctx.currentTime + duration);
         }
     }
 

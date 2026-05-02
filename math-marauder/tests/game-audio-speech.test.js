@@ -25,6 +25,35 @@ global.document = {
 global.MathMarauder = {};
 require('../js/game.js');
 
+function stubGameForAnswer() {
+    const game = new MathMarauder.Game();
+    game._currentProblem = { correct: 12, factKey: 'mul:3:4' };
+    game._firstTry = true;
+    game._progression = { recordAnswer() {} };
+    game._encounter = {};
+    game._raid = {
+        hearts: 3,
+        shields: 1,
+        streak: 0,
+        promptsAnswered: 0,
+        correctFirstTry: 0,
+        longestStreak: 0
+    };
+    game._ui = {
+        markAnswer() {},
+        showSpell() {},
+        announce() {},
+        setAnswers() {},
+        updateHud() {}
+    };
+    game._speech = { speak() {} };
+    game._currentRoom = {};
+    game._syncScene = () => {};
+    game.presentProblem = () => {};
+    game._finishMonsterStep = () => {};
+    return game;
+}
+
 {
     const game = new MathMarauder.Game();
     const spoken = [];
@@ -41,6 +70,79 @@ require('../js/game.js');
     ]);
     assert.strictEqual(game._joinSpeech(game._spellNarrationText('mirror-spark'), 'Try again.'), 'Mirror Spark hint. Try again.');
 }
+
+{
+    const game = stubGameForAnswer();
+    const calls = [];
+    game._audio = {
+        playCorrect: () => calls.push('correct'),
+        playWrong: () => calls.push('wrong'),
+        playHit: () => calls.push('hit')
+    };
+    MathMarauder.GameRules = {
+        resolveAnswer: () => ({
+            hearts: 3,
+            shields: 1,
+            streak: 1,
+            promptsAnswered: 1,
+            correctFirstTry: 1,
+            longestStreak: 1,
+            monsterHp: 1
+        })
+    };
+    game.handleAnswer(12, 0);
+    assert.deepStrictEqual(calls, ['correct']);
+}
+
+{
+    const game = stubGameForAnswer();
+    const calls = [];
+    game._audio = {
+        playCorrect: () => calls.push('correct'),
+        playWrong: () => calls.push('wrong'),
+        playHit: () => calls.push('hit')
+    };
+    MathMarauder.GameRules = {
+        resolveAnswer: () => ({
+            hearts: 3,
+            shields: 0,
+            streak: 0,
+            promptsAnswered: 1,
+            correctFirstTry: 0,
+            longestStreak: 0,
+            monsterHp: 1,
+            spellTriggered: 'mirror-spark',
+            hintText: ''
+        })
+    };
+    game.handleAnswer(10, 0);
+    assert.deepStrictEqual(calls, ['wrong']);
+}
+
+{
+    const game = stubGameForAnswer();
+    const calls = [];
+    game._audio = {
+        playCorrect: () => calls.push('correct'),
+        playWrong: () => calls.push('wrong'),
+        playHit: () => calls.push('hit')
+    };
+    MathMarauder.GameRules = {
+        resolveAnswer: () => ({
+            hearts: 3,
+            shields: 1,
+            streak: 3,
+            promptsAnswered: 1,
+            correctFirstTry: 1,
+            longestStreak: 3,
+            monsterHp: 1,
+            spellTriggered: 'starbolt'
+        })
+    };
+    game.handleAnswer(12, 0);
+    assert.deepStrictEqual(calls, ['correct', 'hit']);
+}
+
 
 {
     const game = new MathMarauder.Game();
