@@ -1,0 +1,297 @@
+:root {
+    --bg: #f5f0e8;
+    --text: #2c2416;
+    --muted: #595143;
+    --panel: #fffaf0;
+    --ink: #221528;
+    --blue: #2563eb;
+    --teal: #0f766e;
+    --gold: #b45309;
+    --danger: #b91c1c;
+    --shadow: rgba(44, 36, 22, 0.22);
+    --font-family: 'OpenDyslexic', 'Comic Sans MS', cursive, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    font-size: 18px;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-family);
+    line-height: 1.6;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    min-width: 44px;
+    min-height: 44px;
+    border: 3px solid var(--text);
+    border-radius: 8px;
+    background: #fff8dc;
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--shadow);
+}
+
+button:focus-visible {
+    outline: 4px solid #38bdf8;
+    outline-offset: 3px;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    box-shadow: none;
+}
+
+.screen {
+    min-height: 100vh;
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+.screen:not(.active),
+.hidden {
+    display: none !important;
+}
+
+.screen.active {
+    display: flex;
+}
+
+#screen-title {
+    position: relative;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(250, 204, 21, 0.22), transparent 28%),
+        linear-gradient(145deg, #16213e, #351f47 48%, #12372a);
+    color: #fffaf0;
+}
+
+.title-panel,
+.results-panel {
+    width: min(760px, 100%);
+    text-align: center;
+}
+
+.eyebrow {
+    color: #facc15;
+    font-weight: 700;
+}
+
+h1 {
+    margin: 0;
+    font-size: 4.4rem;
+    line-height: 1.05;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+#title-tagline {
+    color: #f5f0e8;
+    font-size: 1.2rem;
+}
+
+.title-buttons,
+.map-cards {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-top: 24px;
+}
+
+.primary-action {
+    background: #facc15;
+}
+
+.title-settings {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.battle-wrap {
+    position: relative;
+    width: min(960px, 100%);
+}
+
+#battle-canvas {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    background: #111827;
+    border: 4px solid var(--text);
+    border-radius: 8px;
+    touch-action: none;
+}
+
+.raid-hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #fffaf0;
+    text-shadow: 0 2px 4px #000;
+}
+
+.spell-banner {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    min-height: 44px;
+    min-width: min(420px, calc(100% - 32px));
+    padding: 8px 14px;
+    transform: translateX(-50%);
+    border: 3px solid #fffaf0;
+    border-radius: 8px;
+    background: rgba(34, 21, 40, 0.78);
+    color: #fffaf0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.spell-banner:empty {
+    visibility: hidden;
+}
+
+#screen-raid.active {
+    flex-direction: column;
+    gap: 14px;
+}
+
+#prompt-panel {
+    width: min(960px, 100%);
+    background: var(--panel);
+    border-top: 4px solid var(--text);
+    padding: 16px;
+}
+
+#math-prompt {
+    min-height: 64px;
+    text-align: center;
+    font-size: 3.4rem;
+    font-weight: 700;
+}
+
+#answer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.answer-button {
+    min-height: 72px;
+    font-size: 2rem;
+    background: #e0f2fe;
+}
+
+.answer-button.correct {
+    background: #bbf7d0;
+}
+
+.answer-button.wrong {
+    background: #fecaca;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(34, 21, 40, 0.68);
+}
+
+.overlay:not(.open) {
+    display: none !important;
+}
+
+.overlay.open {
+    display: flex;
+}
+
+.overlay-panel {
+    width: min(560px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    background: var(--panel);
+    color: var(--text);
+    border: 4px solid var(--text);
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.close-button {
+    float: right;
+    border-radius: 50%;
+}
+
+.dialogue-panel p {
+    margin-right: 54px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.reduced-motion * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .screen {
+        padding: 14px;
+    }
+
+    #answer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    h1 {
+        font-size: 3rem;
+    }
+
+    #math-prompt {
+        font-size: 2.4rem;
+    }
+
+    .answer-button {
+        font-size: 1.6rem;
+    }
+}
