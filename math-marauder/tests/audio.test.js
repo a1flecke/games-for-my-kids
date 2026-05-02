@@ -112,3 +112,17 @@ class FakeAudioContext {
     assert.ok(audio._ctx.oscillators.length >= musicCount + 5, 'wrong SFX should schedule two more effect tones');
     global.window = originalWindow;
 }
+
+{
+    const originalWindow = global.window;
+    global.window = { AudioContext: FakeAudioContext };
+    const audio = new AudioManager();
+    audio.setMusicEnabled(true);
+    const musicCount = audio._ctx.oscillators.length;
+    const musicEventCount = audio._musicGain.gain.events.length;
+    audio.setMuted(true);
+    audio.playCorrect();
+    assert.strictEqual(audio._ctx.oscillators.length, musicCount, 'muted SFX should not schedule effect tones');
+    assert.strictEqual(audio._musicGain.gain.events.length, musicEventCount, 'muted SFX should not duck music');
+    global.window = originalWindow;
+}

@@ -117,6 +117,7 @@
         }
 
         _playTone(freq, duration, type, gainValue) {
+            if (this._muted) return;
             const ctx = this._getCtx();
             if (!ctx || !this._effectsGain) return;
             ctx.resume().then(() => {
@@ -136,6 +137,7 @@
         }
 
         _playArp(freqs, noteLength, type, gainValue) {
+            if (this._muted) return;
             const ctx = this._getCtx();
             if (!ctx || !this._effectsGain) return;
             ctx.resume().then(() => {
