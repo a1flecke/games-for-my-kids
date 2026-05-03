@@ -100,6 +100,11 @@ class Game {
     this._monsterRenderer = null;
     this._wizardRenderer = null;
 
+    // Combat — created when entering FIGHT, cancelled when leaving
+    this._fightManager = null;
+    this._orbsRenderer = null;
+    this._hud = null;
+
     // Demo-mode state
     this._demo = null;
 
@@ -140,10 +145,20 @@ class Game {
     // FPS counter
     this._fpsEl = document.getElementById('fps-counter');
 
+    // Pointer events on canvas — dispatch to orb hit-test in FIGHT state
+    this.canvas.addEventListener('pointerdown', (e) => this._onPointerDown(e));
+
     // Boot into demo mode if ?demo=1
-    if (new URLSearchParams(window.location.search).get('demo') === '1') {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('demo') === '1') {
       this._initDemo();
       this.setState(STATE.DEMO);
+    }
+
+    // Boot into a fight directly if ?fight=<monsterId>
+    const fightParam = params.get('fight');
+    if (fightParam) {
+      this._launchDebugFight(fightParam);
     }
   }
 
@@ -185,16 +200,25 @@ class Game {
   _update(dt, now) {
     if (this._animManager) this._animManager.update(dt, now);
     if (this._particles) this._particles.update(dt);
+    if (this.state === STATE.FIGHT && this._fightManager) this._fightManager.update(dt);
   }
 
   _draw(now) {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
-    this.ctx.fillStyle = '#F5F0E8';
-    this.ctx.fillRect(0, 0, w, h);
+
+    // FIGHT draws its own realm background; other states use the default cream
+    if (this.state !== STATE.FIGHT) {
+      this.ctx.fillStyle = '#F5F0E8';
+      this.ctx.fillRect(0, 0, w, h);
+    }
 
     if (this.state === STATE.DEMO) {
       this._drawDemo(now, w, h);
+    }
+
+    if (this.state === STATE.FIGHT && this._fightManager) {
+      this._fightManager.draw(this.ctx, w, h);
     }
 
     if (this._particles) this._particles.draw(this.ctx);
@@ -227,15 +251,110 @@ class Game {
 
   _bindPauseScreen() {
     const btn = document.getElementById('resume-button');
-    if (btn) btn.addEventListener('click', () => {
-      if (this.state === STATE.PAUSED && this._prevState) {
-        this.setState(this._prevState);
-      }
-    });
+    if (btn) btn.addEventListener('click', () => this.resume());
   }
 
   pause() {
-    if (this.state !== STATE.PAUSED) this.setState(STATE.PAUSED);
+    if (this.state !== STATE.PAUSED) {
+      if (this._fightManager) this._fightManager.notifyPaused();
+      this.setState(STATE.PAUSED);
+      if ('speechSynthesis' in window) speechSynthesis.pause();
+    }
+  }
+
+  resume() {
+    if (this.state === STATE.PAUSED && this._prevState) {
+      this.setState(this._prevState);
+      if (this._fightManager) this._fightManager.notifyResumed();
+      if ('speechSynthesis' in window) speechSynthesis.resume();
+    }
+  }
+
+  // ── Fight management ──────────────────────────────────────────────────────────
+
+  _startFight(monster, realm, masteryMap, allowStretch) {
+    this._exitFight();
+
+    const rng = mulberry32((Date.now() ^ (monster.id.charCodeAt(0) * 31)) | 0);
+
+    const hudRoot = document.getElementById('hud-root');
+    this._hud = new HUD(hudRoot);
+    this._orbsRenderer = new OrbsRenderer(this._fxCache);
+
+    this._fightManager = new FightManager({
+      rng,
+      masteryMap,
+      realm,
+      problemGen: ProblemGen,
+      distractors: Distractors,
+      mastery: Mastery,
+      onComplete: (result) => this._onFightComplete(result),
+      audio: null,
+      monsterRenderer: this._monsterRenderer,
+      wizardRenderer: this._wizardRenderer,
+      hud: this._hud,
+      anim: this._animManager,
+      particles: this._particles,
+      allowStretch,
+    });
+    this._fightManager.setOrbsRenderer(this._orbsRenderer);
+    this._fightManager.start(monster);
+    this.setState(STATE.FIGHT);
+  }
+
+  _exitFight() {
+    if (this._fightManager) {
+      this._fightManager.cancel();
+      this._fightManager = null;
+    }
+    this._orbsRenderer = null;
+    this._hud = null;
+  }
+
+  _onFightComplete(result) {
+    console.log('[Game] Fight complete:', result);
+    this._exitFight();
+    this.setState(STATE.TITLE);
+  }
+
+  _onPointerDown(e) {
+    if (this.state !== STATE.FIGHT) return;
+    if (!this._fightManager || !this._orbsRenderer) return;
+    if (this._fightManager.state !== 'ANSWERING') return;
+
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    this._orbsRenderer.layout(this.canvas.clientWidth, this.canvas.clientHeight);
+    const idx = this._orbsRenderer.hitTest(x, y);
+    if (idx >= 0 && this._fightManager._currentOrbs[idx] !== undefined) {
+      this._fightManager.selectOrb(this._fightManager._currentOrbs[idx]);
+    }
+  }
+
+  async _launchDebugFight(monsterId) {
+    try {
+      const [monstersData, realmsData] = await Promise.all([
+        fetch('data/monsters.json').then(function(r) { return r.json(); }),
+        fetch('data/realms.json').then(function(r) { return r.json(); }),
+      ]);
+      const monster = monstersData.monsters.find(function(m) { return m.id === monsterId; });
+      if (!monster) {
+        console.warn('[Game] Debug fight: monster not found:', monsterId);
+        return;
+      }
+      const realm = realmsData.realms.find(function(r) { return r.id === 'goblin_forest'; });
+      if (!realm) {
+        console.warn('[Game] Debug fight: goblin_forest realm not found');
+        return;
+      }
+      const data = SaveManager.load();
+      const allowStretch = data.settings.allowStretchFacts !== false;
+      this._startFight(monster, realm, data.mastery, allowStretch);
+    } catch (err) {
+      console.error('[Game] Debug fight load failed:', err);
+    }
   }
 
   // ── Demo screen ───────────────────────────────────────────────────────────────
