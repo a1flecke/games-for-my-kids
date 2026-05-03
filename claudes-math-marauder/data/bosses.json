@@ -1,0 +1,134 @@
+{
+  "bosses": [
+    {
+      "id": "goblin_warlord",
+      "name": "Korg the Warlord",
+      "realmId": "goblin_forest",
+      "size": [320, 400],
+      "palette": {
+        "body":   "#5a3c1a",
+        "head":   "#6a4c2a",
+        "limbs":  "#3a2c0a",
+        "eyes":   "#fff080",
+        "pupils": "#1a0a0a",
+        "mouth":  "#1a0a0a",
+        "horns":  "#c93434"
+      },
+      "hp": 3,
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 90,  "ry": 100, "wobble": 7,  "seed": 1101 },
+        "head":  { "kind": "egg",        "rx": 52,  "ry": 60,  "tilt": -0.05, "seed": 1102 },
+        "eyes":  { "kind": "comic_pair", "size": 22, "expr": "angry",         "seed": 1103 },
+        "mouth": { "kind": "fang_grin",  "width": 60, "height": 28,           "seed": 1104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 60, "width": 18, "side": "left",  "seed": 1105 },
+          { "kind": "stub_arm", "length": 60, "width": 18, "side": "right", "seed": 1106 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 32, "seed": 1107 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,    "oy": 20  },
+        "head":  { "ox": 0,    "oy": -100 },
+        "eyes":  { "ox": 0,    "oy": -106 },
+        "mouth": { "ox": 0,    "oy": -76  },
+        "horns": { "ox": 0,    "oy": -160 },
+        "limb0": { "ox": -100, "oy": -10 },
+        "limb1": { "ox":  100, "oy": -10 }
+      },
+      "anim": { "idle": "menacing_breath", "attack": "club_swing", "hit": "stagger", "phaseBreak": "armor_shatter" },
+      "introSpeech": "So they sent the little wizard? Ha! I've crushed a hundred apprentices — you'll make a fine trophy!",
+      "voiceProfile": { "pitch": 0.85, "rate": 0.95 },
+      "phases": [
+        { "label": "BONE ARMOR",   "kind": "mul",     "hint": "Break the bone armor!",    "factFamilyHint": "x5",  "mode": "orb" },
+        { "label": "BLOODFRENZY",  "kind": "div",     "hint": "Cut through the rage!",     "factFamilyHint": "x5",  "mode": "orb" },
+        { "label": "FINAL ROAR",   "kind": "stretch", "hint": "End it!",                   "factFamilyHint": "x5",  "mode": "ultimate" }
+      ]
+    },
+    {
+      "id": "crystal_titan",
+      "name": "Crystal Titan",
+      "realmId": "crystal_cave",
+      "tbdInRealms2to5": true,
+      "size": [320, 400],
+      "palette": {
+        "body":   "#7070cc",
+        "head":   "#8080dc",
+        "limbs":  "#404088",
+        "eyes":   "#eeeeff",
+        "pupils": "#1a1a3a",
+        "horns":  "#bbbbff"
+      },
+      "hp": 3,
+      "phases": [
+        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x4",  "mode": "orb" },
+        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x6",  "mode": "orb" },
+        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+      ]
+    },
+    {
+      "id": "wyrm_emberhart",
+      "name": "Wyrm Emberhart",
+      "realmId": "dragon_peak",
+      "tbdInRealms2to5": true,
+      "size": [360, 440],
+      "palette": {
+        "body":   "#8a2c2c",
+        "head":   "#aa3838",
+        "limbs":  "#441010",
+        "eyes":   "#ffe040",
+        "pupils": "#1a0000",
+        "horns":  "#f0a040",
+        "wings":  "#6b2020"
+      },
+      "hp": 3,
+      "phases": [
+        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x6",  "mode": "orb" },
+        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x7",  "mode": "orb" },
+        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+      ]
+    },
+    {
+      "id": "void_oracle",
+      "name": "Void Oracle",
+      "realmId": "astral_void",
+      "tbdInRealms2to5": true,
+      "size": [300, 380],
+      "palette": {
+        "body":   "#2a1a5a",
+        "head":   "#3a2a6e",
+        "limbs":  "#0d0a2c",
+        "eyes":   "#ddd5ff",
+        "pupils": "#0d0a2c"
+      },
+      "hp": 3,
+      "phases": [
+        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x8",  "mode": "orb" },
+        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x9",  "mode": "orb" },
+        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+      ]
+    },
+    {
+      "id": "the_lich_king",
+      "name": "The Lich King",
+      "realmId": "lich_citadel",
+      "tbdInRealms2to5": true,
+      "size": [340, 420],
+      "palette": {
+        "body":   "#2a2a2a",
+        "head":   "#1a1a1a",
+        "limbs":  "#383838",
+        "eyes":   "#9bb87a",
+        "pupils": "#0a0a0a",
+        "horns":  "#9bb87a"
+      },
+      "hp": 4,
+      "phases": [
+        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x7",  "mode": "orb" },
+        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x8",  "mode": "orb" },
+        { "label": "PHASE 3", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x12", "mode": "orb" },
+        { "label": "PHASE 4", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+      ]
+    }
+  ]
+}

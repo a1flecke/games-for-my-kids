@@ -1,0 +1,20 @@
+{
+  "classes": [
+    {
+      "id": "apprentice",
+      "name": "Apprentice",
+      "passive": { "type": "vanilla", "description": "Steady caster with no class bonus. Best for learning." },
+      "starterDeck": ["ember_bolt", "frost_orb", "stone_shield", null, null],
+      "unlock": { "kind": "starter" },
+      "wizardSchema": { "robeColor": "#5a4a8a", "hatColor": "#3a2a6a", "staffKind": "wand_simple", "skinTone": "#f0d6c2" }
+    },
+    {
+      "id": "pyromancer",
+      "name": "Pyromancer",
+      "passive": { "type": "crit_chain", "description": "Each consecutive correct answer increases crit damage by 5% (caps at 50%)." },
+      "starterDeck": ["ember_bolt", "kindle_step", "ash_shield", null, null],
+      "unlock": { "kind": "boss_clear", "realm": "goblin_forest", "minStars": 1 },
+      "wizardSchema": { "robeColor": "#aa3322", "hatColor": "#661a0a", "staffKind": "staff_flame", "skinTone": "#f0c8a0" }
+    }
+  ]
+}

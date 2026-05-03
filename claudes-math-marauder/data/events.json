@@ -1,0 +1,46 @@
+{
+  "events": [
+    {
+      "id": "lost_traveler",
+      "prompt": "A traveler with a torn satchel offers a trade. She holds a mystery scroll.",
+      "choices": [
+        { "text": "Give 10 gold for a mystery scroll", "outcomes": [{ "kind": "gold", "delta": -10 }, { "kind": "spell", "rarity": "common" }] },
+        { "text": "Walk past", "outcomes": [{ "kind": "gold", "delta": 0 }] }
+      ]
+    },
+    {
+      "id": "ancient_shrine",
+      "prompt": "A moss-covered shrine glows faintly in the gloom. An inscription reads: 'Offer, and be healed.'",
+      "choices": [
+        { "text": "Leave 15 gold at the shrine", "outcomes": [{ "kind": "gold", "delta": -15 }, { "kind": "heal", "amount": 1 }] },
+        { "text": "Ignore the shrine", "outcomes": [{ "kind": "gold", "delta": 0 }] },
+        { "text": "Smash the shrine for gold", "outcomes": [{ "kind": "gold", "delta": 10 }, { "kind": "damage", "amount": 1 }] }
+      ]
+    },
+    {
+      "id": "goblin_gambler",
+      "prompt": "A suspicious goblin in a tiny hat offers a shortcut through the trees — for a fee.",
+      "choices": [
+        { "text": "Pay 10 gold for the shortcut", "outcomes": [{ "kind": "gold", "delta": -10 }, { "kind": "streak_bonus", "amount": 1 }] },
+        { "text": "Decline and find your own path", "outcomes": [{ "kind": "gold", "delta": 0 }] }
+      ]
+    },
+    {
+      "id": "mushroom_ring",
+      "prompt": "You stumble into a ring of glowing mushrooms. A voice says: 'Answer true and I grant clarity.'",
+      "choices": [
+        { "text": "Step inside the ring", "outcomes": [{ "kind": "streak_bonus", "amount": 2 }] },
+        { "text": "Walk around", "outcomes": [{ "kind": "gold", "delta": 0 }] }
+      ]
+    },
+    {
+      "id": "wounded_mage",
+      "prompt": "A wounded mage leans against a tree, clutching a spell scroll. She can barely speak.",
+      "choices": [
+        { "text": "Give her 20 gold for the scroll", "outcomes": [{ "kind": "gold", "delta": -20 }, { "kind": "spell", "rarity": "rare" }] },
+        { "text": "Give her 5 gold as kindness", "outcomes": [{ "kind": "gold", "delta": -5 }, { "kind": "heal", "amount": 1 }] },
+        { "text": "Hurry on", "outcomes": [{ "kind": "gold", "delta": 0 }] }
+      ]
+    }
+  ]
+}
