@@ -1,0 +1,43 @@
+{
+  "chapters": [
+    {
+      "id": "chapter_1",
+      "realmId": "goblin_forest",
+      "title": "Into the Goblin Forest",
+      "lines": [
+        "Your master's last words still echo in your ears.",
+        "The Tower of Numbers has fallen.",
+        "Goblins march from the forest. They carry stolen wisdom.",
+        "You are the last apprentice. The math is yours to wield.",
+        "Cast true. Cast well. Save the tower.",
+        "And so you step into the trees..."
+      ]
+    }
+  ],
+  "flavor": {
+    "victories": [
+      "Easy.",
+      "Numbers don't lie.",
+      "Cast and dismissed.",
+      "Calculated.",
+      "Another one down.",
+      "The math wins again.",
+      "Sum of nothing.",
+      "Carry the one — carry the day!",
+      "Solved.",
+      "Next problem!"
+    ],
+    "taunts": [
+      "Try a number, wizard!",
+      "Your books won't help you here!",
+      "Multiply this!",
+      "How does it divide now?",
+      "Numbers? I eat numbers!",
+      "Wizard? More like fizzler!",
+      "Show me your work!",
+      "Cast something — anything!",
+      "Slow!",
+      "Wrong already?"
+    ]
+  }
+}

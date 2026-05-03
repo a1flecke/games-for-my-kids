@@ -1,0 +1,130 @@
+{
+  "monsters": [
+    {
+      "id": "goblin_grunt",
+      "name": "Goblin Grunt",
+      "tier": 1,
+      "hp": 1,
+      "size": [180, 220],
+      "palette": ["#3a6b2c", "#1b3618", "#f0d840"],
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 70, "ry": 80, "wobble": 0.12 },
+        "head":  { "kind": "egg",        "scale": 1.1, "tilt": -0.05 },
+        "eyes":  { "kind": "comic_pair", "size": 18, "expr": "angry" },
+        "mouth": { "kind": "fang_grin" },
+        "limbs": [ { "kind": "stub_arm", "side": "L" }, { "kind": "stub_arm", "side": "R" } ],
+        "horns": null,
+        "tail":  null
+      },
+      "anim": { "idle": "bob", "attack": "lunge", "hit": "squash" },
+      "voiceTaunts": ["Tiny wizard! Easy lunch!", "Numbers won't save you!", "Hee hee, you're no match for ME!"],
+      "voiceProfile": { "pitch": 1.1, "rate": 1.1 },
+      "spawnSfx": "goblinGrunt"
+    },
+    {
+      "id": "goblin_runt",
+      "name": "Goblin Runt",
+      "tier": 1,
+      "hp": 1,
+      "size": [120, 160],
+      "palette": ["#4a8c3a", "#2a4a22", "#ffdd20"],
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 48, "ry": 55, "wobble": 0.18 },
+        "head":  { "kind": "egg",        "scale": 1.3, "tilt": 0.08 },
+        "eyes":  { "kind": "comic_pair", "size": 14, "expr": "scared" },
+        "mouth": { "kind": "open_gasp" },
+        "limbs": [ { "kind": "stick_arm", "side": "L" }, { "kind": "stick_arm", "side": "R" } ],
+        "horns": null,
+        "tail":  { "kind": "rat_tail" }
+      },
+      "anim": { "idle": "tremble", "attack": "dart", "hit": "spin" },
+      "voiceTaunts": ["D-don't hurt me! I'm just the runt!", "Numbers big and scary!", "Eep! He's doing math!"],
+      "voiceProfile": { "pitch": 1.4, "rate": 1.2 },
+      "spawnSfx": "goblinSqueak"
+    },
+    {
+      "id": "tree_imp",
+      "name": "Tree Imp",
+      "tier": 1,
+      "hp": 1,
+      "size": [160, 200],
+      "palette": ["#5c7a2a", "#2c4010", "#c8b860"],
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 60, "ry": 75, "wobble": 0.08 },
+        "head":  { "kind": "egg",        "scale": 0.9, "tilt": 0.12 },
+        "eyes":  { "kind": "comic_pair", "size": 16, "expr": "sly" },
+        "mouth": { "kind": "smirk" },
+        "limbs": [ { "kind": "branch_arm", "side": "L" }, { "kind": "branch_arm", "side": "R" } ],
+        "horns": { "kind": "twig_nubs" },
+        "tail":  null
+      },
+      "anim": { "idle": "sway", "attack": "swipe", "hit": "wobble" },
+      "voiceTaunts": ["You'll never solve that in the forest!", "My roots go deeper than your math!", "Multiply THIS, little mage!"],
+      "voiceProfile": { "pitch": 0.95, "rate": 0.9 },
+      "spawnSfx": "creakBranch"
+    },
+    {
+      "id": "fungal_creep",
+      "name": "Fungal Creep",
+      "tier": 1,
+      "hp": 1,
+      "size": [200, 170],
+      "palette": ["#8a6b3a", "#4a3820", "#d4a0d0"],
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 90, "ry": 65, "wobble": 0.05 },
+        "head":  { "kind": "mushroom_cap", "scale": 1.2, "tilt": 0.02 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "blank" },
+        "mouth": { "kind": "drool_smile" },
+        "limbs": [ { "kind": "stub_arm", "side": "L" }, { "kind": "stub_arm", "side": "R" } ],
+        "horns": null,
+        "tail":  null
+      },
+      "anim": { "idle": "pulse", "attack": "spore_burst", "hit": "deflate" },
+      "voiceTaunts": ["Mmm... spores make math hard...", "Numbers? I count mushrooms.", "Your spell smells wrong!"],
+      "voiceProfile": { "pitch": 0.8, "rate": 0.8 },
+      "spawnSfx": "sporeCloud"
+    },
+    {
+      "id": "gem_sprite",
+      "name": "Gem Sprite",
+      "tier": 2,
+      "hp": 1,
+      "size": [140, 180],
+      "palette": ["#7070cc", "#303088", "#eeeeff"],
+      "shape": {
+        "body":  { "kind": "crystal_shard", "rx": 55, "ry": 70, "wobble": 0.03 },
+        "head":  { "kind": "egg",           "scale": 0.85, "tilt": -0.1 },
+        "eyes":  { "kind": "comic_pair",    "size": 14, "expr": "cold" },
+        "mouth": { "kind": "thin_line" },
+        "limbs": [ { "kind": "gem_wing", "side": "L" }, { "kind": "gem_wing", "side": "R" } ],
+        "horns": { "kind": "crystal_spire" },
+        "tail":  null
+      },
+      "anim": { "idle": "float", "attack": "shard_throw", "hit": "crack" },
+      "voiceTaunts": ["Your arithmetic is cloudy.", "Refract THAT, wizard.", "Your formula is shattered!"],
+      "voiceProfile": { "pitch": 1.05, "rate": 0.95 },
+      "spawnSfx": "crystalChime"
+    },
+    {
+      "id": "ember_imp",
+      "name": "Ember Imp",
+      "tier": 3,
+      "hp": 1,
+      "size": [150, 190],
+      "palette": ["#cc4422", "#882200", "#ffaa44"],
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 58, "ry": 72, "wobble": 0.15 },
+        "head":  { "kind": "egg",        "scale": 1.0, "tilt": -0.08 },
+        "eyes":  { "kind": "comic_pair", "size": 16, "expr": "furious" },
+        "mouth": { "kind": "fire_grin" },
+        "limbs": [ { "kind": "flame_arm", "side": "L" }, { "kind": "flame_arm", "side": "R" } ],
+        "horns": { "kind": "curled_horns" },
+        "tail":  { "kind": "devil_tail" }
+      },
+      "anim": { "idle": "flicker", "attack": "fire_swipe", "hit": "smoke_puff" },
+      "voiceTaunts": ["Your numbers burn like paper!", "Too slow — I'm already on fire!", "Math? I prefer scorched earth!"],
+      "voiceProfile": { "pitch": 1.15, "rate": 1.05 },
+      "spawnSfx": "emberCrackle"
+    }
+  ]
+}
