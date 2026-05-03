@@ -281,6 +281,79 @@ button.danger {
   z-index: 60;
 }
 
+/* ===== Ultimate overlay ===== */
+#ultimate-panel {
+  border-width: 6px;
+  max-width: min(520px, 92vw);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+#ultimate-problem {
+  font-size: 128px;
+  font-weight: 900;
+  font-family: var(--font-stack);
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: 2px;
+}
+
+#ultimate-sigil {
+  font-size: 96px;
+  font-weight: 900;
+  font-family: var(--font-stack);
+  line-height: 1;
+  min-height: 120px;
+  padding: 16px 32px;
+  border: 4px dashed var(--accent-comic-yellow);
+  border-radius: 12px;
+  background: rgba(240, 216, 64, 0.1);
+  text-shadow: 0 0 12px rgba(240, 216, 64, 0.6);
+  width: 100%;
+  color: var(--text);
+}
+
+#ultimate-sigil.committed-correct {
+  border-style: solid;
+  border-color: #4a9a2a;
+  background: rgba(74, 154, 42, 0.18);
+  text-shadow: 0 0 14px rgba(74, 154, 42, 0.7);
+}
+
+#ultimate-sigil.committed-wrong {
+  border-style: solid;
+  border-color: var(--accent-comic-red);
+  background: rgba(201, 52, 52, 0.18);
+  text-shadow: 0 0 14px rgba(201, 52, 52, 0.7);
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.numpad button {
+  min-width: 72px;
+  min-height: 72px;
+  font-size: 32px;
+  padding: 8px;
+}
+
+.numpad-commit {
+  background: var(--accent-comic-yellow);
+  font-weight: 900;
+}
+
+.numpad-back {
+  background: var(--bg);
+}
+
 /* ===== Demo screen ===== */
 #demo-screen.active {
   display: block;

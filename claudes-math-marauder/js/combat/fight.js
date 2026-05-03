@@ -56,6 +56,11 @@ class FightManager {
     this._monsterX = 0;
     this._monsterY = 0;
 
+    // Ultimate helper — created lazily in start() so hud/anim refs are ready.
+    this._ultimate = null;
+    // When set, the next correct orb-cast answer deals half damage (ultimate-miss penalty).
+    this._halfDamageOnNext = false;
+
     this.onComplete = onComplete || null;
     this._lessonComplete = false;
   }
@@ -66,8 +71,9 @@ class FightManager {
     this._orbsRenderer = orbsRenderer;
   }
 
-  start(monster) {
+  start(monster, opts) {
     this.cancel();
+    opts = opts || {};
     this._lessonComplete = false;
     this._monster = monster;
     this._monsterKO = false;
@@ -77,7 +83,8 @@ class FightManager {
     this._streak = 0;
     this._score = 0;
     this._retries = 0;
-    this._ultimateCharge = 0;
+    this._ultimateCharge = opts.startCharged ? 1.0 : 0;
+    this._halfDamageOnNext = false;
     this._recentKeys = [];
     this._burstTexts = [];
     this._problemsAnsweredThisFight = 0;
@@ -85,10 +92,19 @@ class FightManager {
     this._wizardFlavorHp = 60;
     this.state = 'INTRO';
 
+    // Create Ultimate helper once per FightManager lifecycle.
+    if (!this._ultimate) {
+      this._ultimate = new Ultimate({
+        audio: this._audio,
+        hud: this._hud,
+        anim: this._anim,
+      });
+    }
+
     this._hud.show();
     this._hud.setStreak(0);
     this._hud.setScore(0);
-    this._hud.setUltimateCharge(0);
+    this._hud.setUltimateCharge(this._ultimateCharge);
     this._hud.setWizardHp(60);
 
     this._introTimer = setTimeout(() => this._enterProblem(), 1100);
@@ -101,6 +117,7 @@ class FightManager {
     clearTimeout(this._introTimer);        this._introTimer = null;
     clearTimeout(this._resolveTimer);      this._resolveTimer = null;
     clearTimeout(this._wrongRevealTimer);  this._wrongRevealTimer = null;
+    if (this._ultimate) this._ultimate.cancel();
     if (this._anim) this._anim.cancelAll();
     if (this._hud) this._hud.hide();
     this.onComplete = null;
@@ -229,6 +246,14 @@ class FightManager {
       return;
     }
 
+    // Ultimate gate: if meter is full, launch the typed-numpad overlay.
+    if (this._ultimateCharge >= 1.0 && this._ultimate) {
+      this.state = 'ULTIMATE_ANSWERING';
+      this._ultimate.onResolve = (result) => this._resolveUltimate(result);
+      this._ultimate.start(this._currentProblem);
+      return;
+    }
+
     this._currentOrbs = this._distractors.generateDistractors(this._currentProblem, this._rng);
     this._answerStartedAt = performance.now();
     this.state = 'ANSWERING';
@@ -256,7 +281,9 @@ class FightManager {
       this._correctThisFight++;
       const speedBonus = Math.max(0, (5000 - timeMs) / 50);
       const streakMult = 1 + (this._streak * 0.05);
-      const dmg = Math.round((100 + speedBonus) * streakMult);
+      const halfDamage = this._halfDamageOnNext;
+      this._halfDamageOnNext = false;
+      const dmg = Math.round((100 + speedBonus) * streakMult * (halfDamage ? 0.5 : 1));
       this._score += dmg;
       this._streak++;
       this._monsterHpRemaining -= 1;
@@ -284,6 +311,52 @@ class FightManager {
         if (this._wizardFlavorHp <= 0) this._defeatRetry();
         else this._enterProblem();
       }, 1200);
+    }
+  }
+
+  _resolveUltimate({ correct, value, timeMs, escaped }) {
+    if (this._lessonComplete) return;     // re-entry guard (CLAUDE.md)
+    this.state = 'RESOLVE';
+    this._problemsAnsweredThisFight++;
+
+    if (!this._currentProblem.isStretch) {
+      this._mastery.recordResolve(this._masteryMap, this._currentProblem.factKey, {
+        correct,
+        timeMs,
+        now: Date.now(),
+        masteredAvgMs: this._mastery.masteredAvgMs(this._masteryMap),
+      });
+    }
+
+    this._recentKeys.push(this._currentProblem.factKey);
+    if (this._recentKeys.length > 5) this._recentKeys.shift();
+
+    this._ultimateCharge = 0;
+    this._hud.setUltimateCharge(0);
+
+    if (correct) {
+      this._correctThisFight++;
+      this._streak++;
+      this._monsterHpRemaining = Math.max(0, this._monsterHpRemaining - 3);
+      this._score += 500;
+      this._hud.setStreak(this._streak);
+      this._hud.setScore(this._score);
+      this._anim.begin(this._monster.id, { kind: 'hit', startedAt: performance.now(), duration: 600 });
+      this._playAudio('ko');
+      this._burst(this._monsterX, this._monsterY - 60, 'ULTIMATE!');
+      this._resolveTimer = setTimeout(() => {
+        if (this._monsterHpRemaining <= 0) this._victory();
+        else this._enterProblem();
+      }, 800);
+    } else {
+      this._streak = 0;
+      this._hud.setStreak(0);
+      this._halfDamageOnNext = true;
+      if (!escaped) {
+        this._narrate('The answer was ' + this._currentProblem.answer + '.');
+        this._hud.flashCorrect(this._currentProblem.answer);
+      }
+      this._resolveTimer = setTimeout(() => this._enterProblem(), 1200);
     }
   }
 
