@@ -272,8 +272,9 @@ class Game {
 
   // ── Fight management ──────────────────────────────────────────────────────────
 
-  _startFight(monster, realm, masteryMap, allowStretch) {
+  _startFight(monster, realm, masteryMap, allowStretch, opts) {
     this._exitFight();
+    opts = opts || {};
 
     const rng = mulberry32((Date.now() ^ (monster.id.charCodeAt(0) * 31)) | 0);
 
@@ -298,7 +299,7 @@ class Game {
       allowStretch,
     });
     this._fightManager.setOrbsRenderer(this._orbsRenderer);
-    this._fightManager.start(monster);
+    this._fightManager.start(monster, opts);
     this.setState(STATE.FIGHT);
   }
 
@@ -351,7 +352,8 @@ class Game {
       }
       const data = SaveManager.load();
       const allowStretch = data.settings.allowStretchFacts !== false;
-      this._startFight(monster, realm, data.mastery, allowStretch);
+      const startCharged = params.get('ultimate') === '1';
+      this._startFight(monster, realm, data.mastery, allowStretch, { startCharged });
     } catch (err) {
       console.error('[Game] Debug fight load failed:', err);
     }
