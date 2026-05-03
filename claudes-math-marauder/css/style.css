@@ -316,6 +316,20 @@ button.danger {
   color: var(--text);
 }
 
+#ultimate-sigil.committed-correct {
+  border-style: solid;
+  border-color: #4a9a2a;
+  background: rgba(74, 154, 42, 0.18);
+  text-shadow: 0 0 14px rgba(74, 154, 42, 0.7);
+}
+
+#ultimate-sigil.committed-wrong {
+  border-style: solid;
+  border-color: var(--accent-comic-red);
+  background: rgba(201, 52, 52, 0.18);
+  text-shadow: 0 0 14px rgba(201, 52, 52, 0.7);
+}
+
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -15,6 +15,8 @@ class Ultimate {
     this._answerStartedAt = 0;
     this._maxDigits = 6;
     this.onResolve = null;
+    // Re-entry/input lock: true while the 400ms post-commit feedback timer runs.
+    this._committing = false;
 
     this._overlay = null;
     this._sigilEl = null;
@@ -30,9 +32,13 @@ class Ultimate {
     this.cancel();
     this._currentProblem = problem;
     this._buf = '';
+    this._committing = false;
     this._answerStartedAt = performance.now();
     this._build();
     if (this._probEl) this._probEl.textContent = problem.displayText;
+    if (this._sigilEl) {
+      this._sigilEl.classList.remove('committed-correct', 'committed-wrong');
+    }
     this._renderSigil();
     this._overlay.classList.add('open');
     this._overlay.setAttribute('aria-hidden', 'false');
@@ -46,11 +52,15 @@ class Ultimate {
       clearTimeout(this._timers._resolveTimer);
       this._timers._resolveTimer = null;
     }
+    this._committing = false;
     this._unbindPhysicalKeys();
     if (this._overlay) {
       const wasOpen = this._overlay.classList.contains('open');
       this._overlay.classList.remove('open');
       this._overlay.setAttribute('aria-hidden', 'true');
+      if (this._sigilEl) {
+        this._sigilEl.classList.remove('committed-correct', 'committed-wrong');
+      }
       // Return focus to body on close so touch-based orb selection works cleanly next round.
       if (wasOpen) document.body.focus();
     }
@@ -112,9 +122,9 @@ class Ultimate {
 
     this._focusables = [];
 
-    for (var ki = 0; ki < KEYS.length; ki++) {
-      var key = KEYS[ki];
-      var btn = document.createElement('button');
+    for (let ki = 0; ki < KEYS.length; ki++) {
+      const key = KEYS[ki];
+      const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = key.label;
       btn.setAttribute('aria-label', key.ariaLabel);
@@ -131,9 +141,8 @@ class Ultimate {
         this._commitBtn = btn;
         btn.addEventListener('click', () => this._onCommit());
       } else {
-        (function(digit) {
-          btn.addEventListener('click', function() { this._onDigit(digit); }.bind(this));
-        }).call(this, key.digit);
+        const digit = key.digit;
+        btn.addEventListener('click', () => this._onDigit(digit));
       }
 
       numpad.appendChild(btn);
@@ -146,29 +155,39 @@ class Ultimate {
   }
 
   _onDigit(d) {
+    if (this._committing) return;
     if (this._buf.length >= this._maxDigits) return;
+    // Strip leading zeros: '0' + any digit replaces with that digit (no '07' display).
+    if (this._buf === '0') this._buf = '';
     this._buf += d;
     this._renderSigil();
   }
 
   _onBackspace() {
+    if (this._committing) return;
     this._buf = this._buf.slice(0, -1);
     this._renderSigil();
   }
 
   _onCommit() {
+    if (this._committing) return;
     if (this._buf.length === 0) return;
-    var value = parseInt(this._buf, 10);
-    var timeMs = performance.now() - this._answerStartedAt;
-    var correct = value === this._currentProblem.answer;
+    this._committing = true;
+
+    const value = parseInt(this._buf, 10);
+    const timeMs = performance.now() - this._answerStartedAt;
+    const correct = value === this._currentProblem.answer;
     if (this._audio) this._audio.play(correct ? 'ultimateFire' : 'wrong');
-    var cb = this.onResolve;      // save BEFORE cancel() nulls it (CLAUDE.md pattern)
-    this.cancel();
-    var resolvedValue = value;
-    var resolvedTimeMs = timeMs;
-    var resolvedCorrect = correct;
-    this._timers._resolveTimer = setTimeout(function() {
-      if (cb) cb({ correct: resolvedCorrect, value: resolvedValue, timeMs: resolvedTimeMs });
+
+    // Visual feedback ON the overlay during the 400ms close delay.
+    if (this._sigilEl) {
+      this._sigilEl.classList.add(correct ? 'committed-correct' : 'committed-wrong');
+    }
+
+    const cb = this.onResolve;   // save BEFORE cancel() nulls it (CLAUDE.md pattern)
+    this._timers._resolveTimer = setTimeout(() => {
+      this.cancel();
+      if (cb) cb({ correct, value, timeMs });
     }, 400);
   }
 
@@ -194,38 +213,40 @@ class Ultimate {
   }
 
   _bindPhysicalKeys() {
-    var self = this;
-    this._physicalKeyHandler = function(e) {
+    this._physicalKeyHandler = (e) => {
       // Guard: only handle when overlay is open (stale-handler safety, CLAUDE.md).
-      if (!self._overlay || !self._overlay.classList.contains('open')) return;
+      if (!this._overlay || !this._overlay.classList.contains('open')) return;
 
       if (e.key >= '0' && e.key <= '9') {
-        self._onDigit(e.key);
+        this._onDigit(e.key);
         e.preventDefault();
       } else if (e.key === 'Backspace') {
-        self._onBackspace();
+        this._onBackspace();
         e.preventDefault();
       } else if (e.key === 'Enter') {
-        self._onCommit();
+        this._onCommit();
         e.preventDefault();
       } else if (e.key === 'Escape') {
         // Escape guard: classList.contains check (CLAUDE.md focus-trap rule).
-        if (self._overlay.classList.contains('open')) {
-          var cb = self.onResolve;
-          var timeMs = performance.now() - self._answerStartedAt;
-          self.cancel();
+        // Also bail if a commit is mid-flight (avoid double-resolve).
+        if (this._committing) { e.preventDefault(); return; }
+        if (this._overlay.classList.contains('open')) {
+          const cb = this.onResolve;
+          const timeMs = performance.now() - this._answerStartedAt;
+          this.cancel();
           if (cb) cb({ correct: false, value: null, timeMs: timeMs, escaped: true });
         }
+        e.preventDefault();
       } else if (e.key === 'Tab') {
         // Focus trap: cycle Tab/Shift-Tab within the numpad buttons.
         e.preventDefault();
-        var focused = document.activeElement;
-        var idx = self._focusables.indexOf(focused);
+        const focused = document.activeElement;
+        const idx = this._focusables.indexOf(focused);
         if (e.shiftKey) {
-          var prev = (idx <= 0) ? self._focusables[self._focusables.length - 1] : self._focusables[idx - 1];
+          const prev = (idx <= 0) ? this._focusables[this._focusables.length - 1] : this._focusables[idx - 1];
           if (prev) prev.focus();
         } else {
-          var next = (idx >= self._focusables.length - 1) ? self._focusables[0] : self._focusables[idx + 1];
+          const next = (idx >= this._focusables.length - 1) ? this._focusables[0] : this._focusables[idx + 1];
           if (next) next.focus();
         }
       }
