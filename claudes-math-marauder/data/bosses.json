@@ -5,16 +5,36 @@
       "name": "Korg the Warlord",
       "realmId": "goblin_forest",
       "size": [320, 400],
-      "palette": ["#5a3c1a", "#2a1c0a", "#c93434"],
+      "palette": {
+        "body":   "#5a3c1a",
+        "head":   "#6a4c2a",
+        "limbs":  "#3a2c0a",
+        "eyes":   "#fff080",
+        "pupils": "#1a0a0a",
+        "mouth":  "#1a0a0a",
+        "horns":  "#c93434"
+      },
       "hp": 3,
       "shape": {
-        "body":  { "kind": "blob",       "rx": 130, "ry": 150, "wobble": 0.08 },
-        "head":  { "kind": "egg",        "scale": 1.2, "tilt": -0.05 },
-        "eyes":  { "kind": "comic_pair", "size": 28, "expr": "furious" },
-        "mouth": { "kind": "fang_grin" },
-        "limbs": [ { "kind": "club_arm", "side": "L" }, { "kind": "shield_arm", "side": "R" } ],
-        "horns": { "kind": "ram_horns" },
+        "body":  { "kind": "blob",       "rx": 90,  "ry": 100, "wobble": 7,  "seed": 1101 },
+        "head":  { "kind": "egg",        "rx": 52,  "ry": 60,  "tilt": -0.05, "seed": 1102 },
+        "eyes":  { "kind": "comic_pair", "size": 22, "expr": "angry",         "seed": 1103 },
+        "mouth": { "kind": "fang_grin",  "width": 60, "height": 28,           "seed": 1104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 60, "width": 18, "side": "left",  "seed": 1105 },
+          { "kind": "stub_arm", "length": 60, "width": 18, "side": "right", "seed": 1106 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 32, "seed": 1107 },
         "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,    "oy": 20  },
+        "head":  { "ox": 0,    "oy": -100 },
+        "eyes":  { "ox": 0,    "oy": -106 },
+        "mouth": { "ox": 0,    "oy": -76  },
+        "horns": { "ox": 0,    "oy": -160 },
+        "limb0": { "ox": -100, "oy": -10 },
+        "limb1": { "ox":  100, "oy": -10 }
       },
       "anim": { "idle": "menacing_breath", "attack": "club_swing", "hit": "stagger", "phaseBreak": "armor_shatter" },
       "introSpeech": "So they sent the little wizard? Ha! I've crushed a hundred apprentices — you'll make a fine trophy!",
@@ -31,24 +51,19 @@
       "realmId": "crystal_cave",
       "tbdInRealms2to5": true,
       "size": [320, 400],
-      "palette": ["#7070cc", "#303088", "#eeeeff"],
-      "hp": 3,
-      "shape": {
-        "body":  { "kind": "blob",       "rx": 130, "ry": 150, "wobble": 0.03 },
-        "head":  { "kind": "egg",        "scale": 1.0, "tilt": 0 },
-        "eyes":  { "kind": "comic_pair", "size": 24, "expr": "cold" },
-        "mouth": { "kind": "thin_line" },
-        "limbs": [ { "kind": "crystal_arm", "side": "L" }, { "kind": "crystal_arm", "side": "R" } ],
-        "horns": { "kind": "crystal_spire" },
-        "tail":  null
+      "palette": {
+        "body":   "#7070cc",
+        "head":   "#8080dc",
+        "limbs":  "#404088",
+        "eyes":   "#eeeeff",
+        "pupils": "#1a1a3a",
+        "horns":  "#bbbbff"
       },
-      "anim": { "idle": "float", "attack": "shard_throw", "hit": "crack", "phaseBreak": "shatter_reform" },
-      "introSpeech": "TBD — Realm 2 content.",
-      "voiceProfile": { "pitch": 0.9, "rate": 0.9 },
+      "hp": 3,
       "phases": [
-        { "label": "PHASE 1", "kind": "mul", "hint": "TBD", "factFamilyHint": "x4", "mode": "orb" },
-        { "label": "PHASE 2", "kind": "div", "hint": "TBD", "factFamilyHint": "x6", "mode": "orb" },
-        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x6", "mode": "ultimate" }
+        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x4",  "mode": "orb" },
+        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x6",  "mode": "orb" },
+        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
       ]
     },
     {
@@ -57,24 +72,20 @@
       "realmId": "dragon_peak",
       "tbdInRealms2to5": true,
       "size": [360, 440],
-      "palette": ["#8a2c2c", "#441010", "#f0a040"],
-      "hp": 3,
-      "shape": {
-        "body":  { "kind": "blob",       "rx": 150, "ry": 165, "wobble": 0.06 },
-        "head":  { "kind": "egg",        "scale": 1.3, "tilt": -0.1 },
-        "eyes":  { "kind": "comic_pair", "size": 30, "expr": "furious" },
-        "mouth": { "kind": "fire_grin" },
-        "limbs": [ { "kind": "wing_arm", "side": "L" }, { "kind": "wing_arm", "side": "R" } ],
-        "horns": { "kind": "curled_horns" },
-        "tail":  { "kind": "dragon_tail" }
+      "palette": {
+        "body":   "#8a2c2c",
+        "head":   "#aa3838",
+        "limbs":  "#441010",
+        "eyes":   "#ffe040",
+        "pupils": "#1a0000",
+        "horns":  "#f0a040",
+        "wings":  "#6b2020"
       },
-      "anim": { "idle": "flicker", "attack": "fire_breath", "hit": "smoke_puff", "phaseBreak": "scale_shed" },
-      "introSpeech": "TBD — Realm 3 content.",
-      "voiceProfile": { "pitch": 0.75, "rate": 0.85 },
+      "hp": 3,
       "phases": [
-        { "label": "PHASE 1", "kind": "mul", "hint": "TBD", "factFamilyHint": "x6", "mode": "orb" },
-        { "label": "PHASE 2", "kind": "div", "hint": "TBD", "factFamilyHint": "x7", "mode": "orb" },
-        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x7", "mode": "ultimate" }
+        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x6",  "mode": "orb" },
+        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x7",  "mode": "orb" },
+        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
       ]
     },
     {
@@ -83,24 +94,18 @@
       "realmId": "astral_void",
       "tbdInRealms2to5": true,
       "size": [300, 380],
-      "palette": ["#2a1a5a", "#0d0a2c", "#ddd5ff"],
-      "hp": 3,
-      "shape": {
-        "body":  { "kind": "blob",       "rx": 120, "ry": 140, "wobble": 0.04 },
-        "head":  { "kind": "egg",        "scale": 1.1, "tilt": 0 },
-        "eyes":  { "kind": "comic_pair", "size": 22, "expr": "empty" },
-        "mouth": { "kind": "void_maw" },
-        "limbs": [ { "kind": "tendril_arm", "side": "L" }, { "kind": "tendril_arm", "side": "R" } ],
-        "horns": null,
-        "tail":  null
+      "palette": {
+        "body":   "#2a1a5a",
+        "head":   "#3a2a6e",
+        "limbs":  "#0d0a2c",
+        "eyes":   "#ddd5ff",
+        "pupils": "#0d0a2c"
       },
-      "anim": { "idle": "drift", "attack": "void_pulse", "hit": "distort", "phaseBreak": "unravel" },
-      "introSpeech": "TBD — Realm 4 content.",
-      "voiceProfile": { "pitch": 0.7, "rate": 0.8 },
+      "hp": 3,
       "phases": [
-        { "label": "PHASE 1", "kind": "mul", "hint": "TBD", "factFamilyHint": "x8", "mode": "orb" },
-        { "label": "PHASE 2", "kind": "div", "hint": "TBD", "factFamilyHint": "x9", "mode": "orb" },
-        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x9", "mode": "ultimate" }
+        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x8",  "mode": "orb" },
+        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x9",  "mode": "orb" },
+        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
       ]
     },
     {
@@ -109,25 +114,20 @@
       "realmId": "lich_citadel",
       "tbdInRealms2to5": true,
       "size": [340, 420],
-      "palette": ["#2a2a2a", "#111111", "#9bb87a"],
-      "hp": 4,
-      "shape": {
-        "body":  { "kind": "blob",       "rx": 135, "ry": 158, "wobble": 0.02 },
-        "head":  { "kind": "skull",      "scale": 1.15, "tilt": 0.05 },
-        "eyes":  { "kind": "comic_pair", "size": 26, "expr": "dead" },
-        "mouth": { "kind": "jaw_open" },
-        "limbs": [ { "kind": "bone_arm", "side": "L" }, { "kind": "bone_arm", "side": "R" } ],
-        "horns": { "kind": "crown_of_bone" },
-        "tail":  null
+      "palette": {
+        "body":   "#2a2a2a",
+        "head":   "#1a1a1a",
+        "limbs":  "#383838",
+        "eyes":   "#9bb87a",
+        "pupils": "#0a0a0a",
+        "horns":  "#9bb87a"
       },
-      "anim": { "idle": "hover_sway", "attack": "necrotic_bolt", "hit": "rattle", "phaseBreak": "bone_explosion" },
-      "introSpeech": "TBD — Realm 5 content.",
-      "voiceProfile": { "pitch": 0.65, "rate": 0.75 },
+      "hp": 4,
       "phases": [
         { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x7",  "mode": "orb" },
         { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x8",  "mode": "orb" },
         { "label": "PHASE 3", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x12", "mode": "orb" },
-        { "label": "PHASE 4", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x12", "mode": "ultimate" }
+        { "label": "PHASE 4", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
       ]
     }
   ]

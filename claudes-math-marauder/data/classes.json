@@ -4,7 +4,7 @@
       "id": "apprentice",
       "name": "Apprentice",
       "passive": { "type": "vanilla", "description": "Steady caster with no class bonus. Best for learning." },
-      "starterDeck": ["ember_bolt", null, null, null, null],
+      "starterDeck": ["ember_bolt", "frost_orb", "stone_shield", null, null],
       "unlock": { "kind": "starter" },
       "wizardSchema": { "robeColor": "#5a4a8a", "hatColor": "#3a2a6a", "staffKind": "wand_simple", "skinTone": "#f0d6c2" }
     },

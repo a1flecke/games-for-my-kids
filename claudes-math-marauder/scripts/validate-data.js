@@ -45,10 +45,106 @@ function contrastRatio(hex1, hex2) {
 
 const CREAM = '#F5F0E8';
 
-function checkPaletteColors(colors, context) {
+function checkColorList(colors, context) {
   (Array.isArray(colors) ? colors : [colors]).forEach(c => {
     if (!isHex6(c)) {
       critical(`${context}: "${c}" is not a valid #RRGGBB color`);
+    }
+  });
+}
+
+// Object palettes used by MonsterRenderer (palette.body, palette.head, etc).
+function checkPaletteObject(palette, context, requiredKeys) {
+  if (!palette || typeof palette !== 'object' || Array.isArray(palette)) {
+    critical(`${context}: palette must be an object (e.g. { body: "#xxxxxx", head: "#xxxxxx" })`);
+    return;
+  }
+  Object.entries(palette).forEach(([k, v]) => {
+    if (!isHex6(v)) critical(`${context}.palette.${k}: "${v}" is not a valid #RRGGBB color`);
+  });
+  (requiredKeys || []).forEach(k => {
+    if (!(k in palette)) warn(`${context}.palette: missing key "${k}"`);
+  });
+}
+
+function checkSize(size, context) {
+  if (!Array.isArray(size) || size.length !== 2) {
+    critical(`${context}: size must be a [width, height] array`);
+    return;
+  }
+  size.forEach((n, i) => {
+    if (typeof n !== 'number' || n <= 0) {
+      critical(`${context}: size[${i}] must be a positive number`);
+    }
+  });
+}
+
+function checkLayout(layout, shape, context) {
+  if (!layout || typeof layout !== 'object' || Array.isArray(layout)) {
+    critical(`${context}: layout must be an object with per-part {ox, oy} entries`);
+    return;
+  }
+  const requiredSlots = [];
+  if (shape) {
+    if (shape.body)  requiredSlots.push('body');
+    if (shape.head)  requiredSlots.push('head');
+    if (shape.eyes)  requiredSlots.push('eyes');
+    if (shape.mouth) requiredSlots.push('mouth');
+    if (shape.horns) requiredSlots.push('horns');
+    if (shape.tail)  requiredSlots.push('tail');
+    if (shape.wings) requiredSlots.push('wings');
+    if (Array.isArray(shape.limbs)) {
+      shape.limbs.forEach((_, i) => requiredSlots.push('limb' + i));
+    }
+  }
+  requiredSlots.forEach(slot => {
+    const entry = layout[slot];
+    if (!entry || typeof entry.ox !== 'number' || typeof entry.oy !== 'number') {
+      critical(`${context}.layout.${slot}: must be {ox, oy} numbers (renderer crashes without it)`);
+    }
+  });
+}
+
+function checkShapeRenderable(shape, context) {
+  if (!shape || typeof shape !== 'object') return;
+
+  // Eye expression — must be in the renderer's EXPR_CONFIG.
+  const VALID_EXPRS = ['angry', 'surprised', 'happy', 'neutral', 'dead'];
+  if (shape.eyes && shape.eyes.expr && !VALID_EXPRS.includes(shape.eyes.expr)) {
+    critical(`${context}.shape.eyes.expr: "${shape.eyes.expr}" not in ${JSON.stringify(VALID_EXPRS)} (renderer falls back to neutral)`);
+  }
+
+  // Limb side must be 'left' or 'right' (renderer treats anything else as right).
+  if (Array.isArray(shape.limbs)) {
+    shape.limbs.forEach((limb, i) => {
+      if (limb.side !== 'left' && limb.side !== 'right') {
+        critical(`${context}.shape.limbs[${i}].side: must be "left" or "right" (got ${JSON.stringify(limb.side)})`);
+      }
+      if (typeof limb.seed !== 'number') warn(`${context}.shape.limbs[${i}]: missing seed (defaults to 0 — wobble pattern not unique)`);
+    });
+  }
+
+  // Required pixel-sized fields and seeds.
+  const partRules = {
+    body:  ['rx', 'ry', 'wobble', 'seed'],
+    head:  ['rx', 'ry', 'seed'],
+    eyes:  ['size', 'seed'],
+    mouth: ['width', 'height', 'seed'],
+    horns: ['size', 'seed'],
+    tail:  ['length', 'seed'],
+  };
+  Object.entries(partRules).forEach(([slot, fields]) => {
+    const part = shape[slot];
+    if (!part) return;
+    fields.forEach(f => {
+      if (typeof part[f] !== 'number') {
+        if (f === 'seed') warn(`${context}.shape.${slot}: missing ${f} (defaults to 0 — wobble pattern not unique)`);
+        else critical(`${context}.shape.${slot}: missing numeric ${f}`);
+      }
+    });
+    // Wobble values should be in pixel range (renderer multiplies by 0.04). Fractions like 0.12 produce ~no wobble.
+    if (slot === 'body' && typeof part.wobble === 'number' && part.wobble > 0 && part.wobble < 1) {
+      warn(`${context}.shape.body.wobble: ${part.wobble} is a fraction; renderer expects pixel values (typical 3–10)`);
     }
   });
 }
@@ -71,6 +167,20 @@ const spellIds   = new Set();
 const classIds   = new Set();
 const chapterIds = new Set();
 
+const STRETCH_FAMILIES = new Set(['x2', 'x5', 'x10']);
+
+// =========================================================
+// Unreferenced data files check
+// =========================================================
+const KNOWN_FILES = new Set(['realms.json', 'monsters.json', 'bosses.json', 'spells.json', 'classes.json', 'story.json', 'events.json']);
+if (fs.existsSync(DATA_DIR)) {
+  fs.readdirSync(DATA_DIR).forEach(fn => {
+    if (fn.endsWith('.json') && !KNOWN_FILES.has(fn)) {
+      warn(`unreferenced data file: ${fn} (not loaded by validator)`);
+    }
+  });
+}
+
 // =========================================================
 // realms.json
 // =========================================================
@@ -86,11 +196,17 @@ if (realmsData) {
       if (realmIds.has(r.id)) critical(`realms: duplicate id "${r.id}"`);
       realmIds.add(r.id);
 
-      // Palette colors
+      // Palette colors — all must be valid hex; halftone/panelTint contrast vs cream.
       if (r.palette) {
-        if (r.palette.bgGradient) checkPaletteColors(r.palette.bgGradient, `${ctx}.palette.bgGradient`);
-        if (r.palette.halftoneColor) checkPaletteColors(r.palette.halftoneColor, `${ctx}.palette.halftoneColor`);
-        if (r.palette.panelTint) checkPaletteColors(r.palette.panelTint, `${ctx}.palette.panelTint`);
+        if (r.palette.bgGradient) checkColorList(r.palette.bgGradient, `${ctx}.palette.bgGradient`);
+        if (r.palette.halftoneColor) {
+          checkColorList(r.palette.halftoneColor, `${ctx}.palette.halftoneColor`);
+          if (isHex6(r.palette.halftoneColor)) {
+            const ratio = contrastRatio(r.palette.halftoneColor, CREAM);
+            if (ratio < 3.0) warn(`${ctx}.palette.halftoneColor: contrast on cream is ${ratio.toFixed(2)}:1 (< 3.0)`);
+          }
+        }
+        if (r.palette.panelTint) checkColorList(r.palette.panelTint, `${ctx}.palette.panelTint`);
       }
 
       // factFamilyWeights must sum to ~1.0
@@ -109,7 +225,6 @@ if (realmsData) {
         critical(`${ctx}: missing factFamilyWeights`);
       }
 
-      // monsterPool — will cross-check after monsters loaded
       if (!Array.isArray(r.monsterPool)) critical(`${ctx}: monsterPool must be an array`);
       if (!r.bossId) warn(`${ctx}: missing bossId`);
       if (!r.storyChapterId) warn(`${ctx}: missing storyChapterId`);
@@ -132,8 +247,10 @@ if (monstersData) {
       if (monsterIds.has(m.id)) critical(`monsters: duplicate id "${m.id}"`);
       monsterIds.add(m.id);
 
-      if (!Array.isArray(m.palette)) critical(`${ctx}: palette must be an array`);
-      else checkPaletteColors(m.palette, `${ctx}.palette`);
+      checkPaletteObject(m.palette, ctx, ['body', 'head', 'eyes', 'pupils']);
+      checkSize(m.size, ctx);
+      checkShapeRenderable(m.shape, ctx);
+      checkLayout(m.layout, m.shape, ctx);
 
       if (!m.shape) warn(`${ctx}: missing shape`);
       if (!m.anim)  warn(`${ctx}: missing anim`);
@@ -145,9 +262,7 @@ if (monstersData) {
   }
 }
 
-// =========================================================
 // Cross-check realm monsterPool → monster IDs
-// =========================================================
 if (realmsData && monstersData) {
   (realmsData.realms || []).forEach(r => {
     if (!Array.isArray(r.monsterPool)) return;
@@ -177,20 +292,27 @@ if (bossesData) {
       if (bossIds.has(b.id)) critical(`bosses: duplicate id "${b.id}"`);
       bossIds.add(b.id);
 
-      // Check palette colors even for placeholder bosses
-      if (Array.isArray(b.palette)) checkPaletteColors(b.palette, `${ctx}.palette`);
+      // Palette + size validated for all bosses, including TBD ones.
+      checkPaletteObject(b.palette, ctx, ['body', 'head']);
+      if (b.size) checkSize(b.size, ctx);
 
-      // Skip deep validation for placeholder bosses
+      // Phase factFamilyHint for stretch kinds — must be in {x2, x5, x10}
+      if (Array.isArray(b.phases)) {
+        b.phases.forEach((p, pi) => {
+          if (p.kind === 'stretch' && p.factFamilyHint && !STRETCH_FAMILIES.has(p.factFamilyHint)) {
+            warn(`${ctx}.phases[${pi}]: stretch kind requires factFamilyHint in ${JSON.stringify([...STRETCH_FAMILIES])} (got "${p.factFamilyHint}")`);
+          }
+        });
+      }
+
+      // TBD bosses skip deep validation but get palette + stretch checks above.
       if (b.tbdInRealms2to5 === true) {
-        info(`${ctx}: tbdInRealms2to5=true — skipping deep validation`);
+        info(`${ctx}: tbdInRealms2to5=true — skipping shape/layout validation`);
         return;
       }
 
       if (!b.realmId) critical(`${ctx}: missing realmId`);
       else if (!realmIds.has(b.realmId)) critical(`${ctx}: realmId "${b.realmId}" not found in realms`);
-
-      if (!Array.isArray(b.palette)) critical(`${ctx}: palette must be an array`);
-      else checkPaletteColors(b.palette, `${ctx}.palette`);
 
       if (typeof b.hp !== 'number' || b.hp < 1) critical(`${ctx}: hp must be a positive number`);
 
@@ -208,11 +330,13 @@ if (bossesData) {
         info(`${ctx}: ${b.phases.length} phases match hp ✓`);
       }
 
+      checkShapeRenderable(b.shape, ctx);
+      checkLayout(b.layout, b.shape, ctx);
+
       if (!b.shape) warn(`${ctx}: missing shape`);
       if (!b.anim)  warn(`${ctx}: missing anim`);
     });
 
-    // Cross-check realm bossId → boss IDs
     if (realmsData) {
       (realmsData.realms || []).forEach(r => {
         if (r.bossId && !bossIds.has(r.bossId)) {
@@ -249,7 +373,7 @@ if (spellsData) {
       if (isHex6(s.fxColor)) {
         const ratio = contrastRatio(s.fxColor, CREAM);
         if (ratio < 3.0) {
-          warn(`${ctx}: fxColor "${s.fxColor}" contrast on cream is ${ratio.toFixed(2)}:1 (< 3.0 — may be hard to see)`);
+          warn(`${ctx}: fxColor "${s.fxColor}" contrast on cream is ${ratio.toFixed(2)}:1 (< 3.0 — particle FX only, not text)`);
         }
       } else if (s.fxColor) {
         critical(`${ctx}: fxColor "${s.fxColor}" is not a valid #RRGGBB color`);
@@ -297,6 +421,11 @@ if (classesData) {
         if (c.unlock.realm && !realmIds.has(c.unlock.realm)) {
           critical(`${ctx}: unlock.realm "${c.unlock.realm}" not found in realms`);
         }
+        if (c.unlock.minStars !== undefined) {
+          if (typeof c.unlock.minStars !== 'number' || c.unlock.minStars < 1 || c.unlock.minStars > 3) {
+            critical(`${ctx}: unlock.minStars must be in [1, 3], got ${c.unlock.minStars}`);
+          }
+        }
       }
 
       if (c.wizardSchema) {
@@ -339,13 +468,25 @@ if (storyData) {
 
       if (!Array.isArray(ch.lines) || ch.lines.length < 4 || ch.lines.length > 12) {
         critical(`${ctx}: lines.length must be in [4, 12], got ${Array.isArray(ch.lines) ? ch.lines.length : 'N/A'}`);
+      } else {
+        // Single-sentence-per-panel rule from spec §7.2.
+        ch.lines.forEach((line, li) => {
+          if (typeof line !== 'string') return;
+          // Count sentence-ending punctuation that's followed by a space and a capital letter or end-of-string.
+          // Allow ellipses ("...") and trailing punctuation. Two sentence-enders mid-line indicate two sentences.
+          const stripped = line.replace(/\.\.\./g, '…');
+          const matches = stripped.match(/[.!?](?=\s+[A-Z])/g);
+          if (matches && matches.length >= 1) {
+            warn(`${ctx}.lines[${li}]: appears to contain multiple sentences (spec §7.2: one sentence per panel)`);
+          }
+        });
       }
     });
 
-    // Cross-check realm storyChapterId → chapter IDs
     if (realmsData) {
       (realmsData.realms || []).forEach(r => {
         if (r.storyChapterId && !chapterIds.has(r.storyChapterId)) {
+          // Realms 2–5 chapters are deferred to Session 11; warn (non-blocking).
           warn(`realm "${r.id}": storyChapterId "${r.storyChapterId}" not found in story chapters (may be added in a later session)`);
         }
       });
@@ -370,7 +511,7 @@ if (eventsData) {
   if (!Array.isArray(events)) {
     critical('events.json: "events" must be an array');
   } else {
-    const validOutcomeKinds = ['gold', 'heal', 'damage', 'spell', 'streak_bonus', 'class_unlock'];
+    const validOutcomeKinds = new Set(['gold', 'heal', 'damage', 'spell', 'streak_bonus', 'class_unlock']);
     const eventIds = new Set();
     events.forEach((ev, i) => {
       const ctx = `events[${i}] (${ev.id})`;
@@ -380,15 +521,39 @@ if (eventsData) {
 
       if (!Array.isArray(ev.choices) || ev.choices.length < 1 || ev.choices.length > 3) {
         critical(`${ctx}: choices.length must be in [1, 3], got ${Array.isArray(ev.choices) ? ev.choices.length : 'N/A'}`);
-      } else {
-        ev.choices.forEach((ch, ci) => {
-          (ch.outcomes || []).forEach((out, oi) => {
-            if (!validOutcomeKinds.includes(out.kind)) {
-              critical(`${ctx}.choices[${ci}].outcomes[${oi}]: kind "${out.kind}" not in ${JSON.stringify(validOutcomeKinds)}`);
-            }
-          });
-        });
+        return;
       }
+
+      ev.choices.forEach((ch, ci) => {
+        if (!Array.isArray(ch.outcomes) || ch.outcomes.length < 1) {
+          critical(`${ctx}.choices[${ci}]: outcomes must have at least 1 entry (spec §8.2)`);
+          return;
+        }
+        ch.outcomes.forEach((out, oi) => {
+          const ctx2 = `${ctx}.choices[${ci}].outcomes[${oi}]`;
+          if (!validOutcomeKinds.has(out.kind)) {
+            critical(`${ctx2}: kind "${out.kind}" not in ${JSON.stringify([...validOutcomeKinds])}`);
+            return;
+          }
+          // Per-kind shape checks
+          if (out.kind === 'gold') {
+            if (typeof out.delta !== 'number') critical(`${ctx2}: gold outcome requires numeric "delta"`);
+          } else if (out.kind === 'heal' || out.kind === 'damage' || out.kind === 'streak_bonus') {
+            if (typeof out.amount !== 'number' || out.amount <= 0) {
+              critical(`${ctx2}: ${out.kind} outcome requires positive numeric "amount"`);
+            }
+          } else if (out.kind === 'spell') {
+            if (out.rarity && !['common', 'rare'].includes(out.rarity)) {
+              warn(`${ctx2}: spell rarity "${out.rarity}" unusual for Realm 1 (expected common|rare)`);
+            }
+          } else if (out.kind === 'class_unlock') {
+            if (!out.classId) critical(`${ctx2}: class_unlock outcome requires "classId"`);
+            else if (classesData && !classIds.has(out.classId)) {
+              critical(`${ctx2}: class_unlock classId "${out.classId}" not found in classes`);
+            }
+          }
+        });
+      });
     });
     info(`events.json: ${events.length} events`);
   }
