@@ -76,6 +76,7 @@ html, body {
 #paused-screen.active {
   display: flex;
 }
+/* #demo-screen.active display is set in the Demo screen section below */
 
 /* ===== Overlays ===== */
 .overlay {
@@ -181,6 +182,42 @@ button.danger {
   border: 2px solid var(--accent-ink);
   max-width: 80vw;
   text-align: center;
+}
+
+/* ===== Demo screen ===== */
+#demo-screen.active {
+  display: block;
+  background: transparent;
+  pointer-events: none;
+}
+#demo-controls {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 20;
+}
+#demo-controls button {
+  font-size: 14px;
+  padding: 6px 14px;
+  min-height: 44px;
+}
+
+/* ===== FPS counter ===== */
+#fps-counter {
+  position: fixed;
+  top: 6px;
+  right: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: monospace;
+  z-index: 200;
+  pointer-events: none;
 }
 
 /* ===== Title screen ===== */
