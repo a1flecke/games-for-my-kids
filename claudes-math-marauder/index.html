@@ -15,6 +15,7 @@
   <div id="overlay-root"></div>
   <div id="toast-root" role="status"></div>
   <div id="transition-canvas-wrap"><canvas id="transition-canvas"></canvas></div>
+  <div id="fps-counter" aria-hidden="true"></div>
 
   <!-- TITLE screen -->
   <section id="title-screen" class="screen active" aria-label="Title screen">
@@ -41,11 +42,23 @@
     <button id="resume-button" class="primary" aria-label="Resume game">Resume</button>
   </section>
 
+  <!-- DEMO screen — visible at ?demo=1; canvas renders all content; buttons are DOM overlays -->
+  <section id="demo-screen" class="screen" aria-label="Render demo">
+    <div id="demo-controls" aria-label="Demo controls">
+      <button id="demo-flash-toggle" class="secondary" aria-pressed="false" aria-label="Toggle panel flash">Flash</button>
+      <button id="demo-shake-toggle" class="secondary" aria-label="Trigger screen shake">Shake</button>
+      <button id="demo-hit-0" class="secondary" aria-label="Hit goblin">Hit Goblin</button>
+      <button id="demo-hit-1" class="secondary" aria-label="Hit dragon">Hit Dragon</button>
+      <button id="demo-hit-2" class="secondary" aria-label="Hit lich">Hit Lich</button>
+    </div>
+  </section>
+
   <!--
     Script load order (all defer, UMD globals — no bundler required):
       1. Utilities: save, rng, shuffle, escape, toast
       2. Combat logic (pure, no DOM): factKeys → mastery → problemGen → distractors
-      3. Game orchestration: game.js last (reads all globals)
+      3. FX system: cache → comicfx → shapes → animation → particles → renderers
+      4. Game orchestration: game.js last (reads all globals)
   -->
   <script src="js/save.js" defer></script>
   <script src="js/util/rng.js" defer></script>
@@ -57,7 +70,15 @@
   <script src="js/combat/mastery.js" defer></script>
   <script src="js/combat/problemGen.js" defer></script>
   <script src="js/combat/distractors.js" defer></script>
-  <!-- Future sessions will add: fight.js, bossFight.js, mapGen.js, hub.js, etc. -->
+  <!-- FX system (Session 3) -->
+  <script src="js/fx/cache.js" defer></script>
+  <script src="js/fx/comicfx.js" defer></script>
+  <script src="js/fx/shapes.js" defer></script>
+  <script src="js/fx/animation.js" defer></script>
+  <script src="js/fx/particles.js" defer></script>
+  <script src="js/fx/monsterRenderer.js" defer></script>
+  <script src="js/fx/wizardRenderer.js" defer></script>
+  <!-- Game orchestration -->
   <script src="js/game.js" defer></script>
 </body>
 </html>
