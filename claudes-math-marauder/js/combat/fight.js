@@ -72,7 +72,11 @@ class FightManager {
   }
 
   start(monster, opts) {
+    // cancel() nulls onComplete to prevent stale callbacks; preserve the
+    // caller-supplied callback across the defensive cancel at start().
+    const savedCb = this.onComplete;
     this.cancel();
+    this.onComplete = savedCb;
     opts = opts || {};
     this._lessonComplete = false;
     this._monster = monster;
@@ -417,17 +421,12 @@ class FightManager {
   }
 
   _narrate(text) {
-    if (!('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
+    if (!window.speech) return;
     const monster = this._monster;
-    setTimeout(function() {
-      const utt = new SpeechSynthesisUtterance(text);
-      if (monster && monster.voiceProfile) {
-        utt.pitch = monster.voiceProfile.pitch;
-        utt.rate = monster.voiceProfile.rate;
-      }
-      speechSynthesis.speak(utt);
-    }, 50);
+    const opts = (monster && monster.voiceProfile)
+      ? { pitch: monster.voiceProfile.pitch, rate: monster.voiceProfile.rate }
+      : undefined;
+    window.speech.speakIfAuto(text, opts);
   }
 
   _pickTaunt(monster) {

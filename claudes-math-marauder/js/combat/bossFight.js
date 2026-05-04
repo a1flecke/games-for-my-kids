@@ -70,7 +70,11 @@ class BossFightManager {
   }
 
   start(boss, realm, masteryMap) {
+    // cancel() nulls onComplete to prevent stale callbacks; preserve the
+    // caller-supplied callback across the defensive cancel at start().
+    const savedCb = this.onComplete;
     this.cancel();
+    this.onComplete = savedCb;
     this._lessonComplete = false;
     this._boss = boss;
     this._realm = realm;
@@ -211,7 +215,7 @@ class BossFightManager {
   notifyPaused() {
     if (this._pausedAt) return;
     this._pausedAt = performance.now();
-    if ('speechSynthesis' in window) speechSynthesis.pause();
+    // game.js already pauses window.speech; don't double-pause here
   }
 
   notifyResumed() {
@@ -219,7 +223,6 @@ class BossFightManager {
     const pausedFor = performance.now() - this._pausedAt;
     if (this._answerStartedAt) this._answerStartedAt += pausedFor;
     this._pausedAt = 0;
-    if ('speechSynthesis' in window) speechSynthesis.resume();
   }
 
   // Called by game.js pointer handler when state === 'PHASE_ORB'
@@ -415,16 +418,11 @@ class BossFightManager {
   }
 
   _narrate(text, voice) {
-    if (!('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
-    setTimeout(function() {
-      const utt = new SpeechSynthesisUtterance(text);
-      if (voice && voice.voiceProfile) {
-        utt.pitch = voice.voiceProfile.pitch;
-        utt.rate = voice.voiceProfile.rate;
-      }
-      speechSynthesis.speak(utt);
-    }, 50);
+    if (!window.speech) return;
+    const opts = (voice && voice.voiceProfile)
+      ? { pitch: voice.voiceProfile.pitch, rate: voice.voiceProfile.rate }
+      : undefined;
+    window.speech.speakIfAuto(text, opts);
   }
 
   _playAudio(name) {

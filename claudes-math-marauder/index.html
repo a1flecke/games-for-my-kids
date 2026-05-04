@@ -19,8 +19,9 @@
 
   <!-- TITLE screen -->
   <section id="title-screen" class="screen active" aria-label="Title screen">
+    <button id="title-settings-btn" class="secondary settings-gear-btn" aria-label="Open settings" aria-expanded="false">⚙️</button>
     <h1>Claude's Math Marauder</h1>
-    <p class="subtitle">A game by Claude</p>
+    <p class="subtitle" id="title-subtitle">A game by Claude</p>
     <button id="start-button" class="primary" aria-label="Begin game">Begin</button>
   </section>
 
@@ -83,7 +84,13 @@
   <script src="js/combat/fight.js" defer></script>
   <script src="js/combat/bossFight.js" defer></script>
   <script src="js/combat/orbs.js" defer></script>
+  <script src="js/combat/bossFight.js" defer></script>
   <script src="js/ui/hud.js" defer></script>
+  <script src="js/ui/hub.js" defer></script>
+  <!-- Audio + Settings (Session 8) -->
+  <script src="js/audio/sfx.js" defer></script>
+  <script src="js/audio/speech.js" defer></script>
+  <script src="js/ui/settings.js" defer></script>
   <!-- Game orchestration -->
   <script src="js/game.js" defer></script>
 </body>
