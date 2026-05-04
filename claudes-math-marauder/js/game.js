@@ -124,17 +124,22 @@ class Game {
     this._loop = this._loop.bind(this);
     this._rafId = requestAnimationFrame(this._loop);
 
-    this._bindTitleScreen();
-    this._bindPauseScreen();
-
     this._save = SaveManager.load();
     const data = this._save;
-    if (data.settings.reducedMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.body.setAttribute('data-reduced-motion', 'true');
-    }
-    if (data.settings.fontScale && data.settings.fontScale !== 1.0) {
-      document.documentElement.style.fontSize = Math.round(20 * data.settings.fontScale) + 'px';
-    }
+
+    // Audio + speech — created before binding so gesture handlers can call them
+    window.speech = new SpeechManager();
+    window.sfx = new SfxBank();
+    window.settingsPanel = new SettingsPanel();
+
+    // Hub screen — stub for session 9 run-map replacement
+    window.hubScreen = new HubScreen();
+
+    // Apply persisted settings immediately
+    this._applySettings(data.settings);
+
+    this._bindTitleScreen();
+    this._bindPauseScreen();
 
     // Initialise FX system
     this._fxCache = new FxCache(30);
@@ -159,7 +164,7 @@ class Game {
     // Boot into a fight directly if ?fight=<monsterId>
     const fightParam = params.get('fight');
     if (fightParam) {
-      this._launchDebugFight(fightParam);
+      this._launchDebugFight(fightParam, params.get('ultimate') === '1');
     }
 
     // Boot directly into a boss fight if ?boss=<bossId>
@@ -201,6 +206,7 @@ class Game {
 
     if (this.state !== STATE.PAUSED) this._update(dt, now);
     this._draw(now);
+
     this._rafId = requestAnimationFrame(this._loop);
   }
 
@@ -252,12 +258,52 @@ class Game {
     } else {
       console.warn('[Game] No screen element for state:', this.state, '(expected #' + id + ')');
     }
+    if (this.state === STATE.HUB && window.hubScreen) {
+      window.hubScreen.show();
+    }
+  }
+
+  // ── Settings integration ──────────────────────────────────────────────────────
+  _applySettings(s) {
+    // Font scale
+    document.documentElement.style.fontSize = Math.round(20 * (s.fontScale || 1.0)) + 'px';
+    // Reduced motion (manual override OR OS preference)
+    if (s.reducedMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.body.setAttribute('data-reduced-motion', 'true');
+    } else {
+      document.body.removeAttribute('data-reduced-motion');
+    }
+    // Audio
+    if (window.sfx) {
+      window.sfx.setMuted(s.muteAll);
+      window.sfx.setVolume(s.sfxVolume !== undefined ? s.sfxVolume : 0.7);
+    }
+    // Speech
+    if (window.speech) {
+      window.speech.setSettings({
+        voiceURI: s.speechVoiceURI,
+        rate: s.speechRate,
+        autoNarrate: s.autoNarrate,
+      });
+    }
   }
 
   // ── Title / Pause bindings ────────────────────────────────────────────────────
   _bindTitleScreen() {
-    const btn = document.getElementById('start-button');
-    if (btn) btn.addEventListener('click', () => this.setState(STATE.HUB));
+    const startBtn = document.getElementById('start-button');
+    if (startBtn) startBtn.addEventListener('click', () => this.setState(STATE.HUB));
+
+    // Gear button → settings panel
+    const gearBtn = document.getElementById('title-settings-btn');
+    if (gearBtn) gearBtn.addEventListener('click', () => {
+      if (window.settingsPanel) window.settingsPanel.open(gearBtn);
+    });
+
+    // Read-aloud button on subtitle
+    const subtitle = document.getElementById('title-subtitle');
+    if (subtitle && typeof attachReadAloud === 'function') {
+      attachReadAloud(subtitle, () => subtitle.textContent);
+    }
   }
 
   _bindPauseScreen() {
@@ -270,7 +316,7 @@ class Game {
       if (this._fightManager) this._fightManager.notifyPaused();
       if (this._bossFightManager) this._bossFightManager.notifyPaused();
       this.setState(STATE.PAUSED);
-      if ('speechSynthesis' in window) speechSynthesis.pause();
+      if (window.speech) window.speech.pause();
     }
   }
 
@@ -279,7 +325,7 @@ class Game {
       this.setState(this._prevState);
       if (this._fightManager) this._fightManager.notifyResumed();
       if (this._bossFightManager) this._bossFightManager.notifyResumed();
-      if ('speechSynthesis' in window) speechSynthesis.resume();
+      if (window.speech) window.speech.resume();
     }
   }
 
@@ -361,7 +407,7 @@ class Game {
   _onFightComplete(result) {
     console.log('[Game] Fight complete:', result);
     this._exitFight();
-    this.setState(STATE.TITLE);
+    this.setState(STATE.HUB);
   }
 
   _onPointerDown(e) {
@@ -398,8 +444,7 @@ class Game {
     }
   }
 
-  async _launchDebugFight(monsterId) {
-    const params = new URLSearchParams(window.location.search);
+  async _launchDebugFight(monsterId, startCharged) {
     try {
       const [monstersData, realmsData] = await Promise.all([
         fetch('data/monsters.json').then(function(r) { return r.json(); }),
@@ -417,8 +462,7 @@ class Game {
       }
       const data = SaveManager.load();
       const allowStretch = data.settings.allowStretchFacts !== false;
-      const startCharged = params.get('ultimate') === '1';
-      this._startFight(monster, realm, data.mastery, allowStretch, { startCharged });
+      this._startFight(monster, realm, data.mastery, allowStretch, { startCharged: !!startCharged });
     } catch (err) {
       console.error('[Game] Debug fight load failed:', err);
     }

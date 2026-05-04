@@ -16,8 +16,8 @@ class HUD {
     this._ultimateEl = null;
     this._wizardHpFillEl = null;
     this._correctionEl = null;
-    this._bossPhaseEl = null;
     this._correctionTimer = null;
+    this._bossPhaseEl = null;
     this._build();
   }
 
@@ -62,6 +62,17 @@ class HUD {
     this._correctionTimer = setTimeout(() => {
       this._correctionEl.classList.add('hidden');
     }, 1100);
+  }
+
+  // Updates the boss phase label. Pass empty string to hide.
+  // Live region — textContent drives announcement (no aria-label per CLAUDE.md rule).
+  setBossPhaseLabel(text) {
+    this._bossPhaseEl.textContent = text;
+    if (text) {
+      this._bossPhaseEl.classList.remove('hidden');
+    } else {
+      this._bossPhaseEl.classList.add('hidden');
+    }
   }
 
   // Hides the entire HUD using .hidden class (display:none).
