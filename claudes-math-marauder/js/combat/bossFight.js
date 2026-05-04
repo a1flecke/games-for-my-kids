@@ -244,8 +244,12 @@ class BossFightManager {
   _enterPhase(idx) {
     if (idx >= this._boss.phases.length) { this._victory(); return; }
     this._currentPhaseIdx = idx;
+    this._currentProblem = null;
+    this._currentOrbs = [];
     const phase = this._boss.phases[idx];
     this.state = 'PHASE_INTRO';
+    // Clear stale problem text so previous phase's problem doesn't linger during phase break.
+    this._hud.setProblem('');
     this._hud.setBossPhaseLabel('PHASE ' + (idx + 1) + ': ' + phase.label);
     this._narrate(phase.hint, null);
     clearTimeout(this._phaseBreakTimer);
@@ -290,10 +294,11 @@ class BossFightManager {
 
     if (phase.mode === 'ultimate') {
       this.state = 'PHASE_ULTIMATE';
+      // Ultimate.start() calls cancel() which nulls onResolve — assign AFTER start.
+      this._ultimate.start(this._currentProblem);
       this._ultimate.onResolve = ({ correct, value, timeMs, escaped }) => {
         this._resolve({ correct, value, timeMs, escaped });
       };
-      this._ultimate.start(this._currentProblem);
     } else {
       this._currentOrbs = this._distractors.generateDistractors(this._currentProblem, this._rng);
       this._answerStartedAt = performance.now();
@@ -303,6 +308,8 @@ class BossFightManager {
   }
 
   _resolve({ correct, value, timeMs, escaped }) {
+    if (this._lessonComplete) return;          // re-entry guard (CLAUDE.md)
+    if (!this._currentProblem) return;         // defensive: cancel raced this callback
     if (!this._currentProblem.isStretch) {
       this._mastery.recordResolve(this._masteryMap, this._currentProblem.factKey, {
         correct,
@@ -455,8 +462,14 @@ class BossFightManager {
       const sx = barX + i * (segW + segGap);
       const cleared = i < this._currentPhaseIdx;
       const current = i === this._currentPhaseIdx;
-      ctx.fillStyle = cleared ? '#595143' : current ? '#c93434' : '#8b2020';
+      // High-contrast progression: cleared = muted gold, current = bright red, pending = dark gray.
+      ctx.fillStyle = cleared ? '#a87c30' : current ? '#e84040' : '#3a3028';
       ctx.fillRect(sx, barY, segW, barH);
+      if (current) {
+        ctx.strokeStyle = '#fff080';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(sx + 1, barY + 1, segW - 2, barH - 2);
+      }
     }
 
     ctx.font = 'bold 18px "OpenDyslexic", "Comic Sans MS", cursive';
