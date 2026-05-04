@@ -102,6 +102,7 @@ class Game {
 
     // Combat — created when entering FIGHT, cancelled when leaving
     this._fightManager = null;
+    this._bossFightManager = null;
     this._orbsRenderer = null;
     this._hud = null;
 
@@ -160,6 +161,12 @@ class Game {
     if (fightParam) {
       this._launchDebugFight(fightParam);
     }
+
+    // Boot directly into a boss fight if ?boss=<bossId>
+    const bossParam = params.get('boss');
+    if (bossParam) {
+      this._launchDebugBoss(bossParam);
+    }
   }
 
   _setupCanvasDpr() {
@@ -200,7 +207,10 @@ class Game {
   _update(dt, now) {
     if (this._animManager) this._animManager.update(dt, now);
     if (this._particles) this._particles.update(dt);
-    if (this.state === STATE.FIGHT && this._fightManager) this._fightManager.update(dt);
+    if (this.state === STATE.FIGHT) {
+      if (this._fightManager) this._fightManager.update(dt);
+      if (this._bossFightManager) this._bossFightManager.update(dt);
+    }
   }
 
   _draw(now) {
@@ -217,8 +227,9 @@ class Game {
       this._drawDemo(now, w, h);
     }
 
-    if (this.state === STATE.FIGHT && this._fightManager) {
-      this._fightManager.draw(this.ctx, w, h);
+    if (this.state === STATE.FIGHT) {
+      if (this._fightManager) this._fightManager.draw(this.ctx, w, h);
+      if (this._bossFightManager) this._bossFightManager.draw(this.ctx, w, h);
     }
 
     if (this._particles) this._particles.draw(this.ctx);
@@ -257,6 +268,7 @@ class Game {
   pause() {
     if (this.state !== STATE.PAUSED) {
       if (this._fightManager) this._fightManager.notifyPaused();
+      if (this._bossFightManager) this._bossFightManager.notifyPaused();
       this.setState(STATE.PAUSED);
       if ('speechSynthesis' in window) speechSynthesis.pause();
     }
@@ -266,6 +278,7 @@ class Game {
     if (this.state === STATE.PAUSED && this._prevState) {
       this.setState(this._prevState);
       if (this._fightManager) this._fightManager.notifyResumed();
+      if (this._bossFightManager) this._bossFightManager.notifyResumed();
       if ('speechSynthesis' in window) speechSynthesis.resume();
     }
   }
@@ -303,10 +316,43 @@ class Game {
     this.setState(STATE.FIGHT);
   }
 
+  _startBossFight(boss, realm, masteryMap) {
+    this._exitFight();
+
+    const rng = mulberry32((Date.now() ^ (boss.id.charCodeAt(0) * 31)) | 0);
+
+    const hudRoot = document.getElementById('hud-root');
+    this._hud = new HUD(hudRoot);
+    this._orbsRenderer = new OrbsRenderer(this._fxCache);
+
+    this._bossFightManager = new BossFightManager({
+      rng,
+      masteryMap,
+      realm,
+      problemGen: ProblemGen,
+      distractors: Distractors,
+      mastery: Mastery,
+      audio: null,
+      monsterRenderer: this._monsterRenderer,
+      wizardRenderer: this._wizardRenderer,
+      hud: this._hud,
+      anim: this._animManager,
+      particles: this._particles,
+    });
+    this._bossFightManager.setOrbsRenderer(this._orbsRenderer);
+    this._bossFightManager.onComplete = (result) => this._onFightComplete(result);
+    this._bossFightManager.start(boss, realm, masteryMap);
+    this.setState(STATE.FIGHT);
+  }
+
   _exitFight() {
     if (this._fightManager) {
       this._fightManager.cancel();
       this._fightManager = null;
+    }
+    if (this._bossFightManager) {
+      this._bossFightManager.cancel();
+      this._bossFightManager = null;
     }
     this._orbsRenderer = null;
     this._hud = null;
@@ -320,12 +366,30 @@ class Game {
 
   _onPointerDown(e) {
     if (this.state !== STATE.FIGHT) return;
-    if (!this._fightManager || !this._orbsRenderer) return;
-    if (this._fightManager.state !== 'ANSWERING') return;
 
     const rect = this.canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    // Boss fight pointer routing
+    if (this._bossFightManager) {
+      if (this._bossFightManager.state === 'INTRO') {
+        this._bossFightManager.trySkipIntro();
+        return;
+      }
+      if (this._bossFightManager.state === 'PHASE_ORB' && this._orbsRenderer) {
+        this._orbsRenderer.layout(this.canvas.clientWidth, this.canvas.clientHeight);
+        const idx = this._orbsRenderer.hitTest(x, y);
+        if (idx >= 0 && this._bossFightManager._currentOrbs[idx] !== undefined) {
+          this._bossFightManager.selectOrb(this._bossFightManager._currentOrbs[idx]);
+        }
+      }
+      return;
+    }
+
+    // Regular fight pointer routing
+    if (!this._fightManager || !this._orbsRenderer) return;
+    if (this._fightManager.state !== 'ANSWERING') return;
 
     this._orbsRenderer.layout(this.canvas.clientWidth, this.canvas.clientHeight);
     const idx = this._orbsRenderer.hitTest(x, y);
@@ -335,6 +399,7 @@ class Game {
   }
 
   async _launchDebugFight(monsterId) {
+    const params = new URLSearchParams(window.location.search);
     try {
       const [monstersData, realmsData] = await Promise.all([
         fetch('data/monsters.json').then(function(r) { return r.json(); }),
@@ -356,6 +421,29 @@ class Game {
       this._startFight(monster, realm, data.mastery, allowStretch, { startCharged });
     } catch (err) {
       console.error('[Game] Debug fight load failed:', err);
+    }
+  }
+
+  async _launchDebugBoss(bossId) {
+    try {
+      const [bossesData, realmsData] = await Promise.all([
+        fetch('data/bosses.json').then(function(r) { return r.json(); }),
+        fetch('data/realms.json').then(function(r) { return r.json(); }),
+      ]);
+      const boss = bossesData.bosses.find(function(b) { return b.id === bossId; });
+      if (!boss) {
+        console.warn('[Game] Debug boss: boss not found:', bossId);
+        return;
+      }
+      const realm = realmsData.realms.find(function(r) { return r.id === (boss.realmId || 'goblin_forest'); });
+      if (!realm) {
+        console.warn('[Game] Debug boss: realm not found:', boss.realmId);
+        return;
+      }
+      const data = SaveManager.load();
+      this._startBossFight(boss, realm, data.mastery);
+    } catch (err) {
+      console.error('[Game] Debug boss load failed:', err);
     }
   }
 

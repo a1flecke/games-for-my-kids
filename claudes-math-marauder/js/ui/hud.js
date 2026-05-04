@@ -16,6 +16,7 @@ class HUD {
     this._ultimateEl = null;
     this._wizardHpFillEl = null;
     this._correctionEl = null;
+    this._bossPhaseEl = null;
     this._correctionTimer = null;
     this._build();
   }
@@ -74,6 +75,17 @@ class HUD {
     this._root.classList.remove('hidden');
   }
 
+  // Updates the boss phase label. Pass empty string to hide.
+  // Live region — textContent drives announcement (no aria-label).
+  setBossPhaseLabel(text) {
+    this._bossPhaseEl.textContent = text;
+    if (text) {
+      this._bossPhaseEl.classList.remove('hidden');
+    } else {
+      this._bossPhaseEl.classList.add('hidden');
+    }
+  }
+
   // ── Private ────────────────────────────────────────────────────────────────
 
   _build() {
@@ -128,5 +140,15 @@ class HUD {
     this._correctionEl.setAttribute('aria-atomic', 'true');
     this._correctionEl.classList.add('hidden');
     this._root.appendChild(this._correctionEl);
+
+    // Boss phase label — live region, hidden until boss fight starts.
+    // No aria-label (rule: no aria-live + aria-label on same element).
+    // No aria-hidden toggle — .hidden (display:none) removes from AT tree.
+    this._bossPhaseEl = document.createElement('div');
+    this._bossPhaseEl.id = 'hud-boss-phase-label';
+    this._bossPhaseEl.setAttribute('aria-live', 'polite');
+    this._bossPhaseEl.setAttribute('aria-atomic', 'true');
+    this._bossPhaseEl.classList.add('hidden');
+    this._root.appendChild(this._bossPhaseEl);
   }
 }
