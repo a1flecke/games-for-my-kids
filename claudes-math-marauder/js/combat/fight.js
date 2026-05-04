@@ -249,8 +249,9 @@ class FightManager {
     // Ultimate gate: if meter is full, launch the typed-numpad overlay.
     if (this._ultimateCharge >= 1.0 && this._ultimate) {
       this.state = 'ULTIMATE_ANSWERING';
-      this._ultimate.onResolve = (result) => this._resolveUltimate(result);
+      // Ultimate.start() calls cancel() which nulls onResolve — assign AFTER start.
       this._ultimate.start(this._currentProblem);
+      this._ultimate.onResolve = (result) => this._resolveUltimate(result);
       return;
     }
 
