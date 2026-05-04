@@ -278,12 +278,13 @@ class Game {
       window.sfx.setMuted(s.muteAll);
       window.sfx.setVolume(s.sfxVolume !== undefined ? s.sfxVolume : 0.7);
     }
-    // Speech
+    // Speech — muteAll silences both SFX and narration
     if (window.speech) {
       window.speech.setSettings({
         voiceURI: s.speechVoiceURI,
         rate: s.speechRate,
         autoNarrate: s.autoNarrate,
+        muted: s.muteAll,
       });
     }
   }
@@ -349,7 +350,7 @@ class Game {
       distractors: Distractors,
       mastery: Mastery,
       onComplete: (result) => this._onFightComplete(result),
-      audio: null,
+      audio: window.sfx || null,
       monsterRenderer: this._monsterRenderer,
       wizardRenderer: this._wizardRenderer,
       hud: this._hud,
@@ -378,7 +379,7 @@ class Game {
       problemGen: ProblemGen,
       distractors: Distractors,
       mastery: Mastery,
-      audio: null,
+      audio: window.sfx || null,
       monsterRenderer: this._monsterRenderer,
       wizardRenderer: this._wizardRenderer,
       hud: this._hud,
@@ -400,6 +401,7 @@ class Game {
       this._bossFightManager.cancel();
       this._bossFightManager = null;
     }
+    if (window.speech) window.speech.cancel();
     this._orbsRenderer = null;
     this._hud = null;
   }

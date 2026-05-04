@@ -413,12 +413,13 @@
         window.sfx.setVolume(s.sfxVolume !== undefined ? s.sfxVolume : 0.7);
       }
 
-      // Speech settings
+      // Speech settings — muteAll silences both SFX and narration
       if (window.speech) {
         window.speech.setSettings({
           voiceURI: s.speechVoiceURI,
           rate: s.speechRate,
           autoNarrate: s.autoNarrate,
+          muted: s.muteAll,
         });
       }
     }
@@ -441,14 +442,9 @@
         clearTimeout(this._resetTimer);
         this._resetTimer = null;
         SaveManager.reset();
-        this._data = SaveManager.load();
-        this._populate(this._data.settings);
-        this._applySettings(this._data.settings);
-        this._resetStep = 0;
-        btn.textContent = 'Reset progress';
-        btn.setAttribute('aria-label', 'Reset all progress — requires confirmation');
-        btn.disabled = false;
-        if (typeof showToast === 'function') showToast('Progress reset.', 2500);
+        if (typeof showToast === 'function') showToast('Progress reset. Reloading…', 2000);
+        // Reload so in-memory game state (mastery, run, hub data) is rebuilt from defaults
+        setTimeout(function() { window.location.reload(); }, 600);
       }
     }
 

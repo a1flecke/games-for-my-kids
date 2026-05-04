@@ -580,6 +580,15 @@ body[data-reduced-motion] *, body[data-reduced-motion] *::before, body[data-redu
 }
 
 /* ===== Hub screen ===== */
+.hub-back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  min-height: 44px;
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
 .hub-title {
   font-size: clamp(28px, 5vw, 48px);
   font-weight: 900;

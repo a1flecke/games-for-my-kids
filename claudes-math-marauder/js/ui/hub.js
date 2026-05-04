@@ -29,6 +29,16 @@
     // ── Private ───────────────────────────────────────────────────────────────
 
     _renderSkeleton() {
+      // Back button (top-left) — returns to title screen so users aren't trapped in hub
+      const back = document.createElement('button');
+      back.className = 'secondary hub-back-btn';
+      back.setAttribute('aria-label', 'Back to title screen');
+      back.textContent = '← Title';
+      back.addEventListener('click', function() {
+        if (window.game) window.game.setState('TITLE');
+      });
+      this._root.appendChild(back);
+
       // Gear button (top-right, same as title screen)
       const gear = document.createElement('button');
       gear.className = 'secondary settings-gear-btn';

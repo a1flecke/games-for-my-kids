@@ -7,6 +7,7 @@
       this._voiceURI = null;
       this._rate = 1.0;
       this._autoNarrate = true;
+      this._muted = false;
       this._enabled = ('speechSynthesis' in window);
       if (this._enabled) {
         window.speechSynthesis.onvoiceschanged = () => this._loadVoices();
@@ -19,14 +20,19 @@
       this._voices = window.speechSynthesis.getVoices();
     }
 
-    setSettings({ voiceURI, rate, autoNarrate } = {}) {
+    setSettings({ voiceURI, rate, autoNarrate, muted } = {}) {
       if (voiceURI !== undefined) this._voiceURI = voiceURI;
       if (rate !== undefined) this._rate = rate;
       if (autoNarrate !== undefined) this._autoNarrate = autoNarrate;
+      if (muted !== undefined) {
+        this._muted = !!muted;
+        if (this._muted) this.cancel();
+      }
     }
 
     speak(text, opts) {
       if (!this._enabled) return;
+      if (this._muted) return;
       if (!text) return;
       opts = opts || {};
       const u = new SpeechSynthesisUtterance(text);
