@@ -580,23 +580,149 @@ body[data-reduced-motion] *, body[data-reduced-motion] *::before, body[data-redu
 }
 
 /* ===== Hub screen ===== */
-.hub-back-btn {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  min-height: 44px;
-  padding: 8px 16px;
-  font-size: 16px;
+#hub-screen.active {
+  justify-content: flex-start;
+  padding: 16px;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.hub-header {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: center;
+}
+
+.hub-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .hub-title {
-  font-size: clamp(28px, 5vw, 48px);
+  font-size: clamp(24px, 5vw, 42px);
   font-weight: 900;
   letter-spacing: 2px;
   text-align: center;
-  margin-bottom: 24px;
+  margin: 0;
 }
 
+.hub-title-row .settings-gear-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hub-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hub-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hub-stat-icon {
+  font-size: 20px;
+}
+
+.hub-stat-value {
+  color: var(--text);
+}
+
+/* Hub tile grid */
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 720px;
+  align-self: center;
+}
+
+@media (max-width: 500px) {
+  .hub-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.hub-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 12px;
+  min-height: 100px;
+  background: var(--bg);
+  border: var(--panel-stroke) solid var(--accent-ink);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 80ms;
+  text-align: center;
+}
+
+.hub-tile:active {
+  transform: scale(0.96);
+}
+
+.hub-tile-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.hub-tile-title {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: var(--text);
+}
+
+.hub-tile-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+/* Resume banner */
+.hub-banner {
+  width: 100%;
+  max-width: 720px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--accent-comic-yellow);
+  border: var(--panel-stroke) solid var(--accent-ink);
+  border-radius: 12px;
+  padding: 14px 20px;
+}
+
+.hub-banner-text {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hub-banner-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Legacy hub monster grid (quick-fight overlay still uses these) */
 .hub-loading-text {
   font-size: 20px;
   color: var(--text-secondary);
@@ -675,9 +801,416 @@ body[data-reduced-motion] *, body[data-reduced-motion] *::before, body[data-redu
   margin: 0;
 }
 
+/* Constrain padding/font so "Challenge!" fits inside the boss card (issue #39) */
 .hub-fight-btn {
   width: 100%;
   margin-top: 4px;
+  padding: 10px 8px;
+  font-size: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Hub overlays shared styles ===== */
+.hub-overlay-panel {
+  position: relative;
+  width: min(600px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hub-overlay-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  background: var(--bg);
+}
+
+.hub-overlay-title {
+  margin: 0;
+  padding-right: 52px;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.hub-overlay-subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.hub-overlay-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 2px solid var(--accent-ink);
+}
+
+/* ===== Deck builder ===== */
+.deck-spell-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.deck-spell-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 3px solid var(--accent-ink);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: pointer;
+  min-height: 60px;
+  width: 100%;
+  text-align: left;
+}
+
+.deck-spell-row[aria-pressed="true"] {
+  background: rgba(240, 216, 64, 0.3);
+  border-color: var(--accent-ink);
+}
+
+.deck-spell-row:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deck-spell-check {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+}
+
+.deck-spell-info {
+  flex: 1;
+}
+
+.deck-spell-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.deck-spell-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.deck-spell-rarity {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 2px solid var(--accent-ink);
+  flex-shrink: 0;
+}
+
+.deck-spell-rarity.common { background: var(--bg); }
+.deck-spell-rarity.rare   { background: #d8e8ff; }
+
+/* ===== Class picker ===== */
+.class-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.class-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 3px solid var(--accent-ink);
+  border-radius: 12px;
+  background: var(--bg);
+  width: 100%;
+  text-align: left;
+  min-height: 60px;
+  cursor: pointer;
+}
+
+.class-row.selected {
+  border-color: var(--accent-comic-yellow);
+  background: rgba(240, 216, 64, 0.2);
+}
+
+.class-row:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.class-row-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.class-row-info {
+  flex: 1;
+}
+
+.class-row-name {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.class-row-passive {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.class-row-unlock {
+  font-size: 13px;
+  color: var(--accent-comic-red);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* Warning text inside an overlay (e.g. "Finish or abandon your run first") */
+.hub-overlay-warn {
+  color: var(--accent-comic-red);
+  font-weight: 700;
+}
+
+/* ===== Codex heatmap ===== */
+.codex-overlay-panel {
+  width: min(680px, 96vw);
+}
+
+.codex-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.codex-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.codex-legend-swatch {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  border-radius: 3px;
+  display: inline-block;
+  flex-shrink: 0;
+  border: 2px solid var(--accent-ink);
+}
+.codex-legend-swatch.new        { background: var(--bg); border-style: dashed; border-color: #9a9070; }
+.codex-legend-swatch.learning   { background: #fce8e8; }
+.codex-legend-swatch.practicing { background: #fcf4d8; }
+.codex-legend-swatch.mastered   { background: #d8f0d8; }
+
+.codex-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.codex-grid-row {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 4px;
+}
+
+.codex-cell {
+  min-width: 0;
+  min-height: 44px;
+  padding: 2px;
+  border: 2px solid var(--accent-ink);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1.2;
+  text-align: center;
+  aspect-ratio: 1;
+}
+
+.codex-cell.new       { background: var(--bg); border-style: dashed; border-color: #9a9070; }
+.codex-cell.learning  { background: #fce8e8; }
+.codex-cell.practicing{ background: #fcf4d8; }
+.codex-cell.mastered  { background: #d8f0d8; }
+
+.codex-cell-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.codex-cell-star {
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .codex-cell {
+    min-height: 36px;
+    font-size: 10px;
+  }
+  .codex-cell-label { font-size: 9px; }
+}
+
+/* ===== Story viewer ===== */
+.story-chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.story-chapter-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 3px solid var(--accent-ink);
+  border-radius: 12px;
+  background: var(--bg);
+  width: 100%;
+  text-align: left;
+  min-height: 60px;
+  cursor: pointer;
+}
+
+.story-chapter-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.story-chapter-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.story-chapter-info {
+  flex: 1;
+}
+
+.story-chapter-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.story-chapter-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.story-panel-view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.story-panel-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2px solid var(--accent-ink);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 18px;
+}
+
+.story-panel-text {
+  flex: 1;
+}
+
+.story-panel-speak {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 18px;
+}
+
+.story-panel-speak.speaking {
+  background: var(--accent-comic-yellow);
+  border-color: var(--accent-comic-red);
+}
+
+.story-back-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* ===== Realm picker ===== */
+.realm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.realm-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 3px solid var(--accent-ink);
+  border-radius: 12px;
+  background: var(--bg);
+  width: 100%;
+  text-align: left;
+  min-height: 60px;
+  cursor: pointer;
+}
+
+.realm-row:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.realm-row-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-ink);
+  flex-shrink: 0;
+}
+
+.realm-row-info {
+  flex: 1;
+}
+
+.realm-row-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.realm-row-stars {
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.realm-row-locked-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 2px;
 }
 
 /* ===== Hub: Begin/Resume Run buttons ===== */

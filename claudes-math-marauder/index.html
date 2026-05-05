@@ -25,8 +25,67 @@
     <button id="start-button" class="primary" aria-label="Begin game">Begin</button>
   </section>
 
-  <!-- HUB screen — populated by hub.js -->
-  <section id="hub-screen" class="screen" aria-label="Wizard's Tower"></section>
+  <!-- HUB screen -->
+  <section id="hub-screen" class="screen" aria-label="Wizard's Tower">
+    <header class="hub-header">
+      <div class="hub-title-row">
+        <h1 class="hub-title">WIZARD'S TOWER</h1>
+        <button id="hub-settings-btn" class="secondary settings-gear-btn" aria-label="Open settings" aria-expanded="false">⚙️</button>
+      </div>
+      <div class="hub-stats" role="group" aria-label="Stats">
+        <div class="hub-stat" id="hub-stat-gold">
+          <span class="hub-stat-icon" aria-hidden="true">💰</span>
+          <span class="hub-stat-value" aria-label="Gold: 0">0</span>
+        </div>
+        <div class="hub-stat" id="hub-stat-class">
+          <span class="hub-stat-icon" aria-hidden="true">🧙</span>
+          <span class="hub-stat-value" aria-label="Class: Apprentice">Apprentice</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="hub-grid" role="group" aria-label="Wizard's Tower actions">
+      <button class="hub-tile" id="hub-btn-start-run" aria-label="Start a new run">
+        <span class="hub-tile-icon" aria-hidden="true">⚔️</span>
+        <span class="hub-tile-title">START RUN</span>
+        <span class="hub-tile-sub" id="hub-btn-start-run-sub">Choose a realm</span>
+      </button>
+      <button class="hub-tile" id="hub-btn-deck" aria-label="Build your spell deck">
+        <span class="hub-tile-icon" aria-hidden="true">📜</span>
+        <span class="hub-tile-title">DECK</span>
+        <span class="hub-tile-sub" id="hub-btn-deck-sub">1 spell equipped</span>
+      </button>
+      <button class="hub-tile" id="hub-btn-class" aria-label="Pick your wizard class">
+        <span class="hub-tile-icon" aria-hidden="true">🎓</span>
+        <span class="hub-tile-title">CLASS</span>
+        <span class="hub-tile-sub" id="hub-btn-class-sub">1 unlocked</span>
+      </button>
+      <button class="hub-tile" id="hub-btn-codex" aria-label="View the codex of facts">
+        <span class="hub-tile-icon" aria-hidden="true">📖</span>
+        <span class="hub-tile-title">CODEX</span>
+        <span class="hub-tile-sub" id="hub-btn-codex-sub">0 / 169 mastered</span>
+      </button>
+      <button class="hub-tile" id="hub-btn-story" aria-label="View story panels">
+        <span class="hub-tile-icon" aria-hidden="true">📚</span>
+        <span class="hub-tile-title">STORY</span>
+        <span class="hub-tile-sub" id="hub-btn-story-sub">0 chapters</span>
+      </button>
+      <button class="hub-tile" id="hub-btn-fight" aria-label="Quick fight — pick a monster and fight">
+        <span class="hub-tile-icon" aria-hidden="true">🏟️</span>
+        <span class="hub-tile-title">FIGHT</span>
+        <span class="hub-tile-sub">Quick battle</span>
+      </button>
+    </div>
+
+    <!-- Resume banner — only shown when active run exists; no aria-live (shown on hub enter, not dynamically) -->
+    <div id="hub-resume-banner" class="hub-banner hidden">
+      <span class="hub-banner-text">A run is in progress.</span>
+      <div class="hub-banner-actions">
+        <button id="hub-btn-resume" class="primary">Resume</button>
+        <button id="hub-btn-abandon" class="secondary danger">Abandon</button>
+      </div>
+    </div>
+  </section>
 
   <!-- RUN MAP screen — populated by mapScreen.js -->
   <section id="run-map-screen" class="screen" aria-label="Run map"></section>
@@ -85,7 +144,14 @@
   <script src="js/combat/bossFight.js" defer></script>
   <script src="js/combat/orbs.js" defer></script>
   <script src="js/ui/hud.js" defer></script>
-  <script src="js/ui/hub.js" defer></script>
+  <!-- Hub overlays (Session 10) -->
+  <script src="js/hub/deckBuilder.js" defer></script>
+  <script src="js/hub/classPicker.js" defer></script>
+  <script src="js/hub/codex.js" defer></script>
+  <script src="js/hub/story.js" defer></script>
+  <script src="js/hub/realmPicker.js" defer></script>
+  <script src="js/hub/quickFight.js" defer></script>
+  <script src="js/hub/hub.js" defer></script>
   <!-- Audio + Settings (Session 8) -->
   <script src="js/audio/sfx.js" defer></script>
   <script src="js/audio/speech.js" defer></script>

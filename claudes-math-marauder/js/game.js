@@ -138,14 +138,22 @@ class Game {
     window.sfx = new SfxBank();
     window.settingsPanel = new SettingsPanel();
 
-    // Run-map system
+    // Run-map system (Session 9)
     window.runtime = new Runtime();
     window.mapScreen = new MapScreen();
     window.eventResolver = new EventResolver();
     window.spellShop = new SpellShop();
 
-    // Hub screen
+    // Hub overlays (Session 10)
+    const deckBuilder  = new DeckBuilder();
+    const classPicker  = new ClassPicker();
+    const codex        = new Codex();
+    const story        = new StoryViewer();
+    const realmPicker  = new RealmPicker();
+    const quickFight   = new QuickFightOverlay();
+
     window.hubScreen = new HubScreen();
+    window.hubScreen.setOverlays({ deckBuilder, classPicker, codex, story, realmPicker, quickFight });
 
     // Apply persisted settings immediately
     this._applySettings(data.settings);
@@ -271,6 +279,11 @@ class Game {
   }
 
   _refreshScreens() {
+    // Hide hub bindings when leaving HUB state
+    if (this._prevState === STATE.HUB && this.state !== STATE.HUB && window.hubScreen) {
+      window.hubScreen.hide();
+    }
+
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     const id = this.state.toLowerCase().replace(/_/g, '-') + '-screen';
     const el = document.getElementById(id);
@@ -443,10 +456,118 @@ class Game {
       this._onRunFightComplete(result, this._currentNodeId);
     } else {
       this.setState(STATE.HUB);
+      // Hub show() is called by _refreshScreens; refresh catches updated mastery/gold
     }
   }
 
-  // ── Run-map system ────────────────────────────────────────────────────────────
+  _onCodexDrillComplete(codex) {
+    this._exitFight();
+    // Return to HUB before re-opening the codex overlay so the hub screen is active
+    this.setState(STATE.HUB);
+    if (codex) codex.onDrillComplete();
+    else if (window.hubScreen) window.hubScreen.refresh();
+  }
+
+  // ── Hub actions (Session 10) ──────────────────────────────────────────────────
+
+  _onResumeRun() {
+    const data = SaveManager.load();
+    if (!data.activeRun) return;
+    this._resumeActiveRun(data.activeRun);
+  }
+
+  _onAbandonRun() {
+    const data = SaveManager.load();
+    if (!data.activeRun) return;
+    // Confirm before discarding run progress (spec: inline confirm dialog)
+    const ok = window.confirm('Abandon your run? All progress in this run will be lost.');
+    if (!ok) return;
+    if (window.runtime && typeof window.runtime.abandonRun === 'function') {
+      window.runtime.abandonRun();
+    } else {
+      data.activeRun = null;
+      SaveManager.save(data);
+    }
+    this._currentMap = null;
+    this._currentActiveRun = null;
+    this._currentNodeId = null;
+    this._currentNode = null;
+    if (window.hubScreen) window.hubScreen.refresh();
+    if (typeof showToast === 'function') showToast('Run abandoned.');
+  }
+
+  _startRunInRealm(realmId) {
+    this._startRun(realmId);
+  }
+
+  // Codex drill — 3-problem mini-fight focused on fact (a × b)
+  async _launchCodexDrill(a, b, codex) {
+    try {
+      const [monstersData, realmsData] = await Promise.all([
+        fetch('data/monsters.json').then(function(r) { return r.json(); }),
+        fetch('data/realms.json').then(function(r) { return r.json(); }),
+      ]);
+
+      // Use goblin_grunt as the drill dummy, bump HP to 3 for 3-problem fight
+      const baseMonster = monstersData.monsters.find(function(m) { return m.id === 'goblin_grunt'; });
+      if (!baseMonster) { codex.onDrillComplete(); return; }
+      const drillMonster = Object.assign({}, baseMonster, {
+        id: 'drill_' + a + '_' + b,
+        name: a + ' × ' + b + ' Drill',
+        hp: 3,
+      });
+
+      // Create a drill realm that weights only the target families
+      const realm = realmsData.realms.find(function(r) { return r.id === 'goblin_forest'; });
+      if (!realm) { codex.onDrillComplete(); return; }
+
+      // Build a focused fact-family weight map: full weight on x{a} and x{b} only
+      const drillWeights = {};
+      for (let i = 0; i <= 12; i++) drillWeights['x' + i] = 0;
+      drillWeights['x' + a] = (a === b) ? 1.0 : 0.6;
+      if (a !== b) drillWeights['x' + b] = 0.4;
+
+      const drillRealm = Object.assign({}, realm, {
+        factFamilyWeights: drillWeights,
+        mulRatio: 1.0,  // drill is multiplication only
+      });
+
+      const data = SaveManager.load();
+      const allowStretch = false; // no stretch in drills
+      this._exitFight();
+
+      const rng = mulberry32((Date.now() ^ (a * 31 + b * 17)) | 0);
+
+      const hudRoot = document.getElementById('hud-root');
+      this._hud = new HUD(hudRoot);
+      this._orbsRenderer = new OrbsRenderer(this._fxCache);
+
+      this._fightManager = new FightManager({
+        rng,
+        masteryMap: data.mastery,
+        realm: drillRealm,
+        problemGen: ProblemGen,
+        distractors: Distractors,
+        mastery: Mastery,
+        onComplete: () => this._onCodexDrillComplete(codex),
+        audio: window.sfx || null,
+        monsterRenderer: this._monsterRenderer,
+        wizardRenderer: this._wizardRenderer,
+        hud: this._hud,
+        anim: this._animManager,
+        particles: this._particles,
+        allowStretch,
+      });
+      this._fightManager.setOrbsRenderer(this._orbsRenderer);
+      this._fightManager.start(drillMonster, {});
+      this.setState(STATE.FIGHT);
+    } catch (err) {
+      console.error('[Game] Codex drill launch failed:', err);
+      if (codex) codex.onDrillComplete();
+    }
+  }
+
+  // ── Run-map system (Session 9) ────────────────────────────────────────────────
 
   async _startRun(realmId) {
     try {
