@@ -55,6 +55,29 @@
       heading.textContent = "Wizard's Tower";
       this._root.appendChild(heading);
 
+      // Begin Run button — primary CTA
+      const beginRunBtn = document.createElement('button');
+      beginRunBtn.className = 'primary hub-begin-run-btn';
+      beginRunBtn.setAttribute('aria-label', 'Begin a new run of Goblin Forest');
+      beginRunBtn.textContent = '⚔️ Begin Run!';
+      beginRunBtn.addEventListener('click', function() {
+        if (window.game) window.game._startRun('goblin_forest');
+      });
+      this._root.appendChild(beginRunBtn);
+
+      // Resume Run button — only shown when an active run exists
+      const savedData = SaveManager.load();
+      if (savedData.activeRun) {
+        const resumeBtn = document.createElement('button');
+        resumeBtn.className = 'secondary hub-resume-run-btn';
+        resumeBtn.setAttribute('aria-label', 'Resume your current run');
+        resumeBtn.textContent = '↩ Resume Run';
+        resumeBtn.addEventListener('click', function() {
+          if (window.game) window.game._resumeActiveRun(SaveManager.load().activeRun);
+        });
+        this._root.appendChild(resumeBtn);
+      }
+
       const loading = document.createElement('p');
       loading.id = 'hub-loading';
       loading.className = 'hub-loading-text';
