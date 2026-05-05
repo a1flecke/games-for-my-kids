@@ -106,6 +106,12 @@ class Game {
     this._orbsRenderer = null;
     this._hud = null;
 
+    // Run-map state — set when a run is active
+    this._currentMap = null;
+    this._currentActiveRun = null;
+    this._currentNodeId = null;
+    this._currentNode = null;
+
     // Demo-mode state
     this._demo = null;
 
@@ -132,7 +138,13 @@ class Game {
     window.sfx = new SfxBank();
     window.settingsPanel = new SettingsPanel();
 
-    // Hub screen — stub for session 9 run-map replacement
+    // Run-map system
+    window.runtime = new Runtime();
+    window.mapScreen = new MapScreen();
+    window.eventResolver = new EventResolver();
+    window.spellShop = new SpellShop();
+
+    // Hub screen
     window.hubScreen = new HubScreen();
 
     // Apply persisted settings immediately
@@ -159,18 +171,27 @@ class Game {
     if (params.get('demo') === '1') {
       this._initDemo();
       this.setState(STATE.DEMO);
+      return;
     }
 
     // Boot into a fight directly if ?fight=<monsterId>
     const fightParam = params.get('fight');
     if (fightParam) {
       this._launchDebugFight(fightParam, params.get('ultimate') === '1');
+      return;
     }
 
     // Boot directly into a boss fight if ?boss=<bossId>
     const bossParam = params.get('boss');
     if (bossParam) {
       this._launchDebugBoss(bossParam);
+      return;
+    }
+
+    // Resume an active run if one was saved mid-session.
+    const savedData = this._save;
+    if (savedData.activeRun) {
+      this._resumeActiveRun(savedData.activeRun);
     }
   }
 
@@ -261,6 +282,14 @@ class Game {
     if (this.state === STATE.HUB && window.hubScreen) {
       window.hubScreen.show();
     }
+    if (this.state === STATE.RUN_MAP && window.mapScreen && this._currentMap && this._currentActiveRun) {
+      window.mapScreen.show(
+        this._currentMap,
+        this._currentActiveRun,
+        window.runtime,
+        (nodeId, node) => this._onNodeSelected(nodeId, node)
+      );
+    }
   }
 
   // ── Settings integration ──────────────────────────────────────────────────────
@@ -336,7 +365,7 @@ class Game {
     this._exitFight();
     opts = opts || {};
 
-    const rng = mulberry32((Date.now() ^ (monster.id.charCodeAt(0) * 31)) | 0);
+    const rng = mulberry32(((Date.now() + Math.floor(Math.random() * 0x10000)) ^ (monster.id.charCodeAt(0) * 31)) | 0);
 
     const hudRoot = document.getElementById('hud-root');
     this._hud = new HUD(hudRoot);
@@ -366,7 +395,7 @@ class Game {
   _startBossFight(boss, realm, masteryMap) {
     this._exitFight();
 
-    const rng = mulberry32((Date.now() ^ (boss.id.charCodeAt(0) * 31)) | 0);
+    const rng = mulberry32(((Date.now() + Math.floor(Math.random() * 0x10000)) ^ (boss.id.charCodeAt(0) * 31)) | 0);
 
     const hudRoot = document.getElementById('hud-root');
     this._hud = new HUD(hudRoot);
@@ -409,7 +438,151 @@ class Game {
   _onFightComplete(result) {
     console.log('[Game] Fight complete:', result);
     this._exitFight();
-    this.setState(STATE.HUB);
+    const activeRun = window.runtime ? window.runtime.resume() : null;
+    if (activeRun && this._currentNodeId) {
+      this._onRunFightComplete(result, this._currentNodeId);
+    } else {
+      this.setState(STATE.HUB);
+    }
+  }
+
+  // ── Run-map system ────────────────────────────────────────────────────────────
+
+  async _startRun(realmId) {
+    try {
+      await window.runtime.loadData();
+      const realm = window.runtime.getRealmById(realmId);
+      if (!realm) { console.error('[Game] Realm not found:', realmId); return; }
+      const { run, map } = window.runtime.startRun(realm);
+      this._currentMap = map;
+      this._currentActiveRun = run;
+      this._currentNodeId = null;
+      this._currentNode = null;
+      this.setState(STATE.RUN_MAP);
+    } catch (err) {
+      console.error('[Game] _startRun failed:', err);
+    }
+  }
+
+  async _resumeActiveRun(activeRun) {
+    try {
+      await window.runtime.loadData();
+      const map = window.runtime.buildMap(activeRun);
+      if (!map) { window.runtime.abandonRun(); return; }
+      this._currentMap = map;
+      this._currentActiveRun = activeRun;
+      this._currentNodeId = null;
+      this._currentNode = null;
+      this.setState(STATE.RUN_MAP);
+    } catch (err) {
+      console.error('[Game] _resumeActiveRun failed:', err);
+    }
+  }
+
+  _onNodeSelected(nodeId, node) {
+    this._currentNodeId = nodeId;
+    this._currentNode = node;
+    window.runtime.advanceTo(nodeId);
+
+    const kind = node.kind;
+    if (kind === 'combat' || kind === 'elite' || kind === 'boss') {
+      this._launchRunFight(node);
+    } else if (kind === 'mystery') {
+      this._launchEvent(nodeId, node);
+    } else if (kind === 'spellshop') {
+      this._launchShop(nodeId, node);
+    } else if (kind === 'rest') {
+      this._resolveRestNode(nodeId, node);
+    } else {
+      // Unknown node kind — complete it immediately and return to map.
+      this._returnToRunMap(nodeId, null);
+    }
+  }
+
+  _launchRunFight(node) {
+    const run = window.runtime.resume();
+    const realm = window.runtime.getRealmById(run ? run.realmId : null);
+    const data = SaveManager.load();
+    const allowStretch = data.settings.allowStretchFacts !== false;
+
+    if (node.kind === 'boss') {
+      const boss = window.runtime.getRealmBoss(realm);
+      if (!boss || !realm) { this._returnToRunMap(node.id, null); return; }
+      this._startBossFight(boss, realm, data.mastery);
+    } else {
+      // Pick a random monster from the pool using the node id as seed offset.
+      const monsters = window.runtime.getMonstersForRealm(realm);
+      if (!monsters.length || !realm) { this._returnToRunMap(node.id, null); return; }
+      const pickSeed = (hashString(node.id) ^ (run ? run.seed : 0)) & 0x7fffffff;
+      const pickRng = mulberry32(pickSeed);
+      const monster = monsters[Math.floor(pickRng() * monsters.length)];
+      const opts = node.kind === 'elite' ? { startCharged: false } : {};
+      this._startFight(monster, realm, data.mastery, allowStretch, opts);
+    }
+  }
+
+  _launchEvent(nodeId, node) {
+    const events = window.runtime.getEvents();
+    if (!events.length) { this._returnToRunMap(nodeId, null); return; }
+    const pickSeed = (hashString(nodeId) ^ (window.runtime.resume() || { seed: 0 }).seed) & 0x7fffffff;
+    const pickRng = mulberry32(pickSeed);
+    const event = events[Math.floor(pickRng() * events.length)];
+
+    window.eventResolver.open(event, window.runtime, (resolved) => {
+      this._returnToRunMap(nodeId, null);
+    });
+  }
+
+  _launchShop(nodeId, node) {
+    window.spellShop.open(nodeId, window.runtime, (resolved) => {
+      this._returnToRunMap(nodeId, null);
+    });
+  }
+
+  _resolveRestNode(nodeId, node) {
+    // Flavor only in B3 — show a toast then return to map.
+    if (window.showToast) showToast('You rest at the campfire. The forest is quiet.', 2500);
+    this._returnToRunMap(nodeId, null);
+  }
+
+  _returnToRunMap(nodeId, outcome) {
+    const updatedRun = window.runtime.completeNode(nodeId, outcome);
+    if (!updatedRun) { this.setState(STATE.HUB); return; }
+    this._currentActiveRun = updatedRun;
+    const newMap = window.runtime.buildMap(updatedRun);
+    if (!newMap) { this.setState(STATE.HUB); return; }
+    this._currentMap = newMap;
+    this._currentNodeId = null;
+    this._currentNode = null;
+    this.setState(STATE.RUN_MAP);
+  }
+
+  _onRunFightComplete(result, nodeId) {
+    const node = this._currentNode;
+    const isBoss = node && node.kind === 'boss';
+    // Award random 5-15 gold per fight (not in combat module — game.js is UI orchestration).
+    const goldEarned = 5 + Math.floor(Math.random() * 11);
+    const outcome = {
+      goldDelta: goldEarned,
+      retries: result.retries || 0,
+      score: result.score || 0,
+    };
+
+    if (isBoss) {
+      // Complete the boss node first so mapNodes is current.
+      window.runtime.completeNode(nodeId, outcome);
+      const finalResult = window.runtime.finishRun({ outcome: result.outcome, score: result.score });
+      this._currentMap = null;
+      this._currentActiveRun = null;
+      this._currentNodeId = null;
+      this._currentNode = null;
+      this.setState(STATE.HUB);
+      const stars = finalResult ? finalResult.stars : 1;
+      const goldMsg = finalResult ? finalResult.gold + ' gold earned' : '';
+      if (window.showToast) showToast('Run complete! ' + '⭐'.repeat(stars) + (goldMsg ? ' · ' + goldMsg : ''), 4000);
+    } else {
+      this._returnToRunMap(nodeId, outcome);
+    }
   }
 
   _onPointerDown(e) {

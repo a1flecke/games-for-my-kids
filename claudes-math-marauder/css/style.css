@@ -680,6 +680,299 @@ body[data-reduced-motion] *, body[data-reduced-motion] *::before, body[data-redu
   margin-top: 4px;
 }
 
+/* ===== Hub: Begin/Resume Run buttons ===== */
+.hub-begin-run-btn {
+  font-size: 22px;
+  padding: 16px 40px;
+  margin: 24px auto 8px;
+  display: block;
+  min-width: 200px;
+}
+
+.hub-resume-run-btn {
+  display: block;
+  margin: 0 auto 16px;
+  min-width: 160px;
+}
+
+/* ===== Run map screen ===== */
+#run-map-screen.active {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.run-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 3px solid var(--accent-ink);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.run-map-realm-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.run-map-gold {
+  font-size: 18px;
+  font-weight: 700;
+  color: #b07a00;
+  min-width: 60px;
+  text-align: right;
+}
+
+.run-map-quit-btn {
+  font-size: 16px;
+  padding: 8px 14px;
+  min-width: 80px;
+  min-height: 44px;
+}
+
+.run-map-area {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.run-map-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.run-map-edge {
+  stroke: #b0a898;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.run-map-edge.completed {
+  stroke: #5a8a3a;
+  stroke-width: 2;
+}
+
+.run-map-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  background: var(--bg);
+  border: var(--panel-stroke) solid var(--accent-ink);
+  font-family: var(--font-stack);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.run-map-node:not([disabled]):hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+
+.run-map-node-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.run-map-node-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1;
+}
+
+.run-map-node.glow {
+  border-color: var(--accent-comic-yellow);
+  box-shadow: 0 0 12px 3px rgba(240, 216, 64, 0.6);
+  animation: map-node-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes map-node-pulse {
+  0%, 100% { box-shadow: 0 0 10px 2px rgba(240, 216, 64, 0.5); }
+  50%       { box-shadow: 0 0 20px 6px rgba(240, 216, 64, 0.85); }
+}
+
+.run-map-node.completed {
+  border-color: #5a8a3a;
+  background: #f0f8ea;
+  opacity: 0.7;
+}
+
+.run-map-node.locked {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.run-map-status {
+  text-align: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  padding: 10px;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+/* ===== Event overlay ===== */
+.event-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 440px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.event-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.event-prompt {
+  font-size: 20px;
+  line-height: 1.5;
+  text-align: center;
+  margin: 0;
+}
+
+.event-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.event-choice-btn {
+  width: 100%;
+  font-size: 18px;
+  text-align: left;
+  padding: 12px 16px;
+  white-space: normal;
+  min-height: 44px;
+}
+
+/* ===== Shop overlay ===== */
+.shop-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 480px;
+  width: 92%;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.shop-heading {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+}
+
+.shop-gold-display {
+  font-size: 18px;
+  font-weight: 700;
+  color: #b07a00;
+  margin: 0;
+}
+
+.shop-empty {
+  font-size: 18px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.shop-offerings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.shop-card {
+  border: var(--panel-stroke) solid var(--accent-ink);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shop-card.rarity-rare   { border-color: #2c5fb3; }
+.shop-card.rarity-epic   { border-color: #8a34c9; }
+
+.shop-card-name {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.shop-card-rarity {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.shop-card.rarity-rare .shop-card-rarity   { color: #2c5fb3; }
+.shop-card.rarity-epic .shop-card-rarity   { color: #8a34c9; }
+
+.shop-card-cost {
+  font-size: 16px;
+  color: #b07a00;
+  margin: 0;
+}
+
+.shop-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.shop-buy-btn,
+.shop-skip-btn {
+  flex: 1;
+  min-height: 44px;
+}
+
+/* ===== Overlay close button ===== */
+.overlay-close-btn {
+  align-self: flex-end;
+  margin-bottom: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 20px;
+  padding: 6px 12px;
+}
+
 /* ===== Read-aloud button ===== */
 .read-aloud {
   display: inline-flex;
