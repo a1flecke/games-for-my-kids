@@ -213,8 +213,8 @@ if (realmsData) {
       if (r.factFamilyWeights) {
         const keys = ['x0','x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11','x12'];
         const sum = keys.reduce((acc, k) => acc + (r.factFamilyWeights[k] || 0), 0);
-        if (sum < 0.95 || sum > 1.05) {
-          critical(`${ctx}: factFamilyWeights sum is ${sum.toFixed(4)}, must be in [0.95, 1.05]`);
+        if (sum < 0.99 || sum > 1.01) {
+          critical(`${ctx}: factFamilyWeights sum is ${sum.toFixed(4)}, must be in [0.99, 1.01] (±0.01 tolerance)`);
         } else {
           info(`${ctx}: factFamilyWeights sum = ${sum.toFixed(4)} ✓`);
         }
@@ -296,9 +296,13 @@ if (bossesData) {
       checkPaletteObject(b.palette, ctx, ['body', 'head']);
       if (b.size) checkSize(b.size, ctx);
 
-      // Phase factFamilyHint for stretch kinds — must be in {x2, x5, x10}
+      // Phase factFamilyHint validation
+      const VALID_FACT_FAMILIES = new Set(['x0','x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11','x12']);
       if (Array.isArray(b.phases)) {
         b.phases.forEach((p, pi) => {
+          if (p.factFamilyHint && !VALID_FACT_FAMILIES.has(p.factFamilyHint)) {
+            critical(`${ctx}.phases[${pi}]: factFamilyHint "${p.factFamilyHint}" is not a valid family (must be x0–x12)`);
+          }
           if (p.kind === 'stretch' && p.factFamilyHint && !STRETCH_FAMILIES.has(p.factFamilyHint)) {
             warn(`${ctx}.phases[${pi}]: stretch kind requires factFamilyHint in ${JSON.stringify([...STRETCH_FAMILIES])} (got "${p.factFamilyHint}")`);
           }

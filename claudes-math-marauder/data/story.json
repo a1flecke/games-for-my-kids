@@ -14,6 +14,81 @@
         "Cast true and save the tower.",
         "And so you step into the trees..."
       ]
+    },
+    {
+      "id": "chapter_2",
+      "realmId": "crystal_cave",
+      "title": "Into the Crystal Cave",
+      "lines": [
+        "The Goblin Warlord falls.",
+        "His stolen tomes scatter across the mud.",
+        "One page remains clutched in his hand.",
+        "It shows a map — a cave of crystal and shadow.",
+        "The goblins stole something deeper here.",
+        "Something ancient and sharp as a prism.",
+        "You descend into the dark.",
+        "The crystals catch your light and multiply it."
+      ]
+    },
+    {
+      "id": "chapter_3",
+      "realmId": "dragon_peak",
+      "title": "The Dragon Peak",
+      "lines": [
+        "Zharx the Crystal Titan crumbles to shards.",
+        "The cave exhales a hot breath.",
+        "Far above, smoke curls from a broken mountain.",
+        "A dragon's peak — ember-lit and terrible.",
+        "The stolen knowledge burns somewhere in that fire.",
+        "Every wizard before you turned back here.",
+        "You tighten your grip on your spell tome.",
+        "The mountain waits."
+      ]
+    },
+    {
+      "id": "chapter_4",
+      "realmId": "astral_void",
+      "title": "The Astral Void",
+      "lines": [
+        "Wyrm Emberhart collapses in a storm of smoke.",
+        "The sky above splits open like a wound.",
+        "Stars pour through the crack.",
+        "A void stretches beyond the peak — cold and vast.",
+        "The stolen wisdom has been scattered across the cosmos.",
+        "Only the numbers you know can guide you through.",
+        "You step into the dark between stars.",
+        "The void hums a question you must answer."
+      ]
+    },
+    {
+      "id": "chapter_5",
+      "realmId": "lich_citadel",
+      "title": "The Lich Citadel",
+      "lines": [
+        "The Void Oracle fades like smoke.",
+        "One final vision burns in your mind.",
+        "A citadel of black stone on a dying plain.",
+        "The Lich King sits at its heart.",
+        "He hoards the last of the stolen knowledge.",
+        "He has kept it locked in bone and shadow for centuries.",
+        "This is the final climb.",
+        "Every answer you have ever given has led here."
+      ]
+    },
+    {
+      "id": "chapter_6",
+      "realmId": "lich_citadel",
+      "title": "The Tower Restored",
+      "lines": [
+        "Morthas the Lich King crumbles to dust.",
+        "The stolen knowledge rises from the rubble like dawn.",
+        "Every equation he hoarded flows back into the world.",
+        "The Tower of Numbers blazes with light.",
+        "Somewhere, students open their books and remember.",
+        "Your master smiles in the light.",
+        "The math was yours to wield.",
+        "And you wielded it true."
+      ]
     }
   ],
   "flavor": {

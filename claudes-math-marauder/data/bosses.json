@@ -47,87 +47,184 @@
     },
     {
       "id": "crystal_titan",
-      "name": "Crystal Titan",
+      "name": "Zharx the Crystal Titan",
       "realmId": "crystal_cave",
-      "tbdInRealms2to5": true,
-      "size": [320, 400],
+      "size": [340, 420],
       "palette": {
         "body":   "#7070cc",
         "head":   "#8080dc",
         "limbs":  "#404088",
         "eyes":   "#eeeeff",
         "pupils": "#1a1a3a",
+        "mouth":  "#1a1a3a",
         "horns":  "#bbbbff"
       },
       "hp": 3,
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 96,  "ry": 106, "wobble": 4,  "seed": 6101 },
+        "head":  { "kind": "egg",        "rx": 54,  "ry": 62,  "tilt": -0.04, "seed": 6102 },
+        "eyes":  { "kind": "comic_pair", "size": 22, "expr": "neutral",       "seed": 6103 },
+        "mouth": { "kind": "fang_grin",  "width": 62, "height": 26,           "seed": 6104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 64, "width": 20, "side": "left",  "seed": 6105 },
+          { "kind": "stub_arm", "length": 64, "width": 20, "side": "right", "seed": 6106 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 36, "seed": 6107 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,    "oy": 20  },
+        "head":  { "ox": 0,    "oy": -108 },
+        "eyes":  { "ox": 0,    "oy": -114 },
+        "mouth": { "ox": 0,    "oy": -82  },
+        "horns": { "ox": 0,    "oy": -172 },
+        "limb0": { "ox": -108, "oy": -12 },
+        "limb1": { "ox":  108, "oy": -12 }
+      },
+      "anim": { "idle": "crystal_pulse", "attack": "prism_shatter", "hit": "fracture_glow", "phaseBreak": "crystal_explosion" },
+      "introSpeech": "You dare enter my cave? I am older than every mountain above — your numbers cannot crack my shell!",
+      "voiceProfile": { "pitch": 0.75, "rate": 0.9 },
       "phases": [
-        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x4",  "mode": "orb" },
-        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x6",  "mode": "orb" },
-        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+        { "label": "CRYSTAL SHIELD", "kind": "mul",     "hint": "Shatter the crystal shield!",  "factFamilyHint": "x4",  "mode": "orb" },
+        { "label": "PRISM STORM",    "kind": "div",     "hint": "Refract the prism storm!",      "factFamilyHint": "x7",  "mode": "orb" },
+        { "label": "TITAN'S WRATH",  "kind": "stretch", "hint": "End the titan!",                "factFamilyHint": "x2",  "mode": "ultimate" }
       ]
     },
     {
       "id": "wyrm_emberhart",
       "name": "Wyrm Emberhart",
       "realmId": "dragon_peak",
-      "tbdInRealms2to5": true,
-      "size": [360, 440],
+      "size": [370, 450],
       "palette": {
         "body":   "#8a2c2c",
         "head":   "#aa3838",
         "limbs":  "#441010",
         "eyes":   "#ffe040",
         "pupils": "#1a0000",
-        "horns":  "#f0a040",
-        "wings":  "#6b2020"
+        "mouth":  "#1a0000",
+        "horns":  "#f0a040"
       },
       "hp": 3,
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 104, "ry": 116, "wobble": 6,  "seed": 7101 },
+        "head":  { "kind": "egg",        "rx": 60,  "ry": 68,  "tilt": -0.08, "seed": 7102 },
+        "eyes":  { "kind": "comic_pair", "size": 24, "expr": "angry",         "seed": 7103 },
+        "mouth": { "kind": "fang_grin",  "width": 72, "height": 32,           "seed": 7104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 72, "width": 22, "side": "left",  "seed": 7105 },
+          { "kind": "stub_arm", "length": 72, "width": 22, "side": "right", "seed": 7106 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 42, "seed": 7107 },
+        "tail":  { "kind": "tail", "length": 120, "segments": 6, "seed": 7108 }
+      },
+      "layout": {
+        "body":  { "ox": 0,    "oy": 24  },
+        "head":  { "ox": 0,    "oy": -122 },
+        "eyes":  { "ox": 0,    "oy": -128 },
+        "mouth": { "ox": 0,    "oy": -94  },
+        "horns": { "ox": 0,    "oy": -196 },
+        "limb0": { "ox": -116, "oy": -14 },
+        "limb1": { "ox":  116, "oy": -14 },
+        "tail":  { "ox": 80,   "oy": 60  }
+      },
+      "anim": { "idle": "fire_breath_idle", "attack": "inferno_breath", "hit": "smoke_stagger", "phaseBreak": "scale_crack" },
+      "introSpeech": "A wizard? I have melted a thousand wizards. My scales remember every equation they screamed before the end.",
+      "voiceProfile": { "pitch": 0.7, "rate": 0.85 },
       "phases": [
-        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x6",  "mode": "orb" },
-        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x7",  "mode": "orb" },
-        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+        { "label": "FLAME SCALES",   "kind": "mul",     "hint": "Break through the flames!",     "factFamilyHint": "x8",  "mode": "orb" },
+        { "label": "INFERNO BREATH", "kind": "div",     "hint": "Survive the inferno!",           "factFamilyHint": "x9",  "mode": "orb" },
+        { "label": "WYRM'S END",     "kind": "stretch", "hint": "Strike the killing blow!",       "factFamilyHint": "x5",  "mode": "ultimate" }
       ]
     },
     {
       "id": "void_oracle",
-      "name": "Void Oracle",
+      "name": "Seer Xal'than the Void Oracle",
       "realmId": "astral_void",
-      "tbdInRealms2to5": true,
-      "size": [300, 380],
+      "size": [320, 400],
       "palette": {
         "body":   "#2a1a5a",
         "head":   "#3a2a6e",
         "limbs":  "#0d0a2c",
         "eyes":   "#ddd5ff",
-        "pupils": "#0d0a2c"
+        "pupils": "#0d0a2c",
+        "mouth":  "#0d0a2c",
+        "horns":  "#a898dd"
       },
       "hp": 3,
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 90,  "ry": 100, "wobble": 3,  "seed": 8101 },
+        "head":  { "kind": "egg",        "rx": 52,  "ry": 60,  "tilt": 0.04, "seed": 8102 },
+        "eyes":  { "kind": "comic_pair", "size": 22, "expr": "neutral",      "seed": 8103 },
+        "mouth": { "kind": "fang_grin",  "width": 58, "height": 24,          "seed": 8104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 58, "width": 16, "side": "left",  "seed": 8105 },
+          { "kind": "stub_arm", "length": 58, "width": 16, "side": "right", "seed": 8106 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 28, "seed": 8107 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,    "oy": 20  },
+        "head":  { "ox": 0,    "oy": -102 },
+        "eyes":  { "ox": 0,    "oy": -108 },
+        "mouth": { "ox": 0,    "oy": -78  },
+        "horns": { "ox": 0,    "oy": -162 },
+        "limb0": { "ox": -98,  "oy": -10 },
+        "limb1": { "ox":  98,  "oy": -10 }
+      },
+      "anim": { "idle": "astral_float", "attack": "void_blast", "hit": "phase_crack", "phaseBreak": "dimension_tear" },
+      "introSpeech": "I have seen every answer you will ever give. I have seen your defeat. It is... inevitable.",
+      "voiceProfile": { "pitch": 0.9, "rate": 0.8 },
       "phases": [
-        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x8",  "mode": "orb" },
-        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x9",  "mode": "orb" },
-        { "label": "PHASE 3", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+        { "label": "COSMIC VEIL",   "kind": "div",     "hint": "Pierce the cosmic veil!",    "factFamilyHint": "x11", "mode": "orb" },
+        { "label": "VOID PROPHECY", "kind": "mul",     "hint": "Silence the prophecy!",      "factFamilyHint": "x12", "mode": "orb" },
+        { "label": "ORACLE'S END",  "kind": "stretch", "hint": "Unmake the oracle!",          "factFamilyHint": "x10", "mode": "ultimate" }
       ]
     },
     {
       "id": "the_lich_king",
-      "name": "The Lich King",
+      "name": "Morthas the Lich King",
       "realmId": "lich_citadel",
-      "tbdInRealms2to5": true,
-      "size": [340, 420],
+      "size": [350, 430],
       "palette": {
         "body":   "#2a2a2a",
         "head":   "#1a1a1a",
         "limbs":  "#383838",
         "eyes":   "#9bb87a",
         "pupils": "#0a0a0a",
+        "mouth":  "#0a0a0a",
         "horns":  "#9bb87a"
       },
       "hp": 4,
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 98,  "ry": 110, "wobble": 5,  "seed": 9101 },
+        "head":  { "kind": "egg",        "rx": 56,  "ry": 64,  "tilt": -0.06, "seed": 9102 },
+        "eyes":  { "kind": "comic_pair", "size": 24, "expr": "angry",         "seed": 9103 },
+        "mouth": { "kind": "fang_grin",  "width": 66, "height": 30,           "seed": 9104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 68, "width": 20, "side": "left",  "seed": 9105 },
+          { "kind": "stub_arm", "length": 68, "width": 20, "side": "right", "seed": 9106 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 38, "seed": 9107 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,    "oy": 22  },
+        "head":  { "ox": 0,    "oy": -114 },
+        "eyes":  { "ox": 0,    "oy": -120 },
+        "mouth": { "ox": 0,    "oy": -88  },
+        "horns": { "ox": 0,    "oy": -182 },
+        "limb0": { "ox": -110, "oy": -14 },
+        "limb1": { "ox":  110, "oy": -14 }
+      },
+      "anim": { "idle": "death_glow", "attack": "necrotic_wave", "hit": "lich_stagger", "phaseBreak": "phylactery_crack" },
+      "introSpeech": "I have ruled this citadel since before your lineage was written. You bring numbers? I bring eternity.",
+      "voiceProfile": { "pitch": 0.65, "rate": 0.8 },
       "phases": [
-        { "label": "PHASE 1", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x7",  "mode": "orb" },
-        { "label": "PHASE 2", "kind": "div",     "hint": "TBD", "factFamilyHint": "x8",  "mode": "orb" },
-        { "label": "PHASE 3", "kind": "mul",     "hint": "TBD", "factFamilyHint": "x12", "mode": "orb" },
-        { "label": "PHASE 4", "kind": "stretch", "hint": "TBD", "factFamilyHint": "x10", "mode": "ultimate" }
+        { "label": "DEATH SHROUD",   "kind": "mul",     "hint": "Strike through the death shroud!",   "factFamilyHint": "x7",  "mode": "orb" },
+        { "label": "BONE SHIELD",    "kind": "div",     "hint": "Shatter the bone shield!",            "factFamilyHint": "x8",  "mode": "orb" },
+        { "label": "PHYLACTERY",     "kind": "mul",     "hint": "Destroy the phylactery!",             "factFamilyHint": "x12", "mode": "orb" },
+        { "label": "UNDYING WILL",   "kind": "stretch", "hint": "Finish it — forever!",                "factFamilyHint": "x10", "mode": "ultimate" }
       ]
     }
   ]

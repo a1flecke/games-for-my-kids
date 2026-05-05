@@ -10,7 +10,7 @@
     },
     {
       "id": "ancient_shrine",
-      "prompt": "A moss-covered shrine glows faintly in the gloom. An inscription reads: 'Offer, and be healed.'",
+      "prompt": "A moss-covered shrine glows faintly. An inscription reads: 'Offer, and be healed.'",
       "choices": [
         { "text": "Leave 15 gold at the shrine", "outcomes": [{ "kind": "gold", "delta": -15 }, { "kind": "heal", "amount": 1 }] },
         { "text": "Ignore the shrine", "outcomes": [{ "kind": "gold", "delta": 0 }] },
@@ -40,6 +40,73 @@
         { "text": "Give her 20 gold for the scroll", "outcomes": [{ "kind": "gold", "delta": -20 }, { "kind": "spell", "rarity": "rare" }] },
         { "text": "Give her 5 gold as kindness", "outcomes": [{ "kind": "gold", "delta": -5 }, { "kind": "heal", "amount": 1 }] },
         { "text": "Hurry on", "outcomes": [{ "kind": "gold", "delta": 0 }] }
+      ]
+    },
+    {
+      "id": "helpful_spirit",
+      "prompt": "A glowing spirit drifts toward you. 'Rest here, weary mage,' it whispers.",
+      "choices": [
+        { "text": "Accept the blessing", "outcomes": [{ "kind": "heal", "amount": 1 }] },
+        { "text": "Ask it for gold instead", "outcomes": [{ "kind": "gold", "delta": 15 }] }
+      ]
+    },
+    {
+      "id": "crumbling_vault",
+      "prompt": "A crumbling stone vault lies half-open. Inside: scattered coins and a faded scroll.",
+      "choices": [
+        { "text": "Grab the gold (20 gold)", "outcomes": [{ "kind": "gold", "delta": 20 }] },
+        { "text": "Take the scroll instead", "outcomes": [{ "kind": "spell", "rarity": "common" }] },
+        { "text": "Leave it — this place feels cursed", "outcomes": [{ "kind": "gold", "delta": 0 }] }
+      ]
+    },
+    {
+      "id": "ancient_tome",
+      "prompt": "Tucked beneath a root: an ancient tome, still dry. Its pages hum with focused energy.",
+      "choices": [
+        { "text": "Read the tome carefully", "outcomes": [{ "kind": "streak_bonus", "amount": 3 }] },
+        { "text": "Sell it to a passing merchant", "outcomes": [{ "kind": "gold", "delta": 25 }] }
+      ]
+    },
+    {
+      "id": "cursed_fog",
+      "prompt": "A purple fog rolls in. Your vision blurs. You feel weaker but also lighter — lighter of coin.",
+      "choices": [
+        { "text": "Push through the fog", "outcomes": [{ "kind": "gold", "delta": -20 }, { "kind": "damage", "amount": 1 }] },
+        { "text": "Wait it out (lose 15 gold)", "outcomes": [{ "kind": "gold", "delta": -15 }] },
+        { "text": "Cast a protection spell (lose 10 gold)", "outcomes": [{ "kind": "gold", "delta": -10 }] }
+      ]
+    },
+    {
+      "id": "rival_wizard",
+      "prompt": "A rival wizard blocks your path. 'Only one of us leaves this forest with those spells,' he sneers.",
+      "choices": [
+        { "text": "Challenge him — winner takes all", "outcomes": [{ "kind": "damage", "amount": 1 }, { "kind": "spell", "rarity": "rare" }] },
+        { "text": "Bribe him to step aside", "outcomes": [{ "kind": "gold", "delta": -30 }] }
+      ]
+    },
+    {
+      "id": "fortune_teller",
+      "prompt": "An old crone with glowing eyes offers to read your fate. 'For a price, I show you clarity.'",
+      "choices": [
+        { "text": "Pay 25 gold to hear your fortune", "outcomes": [{ "kind": "gold", "delta": -25 }, { "kind": "streak_bonus", "amount": 2 }] },
+        { "text": "Politely decline", "outcomes": [{ "kind": "gold", "delta": 0 }] }
+      ]
+    },
+    {
+      "id": "crystal_spring",
+      "prompt": "A small spring bubbles up from the cave floor. The water is cold and faintly luminous.",
+      "choices": [
+        { "text": "Drink from the spring", "outcomes": [{ "kind": "heal", "amount": 1 }] },
+        { "text": "Collect a vial to trade later", "outcomes": [{ "kind": "gold", "delta": 20 }] }
+      ]
+    },
+    {
+      "id": "void_storm",
+      "prompt": "The air crackles. A void storm spirals overhead. Anything could happen.",
+      "choices": [
+        { "text": "Stand your ground", "outcomes": [{ "kind": "spell", "rarity": "rare" }] },
+        { "text": "Run for cover", "outcomes": [{ "kind": "gold", "delta": -10 }, { "kind": "heal", "amount": 1 }] },
+        { "text": "Channel the storm", "outcomes": [{ "kind": "streak_bonus", "amount": 2 }, { "kind": "damage", "amount": 1 }] }
       ]
     }
   ]
