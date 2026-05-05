@@ -130,7 +130,12 @@
     _getSelectableIds() {
       const current = this._map.nodes.get(this._activeRun.currentNodeId);
       if (!current) return [];
-      // Selectable = outgoing edges from current completed node.
+      // If the current node isn't completed yet (e.g., browser closed mid-fight),
+      // it remains the node to enter — don't skip past it.
+      if (!current.completed && current.kind !== 'start') {
+        return [current.id];
+      }
+      // Normal case: outgoing edges that haven't been completed yet.
       return current.edgesOut.filter((id) => {
         const n = this._map.nodes.get(id);
         return n && !n.completed;
