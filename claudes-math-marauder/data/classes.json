@@ -15,6 +15,22 @@
       "starterDeck": ["ember_bolt", "kindle_step", "ash_shield", null, null],
       "unlock": { "kind": "boss_clear", "realm": "goblin_forest", "minStars": 1 },
       "wizardSchema": { "robeColor": "#aa3322", "hatColor": "#661a0a", "staffKind": "staff_flame", "skinTone": "#f0c8a0" }
+    },
+    {
+      "id": "stormcaller",
+      "name": "Stormcaller",
+      "passive": { "type": "ultimate_charge", "description": "Every correct answer fills the ultimate gauge 10% faster." },
+      "starterDeck": ["ember_bolt", "spark_fan", "frost_orb", null, null],
+      "unlock": { "kind": "boss_clear", "realm": "dragon_peak", "minStars": 1 },
+      "wizardSchema": { "robeColor": "#2244aa", "hatColor": "#112288", "staffKind": "staff_storm", "skinTone": "#e8d0c0" }
+    },
+    {
+      "id": "voidweaver",
+      "name": "Voidweaver",
+      "passive": { "type": "stretch_always", "description": "Stretch facts are always available, even from un-mastered families. Correct stretch answers earn 80% of normal gold." },
+      "starterDeck": ["ember_bolt", "shadow_grasp", "frost_orb", null, null],
+      "unlock": { "kind": "boss_clear", "realm": "lich_citadel", "minStars": 1 },
+      "wizardSchema": { "robeColor": "#2a1a4a", "hatColor": "#1a0a3a", "staffKind": "staff_void", "skinTone": "#d8c8e0" }
     }
   ]
 }

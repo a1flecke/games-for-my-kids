@@ -4,782 +4,1011 @@
       "id": "goblin_grunt",
       "name": "Goblin Grunt",
       "tier": 1,
-      "hp": 3,
-      "size": [
-        180,
-        220
-      ],
+      "hp": 1,
+      "size": [180, 220],
       "palette": {
-        "body": "#3a6b2c",
-        "head": "#4a7b3c",
-        "limbs": "#2a5b1c",
-        "eyes": "#ffffff",
+        "body":   "#3a6b2c",
+        "head":   "#4a7b3c",
+        "limbs":  "#2a5b1c",
+        "eyes":   "#ffffff",
         "pupils": "#1a1a1a",
-        "mouth": "#1a1a1a",
-        "horns": "#f0d840"
+        "mouth":  "#1a1a1a",
+        "horns":  "#f0d840"
       },
       "shape": {
-        "body": {
-          "kind": "blob",
-          "rx": 40,
-          "ry": 46,
-          "wobble": 6,
-          "seed": 101
-        },
-        "head": {
-          "kind": "egg",
-          "rx": 26,
-          "ry": 32,
-          "tilt": -0.05,
-          "seed": 102
-        },
-        "eyes": {
-          "kind": "comic_pair",
-          "size": 12,
-          "expr": "angry",
-          "seed": 103
-        },
-        "mouth": {
-          "kind": "fang_grin",
-          "width": 22,
-          "height": 12,
-          "seed": 104
-        },
+        "body":  { "kind": "blob",       "rx": 40, "ry": 46, "wobble": 6, "seed": 101 },
+        "head":  { "kind": "egg",        "rx": 26, "ry": 32, "tilt": -0.05, "seed": 102 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "angry",        "seed": 103 },
+        "mouth": { "kind": "fang_grin",  "width": 22, "height": 12,         "seed": 104 },
         "limbs": [
-          {
-            "kind": "stub_arm",
-            "length": 28,
-            "width": 8,
-            "side": "left",
-            "seed": 105
-          },
-          {
-            "kind": "stub_arm",
-            "length": 28,
-            "width": 8,
-            "side": "right",
-            "seed": 106
-          }
+          { "kind": "stub_arm", "length": 28, "width": 8, "side": "left",  "seed": 105 },
+          { "kind": "stub_arm", "length": 28, "width": 8, "side": "right", "seed": 106 }
         ],
         "horns": null,
-        "tail": null
+        "tail":  null
       },
       "layout": {
-        "body": {
-          "ox": 0,
-          "oy": 4
-        },
-        "head": {
-          "ox": 0,
-          "oy": -52
-        },
-        "eyes": {
-          "ox": 0,
-          "oy": -56
-        },
-        "mouth": {
-          "ox": 0,
-          "oy": -40
-        },
-        "limb0": {
-          "ox": -42,
-          "oy": -2
-        },
-        "limb1": {
-          "ox": 42,
-          "oy": -2
-        }
+        "body":  { "ox": 0,   "oy": 4   },
+        "head":  { "ox": 0,   "oy": -52 },
+        "eyes":  { "ox": 0,   "oy": -56 },
+        "mouth": { "ox": 0,   "oy": -40 },
+        "limb0": { "ox": -42, "oy": -2  },
+        "limb1": { "ox":  42, "oy": -2  }
       },
-      "anim": {
-        "idle": "bob",
-        "attack": "lunge",
-        "hit": "squash"
-      },
-      "voiceTaunts": [
-        "Tiny wizard! Easy lunch!",
-        "Numbers won't save you!",
-        "Hee hee, you're no match for ME!"
-      ],
-      "voiceProfile": {
-        "pitch": 1.1,
-        "rate": 1.1
-      },
+      "anim": { "idle": "bob", "attack": "lunge", "hit": "squash" },
+      "voiceTaunts": ["Tiny wizard! Easy lunch!", "Numbers won't save you!", "Hee hee, you're no match for ME!"],
+      "voiceProfile": { "pitch": 1.1, "rate": 1.1 },
       "spawnSfx": "goblinGrunt"
     },
     {
       "id": "goblin_runt",
       "name": "Goblin Runt",
       "tier": 1,
-      "hp": 3,
-      "size": [
-        160,
-        200
-      ],
+      "hp": 1,
+      "size": [160, 200],
       "palette": {
-        "body": "#4a8c3a",
-        "head": "#5a9c4a",
-        "limbs": "#3a7c2a",
-        "eyes": "#ffffff",
+        "body":   "#4a8c3a",
+        "head":   "#5a9c4a",
+        "limbs":  "#3a7c2a",
+        "eyes":   "#ffffff",
         "pupils": "#1a1a1a",
-        "mouth": "#1a1a1a"
+        "mouth":  "#1a1a1a"
       },
       "shape": {
-        "body": {
-          "kind": "blob",
-          "rx": 32,
-          "ry": 38,
-          "wobble": 8,
-          "seed": 201
-        },
-        "head": {
-          "kind": "egg",
-          "rx": 24,
-          "ry": 28,
-          "tilt": 0.08,
-          "seed": 202
-        },
-        "eyes": {
-          "kind": "comic_pair",
-          "size": 11,
-          "expr": "surprised",
-          "seed": 203
-        },
-        "mouth": {
-          "kind": "fang_grin",
-          "width": 16,
-          "height": 10,
-          "seed": 204
-        },
+        "body":  { "kind": "blob",       "rx": 32, "ry": 38, "wobble": 8, "seed": 201 },
+        "head":  { "kind": "egg",        "rx": 24, "ry": 28, "tilt": 0.08, "seed": 202 },
+        "eyes":  { "kind": "comic_pair", "size": 11, "expr": "surprised",  "seed": 203 },
+        "mouth": { "kind": "fang_grin",  "width": 16, "height": 10,        "seed": 204 },
         "limbs": [
-          {
-            "kind": "stub_arm",
-            "length": 22,
-            "width": 6,
-            "side": "left",
-            "seed": 205
-          },
-          {
-            "kind": "stub_arm",
-            "length": 22,
-            "width": 6,
-            "side": "right",
-            "seed": 206
-          }
+          { "kind": "stub_arm", "length": 22, "width": 6, "side": "left",  "seed": 205 },
+          { "kind": "stub_arm", "length": 22, "width": 6, "side": "right", "seed": 206 }
         ],
         "horns": null,
-        "tail": null
+        "tail":  null
       },
       "layout": {
-        "body": {
-          "ox": 0,
-          "oy": 6
-        },
-        "head": {
-          "ox": 0,
-          "oy": -42
-        },
-        "eyes": {
-          "ox": 0,
-          "oy": -46
-        },
-        "mouth": {
-          "ox": 0,
-          "oy": -32
-        },
-        "limb0": {
-          "ox": -34,
-          "oy": 0
-        },
-        "limb1": {
-          "ox": 34,
-          "oy": 0
-        }
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -42 },
+        "eyes":  { "ox": 0,   "oy": -46 },
+        "mouth": { "ox": 0,   "oy": -32 },
+        "limb0": { "ox": -34, "oy": 0   },
+        "limb1": { "ox":  34, "oy": 0   }
       },
-      "anim": {
-        "idle": "tremble",
-        "attack": "dart",
-        "hit": "spin"
-      },
-      "voiceTaunts": [
-        "D-don't hurt me! I'm just the runt!",
-        "I'm too quick for you!",
-        "Eep! Don't look at me!"
-      ],
-      "voiceProfile": {
-        "pitch": 1.4,
-        "rate": 1.2
-      },
+      "anim": { "idle": "tremble", "attack": "dart", "hit": "spin" },
+      "voiceTaunts": ["D-don't hurt me! I'm just the runt!", "I'm too quick for you!", "Eep! Don't look at me!"],
+      "voiceProfile": { "pitch": 1.4, "rate": 1.2 },
       "spawnSfx": "goblinSqueak"
     },
     {
       "id": "tree_imp",
       "name": "Tree Imp",
       "tier": 1,
-      "hp": 3,
-      "size": [
-        170,
-        210
-      ],
+      "hp": 1,
+      "size": [170, 210],
       "palette": {
-        "body": "#5c7a2a",
-        "head": "#6c8a3a",
-        "limbs": "#3c5a1a",
-        "eyes": "#fff4d0",
+        "body":   "#5c7a2a",
+        "head":   "#6c8a3a",
+        "limbs":  "#3c5a1a",
+        "eyes":   "#fff4d0",
         "pupils": "#1a1a1a",
-        "mouth": "#1a1a1a",
-        "horns": "#8a6a3a"
+        "mouth":  "#1a1a1a",
+        "horns":  "#8a6a3a"
       },
       "shape": {
-        "body": {
-          "kind": "blob",
-          "rx": 36,
-          "ry": 44,
-          "wobble": 5,
-          "seed": 301
-        },
-        "head": {
-          "kind": "egg",
-          "rx": 22,
-          "ry": 26,
-          "tilt": 0.12,
-          "seed": 302
-        },
-        "eyes": {
-          "kind": "comic_pair",
-          "size": 12,
-          "expr": "happy",
-          "seed": 303
-        },
-        "mouth": {
-          "kind": "fang_grin",
-          "width": 18,
-          "height": 10,
-          "seed": 304
-        },
+        "body":  { "kind": "blob",       "rx": 36, "ry": 44, "wobble": 5, "seed": 301 },
+        "head":  { "kind": "egg",        "rx": 22, "ry": 26, "tilt": 0.12, "seed": 302 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "happy",      "seed": 303 },
+        "mouth": { "kind": "fang_grin",  "width": 18, "height": 10,        "seed": 304 },
         "limbs": [
-          {
-            "kind": "stub_arm",
-            "length": 30,
-            "width": 6,
-            "side": "left",
-            "seed": 305
-          },
-          {
-            "kind": "stub_arm",
-            "length": 30,
-            "width": 6,
-            "side": "right",
-            "seed": 306
-          }
+          { "kind": "stub_arm", "length": 30, "width": 6, "side": "left",  "seed": 305 },
+          { "kind": "stub_arm", "length": 30, "width": 6, "side": "right", "seed": 306 }
         ],
-        "horns": {
-          "kind": "twig_nubs",
-          "size": 14,
-          "seed": 307
-        },
-        "tail": null
+        "horns": { "kind": "twig_nubs", "size": 14, "seed": 307 },
+        "tail":  null
       },
       "layout": {
-        "body": {
-          "ox": 0,
-          "oy": 4
-        },
-        "head": {
-          "ox": 0,
-          "oy": -50
-        },
-        "eyes": {
-          "ox": 0,
-          "oy": -54
-        },
-        "mouth": {
-          "ox": 0,
-          "oy": -40
-        },
-        "horns": {
-          "ox": 0,
-          "oy": -76
-        },
-        "limb0": {
-          "ox": -40,
-          "oy": -4
-        },
-        "limb1": {
-          "ox": 40,
-          "oy": -4
-        }
+        "body":  { "ox": 0,   "oy": 4   },
+        "head":  { "ox": 0,   "oy": -50 },
+        "eyes":  { "ox": 0,   "oy": -54 },
+        "mouth": { "ox": 0,   "oy": -40 },
+        "horns": { "ox": 0,   "oy": -76 },
+        "limb0": { "ox": -40, "oy": -4  },
+        "limb1": { "ox":  40, "oy": -4  }
       },
-      "anim": {
-        "idle": "sway",
-        "attack": "swipe",
-        "hit": "wobble"
-      },
-      "voiceTaunts": [
-        "You'll never solve that in the forest!",
-        "My roots go deeper than your spell!",
-        "Multiply THIS, little mage!"
-      ],
-      "voiceProfile": {
-        "pitch": 0.95,
-        "rate": 0.9
-      },
+      "anim": { "idle": "sway", "attack": "swipe", "hit": "wobble" },
+      "voiceTaunts": ["You'll never solve that in the forest!", "My roots go deeper than your spell!", "Multiply THIS, little mage!"],
+      "voiceProfile": { "pitch": 0.95, "rate": 0.9 },
       "spawnSfx": "creakBranch"
     },
     {
       "id": "fungal_creep",
       "name": "Fungal Creep",
       "tier": 1,
-      "hp": 4,
-      "size": [
-        200,
-        200
-      ],
+      "hp": 1,
+      "size": [200, 200],
       "palette": {
-        "body": "#8a6b3a",
-        "head": "#d4a0d0",
-        "limbs": "#5a3b1a",
-        "eyes": "#ffffff",
+        "body":   "#8a6b3a",
+        "head":   "#d4a0d0",
+        "limbs":  "#5a3b1a",
+        "eyes":   "#ffffff",
         "pupils": "#3a1a3a",
-        "mouth": "#3a1a3a"
+        "mouth":  "#3a1a3a"
       },
       "shape": {
-        "body": {
-          "kind": "blob",
-          "rx": 50,
-          "ry": 40,
-          "wobble": 4,
-          "seed": 401
-        },
-        "head": {
-          "kind": "egg",
-          "rx": 32,
-          "ry": 22,
-          "tilt": 0.02,
-          "seed": 402
-        },
-        "eyes": {
-          "kind": "comic_pair",
-          "size": 10,
-          "expr": "neutral",
-          "seed": 403
-        },
-        "mouth": {
-          "kind": "fang_grin",
-          "width": 18,
-          "height": 8,
-          "seed": 404
-        },
+        "body":  { "kind": "blob", "rx": 50, "ry": 40, "wobble": 4, "seed": 401 },
+        "head":  { "kind": "egg",  "rx": 32, "ry": 22, "tilt": 0.02, "seed": 402 },
+        "eyes":  { "kind": "comic_pair", "size": 10, "expr": "neutral",   "seed": 403 },
+        "mouth": { "kind": "fang_grin",  "width": 18, "height": 8,        "seed": 404 },
         "limbs": [
-          {
-            "kind": "stub_arm",
-            "length": 24,
-            "width": 8,
-            "side": "left",
-            "seed": 405
-          },
-          {
-            "kind": "stub_arm",
-            "length": 24,
-            "width": 8,
-            "side": "right",
-            "seed": 406
-          }
+          { "kind": "stub_arm", "length": 24, "width": 8, "side": "left",  "seed": 405 },
+          { "kind": "stub_arm", "length": 24, "width": 8, "side": "right", "seed": 406 }
         ],
         "horns": null,
-        "tail": null
+        "tail":  null
       },
       "layout": {
-        "body": {
-          "ox": 0,
-          "oy": 10
-        },
-        "head": {
-          "ox": 0,
-          "oy": -38
-        },
-        "eyes": {
-          "ox": 0,
-          "oy": -42
-        },
-        "mouth": {
-          "ox": 0,
-          "oy": -32
-        },
-        "limb0": {
-          "ox": -50,
-          "oy": 8
-        },
-        "limb1": {
-          "ox": 50,
-          "oy": 8
-        }
+        "body":  { "ox": 0,   "oy": 10 },
+        "head":  { "ox": 0,   "oy": -38 },
+        "eyes":  { "ox": 0,   "oy": -42 },
+        "mouth": { "ox": 0,   "oy": -32 },
+        "limb0": { "ox": -50, "oy": 8 },
+        "limb1": { "ox":  50, "oy": 8 }
       },
-      "anim": {
-        "idle": "pulse",
-        "attack": "spore_burst",
-        "hit": "deflate"
-      },
-      "voiceTaunts": [
-        "My spores cloud your mind!",
-        "Numbers? I count mushrooms.",
-        "Your spell smells wrong!"
-      ],
-      "voiceProfile": {
-        "pitch": 0.8,
-        "rate": 0.8
-      },
+      "anim": { "idle": "pulse", "attack": "spore_burst", "hit": "deflate" },
+      "voiceTaunts": ["My spores cloud your mind!", "Numbers? I count mushrooms.", "Your spell smells wrong!"],
+      "voiceProfile": { "pitch": 0.8, "rate": 0.8 },
       "spawnSfx": "sporeCloud"
     },
     {
       "id": "goblin_brute",
       "name": "Goblin Brute",
       "tier": 1,
-      "hp": 5,
-      "size": [
-        220,
-        260
-      ],
+      "hp": 2,
+      "size": [220, 260],
       "palette": {
-        "body": "#2a5b1c",
-        "head": "#3a6b2c",
-        "limbs": "#1a4b0c",
-        "eyes": "#ffe080",
+        "body":   "#2a5b1c",
+        "head":   "#3a6b2c",
+        "limbs":  "#1a4b0c",
+        "eyes":   "#ffe080",
         "pupils": "#1a1a1a",
-        "mouth": "#1a1a1a",
-        "horns": "#a07028"
+        "mouth":  "#1a1a1a",
+        "horns":  "#a07028"
       },
       "shape": {
-        "body": {
-          "kind": "blob",
-          "rx": 54,
-          "ry": 60,
-          "wobble": 7,
-          "seed": 501
-        },
-        "head": {
-          "kind": "egg",
-          "rx": 32,
-          "ry": 36,
-          "tilt": -0.08,
-          "seed": 502
-        },
-        "eyes": {
-          "kind": "comic_pair",
-          "size": 14,
-          "expr": "angry",
-          "seed": 503
-        },
-        "mouth": {
-          "kind": "fang_grin",
-          "width": 28,
-          "height": 16,
-          "seed": 504
-        },
+        "body":  { "kind": "blob",       "rx": 54, "ry": 60, "wobble": 7, "seed": 501 },
+        "head":  { "kind": "egg",        "rx": 32, "ry": 36, "tilt": -0.08, "seed": 502 },
+        "eyes":  { "kind": "comic_pair", "size": 14, "expr": "angry",       "seed": 503 },
+        "mouth": { "kind": "fang_grin",  "width": 28, "height": 16,         "seed": 504 },
         "limbs": [
-          {
-            "kind": "stub_arm",
-            "length": 36,
-            "width": 12,
-            "side": "left",
-            "seed": 505
-          },
-          {
-            "kind": "stub_arm",
-            "length": 36,
-            "width": 12,
-            "side": "right",
-            "seed": 506
-          }
+          { "kind": "stub_arm", "length": 36, "width": 12, "side": "left",  "seed": 505 },
+          { "kind": "stub_arm", "length": 36, "width": 12, "side": "right", "seed": 506 }
         ],
-        "horns": {
-          "kind": "twig_nubs",
-          "size": 18,
-          "seed": 507
-        },
-        "tail": null
+        "horns": { "kind": "twig_nubs", "size": 18, "seed": 507 },
+        "tail":  null
       },
       "layout": {
-        "body": {
-          "ox": 0,
-          "oy": 6
-        },
-        "head": {
-          "ox": 0,
-          "oy": -68
-        },
-        "eyes": {
-          "ox": 0,
-          "oy": -72
-        },
-        "mouth": {
-          "ox": 0,
-          "oy": -54
-        },
-        "horns": {
-          "ox": 0,
-          "oy": -100
-        },
-        "limb0": {
-          "ox": -58,
-          "oy": -6
-        },
-        "limb1": {
-          "ox": 58,
-          "oy": -6
-        }
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -68 },
+        "eyes":  { "ox": 0,   "oy": -72 },
+        "mouth": { "ox": 0,   "oy": -54 },
+        "horns": { "ox": 0,   "oy": -100 },
+        "limb0": { "ox": -58, "oy": -6  },
+        "limb1": { "ox":  58, "oy": -6  }
       },
-      "anim": {
-        "idle": "menacing_breath",
-        "attack": "club_swing",
-        "hit": "stagger"
-      },
-      "voiceTaunts": [
-        "BRUTE SMASH!",
-        "Wizard go SPLAT!",
-        "Big fists, little wizard!"
-      ],
-      "voiceProfile": {
-        "pitch": 0.7,
-        "rate": 0.85
-      },
+      "anim": { "idle": "menacing_breath", "attack": "club_swing", "hit": "stagger" },
+      "voiceTaunts": ["BRUTE SMASH!", "Wizard go SPLAT!", "Big fists, little wizard!"],
+      "voiceProfile": { "pitch": 0.7, "rate": 0.85 },
       "spawnSfx": "goblinRoar"
     },
     {
       "id": "gem_sprite",
       "name": "Gem Sprite",
       "tier": 2,
-      "hp": 3,
-      "size": [
-        160,
-        200
-      ],
+      "hp": 1,
+      "size": [160, 200],
       "palette": {
-        "body": "#7070cc",
-        "head": "#8080dc",
-        "limbs": "#4040aa",
-        "eyes": "#eeeeff",
+        "body":   "#7070cc",
+        "head":   "#8080dc",
+        "limbs":  "#4040aa",
+        "eyes":   "#eeeeff",
         "pupils": "#1a1a3a",
-        "mouth": "#1a1a3a",
-        "horns": "#bbbbff"
+        "mouth":  "#1a1a3a",
+        "horns":  "#bbbbff"
       },
       "shape": {
-        "body": {
-          "kind": "blob",
-          "rx": 34,
-          "ry": 40,
-          "wobble": 3,
-          "seed": 601
-        },
-        "head": {
-          "kind": "egg",
-          "rx": 22,
-          "ry": 26,
-          "tilt": -0.1,
-          "seed": 602
-        },
-        "eyes": {
-          "kind": "comic_pair",
-          "size": 12,
-          "expr": "neutral",
-          "seed": 603
-        },
-        "mouth": {
-          "kind": "fang_grin",
-          "width": 14,
-          "height": 6,
-          "seed": 604
-        },
+        "body":  { "kind": "blob",       "rx": 34, "ry": 40, "wobble": 3, "seed": 601 },
+        "head":  { "kind": "egg",        "rx": 22, "ry": 26, "tilt": -0.1, "seed": 602 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "neutral",    "seed": 603 },
+        "mouth": { "kind": "fang_grin",  "width": 14, "height": 6,         "seed": 604 },
         "limbs": [
-          {
-            "kind": "stub_arm",
-            "length": 24,
-            "width": 6,
-            "side": "left",
-            "seed": 605
-          },
-          {
-            "kind": "stub_arm",
-            "length": 24,
-            "width": 6,
-            "side": "right",
-            "seed": 606
-          }
+          { "kind": "stub_arm", "length": 24, "width": 6, "side": "left",  "seed": 605 },
+          { "kind": "stub_arm", "length": 24, "width": 6, "side": "right", "seed": 606 }
         ],
-        "horns": {
-          "kind": "twig_nubs",
-          "size": 16,
-          "seed": 607
-        },
-        "tail": null
+        "horns": { "kind": "twig_nubs", "size": 16, "seed": 607 },
+        "tail":  null
       },
       "layout": {
-        "body": {
-          "ox": 0,
-          "oy": 6
-        },
-        "head": {
-          "ox": 0,
-          "oy": -48
-        },
-        "eyes": {
-          "ox": 0,
-          "oy": -52
-        },
-        "mouth": {
-          "ox": 0,
-          "oy": -38
-        },
-        "horns": {
-          "ox": 0,
-          "oy": -76
-        },
-        "limb0": {
-          "ox": -36,
-          "oy": -2
-        },
-        "limb1": {
-          "ox": 36,
-          "oy": -2
-        }
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -48 },
+        "eyes":  { "ox": 0,   "oy": -52 },
+        "mouth": { "ox": 0,   "oy": -38 },
+        "horns": { "ox": 0,   "oy": -76 },
+        "limb0": { "ox": -36, "oy": -2  },
+        "limb1": { "ox":  36, "oy": -2  }
       },
-      "anim": {
-        "idle": "float",
-        "attack": "shard_throw",
-        "hit": "crack"
-      },
-      "voiceTaunts": [
-        "Your arithmetic is cloudy.",
-        "Refract THAT, wizard.",
-        "Your formula is shattered!"
-      ],
-      "voiceProfile": {
-        "pitch": 1.05,
-        "rate": 0.95
-      },
+      "anim": { "idle": "float", "attack": "shard_throw", "hit": "crack" },
+      "voiceTaunts": ["Your arithmetic is cloudy.", "Refract THAT, wizard.", "Your formula is shattered!"],
+      "voiceProfile": { "pitch": 1.05, "rate": 0.95 },
       "spawnSfx": "crystalChime"
+    },
+    {
+      "id": "cave_bat",
+      "name": "Cave Bat",
+      "tier": 2,
+      "hp": 1,
+      "size": [150, 170],
+      "palette": {
+        "body":   "#2a2438",
+        "head":   "#3a3448",
+        "limbs":  "#1a1428",
+        "eyes":   "#ffee80",
+        "pupils": "#0a0a0a",
+        "mouth":  "#0a0a0a"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 30, "ry": 26, "wobble": 4, "seed": 2001 },
+        "head":  { "kind": "egg",        "rx": 20, "ry": 22, "tilt": -0.06, "seed": 2002 },
+        "eyes":  { "kind": "comic_pair", "size": 11, "expr": "angry",       "seed": 2003 },
+        "mouth": { "kind": "fang_grin",  "width": 14, "height": 8,          "seed": 2004 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 22, "width": 6, "side": "left",  "seed": 2005 },
+          { "kind": "stub_arm", "length": 22, "width": 6, "side": "right", "seed": 2006 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 8   },
+        "head":  { "ox": 0,   "oy": -30 },
+        "eyes":  { "ox": 0,   "oy": -34 },
+        "mouth": { "ox": 0,   "oy": -22 },
+        "limb0": { "ox": -36, "oy": 4   },
+        "limb1": { "ox":  36, "oy": 4   }
+      },
+      "anim": { "idle": "hover", "attack": "dive", "hit": "spin" },
+      "voiceTaunts": ["Darkness is my classroom!", "Can't solve it in the dark!", "Squeak squeak — WRONG!"],
+      "voiceProfile": { "pitch": 1.3, "rate": 1.15 },
+      "spawnSfx": "batShriek"
+    },
+    {
+      "id": "crystal_crawler",
+      "name": "Crystal Crawler",
+      "tier": 2,
+      "hp": 1,
+      "size": [185, 165],
+      "palette": {
+        "body":   "#6880cc",
+        "head":   "#88a0ee",
+        "limbs":  "#3848a8",
+        "eyes":   "#ffffff",
+        "pupils": "#1a1a4a",
+        "mouth":  "#1a1a4a",
+        "horns":  "#c0d8ff"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 48, "ry": 34, "wobble": 3, "seed": 2101 },
+        "head":  { "kind": "egg",        "rx": 24, "ry": 26, "tilt": 0.06, "seed": 2102 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "neutral",    "seed": 2103 },
+        "mouth": { "kind": "fang_grin",  "width": 18, "height": 8,         "seed": 2104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 32, "width": 8, "side": "left",  "seed": 2105 },
+          { "kind": "stub_arm", "length": 32, "width": 8, "side": "right", "seed": 2106 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 14, "seed": 2107 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 10  },
+        "head":  { "ox": 0,   "oy": -32 },
+        "eyes":  { "ox": 0,   "oy": -36 },
+        "mouth": { "ox": 0,   "oy": -24 },
+        "horns": { "ox": 0,   "oy": -58 },
+        "limb0": { "ox": -52, "oy": 6   },
+        "limb1": { "ox":  52, "oy": 6   }
+      },
+      "anim": { "idle": "skitter", "attack": "pincer_snap", "hit": "crack" },
+      "voiceTaunts": ["My crystals are sharper than your answers!", "Scuttlescuttlescuttle — WRONG!", "The cave knows all your mistakes!"],
+      "voiceProfile": { "pitch": 1.2, "rate": 1.1 },
+      "spawnSfx": "crystalSkitter"
+    },
+    {
+      "id": "gem_golem",
+      "name": "Gem Golem",
+      "tier": 2,
+      "hp": 2,
+      "size": [215, 250],
+      "palette": {
+        "body":   "#5060b0",
+        "head":   "#6070c0",
+        "limbs":  "#303080",
+        "eyes":   "#e0e0ff",
+        "pupils": "#0a0a3a",
+        "mouth":  "#0a0a3a",
+        "horns":  "#c0d0ff"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 54, "ry": 60, "wobble": 3, "seed": 2201 },
+        "head":  { "kind": "egg",        "rx": 30, "ry": 34, "tilt": -0.04, "seed": 2202 },
+        "eyes":  { "kind": "comic_pair", "size": 14, "expr": "neutral",     "seed": 2203 },
+        "mouth": { "kind": "fang_grin",  "width": 24, "height": 12,         "seed": 2204 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 40, "width": 14, "side": "left",  "seed": 2205 },
+          { "kind": "stub_arm", "length": 40, "width": 14, "side": "right", "seed": 2206 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 20, "seed": 2207 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -66 },
+        "eyes":  { "ox": 0,   "oy": -70 },
+        "mouth": { "ox": 0,   "oy": -54 },
+        "horns": { "ox": 0,   "oy": -98 },
+        "limb0": { "ox": -60, "oy": -4  },
+        "limb1": { "ox":  60, "oy": -4  }
+      },
+      "anim": { "idle": "rumble", "attack": "stone_slam", "hit": "shatter" },
+      "voiceTaunts": ["GOLEM CALCULATE.", "Numbers are beneath me!", "Your answer is... insufficient."],
+      "voiceProfile": { "pitch": 0.65, "rate": 0.8 },
+      "spawnSfx": "crystalRumble"
+    },
+    {
+      "id": "crystal_guardian",
+      "name": "Crystal Guardian",
+      "tier": 2,
+      "hp": 2,
+      "isElite": true,
+      "size": [240, 275],
+      "palette": {
+        "body":   "#6878d8",
+        "head":   "#7888e8",
+        "limbs":  "#3858b8",
+        "eyes":   "#f0f0ff",
+        "pupils": "#0a0a3a",
+        "mouth":  "#0a0a3a",
+        "horns":  "#d8ecff"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 60, "ry": 66, "wobble": 3, "seed": 2301 },
+        "head":  { "kind": "egg",        "rx": 34, "ry": 38, "tilt": -0.06, "seed": 2302 },
+        "eyes":  { "kind": "comic_pair", "size": 16, "expr": "angry",       "seed": 2303 },
+        "mouth": { "kind": "fang_grin",  "width": 28, "height": 14,         "seed": 2304 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 44, "width": 16, "side": "left",  "seed": 2305 },
+          { "kind": "stub_arm", "length": 44, "width": 16, "side": "right", "seed": 2306 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 24, "seed": 2307 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -74 },
+        "eyes":  { "ox": 0,   "oy": -78 },
+        "mouth": { "ox": 0,   "oy": -60 },
+        "horns": { "ox": 0,   "oy": -112 },
+        "limb0": { "ox": -68, "oy": -4  },
+        "limb1": { "ox":  68, "oy": -4  }
+      },
+      "anim": { "idle": "pulse", "attack": "crystal_storm", "hit": "fracture" },
+      "voiceTaunts": ["The cave's finest defender stands before you!", "Your answers crack like stone!", "I have guarded these depths for a thousand years!"],
+      "voiceProfile": { "pitch": 0.6, "rate": 0.85 },
+      "spawnSfx": "crystalGuardianWake"
     },
     {
       "id": "ember_imp",
       "name": "Ember Imp",
       "tier": 3,
-      "hp": 3,
-      "size": [
-        170,
-        210
-      ],
+      "hp": 1,
+      "size": [170, 210],
       "palette": {
-        "body": "#cc4422",
-        "head": "#dd5533",
-        "limbs": "#882200",
-        "eyes": "#ffee80",
+        "body":   "#cc4422",
+        "head":   "#dd5533",
+        "limbs":  "#882200",
+        "eyes":   "#ffee80",
         "pupils": "#3a0000",
-        "mouth": "#3a0000",
-        "horns": "#3a0000"
+        "mouth":  "#3a0000",
+        "horns":  "#3a0000"
       },
       "shape": {
-        "body": {
-          "kind": "blob",
-          "rx": 36,
-          "ry": 44,
-          "wobble": 7,
-          "seed": 701
-        },
-        "head": {
-          "kind": "egg",
-          "rx": 24,
-          "ry": 28,
-          "tilt": -0.08,
-          "seed": 702
-        },
-        "eyes": {
-          "kind": "comic_pair",
-          "size": 13,
-          "expr": "angry",
-          "seed": 703
-        },
-        "mouth": {
-          "kind": "fang_grin",
-          "width": 20,
-          "height": 12,
-          "seed": 704
-        },
+        "body":  { "kind": "blob",       "rx": 36, "ry": 44, "wobble": 7, "seed": 701 },
+        "head":  { "kind": "egg",        "rx": 24, "ry": 28, "tilt": -0.08, "seed": 702 },
+        "eyes":  { "kind": "comic_pair", "size": 13, "expr": "angry",       "seed": 703 },
+        "mouth": { "kind": "fang_grin",  "width": 20, "height": 12,         "seed": 704 },
         "limbs": [
-          {
-            "kind": "stub_arm",
-            "length": 28,
-            "width": 7,
-            "side": "left",
-            "seed": 705
-          },
-          {
-            "kind": "stub_arm",
-            "length": 28,
-            "width": 7,
-            "side": "right",
-            "seed": 706
-          }
+          { "kind": "stub_arm", "length": 28, "width": 7, "side": "left",  "seed": 705 },
+          { "kind": "stub_arm", "length": 28, "width": 7, "side": "right", "seed": 706 }
         ],
-        "horns": {
-          "kind": "twig_nubs",
-          "size": 16,
-          "seed": 707
-        },
-        "tail": {
-          "kind": "tail",
-          "length": 38,
-          "segments": 4,
-          "seed": 708
-        }
+        "horns": { "kind": "twig_nubs", "size": 16, "seed": 707 },
+        "tail":  { "kind": "tail", "length": 38, "segments": 4, "seed": 708 }
       },
       "layout": {
-        "body": {
-          "ox": 0,
-          "oy": 6
-        },
-        "head": {
-          "ox": 0,
-          "oy": -52
-        },
-        "eyes": {
-          "ox": 0,
-          "oy": -56
-        },
-        "mouth": {
-          "ox": 0,
-          "oy": -42
-        },
-        "horns": {
-          "ox": 0,
-          "oy": -82
-        },
-        "limb0": {
-          "ox": -42,
-          "oy": -2
-        },
-        "limb1": {
-          "ox": 42,
-          "oy": -2
-        },
-        "tail": {
-          "ox": 30,
-          "oy": 30
-        }
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -52 },
+        "eyes":  { "ox": 0,   "oy": -56 },
+        "mouth": { "ox": 0,   "oy": -42 },
+        "horns": { "ox": 0,   "oy": -82 },
+        "limb0": { "ox": -42, "oy": -2  },
+        "limb1": { "ox":  42, "oy": -2  },
+        "tail":  { "ox": 30,  "oy": 30  }
       },
-      "anim": {
-        "idle": "flicker",
-        "attack": "fire_swipe",
-        "hit": "smoke_puff"
-      },
-      "voiceTaunts": [
-        "Your numbers burn like paper!",
-        "Too slow \u2014 I'm already on fire!",
-        "Math? I prefer scorched earth!"
-      ],
-      "voiceProfile": {
-        "pitch": 1.15,
-        "rate": 1.05
-      },
+      "anim": { "idle": "flicker", "attack": "fire_swipe", "hit": "smoke_puff" },
+      "voiceTaunts": ["Your numbers burn like paper!", "Too slow — I'm already on fire!", "Math? I prefer scorched earth!"],
+      "voiceProfile": { "pitch": 1.15, "rate": 1.05 },
       "spawnSfx": "emberCrackle"
+    },
+    {
+      "id": "lava_drake",
+      "name": "Lava Drake",
+      "tier": 3,
+      "hp": 1,
+      "size": [185, 215],
+      "palette": {
+        "body":   "#9a3010",
+        "head":   "#bb4020",
+        "limbs":  "#6a1800",
+        "eyes":   "#ffee40",
+        "pupils": "#1a0000",
+        "mouth":  "#1a0000",
+        "horns":  "#e08020"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 40, "ry": 48, "wobble": 6, "seed": 3001 },
+        "head":  { "kind": "egg",        "rx": 24, "ry": 28, "tilt": -0.1, "seed": 3002 },
+        "eyes":  { "kind": "comic_pair", "size": 13, "expr": "angry",      "seed": 3003 },
+        "mouth": { "kind": "fang_grin",  "width": 22, "height": 12,        "seed": 3004 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 28, "width": 8, "side": "left",  "seed": 3005 },
+          { "kind": "stub_arm", "length": 28, "width": 8, "side": "right", "seed": 3006 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 18, "seed": 3007 },
+        "tail":  { "kind": "tail", "length": 46, "segments": 5, "seed": 3008 }
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -56 },
+        "eyes":  { "ox": 0,   "oy": -60 },
+        "mouth": { "ox": 0,   "oy": -44 },
+        "horns": { "ox": 0,   "oy": -86 },
+        "limb0": { "ox": -46, "oy": -2  },
+        "limb1": { "ox":  46, "oy": -2  },
+        "tail":  { "ox": 34,  "oy": 32  }
+      },
+      "anim": { "idle": "lava_glow", "attack": "fire_breath", "hit": "hiss" },
+      "voiceTaunts": ["Your equations will melt!", "Even lava knows nine times nine!", "The peak burns — and so do you!"],
+      "voiceProfile": { "pitch": 0.9, "rate": 0.95 },
+      "spawnSfx": "lavaHiss"
+    },
+    {
+      "id": "cinder_gnoll",
+      "name": "Cinder Gnoll",
+      "tier": 3,
+      "hp": 1,
+      "size": [180, 215],
+      "palette": {
+        "body":   "#7a4820",
+        "head":   "#8a5830",
+        "limbs":  "#4a2808",
+        "eyes":   "#ffcc40",
+        "pupils": "#1a0000",
+        "mouth":  "#1a0000"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 38, "ry": 44, "wobble": 6, "seed": 3101 },
+        "head":  { "kind": "egg",        "rx": 26, "ry": 30, "tilt": 0.1, "seed": 3102 },
+        "eyes":  { "kind": "comic_pair", "size": 13, "expr": "angry",     "seed": 3103 },
+        "mouth": { "kind": "fang_grin",  "width": 20, "height": 12,       "seed": 3104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 30, "width": 9, "side": "left",  "seed": 3105 },
+          { "kind": "stub_arm", "length": 30, "width": 9, "side": "right", "seed": 3106 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 4   },
+        "head":  { "ox": 0,   "oy": -52 },
+        "eyes":  { "ox": 0,   "oy": -56 },
+        "mouth": { "ox": 0,   "oy": -40 },
+        "limb0": { "ox": -44, "oy": -2  },
+        "limb1": { "ox":  44, "oy": -2  }
+      },
+      "anim": { "idle": "sniff", "attack": "ember_howl", "hit": "yelp" },
+      "voiceTaunts": ["The pack runs on math — and WE are fast!", "Gnolls never miss their multiplications!", "Your answer? Wrong! Totally wrong!"],
+      "voiceProfile": { "pitch": 0.95, "rate": 1.0 },
+      "spawnSfx": "gnollBark"
+    },
+    {
+      "id": "magma_golem",
+      "name": "Magma Golem",
+      "tier": 3,
+      "hp": 2,
+      "size": [225, 255],
+      "palette": {
+        "body":   "#8a2800",
+        "head":   "#aa3800",
+        "limbs":  "#5a1000",
+        "eyes":   "#ffaa30",
+        "pupils": "#1a0000",
+        "mouth":  "#1a0000"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 56, "ry": 62, "wobble": 4, "seed": 3201 },
+        "head":  { "kind": "egg",        "rx": 32, "ry": 36, "tilt": -0.04, "seed": 3202 },
+        "eyes":  { "kind": "comic_pair", "size": 15, "expr": "angry",       "seed": 3203 },
+        "mouth": { "kind": "fang_grin",  "width": 28, "height": 14,         "seed": 3204 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 42, "width": 14, "side": "left",  "seed": 3205 },
+          { "kind": "stub_arm", "length": 42, "width": 14, "side": "right", "seed": 3206 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -70 },
+        "eyes":  { "ox": 0,   "oy": -74 },
+        "mouth": { "ox": 0,   "oy": -56 },
+        "limb0": { "ox": -64, "oy": -4  },
+        "limb1": { "ox":  64, "oy": -4  }
+      },
+      "anim": { "idle": "slow_pulse", "attack": "magma_fist", "hit": "crack_and_glow" },
+      "voiceTaunts": ["The mountain does not hurry.", "Lava solves everything. Eventually.", "Math is just... rocks. Melted."],
+      "voiceProfile": { "pitch": 0.6, "rate": 0.75 },
+      "spawnSfx": "magmaRumble"
+    },
+    {
+      "id": "flame_stalker",
+      "name": "Flame Stalker",
+      "tier": 3,
+      "hp": 2,
+      "isElite": true,
+      "size": [240, 270],
+      "palette": {
+        "body":   "#aa3808",
+        "head":   "#cc4818",
+        "limbs":  "#7a2000",
+        "eyes":   "#ffe050",
+        "pupils": "#1a0000",
+        "mouth":  "#1a0000",
+        "horns":  "#f07020"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 60, "ry": 66, "wobble": 5, "seed": 3301 },
+        "head":  { "kind": "egg",        "rx": 34, "ry": 38, "tilt": -0.1, "seed": 3302 },
+        "eyes":  { "kind": "comic_pair", "size": 16, "expr": "angry",      "seed": 3303 },
+        "mouth": { "kind": "fang_grin",  "width": 30, "height": 16,        "seed": 3304 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 46, "width": 16, "side": "left",  "seed": 3305 },
+          { "kind": "stub_arm", "length": 46, "width": 16, "side": "right", "seed": 3306 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 22, "seed": 3307 },
+        "tail":  { "kind": "tail", "length": 54, "segments": 5, "seed": 3308 }
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -78 },
+        "eyes":  { "ox": 0,   "oy": -82 },
+        "mouth": { "ox": 0,   "oy": -64 },
+        "horns": { "ox": 0,   "oy": -116 },
+        "limb0": { "ox": -70, "oy": -4  },
+        "limb1": { "ox":  70, "oy": -4  },
+        "tail":  { "ox": 38,  "oy": 34  }
+      },
+      "anim": { "idle": "flame_aura", "attack": "inferno_strike", "hit": "smoke_burst" },
+      "voiceTaunts": ["I've roasted a hundred wizard apprentices!", "Your multiplication errors BURN me!", "The peak's greatest hunter — and you're my prey!"],
+      "voiceProfile": { "pitch": 0.85, "rate": 0.9 },
+      "spawnSfx": "flameStalkerRoar"
+    },
+    {
+      "id": "void_wisp",
+      "name": "Void Wisp",
+      "tier": 4,
+      "hp": 1,
+      "size": [140, 160],
+      "palette": {
+        "body":   "#2a1a5a",
+        "head":   "#3a2a6a",
+        "limbs":  "#1a0a4a",
+        "eyes":   "#d0c8ff",
+        "pupils": "#0a0a2a",
+        "mouth":  "#0a0a2a"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 28, "ry": 34, "wobble": 3, "seed": 4001 },
+        "head":  { "kind": "egg",        "rx": 18, "ry": 22, "tilt": 0.05, "seed": 4002 },
+        "eyes":  { "kind": "comic_pair", "size": 10, "expr": "neutral",    "seed": 4003 },
+        "mouth": { "kind": "fang_grin",  "width": 10, "height": 6,         "seed": 4004 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 18, "width": 5, "side": "left",  "seed": 4005 },
+          { "kind": "stub_arm", "length": 18, "width": 5, "side": "right", "seed": 4006 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -38 },
+        "eyes":  { "ox": 0,   "oy": -42 },
+        "mouth": { "ox": 0,   "oy": -30 },
+        "limb0": { "ox": -32, "oy": 0   },
+        "limb1": { "ox":  32, "oy": 0   }
+      },
+      "anim": { "idle": "drift", "attack": "blink_strike", "hit": "disperse" },
+      "voiceTaunts": ["The void knows your answer before you do.", "Division? More like subtraction of hope.", "Numbers don't exist where I come from."],
+      "voiceProfile": { "pitch": 1.1, "rate": 0.85 },
+      "spawnSfx": "voidHum"
+    },
+    {
+      "id": "star_hound",
+      "name": "Star Hound",
+      "tier": 4,
+      "hp": 1,
+      "size": [175, 190],
+      "palette": {
+        "body":   "#1a1e4e",
+        "head":   "#2a2e5e",
+        "limbs":  "#0a0e3e",
+        "eyes":   "#c8d8ff",
+        "pupils": "#0a0a2a",
+        "mouth":  "#0a0a2a"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 44, "ry": 38, "wobble": 4, "seed": 4101 },
+        "head":  { "kind": "egg",        "rx": 24, "ry": 26, "tilt": -0.08, "seed": 4102 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "neutral",     "seed": 4103 },
+        "mouth": { "kind": "fang_grin",  "width": 18, "height": 10,         "seed": 4104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 26, "width": 8, "side": "left",  "seed": 4105 },
+          { "kind": "stub_arm", "length": 26, "width": 8, "side": "right", "seed": 4106 }
+        ],
+        "horns": null,
+        "tail":  { "kind": "tail", "length": 32, "segments": 3, "seed": 4107 }
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 8   },
+        "head":  { "ox": 0,   "oy": -38 },
+        "eyes":  { "ox": 0,   "oy": -42 },
+        "mouth": { "ox": 0,   "oy": -28 },
+        "limb0": { "ox": -50, "oy": 4   },
+        "limb1": { "ox":  50, "oy": 4   },
+        "tail":  { "ox": 36,  "oy": 30  }
+      },
+      "anim": { "idle": "prowl", "attack": "star_pounce", "hit": "yelp" },
+      "voiceTaunts": ["I've hunted through eleven star systems!", "The cosmos sets your multiplication table!", "Your answer echoes in the void — and it's WRONG!"],
+      "voiceProfile": { "pitch": 1.0, "rate": 1.0 },
+      "spawnSfx": "cosmicBark"
+    },
+    {
+      "id": "astral_leech",
+      "name": "Astral Leech",
+      "tier": 4,
+      "hp": 1,
+      "size": [160, 175],
+      "palette": {
+        "body":   "#3a1a5e",
+        "head":   "#4a2a6e",
+        "limbs":  "#2a0a4e",
+        "eyes":   "#e8d0ff",
+        "pupils": "#1a0a2a",
+        "mouth":  "#1a0a2a"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 34, "ry": 40, "wobble": 5, "seed": 4201 },
+        "head":  { "kind": "egg",        "rx": 20, "ry": 24, "tilt": 0.12, "seed": 4202 },
+        "eyes":  { "kind": "comic_pair", "size": 11, "expr": "happy",      "seed": 4203 },
+        "mouth": { "kind": "fang_grin",  "width": 14, "height": 8,         "seed": 4204 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 22, "width": 6, "side": "left",  "seed": 4205 },
+          { "kind": "stub_arm", "length": 22, "width": 6, "side": "right", "seed": 4206 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -48 },
+        "eyes":  { "ox": 0,   "oy": -52 },
+        "mouth": { "ox": 0,   "oy": -38 },
+        "limb0": { "ox": -38, "oy": 0   },
+        "limb1": { "ox":  38, "oy": 0   }
+      },
+      "anim": { "idle": "writhe", "attack": "drain_strike", "hit": "recoil" },
+      "voiceTaunts": ["I feed on miscalculations!", "Every wrong answer makes me stronger.", "Multiply... divide... I drain them all!"],
+      "voiceProfile": { "pitch": 1.2, "rate": 0.9 },
+      "spawnSfx": "astralLeechShriek"
+    },
+    {
+      "id": "cosmic_knight",
+      "name": "Cosmic Knight",
+      "tier": 4,
+      "hp": 2,
+      "size": [200, 235],
+      "palette": {
+        "body":   "#2a3a6e",
+        "head":   "#3a4a7e",
+        "limbs":  "#1a2a5e",
+        "eyes":   "#d8e8ff",
+        "pupils": "#0a1a4a",
+        "mouth":  "#0a1a4a",
+        "horns":  "#a8c8ff"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 50, "ry": 56, "wobble": 3, "seed": 4301 },
+        "head":  { "kind": "egg",        "rx": 28, "ry": 32, "tilt": -0.05, "seed": 4302 },
+        "eyes":  { "kind": "comic_pair", "size": 13, "expr": "neutral",     "seed": 4303 },
+        "mouth": { "kind": "fang_grin",  "width": 22, "height": 10,         "seed": 4304 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 36, "width": 12, "side": "left",  "seed": 4305 },
+          { "kind": "stub_arm", "length": 36, "width": 12, "side": "right", "seed": 4306 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 20, "seed": 4307 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -64 },
+        "eyes":  { "ox": 0,   "oy": -68 },
+        "mouth": { "ox": 0,   "oy": -52 },
+        "horns": { "ox": 0,   "oy": -96 },
+        "limb0": { "ox": -58, "oy": -4  },
+        "limb1": { "ox":  58, "oy": -4  }
+      },
+      "anim": { "idle": "slow_orbit", "attack": "gravity_slash", "hit": "astral_crack" },
+      "voiceTaunts": ["I have patrolled this void for millennia!", "Your maths are an insult to the cosmos!", "The stars themselves judge your calculations!"],
+      "voiceProfile": { "pitch": 0.75, "rate": 0.9 },
+      "spawnSfx": "cosmicKnightArrival"
+    },
+    {
+      "id": "nebula_wraith",
+      "name": "Nebula Wraith",
+      "tier": 4,
+      "hp": 2,
+      "isElite": true,
+      "size": [215, 250],
+      "palette": {
+        "body":   "#3a2a6a",
+        "head":   "#4a3a7a",
+        "limbs":  "#2a1a5a",
+        "eyes":   "#e8dcff",
+        "pupils": "#0a0a2a",
+        "mouth":  "#0a0a2a",
+        "horns":  "#c0b0ff"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 56, "ry": 62, "wobble": 4, "seed": 4401 },
+        "head":  { "kind": "egg",        "rx": 32, "ry": 36, "tilt": -0.08, "seed": 4402 },
+        "eyes":  { "kind": "comic_pair", "size": 15, "expr": "angry",       "seed": 4403 },
+        "mouth": { "kind": "fang_grin",  "width": 26, "height": 12,         "seed": 4404 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 40, "width": 14, "side": "left",  "seed": 4405 },
+          { "kind": "stub_arm", "length": 40, "width": 14, "side": "right", "seed": 4406 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 22, "seed": 4407 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -72 },
+        "eyes":  { "ox": 0,   "oy": -76 },
+        "mouth": { "ox": 0,   "oy": -58 },
+        "horns": { "ox": 0,   "oy": -110 },
+        "limb0": { "ox": -64, "oy": -4  },
+        "limb1": { "ox":  64, "oy": -4  }
+      },
+      "anim": { "idle": "nebula_pulse", "attack": "dark_matter_surge", "hit": "phase_shift" },
+      "voiceTaunts": ["I was born in a dying star — your arithmetic is nothing!", "The nebula consumes all failed answers!", "Even light cannot escape my wrath!"],
+      "voiceProfile": { "pitch": 0.65, "rate": 0.8 },
+      "spawnSfx": "nebulaWraithShriek"
+    },
+    {
+      "id": "skeleton_archer",
+      "name": "Skeleton Archer",
+      "tier": 5,
+      "hp": 1,
+      "size": [165, 210],
+      "palette": {
+        "body":   "#ccc8b8",
+        "head":   "#ddd8c8",
+        "limbs":  "#aaa898",
+        "eyes":   "#88cc44",
+        "pupils": "#0a1a0a",
+        "mouth":  "#0a1a0a"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 34, "ry": 42, "wobble": 3, "seed": 5001 },
+        "head":  { "kind": "egg",        "rx": 22, "ry": 26, "tilt": -0.06, "seed": 5002 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "neutral",     "seed": 5003 },
+        "mouth": { "kind": "fang_grin",  "width": 16, "height": 8,          "seed": 5004 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 28, "width": 7, "side": "left",  "seed": 5005 },
+          { "kind": "stub_arm", "length": 28, "width": 7, "side": "right", "seed": 5006 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 4   },
+        "head":  { "ox": 0,   "oy": -52 },
+        "eyes":  { "ox": 0,   "oy": -56 },
+        "mouth": { "ox": 0,   "oy": -40 },
+        "limb0": { "ox": -40, "oy": -2  },
+        "limb1": { "ox":  40, "oy": -2  }
+      },
+      "anim": { "idle": "rattle", "attack": "bone_arrow", "hit": "clatter" },
+      "voiceTaunts": ["I've been dead long enough to know multiplication!", "My bones never forget a wrong answer.", "Aim true — unlike your arithmetic!"],
+      "voiceProfile": { "pitch": 0.9, "rate": 0.85 },
+      "spawnSfx": "boneRattle"
+    },
+    {
+      "id": "shadow_wraith",
+      "name": "Shadow Wraith",
+      "tier": 5,
+      "hp": 1,
+      "size": [158, 200],
+      "palette": {
+        "body":   "#1a1a1a",
+        "head":   "#2a2a2a",
+        "limbs":  "#0a0a0a",
+        "eyes":   "#9bcc44",
+        "pupils": "#0a1a0a",
+        "mouth":  "#0a1a0a"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 32, "ry": 40, "wobble": 7, "seed": 5101 },
+        "head":  { "kind": "egg",        "rx": 20, "ry": 24, "tilt": 0.1, "seed": 5102 },
+        "eyes":  { "kind": "comic_pair", "size": 11, "expr": "angry",     "seed": 5103 },
+        "mouth": { "kind": "fang_grin",  "width": 14, "height": 8,        "seed": 5104 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 24, "width": 6, "side": "left",  "seed": 5105 },
+          { "kind": "stub_arm", "length": 24, "width": 6, "side": "right", "seed": 5106 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 4   },
+        "head":  { "ox": 0,   "oy": -50 },
+        "eyes":  { "ox": 0,   "oy": -54 },
+        "mouth": { "ox": 0,   "oy": -38 },
+        "limb0": { "ox": -38, "oy": 0   },
+        "limb1": { "ox":  38, "oy": 0   }
+      },
+      "anim": { "idle": "waver", "attack": "shadow_swipe", "hit": "dissolve" },
+      "voiceTaunts": ["Shadows know no answers — only questions.", "Your light cannot touch my darkness!", "Division? More like destruction!"],
+      "voiceProfile": { "pitch": 0.85, "rate": 0.8 },
+      "spawnSfx": "shadowMoan"
+    },
+    {
+      "id": "bone_knight",
+      "name": "Bone Knight",
+      "tier": 5,
+      "hp": 2,
+      "size": [205, 240],
+      "palette": {
+        "body":   "#b8b4a0",
+        "head":   "#c8c4b0",
+        "limbs":  "#989488",
+        "eyes":   "#88cc44",
+        "pupils": "#0a1a0a",
+        "mouth":  "#0a1a0a",
+        "horns":  "#a0a090"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 50, "ry": 56, "wobble": 4, "seed": 5201 },
+        "head":  { "kind": "egg",        "rx": 28, "ry": 32, "tilt": -0.06, "seed": 5202 },
+        "eyes":  { "kind": "comic_pair", "size": 14, "expr": "angry",       "seed": 5203 },
+        "mouth": { "kind": "fang_grin",  "width": 24, "height": 12,         "seed": 5204 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 38, "width": 12, "side": "left",  "seed": 5205 },
+          { "kind": "stub_arm", "length": 38, "width": 12, "side": "right", "seed": 5206 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 20, "seed": 5207 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -64 },
+        "eyes":  { "ox": 0,   "oy": -68 },
+        "mouth": { "ox": 0,   "oy": -52 },
+        "horns": { "ox": 0,   "oy": -96 },
+        "limb0": { "ox": -58, "oy": -4  },
+        "limb1": { "ox":  58, "oy": -4  }
+      },
+      "anim": { "idle": "guard_stance", "attack": "sword_strike", "hit": "stagger" },
+      "voiceTaunts": ["I have served the Lich a thousand years!", "My blade cares not for your feelings about math.", "Undying loyalty. Undying wrong answers!"],
+      "voiceProfile": { "pitch": 0.7, "rate": 0.85 },
+      "spawnSfx": "boneKnightClank"
+    },
+    {
+      "id": "plague_servant",
+      "name": "Plague Servant",
+      "tier": 5,
+      "hp": 1,
+      "size": [162, 198],
+      "palette": {
+        "body":   "#4a5428",
+        "head":   "#5a6438",
+        "limbs":  "#2a3410",
+        "eyes":   "#d0e040",
+        "pupils": "#1a2a0a",
+        "mouth":  "#1a2a0a"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 36, "ry": 42, "wobble": 6, "seed": 5301 },
+        "head":  { "kind": "egg",        "rx": 22, "ry": 26, "tilt": 0.08, "seed": 5302 },
+        "eyes":  { "kind": "comic_pair", "size": 12, "expr": "happy",      "seed": 5303 },
+        "mouth": { "kind": "fang_grin",  "width": 16, "height": 8,         "seed": 5304 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 26, "width": 7, "side": "left",  "seed": 5305 },
+          { "kind": "stub_arm", "length": 26, "width": 7, "side": "right", "seed": 5306 }
+        ],
+        "horns": null,
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 4   },
+        "head":  { "ox": 0,   "oy": -52 },
+        "eyes":  { "ox": 0,   "oy": -56 },
+        "mouth": { "ox": 0,   "oy": -40 },
+        "limb0": { "ox": -42, "oy": 0   },
+        "limb1": { "ox":  42, "oy": 0   }
+      },
+      "anim": { "idle": "shamble", "attack": "plague_cloud", "hit": "stumble" },
+      "voiceTaunts": ["The plague spreads with every wrong answer!", "Sickness loves a miscalculation!", "Serve the Lich... solve wrong... same result!"],
+      "voiceProfile": { "pitch": 0.95, "rate": 0.9 },
+      "spawnSfx": "plagueGurgle"
+    },
+    {
+      "id": "death_knight",
+      "name": "Death Knight",
+      "tier": 5,
+      "hp": 2,
+      "isElite": true,
+      "size": [230, 265],
+      "palette": {
+        "body":   "#3a3830",
+        "head":   "#4a4840",
+        "limbs":  "#2a2820",
+        "eyes":   "#a8dc60",
+        "pupils": "#0a1a0a",
+        "mouth":  "#0a1a0a",
+        "horns":  "#989080"
+      },
+      "shape": {
+        "body":  { "kind": "blob",       "rx": 58, "ry": 64, "wobble": 4, "seed": 5401 },
+        "head":  { "kind": "egg",        "rx": 32, "ry": 36, "tilt": -0.08, "seed": 5402 },
+        "eyes":  { "kind": "comic_pair", "size": 16, "expr": "angry",       "seed": 5403 },
+        "mouth": { "kind": "fang_grin",  "width": 28, "height": 14,         "seed": 5404 },
+        "limbs": [
+          { "kind": "stub_arm", "length": 44, "width": 16, "side": "left",  "seed": 5405 },
+          { "kind": "stub_arm", "length": 44, "width": 16, "side": "right", "seed": 5406 }
+        ],
+        "horns": { "kind": "twig_nubs", "size": 24, "seed": 5407 },
+        "tail":  null
+      },
+      "layout": {
+        "body":  { "ox": 0,   "oy": 6   },
+        "head":  { "ox": 0,   "oy": -76 },
+        "eyes":  { "ox": 0,   "oy": -80 },
+        "mouth": { "ox": 0,   "oy": -62 },
+        "horns": { "ox": 0,   "oy": -114 },
+        "limb0": { "ox": -68, "oy": -4  },
+        "limb1": { "ox":  68, "oy": -4  }
+      },
+      "anim": { "idle": "death_aura", "attack": "necrotic_cleave", "hit": "rattle_crash" },
+      "voiceTaunts": ["Death itself fears the Death Knight's multiplication tables!", "Your equations crumble before my undying might!", "The Lich named me champion for a reason!"],
+      "voiceProfile": { "pitch": 0.6, "rate": 0.85 },
+      "spawnSfx": "deathKnightRoar"
     }
   ]
 }
