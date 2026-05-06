@@ -309,12 +309,6 @@ if (bossesData) {
         });
       }
 
-      // TBD bosses skip deep validation but get palette + stretch checks above.
-      if (b.tbdInRealms2to5 === true) {
-        info(`${ctx}: tbdInRealms2to5=true — skipping shape/layout validation`);
-        return;
-      }
-
       if (!b.realmId) critical(`${ctx}: missing realmId`);
       else if (!realmIds.has(b.realmId)) critical(`${ctx}: realmId "${b.realmId}" not found in realms`);
 
